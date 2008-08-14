@@ -1,0 +1,16 @@
+.cvsignore
+build
+dist
+reports
+.classpath
+.project
+mart.sql
+martj.sqls
+testing.jpage
+oraclemart.sqls
+jre
+spy.log
+oracle.sql
+.settings
+.externalToolBuilders
+writer.debug
