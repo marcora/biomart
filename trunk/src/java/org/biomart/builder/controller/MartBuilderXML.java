@@ -304,6 +304,7 @@ public class MartBuilderXML extends DefaultHandler {
 		if (value == null || "".equals(value))
 			return;
 		xmlWriter.write(" ");
+		
 		xmlWriter.write(name);
 		xmlWriter.write("=\"");
 		xmlWriter.write(value.replaceAll("&", "&amp;").replaceAll("\"",
@@ -2373,9 +2374,22 @@ public class MartBuilderXML extends DefaultHandler {
 				}
 				// Get the expression to use.
 				final String expr = (String) attributes.get("expression");
-
+				// So long as there is at least one alias defined on either one of the two tables in the join
+				// create the restricted relation definition
+				boolean aliasFlag= false;
+				if (!laliases.isEmpty() || !raliases.isEmpty()){
+					aliasFlag = true;
+				}
+/*
 				if (expr != null && rel != null && tableKey != null
 						&& !laliases.isEmpty() && !raliases.isEmpty()) {
+					final RestrictedRelationDefinition def = new RestrictedRelationDefinition(
+							expr, laliases, raliases);
+					rel.setRestrictRelation(w, tableKey, def, index);
+					}
+					*/
+				if ( aliasFlag && expr != null && rel != null && tableKey != null)
+						{
 					final RestrictedRelationDefinition def = new RestrictedRelationDefinition(
 							expr, laliases, raliases);
 					rel.setRestrictRelation(w, tableKey, def, index);
