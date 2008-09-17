@@ -1,25 +1,29 @@
 package org.biomart.configurator.view;
 
 import java.awt.*;
-import javax.swing.*;
-import java.awt.event.*;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
+import java.awt.event.ActionListener;
 
+import javax.swing.*;
+import javax.swing.event.*;
+import java.util.*;
+import java.io.IOException;
 import javax.imageio.ImageIO;
+
 
 import org.biomart.configurator.model.Initializer;
 import org.biomart.configurator.view.ToolBarMenu;
 import org.biomart.configurator.view.SplitPanel;
 
-public class mainGUI {
+
+
+public class mainGUI extends JPanel implements Observer {
 
 
 	//... Constants
     private static final String INITIAL_VALUE = "1";
     
     //... Components
-    private JFrame m_frame = new JFrame("Mart Configurator - a definitive answer to all the problems in modern science");
+    private JFrame m_frame = new JFrame("Mart Configurator - Science is all sorted");
     
     private JTextField m_userInputTf = new JTextField(5);
     private JTextField m_totalTf     = new JTextField(20);
@@ -28,15 +32,15 @@ public class mainGUI {
     
     private Initializer modelObj;
     private ToolBarMenu menuBarObj = new ToolBarMenu();
-    private SplitPanel splitPanelObj = new SplitPanel();
+    private JSplitPane splitPaneObjTop;
+    private JSplitPane splitPaneObjBottom; 
     
     //======================================================= constructor
     /** Constructor */
     public mainGUI(Initializer model) {
         //... Set up the logic
         modelObj = model;
-        modelObj.setValue(INITIAL_VALUE);
-        
+                
         //2. Optional: What happens when the frame closes?
         m_frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -47,9 +51,29 @@ public class mainGUI {
         m_frame.setJMenuBar(menuBarObj.getMenuBar());
        
         // adding split panel
-        splitPanelObj.addTreeView();
-        splitPanelObj.addPropertEditor();
-        m_frame.getContentPane().add(splitPanelObj.getSplitPanel());
+        
+        Font font = new Font("Serif", Font.ITALIC, 24);
+
+         
+        splitPaneObjTop = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, this.m_multiplyBtn, this.m_clearBtn);
+        splitPaneObjTop.setResizeWeight(0.5);
+        splitPaneObjTop.setOneTouchExpandable(true);
+        splitPaneObjTop.setContinuousLayout(true);
+        splitPaneObjTop.setBorder(null);
+        
+        JLabel label = new JLabel("hello");
+        splitPaneObjBottom = new JSplitPane(JSplitPane.VERTICAL_SPLIT, splitPaneObjTop, label);
+        splitPaneObjBottom.setResizeWeight(0.8);
+        splitPaneObjBottom.setOneTouchExpandable(true);
+        splitPaneObjBottom.setContinuousLayout(true);
+        
+        splitPaneObjTop.setMinimumSize(new Dimension(100, 50));
+
+        
+        //splitPanelObj.addTreeView();
+        //splitPanelObj.addPropertEditor();
+        //splitPanelObj.addPropertEditor();
+        m_frame.getContentPane().add(splitPaneObjBottom);
 
         // Size the frame.
         m_frame.setSize(800,600);
@@ -77,51 +101,17 @@ public class mainGUI {
         */
     }
     
-    /**
-     * 
-     */
-
-    public void reset() {
-        m_totalTf.setText(INITIAL_VALUE);
+    public void update(Observable observable, Object arg) {
+    	
     }
-    
-    /**
-     * @return
-     */
-    public String getUserInput() {
-        return m_userInputTf.getText();
-    }
-    
-    /**
-     * @param newTotal
-     */
-    public void setTotal(String newTotal) {
-        m_totalTf.setText(newTotal);
-    }
-    
-    /**
-     * @param errMessage
-     */
-    public void showError(String errMessage) {
-       // JOptionPane.showMessageDialog(this, errMessage);
-    }
-    
-    /**
-     * @param mal
-     */
-    public void addMultiplyListener(ActionListener mal) {
-        m_multiplyBtn.addActionListener(mal);
-    }
-    
-    public void addClearListener(ActionListener cal) {
-        m_clearBtn.addActionListener(cal);
-    }
-	/**
-	 * @param args
-	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
 	}
+	
+	public void menuBarListener (ActionListener className) {
+		this.m_multiplyBtn.addActionListener(className);
+	}
+	
 
 }

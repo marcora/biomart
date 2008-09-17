@@ -19,9 +19,10 @@ public class Start {
         m_model = model;
         m_view  = view;
         
-        //... Add listeners to the view.
-        view.addMultiplyListener(new MultiplyListener());
-        view.addClearListener(new ClearListener());
+        m_model.addObserver(m_view);
+        
+        m_view.menuBarListener(new firstActionListener());
+        
     }
     
     
@@ -33,16 +34,13 @@ public class Start {
      *  4. Tell the View to display the result.
      * If there was an error, tell the View to display it.
      */
-    class MultiplyListener implements ActionListener {
+    class firstActionListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             String userInput = "";
             try {
-                userInput = m_view.getUserInput();
-                m_model.multiplyBy(userInput);
-                m_view.setTotal(m_model.getValue());
                 
             } catch (NumberFormatException nfex) {
-                m_view.showError("Bad input: '" + userInput + "'");
+
             }
         }
     }//end inner class MultiplyListener
@@ -52,10 +50,14 @@ public class Start {
     /**  1. Reset model.
      *   2. Reset View.
      */    
-    class ClearListener implements ActionListener {
+    class secondActionListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            m_model.reset();
-            m_view.reset();
+        	String userInput = "";
+            try {
+                
+            } catch (NumberFormatException nfex) {
+
+            }
         }
     }// end inner class ClearListener
     
