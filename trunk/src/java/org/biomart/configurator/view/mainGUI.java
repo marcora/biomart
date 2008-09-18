@@ -2,15 +2,16 @@ package org.biomart.configurator.view;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.event.ActionListener;
 
 import javax.swing.*;
 import javax.swing.event.*;
 import java.util.*;
 import java.io.IOException;
 import javax.imageio.ImageIO;
+import java.util.logging.Logger;
 
 
+import org.biomart.configurator.controller.Start;
 import org.biomart.configurator.model.Initializer;
 import org.biomart.configurator.view.ToolBarMenu;
 import org.biomart.configurator.view.SplitPanel;
@@ -22,12 +23,12 @@ public class mainGUI extends JPanel implements Observer {
 
 	//... Constants
     private static final String INITIAL_VALUE = "1";
+    public Logger log = Logger.getLogger(Start.class.getName());
+
     
     //... Components
     private JFrame m_frame = new JFrame("Mart Configurator - Science is all sorted");
     
-    private JTextField m_userInputTf = new JTextField(5);
-    private JTextField m_totalTf     = new JTextField(20);
     private JButton    m_multiplyBtn = new JButton("Partition Tree Panel");
     private JButton    m_clearBtn    = new JButton("Configuration Tree Panel");
     
@@ -128,15 +129,7 @@ public class mainGUI extends JPanel implements Observer {
         */
     }
     
-    public void update(Observable observable, Object arg) {
-    	
-    }
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
-	}
-	
-	public void addListenerNew (ActionListener className) {
+    public void addListenerNew (ActionListener className) {
 		this.menuItemNew.addActionListener(className);
 	}
 	public void addListenerOpen (ActionListener className) {
@@ -155,5 +148,12 @@ public class mainGUI extends JPanel implements Observer {
 		this.menuItemQuit.addActionListener(className);
 	}
 	
+	public void update(Observable observable, Object arg) {
+    	
+    }
+	
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
 
+	}
 }

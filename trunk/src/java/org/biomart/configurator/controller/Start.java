@@ -4,19 +4,28 @@ import javax.swing.*;
 import java.awt.event.*;
 import org.biomart.configurator.model.Initializer;
 import org.biomart.configurator.view.mainGUI;
+import javax.swing.filechooser.*;
+import java.io.File;
+
+import java.util.logging.Logger;
+
+// the configuration file for the logger is  /jdk1.5.0/jre/lib/logging.properties
 
 public class Start {
 
 	//... The Controller needs to interact with both the Model and View.
     private Initializer m_model;
     private mainGUI  m_view;
-    
+    public Logger log = Logger.getLogger(Start.class.getName());
     //========================================================== constructor
     /** Constructor 
      * @param model 
      * @param view */
+    public Start() {
+    }
     public Start(Initializer model, mainGUI view) {
-        m_model = model;
+    	
+    	m_model = model;
         m_view  = view;
         
         m_model.addObserver(m_view);
@@ -37,7 +46,7 @@ public class Start {
         public void actionPerformed(ActionEvent e) {
             String userInput = "";
             try {
-                System.out.println("NEW");
+            	log.info("NEW");
             } catch (NumberFormatException nfex) {
 
             }
@@ -48,10 +57,38 @@ public class Start {
         public void actionPerformed(ActionEvent e) {
             String userInput = "";
             try {
-            	System.out.println("OPEN");
+            	log.info("OPEN");
+            	
+            	final JFileChooser fc = new JFileChooser();
+            	
+                XMLFileFilter filter = new XMLFileFilter();  
+            	fc.setFileFilter(filter);
                 
+            	// the parent window is of class m_view
+            	int returnVal = fc.showOpenDialog(m_view);
+            	
+            	//In response to a button click:
+            	if (returnVal == JFileChooser.APPROVE_OPTION) {
+                    File file = fc.getSelectedFile();
+                    log.info("Opening: " + file.getAbsolutePath() + ".");
+                    
+                                        
+                    
+                } else {
+                    log.info("Open command cancelled by user.");
+                }
             } catch (NumberFormatException nfex) {
 
+            }
+        }
+        // helper class to filter the contents of OPEN DIALOG to XML files only
+        class XMLFileFilter extends javax.swing.filechooser.FileFilter {
+            public boolean accept(File f) {
+                return f.isDirectory() || f.getName().toLowerCase().endsWith(".xml");
+            }
+            
+            public String getDescription() {
+                return ".xml files";
             }
         }
     }
@@ -60,7 +97,7 @@ public class Start {
         public void actionPerformed(ActionEvent e) {
             String userInput = "";
             try {
-            	System.out.println("EXPORT");
+            	log.info("EXPORT");
             } catch (NumberFormatException nfex) {
 
             }
@@ -71,7 +108,7 @@ public class Start {
         public void actionPerformed(ActionEvent e) {
             String userInput = "";
             try {
-            	System.out.println("SAVEALL");
+            	log.info("SAVEALL");
             } catch (NumberFormatException nfex) {
 
             }
@@ -82,7 +119,7 @@ public class Start {
         public void actionPerformed(ActionEvent e) {
             String userInput = "";
             try {
-            	System.out.println("UPLOADALL");
+            	log.info("UPLOADALL");
             } catch (NumberFormatException nfex) {
 
             }
@@ -93,7 +130,8 @@ public class Start {
         public void actionPerformed(ActionEvent e) {
             String userInput = "";
             try {
-            	System.out.println("QUIT");       
+            	log.info("QUIT");
+            	System.exit(0);
             } catch (NumberFormatException nfex) {
 
             }
