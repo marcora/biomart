@@ -28,15 +28,16 @@ public class mainGUI extends JPanel implements Observer {
     
     private JTextField m_userInputTf = new JTextField(5);
     private JTextField m_totalTf     = new JTextField(20);
-    private JButton    m_multiplyBtn = new JButton("Multiply");
-    private JButton    m_clearBtn    = new JButton("Clear");
+    private JButton    m_multiplyBtn = new JButton("Partition Tree Panel");
+    private JButton    m_clearBtn    = new JButton("Configuration Tree Panel");
     
     private Initializer modelObj;
     private JMenuBar menuBar;
     private JMenu menu;
     private JMenuItem menuItemNew, menuItemOpen, menuItemExport, menuItemSaveAll, menuItemUploadAll, menuItemQuit;
     private JSplitPane splitPaneObjTop;
-    private JSplitPane splitPaneObjBottom; 
+    private JSplitPane splitPaneObjBottom;
+    private JLabel label;
     
     //======================================================= constructor
     /** Constructor */
@@ -87,7 +88,7 @@ public class mainGUI extends JPanel implements Observer {
         splitPaneObjTop.setContinuousLayout(true);
         splitPaneObjTop.setBorder(null);
         
-        JLabel label = new JLabel("hello");
+        label = new JLabel("Editing panel of above trees");
         splitPaneObjBottom = new JSplitPane(JSplitPane.VERTICAL_SPLIT, splitPaneObjTop, label);
         splitPaneObjBottom.setResizeWeight(0.8);
         splitPaneObjBottom.setOneTouchExpandable(true);
