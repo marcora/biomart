@@ -13,8 +13,6 @@ import java.util.logging.Logger;
 
 import org.biomart.configurator.controller.Start;
 import org.biomart.configurator.model.Initializer;
-import org.biomart.configurator.view.ToolBarMenu;
-import org.biomart.configurator.view.SplitPanel;
 
 
 

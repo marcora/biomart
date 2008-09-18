@@ -72,6 +72,8 @@ public class Start {
                     File file = fc.getSelectedFile();
                     log.info("Opening: " + file.getAbsolutePath() + ".");
                     
+                    // call Initializer to process the XML file and make an object representation
+                    m_model.initRegistry(file.getAbsolutePath());
                                         
                     
                 } else {
