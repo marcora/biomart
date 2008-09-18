@@ -21,46 +21,85 @@ public class Start {
         
         m_model.addObserver(m_view);
         
-        m_view.menuBarListener(new firstActionListener());
-        
+        m_view.addListenerNew(new menuBarNew());
+        m_view.addListenerOpen(new menuBarOpen());
+        m_view.addListenerExport(new menuBarExport());
+        m_view.addListenerSaveAll(new menuBarSaveAll());
+        m_view.addListenerUploadAll(new menuBarUploadAll());
+        m_view.addListenerQuit(new menuBarQuit());
     }
     
     
-    ////////////////////////////////////////// inner class MultiplyListener
-    /** When a mulitplication is requested.
-     *  1. Get the user input number from the View.
-     *  2. Call the model to mulitply by this number.
-     *  3. Get the result from the Model.
-     *  4. Tell the View to display the result.
-     * If there was an error, tell the View to display it.
-     */
-    class firstActionListener implements ActionListener {
+    ////////////////////////////////////////// 
+    // MenuBar Options ActionListeners
+    //////////////////////////////////////////
+    class menuBarNew implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             String userInput = "";
             try {
-                
+                System.out.println("NEW");
             } catch (NumberFormatException nfex) {
 
             }
         }
-    }//end inner class MultiplyListener
+    }
     
-    
-    //////////////////////////////////////////// inner class ClearListener
-    /**  1. Reset model.
-     *   2. Reset View.
-     */    
-    class secondActionListener implements ActionListener {
+    class menuBarOpen implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-        	String userInput = "";
+            String userInput = "";
             try {
+            	System.out.println("OPEN");
                 
             } catch (NumberFormatException nfex) {
 
             }
         }
-    }// end inner class ClearListener
+    }
     
+    class menuBarExport implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            String userInput = "";
+            try {
+            	System.out.println("EXPORT");
+            } catch (NumberFormatException nfex) {
+
+            }
+        }
+    }    
+        
+    class menuBarSaveAll implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            String userInput = "";
+            try {
+            	System.out.println("SAVEALL");
+            } catch (NumberFormatException nfex) {
+
+            }
+        }
+    }
+    
+    class menuBarUploadAll implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            String userInput = "";
+            try {
+            	System.out.println("UPLOADALL");
+            } catch (NumberFormatException nfex) {
+
+            }
+        }
+    }    
+        
+    class menuBarQuit implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            String userInput = "";
+            try {
+            	System.out.println("QUIT");       
+            } catch (NumberFormatException nfex) {
+
+            }
+        }
+    }    
+
     /**
 	 * @param args
 	 */

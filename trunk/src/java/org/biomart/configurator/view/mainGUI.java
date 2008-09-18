@@ -1,6 +1,7 @@
 package org.biomart.configurator.view;
 
 import java.awt.*;
+import java.awt.event.*;
 import java.awt.event.ActionListener;
 
 import javax.swing.*;
@@ -31,7 +32,9 @@ public class mainGUI extends JPanel implements Observer {
     private JButton    m_clearBtn    = new JButton("Clear");
     
     private Initializer modelObj;
-    private ToolBarMenu menuBarObj = new ToolBarMenu();
+    private JMenuBar menuBar;
+    private JMenu menu;
+    private JMenuItem menuItemNew, menuItemOpen, menuItemExport, menuItemSaveAll, menuItemUploadAll, menuItemQuit;
     private JSplitPane splitPaneObjTop;
     private JSplitPane splitPaneObjBottom; 
     
@@ -48,13 +51,36 @@ public class mainGUI extends JPanel implements Observer {
         //...create emptyLabel...
        
         // adding menuBar
-        m_frame.setJMenuBar(menuBarObj.getMenuBar());
-       
+        
+      //Create the menu bar.
+        menuBar = new JMenuBar();
+
+        //Build the first menu.
+        menu = new JMenu("File");
+        menu.setMnemonic(KeyEvent.VK_F);
+        menuBar.add(menu);
+
+        //a group of JMenuItems
+        menuItemNew = new JMenuItem("New", KeyEvent.VK_N);
+        menuItemOpen = new JMenuItem("Open",KeyEvent.VK_O);
+        menuItemExport = new JMenuItem("Export",KeyEvent.VK_E);
+        menuItemSaveAll = new JMenuItem("Save All to File System",KeyEvent.VK_S);
+        menuItemUploadAll = new JMenuItem("Uplaod All from File System",KeyEvent.VK_U);
+        menuItemQuit = new JMenuItem("Quit",KeyEvent.VK_Q);
+        menu.add(menuItemNew);
+        menu.add(menuItemOpen);
+        menu.addSeparator();
+        menu.add(menuItemExport);
+        menu.addSeparator();
+        menu.add(menuItemSaveAll);
+        menu.add(menuItemUploadAll);
+        menu.addSeparator();
+        menu.add(menuItemQuit);
+        
+        m_frame.setJMenuBar(menuBar);
+        
         // adding split panel
         
-        Font font = new Font("Serif", Font.ITALIC, 24);
-
-         
         splitPaneObjTop = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, this.m_multiplyBtn, this.m_clearBtn);
         splitPaneObjTop.setResizeWeight(0.5);
         splitPaneObjTop.setOneTouchExpandable(true);
@@ -109,8 +135,23 @@ public class mainGUI extends JPanel implements Observer {
 
 	}
 	
-	public void menuBarListener (ActionListener className) {
-		this.m_multiplyBtn.addActionListener(className);
+	public void addListenerNew (ActionListener className) {
+		this.menuItemNew.addActionListener(className);
+	}
+	public void addListenerOpen (ActionListener className) {
+		this.menuItemOpen.addActionListener(className);
+	}
+	public void addListenerExport (ActionListener className) {
+		this.menuItemExport.addActionListener(className);
+	}
+	public void addListenerSaveAll (ActionListener className) {
+		this.menuItemSaveAll.addActionListener(className);
+	}
+	public void addListenerUploadAll (ActionListener className) {
+		this.menuItemUploadAll.addActionListener(className);
+	}
+	public void addListenerQuit (ActionListener className) {
+		this.menuItemQuit.addActionListener(className);
 	}
 	
 
