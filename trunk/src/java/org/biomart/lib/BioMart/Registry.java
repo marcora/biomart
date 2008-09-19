@@ -9,12 +9,12 @@ public class Registry extends Root {
 
 	// constructors
 	public Registry() {
-		martUsers = new LinkedList();
 		log.info("creating Regisry Object");
-
+		martUsers = new LinkedList();
 	}
 
 	public void addMartUser(MartUser martUserObj) {
+		log.info("adding MartUser object to registry");
 		this.martUsers.add(martUserObj);		
 	}
 

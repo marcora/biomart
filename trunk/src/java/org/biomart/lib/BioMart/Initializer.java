@@ -50,7 +50,7 @@ public class Initializer {
     	String password = node.getAttribute("password");
     	MartUser martUserObj = new MartUser(name, password);
     	
-		//registryObj->addMartUser(martUserObj);
+		registryObj.addMartUser(martUserObj);
 	}
     
     public static void main(String[] args) {

@@ -9,6 +9,7 @@ public class MartUser extends Root {
 	
 	// constructors
 	public MartUser(String name, String password){
+		log.info("creating MartUser Object: "+name);
 		this.name = name;
 		this.password = password;
 	}
