@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 
 
 import org.biomart.configurator.controller.Start;
-import org.biomart.configurator.model.Initializer;
+import org.biomart.configurator.model.LibraryAdaptor;
 
 
 
@@ -21,7 +21,7 @@ public class mainGUI extends JPanel implements Observer {
 
 	//... Constants
     private static final String INITIAL_VALUE = "1";
-    public Logger log = Logger.getLogger(Start.class.getName());
+    public Logger log = Logger.getLogger(mainGUI.class.getName());
 
     
     //... Components
@@ -30,7 +30,7 @@ public class mainGUI extends JPanel implements Observer {
     private JButton    m_multiplyBtn = new JButton("Partition Tree Panel");
     private JButton    m_clearBtn    = new JButton("Configuration Tree Panel");
     
-    private Initializer modelObj;
+    private LibraryAdaptor modelObj;
     private JMenuBar menuBar;
     private JMenu menu;
     private JMenuItem menuItemNew, menuItemOpen, menuItemExport, menuItemSaveAll, menuItemUploadAll, menuItemQuit;
@@ -40,7 +40,7 @@ public class mainGUI extends JPanel implements Observer {
     
     //======================================================= constructor
     /** Constructor */
-    public mainGUI(Initializer model) {
+    public mainGUI(LibraryAdaptor model) {
         //... Set up the logic
         modelObj = model;
                 

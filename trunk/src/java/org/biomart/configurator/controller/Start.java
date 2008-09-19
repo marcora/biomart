@@ -2,8 +2,9 @@ package org.biomart.configurator.controller;
 
 import javax.swing.*;
 import java.awt.event.*;
-import org.biomart.configurator.model.Initializer;
 import org.biomart.configurator.view.mainGUI;
+import org.biomart.configurator.model.LibraryAdaptor;
+
 import javax.swing.filechooser.*;
 import java.io.File;
 
@@ -14,7 +15,7 @@ import java.util.logging.Logger;
 public class Start {
 
 	//... The Controller needs to interact with both the Model and View.
-    private Initializer m_model;
+    private  LibraryAdaptor m_model;
     private mainGUI  m_view;
     public Logger log = Logger.getLogger(Start.class.getName());
     //========================================================== constructor
@@ -23,7 +24,7 @@ public class Start {
      * @param view */
     public Start() {
     }
-    public Start(Initializer model, mainGUI view) {
+    public Start(LibraryAdaptor model, mainGUI view) {
     	
     	m_model = model;
         m_view  = view;
@@ -65,7 +66,11 @@ public class Start {
             	fc.setFileFilter(filter);
                 
             	// the parent window is of class m_view
-            	int returnVal = fc.showOpenDialog(m_view);
+            	// TODO: UNCOMMENT THIS so that OPEN dialog would work
+            	int returnVal = 1; // = fc.showOpenDialog(m_view);
+            	
+            	// TODO: remove this hardcoded line when you uncomment the above line
+            	m_model.processRegistryFile("/homes/syed/Desktop/registry_XML.xml");
             	
             	//In response to a button click:
             	if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -73,14 +78,14 @@ public class Start {
                     log.info("Opening: " + file.getAbsolutePath() + ".");
                     
                     // call Initializer to process the XML file and make an object representation
-                    m_model.initRegistry(file.getAbsolutePath());
+                    m_model.processRegistryFile(file.getAbsolutePath());
                                         
                     
                 } else {
                     log.info("Open command cancelled by user.");
                 }
             } catch (NumberFormatException nfex) {
-
+            	log.info("error reading XML file");
             }
         }
         // helper class to filter the contents of OPEN DIALOG to XML files only
@@ -141,16 +146,15 @@ public class Start {
     }    
 
     /**
-	 * @param args
+	 * @param args MAIN
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		Initializer model = new Initializer();
+		LibraryAdaptor model = new LibraryAdaptor();
         mainGUI view = new mainGUI(model);
         Start controller = new Start(model, view);
         
         //view.setVisible(true);
-	}
-    
+	}	
 
 }
