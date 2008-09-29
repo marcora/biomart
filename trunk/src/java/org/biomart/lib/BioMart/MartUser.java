@@ -1,15 +1,21 @@
 package org.biomart.lib.BioMart;
 
-import org.biomart.lib.BioMart.*;
+
+import java.util.Collection;
+import java.util.LinkedList;
 
 public class MartUser extends Root {
 
 	public String name = null;
 	public String password = null;
 	
+	public Collection groups;
+	
 	// constructors
 	public MartUser(String name, String password){
 		log.info("creating MartUser Object: "+name);
+		
+		this.groups = new LinkedList();
 		this.name = name;
 		this.password = password;
 	}
@@ -28,6 +34,11 @@ public class MartUser extends Root {
 	
 	public String getPassword(){
 		return this.password;
+	}
+	
+	public void addGroup(Group groupObj) {
+		log.info("adding Group object to MartUser");		
+		this.groups.add(groupObj);	
 	}
 	
 }

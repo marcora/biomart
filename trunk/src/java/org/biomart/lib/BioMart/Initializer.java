@@ -50,7 +50,51 @@ public class Initializer {
     	String password = node.getAttribute("password");
     	MartUser martUserObj = new MartUser(name, password);
     	
+    	//get a nodelist of  elements
+		NodeList nl = node.getElementsByTagName("group");
+		if(nl != null && nl.getLength() > 0) {
+			for (int i=0; i< nl.getLength(); i++){
+				this.processGroup(martUserObj, (Element)nl.item(i));	
+			}
+		}
+    	    	
 		registryObj.addMartUser(martUserObj);
+	}
+    
+    public void processGroup (MartUser martUserObj, Element node) {
+		
+    	String name = node.getAttribute("name"); 
+    	String groupDisplayName = node.getAttribute("groupDisplayName");
+    	String configDisplayName = node.getAttribute("configDisplayName");
+    	Group groupObj = new Group(name, groupDisplayName, configDisplayName);
+    	
+    	//get a nodelist of  elements
+		NodeList nl = node.getElementsByTagName("group");
+		if(nl != null && nl.getLength() > 0) {
+			for (int i=0; i< nl.getLength(); i++){
+				this.processNestedGroups(groupObj, (Element)nl.item(i));	
+			}
+		}    	    	
+		
+		martUserObj.addGroup(groupObj);
+	}
+    
+    public void processNestedGroups (Group parentGroupObj, Element node) {
+		
+    	String name = node.getAttribute("name"); 
+    	String groupDisplayName = node.getAttribute("groupDisplayName");
+    	String configDisplayName = node.getAttribute("configDisplayName");
+    	Group groupObj = new Group(name, groupDisplayName, configDisplayName);
+    	
+    	//get a nodelist of  elements
+		NodeList nl = node.getElementsByTagName("group");
+		if(nl != null && nl.getLength() > 0) {
+			for (int i=0; i< nl.getLength(); i++){
+				this.processNestedGroups(groupObj, (Element)nl.item(i));	
+			}
+		}
+		
+		parentGroupObj.addGroup(groupObj);
 	}
     
     public static void main(String[] args) {

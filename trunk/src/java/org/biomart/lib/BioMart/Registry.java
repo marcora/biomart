@@ -8,7 +8,7 @@ public class Registry extends Root {
 	public Collection martUsers;
 
 	// constructors
-	public Registry() {
+	public Registry() {		
 		log.info("creating Regisry Object");
 		martUsers = new LinkedList();
 	}
