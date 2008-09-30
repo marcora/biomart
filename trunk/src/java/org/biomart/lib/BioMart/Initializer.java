@@ -68,13 +68,20 @@ public class Initializer {
     	String configDisplayName = node.getAttribute("configDisplayName");
     	Group groupObj = new Group(name, groupDisplayName, configDisplayName);
     	
-    	//get a nodelist of  elements
+    	//get a nodelist of  elements - sub groups
 		NodeList nl = node.getElementsByTagName("group");
 		if(nl != null && nl.getLength() > 0) {
 			for (int i=0; i< nl.getLength(); i++){
 				this.processNestedGroups(groupObj, (Element)nl.item(i));	
 			}
-		}    	    	
+		}
+		//get a nodelist of  elements - configs
+		nl = node.getElementsByTagName("config");
+		if(nl != null && nl.getLength() > 0) {
+			for (int i=0; i< nl.getLength(); i++){
+				this.processConfig(groupObj, (Element)nl.item(i));	
+			}
+		}
 		
 		martUserObj.addGroup(groupObj);
 	}
@@ -97,6 +104,61 @@ public class Initializer {
 		parentGroupObj.addGroup(groupObj);
 	}
     
+    public void processConfig (Group groupObj, Element node) {
+		
+    	String name = node.getAttribute("name"); 
+    	String location = node.getAttribute("location");
+    	String mart = node.getAttribute("mart");
+    	String version = node.getAttribute("version");
+    	String dataset = node.getAttribute("dataset");
+    	String processors = node.getAttribute("processors");
+    	
+    	Config configObj = new Config(name, location, mart, version, dataset, processors);
+    	
+    	//get a nodelist of  elements
+		NodeList nl = node.getElementsByTagName("defaultfilter");
+		if(nl != null && nl.getLength() > 0) {
+			for (int i=0; i< nl.getLength(); i++){
+				this.processDefaultFilter(configObj, (Element)nl.item(i));	
+			}
+		}
+		
+		//get a nodelist of  elements
+		nl = node.getElementsByTagName("link");
+		if(nl != null && nl.getLength() > 0) {
+			for (int i=0; i< nl.getLength(); i++){
+				this.processLink(configObj, (Element)nl.item(i));	
+			}
+		}
+		
+		groupObj.addConfig(configObj);
+	}
+	
+    public void processDefaultFilter (Config configObj, Element node) {
+		
+    	String name = node.getAttribute("name"); 
+    	String value = node.getAttribute("value");
+    	
+    	DefaultFilter defaultFilterObj = new DefaultFilter(name, value);    	
+    			
+		configObj.addDefaultFilter(defaultFilterObj);
+	}
+
+    public void processLink (Config configObj, Element node) {
+		
+    	String location = node.getAttribute("location");
+    	String mart = node.getAttribute("mart");
+    	String version = node.getAttribute("version");
+    	String dataset = node.getAttribute("dataset");
+    	String config = node.getAttribute("config");
+    	String source = node.getAttribute("source");
+    	String target = node.getAttribute("target");
+    	
+    	Link linkObj = new Link(location, mart, version, dataset, config, source, target);
+    			
+		configObj.addLink(linkObj);
+	}
+	/* main */
     public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
