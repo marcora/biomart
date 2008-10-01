@@ -1325,7 +1325,7 @@ public class Schema implements Comparable, DataLink, TransactionListener {
 					int n = JOptionPane
 							.showOptionDialog(
 									frame,
-									"Orphan Foreign Key Found. If you choose to proceed, you will be prompted to save the information as reference for diagram update later.\n" + 
+									"Column names in some relations do not match those in DB. They will be saved to a file and deleted during synchronization.\n" + 
 									"Do you still want to proceed?" +"\n",
 									"Schema Update Warning",
 									JOptionPane.YES_NO_OPTION,
@@ -1346,7 +1346,7 @@ public class Schema implements Comparable, DataLink, TransactionListener {
 						return;
 					}
 					else{
-						SaveOrphanKeyDialog.displayText("Orphan Foreign Key", orphanSearch);
+						SaveOrphanKeyDialog.displayText("Orphan Relation", orphanSearch);
 					}
 					
 
@@ -1812,7 +1812,9 @@ public class Schema implements Comparable, DataLink, TransactionListener {
 				// Tables dropped or renamed is handled inside sync process
 				if (dbcols == null) {
 					//missTableList.add(t.getName());
-					//foundOrphanFK = true;
+					foundOrphanFK = true;
+					
+					addTableKeysToOrphanList(t, orphanFK);
 					continue;
 				
 				}
@@ -1848,6 +1850,26 @@ public class Schema implements Comparable, DataLink, TransactionListener {
 			}
 
 			return (result.toString());
+		}
+		
+		private void addTableKeysToOrphanList(Table t, HashMap orphanFK){
+			
+			// Add primary key to orphan key hash set    
+				final Key pmk = (Key) t.getPrimaryKey();
+				//orphanKeyList.add(k);
+				for (int kcl = 0; kcl < pmk.getColumns().length; kcl++)
+					orphanFK.put(pmk.getColumns()[kcl].getName(), pmk
+							.getRelations().toString());
+			
+			// Add foreign keys to orphan key hash set
+			for (final Iterator j = t.getForeignKeys().iterator(); j
+			.hasNext();) {
+				final Key k = (Key) j.next();
+				//orphanKeyList.add(k);
+				for (int kcl = 0; kcl < k.getColumns().length; kcl++)
+					orphanFK.put(k.getColumns()[kcl].getName(), k
+							.getRelations().toString());
+			}
 		}
 		
 		private void clearOrphanForeignKey(List orphanFKList){
