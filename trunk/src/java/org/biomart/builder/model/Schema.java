@@ -1306,11 +1306,13 @@ public class Schema implements Comparable, DataLink, TransactionListener {
 			
 			// List of objects storing orphan key column and its table name
 			List orphanFKList = new ArrayList();
+			StringBuffer orphanSearch = new StringBuffer();
+			boolean orphanBool = false;
 		
 			try {
-				String orphanSearch = findOrphanFKFromDB(orphanFKList);
+				orphanBool = findOrphanFKFromDB(orphanFKList, orphanSearch);
 
-				if (orphanSearch != null) {
+				if (orphanBool) {
 					// force return
 					// return;
 
@@ -1325,8 +1327,8 @@ public class Schema implements Comparable, DataLink, TransactionListener {
 					int n = JOptionPane
 							.showOptionDialog(
 									frame,
-									"Column names in some relations do not match those in DB. They will be saved to a file and deleted during synchronization.\n" + 
-									"Do you still want to proceed?" +"\n",
+									"Some columns in relations no longer exist in source DB. This may be caused by renaming/dropping tables/columns in source DB.\n" + 
+									"When choose 'Proceed', you will be prompted to save this information for later use. Do you want to proceed?" +"\n",
 									"Schema Update Warning",
 									JOptionPane.YES_NO_OPTION,
 									JOptionPane.WARNING_MESSAGE, null, // do
@@ -1343,10 +1345,10 @@ public class Schema implements Comparable, DataLink, TransactionListener {
 					// JOptionPane.YES_NO_OPTION);
 					if (n == JOptionPane.NO_OPTION) {
 						//CorruptSchemaTextDialog.displayText("Orphan Foreign Key", orphanSearch);
-						return;
+						return;						
 					}
 					else{
-						SaveOrphanKeyDialog.displayText("Orphan Relation", orphanSearch);
+						SaveOrphanKeyDialog.displayText("Orphan Relation", orphanSearch.toString());
 					}
 					
 
@@ -1785,15 +1787,15 @@ public class Schema implements Comparable, DataLink, TransactionListener {
 		}
 
 		// Pass in a list object to hold table and column with orphan foreign key
-		private String findOrphanFKFromDB(List orphanKeyList) throws Exception {
+		private boolean findOrphanFKFromDB(List orphanKeyList, StringBuffer orphanSearch) throws Exception {
 
 			HashMap orphanFK = new HashMap();
 			
 			HashSet dbcols;
 			boolean foundOrphanFK = false;
-			StringBuffer result = null;
+			StringBuffer result = orphanSearch;
 
-			List missTableList = new ArrayList();
+			//List missTableList = new ArrayList();
 			
 
 			ResultSet dbTableSet = getTablesFromDB();
@@ -1812,9 +1814,12 @@ public class Schema implements Comparable, DataLink, TransactionListener {
 				// Tables dropped or renamed is handled inside sync process
 				if (dbcols == null) {
 					//missTableList.add(t.getName());
-					foundOrphanFK = true;
 					
-					addTableKeysToOrphanList(t, orphanFK);
+					
+					boolean foundRel = addTableKeysToOrphanList(t, orphanFK);
+					if (foundRel){
+						foundOrphanFK = true;
+					}
 					continue;
 				
 				}
@@ -1839,37 +1844,54 @@ public class Schema implements Comparable, DataLink, TransactionListener {
 				}
 				
 			}
-
+			result.append("Orphan Relation: ");
 			if (foundOrphanFK) {
-				result = new StringBuffer();
+				
 
 				// Output missingt table
 				//result.append("Missing Table: " + missTableList.toString());
-				result.append("Orphan Foreign Key: " +orphanFK.toString());
-
+				result.append(orphanFK.toString());
 			}
+			
 
-			return (result.toString());
+			return foundOrphanFK;
 		}
 		
-		private void addTableKeysToOrphanList(Table t, HashMap orphanFK){
-			
-			// Add primary key to orphan key hash set    
-				final Key pmk = (Key) t.getPrimaryKey();
-				//orphanKeyList.add(k);
-				for (int kcl = 0; kcl < pmk.getColumns().length; kcl++)
-					orphanFK.put(pmk.getColumns()[kcl].getName(), pmk
-							.getRelations().toString());
-			
-			// Add foreign keys to orphan key hash set
-			for (final Iterator j = t.getForeignKeys().iterator(); j
-			.hasNext();) {
-				final Key k = (Key) j.next();
-				//orphanKeyList.add(k);
-				for (int kcl = 0; kcl < k.getColumns().length; kcl++)
-					orphanFK.put(k.getColumns()[kcl].getName(), k
-							.getRelations().toString());
+		private boolean addTableKeysToOrphanList(Table t, HashMap orphanFK) {
+
+			boolean foundRel = false;
+			// Add primary key to orphan key hash set
+			final Key pmk = (Key) t.getPrimaryKey();
+			// orphanKeyList.add(k);
+			if (pmk != null) {
+				for (int kcl = 0; kcl < pmk.getColumns().length; kcl++) {
+					String colName = pmk.getColumns()[kcl].getName();
+
+					Collection relCollection = (Collection) pmk.getRelations();
+					if (relCollection != null && relCollection.size() > 0) {
+						foundRel = true;
+						orphanFK.put(colName, relCollection);
+					}
+
+				}
 			}
+			// If the table has foreign key, then it must contain relations
+			Collection fkCollection = (Collection) t.getForeignKeys();
+			if (fkCollection != null && fkCollection.size() > 0) {
+				foundRel = true;
+
+				// Add foreign keys to orphan key hash set
+				for (final Iterator j = t.getForeignKeys().iterator(); j
+						.hasNext();) {
+					final Key k = (Key) j.next();
+					// orphanKeyList.add(k);
+					for (int kcl = 0; kcl < k.getColumns().length; kcl++)
+						orphanFK.put(k.getColumns()[kcl].getName(), k
+								.getRelations().toString());
+				}
+			}
+
+			return foundRel;
 		}
 		
 		private void clearOrphanForeignKey(List orphanFKList){
