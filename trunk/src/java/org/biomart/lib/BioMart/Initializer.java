@@ -31,19 +31,28 @@ public class Initializer {
         //get the root element
 		Element root = XMLDocumentObj.getDocRoot();
 
-		//get a nodelist of  elements
+		//get a nodelist of  elements [SECTION-1 PORTAL CONFIGURATION]
 		NodeList nl = root.getElementsByTagName("martuser");
 		if(nl != null && nl.getLength() > 0) {
 			for (int i=0; i< nl.getLength(); i++){
 				this.processMartUser(registryObj, (Element)nl.item(i));	
 			}
-		}        
+		}
+		
+		//get a nodelist of  elements [SECTION-1 MART CONFIGURATION]
+		nl = root.getElementsByTagName("location");
+		if(nl != null && nl.getLength() > 0) {
+			for (int i=0; i< nl.getLength(); i++){
+				this.processLocation(registryObj, (Element)nl.item(i));	
+			}
+		}
     }
     
     public Registry getRegistry(){
     	return this.registryObj;
     }
     
+    //[SECTION-1 PORTAL CONFIGURATION]
     public void processMartUser (Registry registryObj, Element node) {
 		
     	String name = node.getAttribute("name"); 
@@ -158,6 +167,59 @@ public class Initializer {
     			
 		configObj.addLink(linkObj);
 	}
+    
+    //[SECTION-2 MART CONFIGURATION]
+    public void processLocation (Registry registryObj, Element node) {
+		
+    	String name = node.getAttribute("name"); 
+    	Location locationObj = new Location(name);
+    	
+    	//get a nodelist of  elements
+		NodeList nl = node.getElementsByTagName("mart");
+		if(nl != null && nl.getLength() > 0) {
+			for (int i=0; i< nl.getLength(); i++){
+				this.processMart(locationObj, (Element)nl.item(i));	
+			}
+		}
+    	    	
+		registryObj.addLocation(locationObj);
+	}
+    
+    public void processMart (Location locationObj, Element node) {
+		
+    	String name = node.getAttribute("name"); 
+    	String version = node.getAttribute("version");
+    	Mart martObj = new Mart(name, version);
+    	
+    	//get a nodelist of  elements
+		NodeList nl = node.getElementsByTagName("partitiontable");
+		if(nl != null && nl.getLength() > 0) {
+			for (int i=0; i< nl.getLength(); i++){
+				this.processPartitionTable(martObj, (Element)nl.item(i));	
+			}
+		}
+    	    	
+		locationObj.addMart(martObj);
+	}
+    
+    public void processPartitionTable (Mart martObj, Element node) {
+		
+    	String name = node.getAttribute("name"); 
+    	String rows = node.getAttribute("rows");
+    	String cols = node.getAttribute("cols");
+    	PartitionTable partitionTableObj = new PartitionTable(name, rows, cols);
+    	
+    	//get a nodelist of  elements
+		NodeList nl = node.getElementsByTagName("partitiontable");
+		if(nl != null && nl.getLength() > 0) {
+			for (int i=0; i< nl.getLength(); i++){
+			//	this.processPartitionTable(martObj, (Element)nl.item(i));	
+			}
+		}
+    	    	
+		martObj.addPartitionTable(partitionTableObj);
+	}
+    
 	/* main */
     public static void main(String[] args) {
 		// TODO Auto-generated method stub
