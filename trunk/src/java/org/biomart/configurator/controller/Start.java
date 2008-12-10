@@ -70,9 +70,10 @@ public class Start {
             	int returnVal = 1; // = fc.showOpenDialog(m_view);
             	
             	// TODO: remove this hardcoded line when you uncomment the above line
-            	// m_model.processRegistryFile("/home/shazi/Desktop/registry_XML.xml");
-            	m_model.processRegistryFile("/work/syed/Desktop/registry_XML.xml");
+            	m_model.processRegistryFile("C:/Documents and Settings/jzhang/My Documents/BM_0.8/registry_XML.xml");
+            	// m_model.processRegistryFile("/work/syed/Desktop/registry_XML.xml");
             	
+            	/* comment out this for now
             	//In response to a button click:
             	if (returnVal == JFileChooser.APPROVE_OPTION) {
                     File file = fc.getSelectedFile();
@@ -85,6 +86,7 @@ public class Start {
                 } else {
                     log.info("Open command cancelled by user.");
                 }
+                */
             } catch (NumberFormatException nfex) {
             	log.info("error reading XML file");
             }

@@ -40,7 +40,7 @@ public class Initializer {
 		}
 		
 		//get a nodelist of  elements [SECTION-1 MART CONFIGURATION]
-		nl = root.getElementsByTagName("location");
+		nl = root.getElementsByTagName("Location");
 		if(nl != null && nl.getLength() > 0) {
 			for (int i=0; i< nl.getLength(); i++){
 				this.processLocation(registryObj, (Element)nl.item(i));	
@@ -174,8 +174,14 @@ public class Initializer {
     	String name = node.getAttribute("name"); 
     	Location locationObj = new Location(name);
     	
+    	locationObj.setType(node.getAttribute("type"));
+    	locationObj.setHost(node.getAttribute("host"));
+    	locationObj.setPort(node.getAttribute("port"));
+    	locationObj.setUserName(node.getAttribute("userName"));
+    	locationObj.setPassword(node.getAttribute("password"));
+    	
     	//get a nodelist of  elements
-		NodeList nl = node.getElementsByTagName("mart");
+		NodeList nl = node.getElementsByTagName("Mart");
 		if(nl != null && nl.getLength() > 0) {
 			for (int i=0; i< nl.getLength(); i++){
 				this.processMart(locationObj, (Element)nl.item(i));	
@@ -189,16 +195,19 @@ public class Initializer {
 		
     	String name = node.getAttribute("name"); 
     	String version = node.getAttribute("version");
-    	Mart martObj = new Mart(name, version);
+    	Mart martObj = new Mart(name, version, locationObj);
+    	
+    	martObj.setDatabaseName(node.getAttribute("databaseName"));
+    	martObj.setSchemaName(node.getAttribute("schemaName"));
     	
     	//get a nodelist of  elements
-		NodeList nl = node.getElementsByTagName("partitiontable");
+		NodeList nl = node.getElementsByTagName("PartitionTable");
 		if(nl != null && nl.getLength() > 0) {
 			for (int i=0; i< nl.getLength(); i++){
 				this.processPartitionTable(martObj, (Element)nl.item(i));	
 			}
 		}
-    	    	
+
 		locationObj.addMart(martObj);
 	}
     
