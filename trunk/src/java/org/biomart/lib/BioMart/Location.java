@@ -23,6 +23,20 @@ public class Location extends Root{
 		
 	}
 	
+	public Location(String name, String type, String host, String port, String userName, String password) {
+		
+		log.info("creating Location Object: "+ name);
+		this.marts = new LinkedList();
+		
+		this.name = name;
+		this.type = type;
+		this.host = host;
+		this.port = port;
+		this.userName = userName;
+		this.password = password;
+		
+	}
+
 	public void addMart(Mart martObj) {
 		log.info("adding Mart object to Location");
 		this.marts.add(martObj);		
@@ -40,40 +54,20 @@ public class Location extends Root{
 		return host;
 	}
 
-	public void setHost(String host) {
-		this.host = host;
-	}
-
 	public String getPort() {
 		return port;
-	}
-
-	public void setPort(String port) {
-		this.port = port;
 	}
 
 	public String getUserName() {
 		return userName;
 	}
 
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
-
 	public String getPassword() {
 		return password;
 	}
 
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
 	public String getType() {
 		return type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
 	}
 
 }
