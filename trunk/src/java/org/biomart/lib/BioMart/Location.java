@@ -12,16 +12,7 @@ public class Location extends Root{
 	private String port;
 	private String userName;
 	private String password;
-
 	
-	public Location(String name) {
-		
-		log.info("creating Location Object: "+ name);
-		this.marts = new LinkedList();	
-		
-		this.name = name;
-		
-	}
 	
 	public Location(String name, String type, String host, String port, String userName, String password) {
 		

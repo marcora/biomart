@@ -71,16 +71,11 @@ public class DBConnectionUtils {
 		String driverClassName = parts[0];
 		String urlTemplate = parts[1];
 		
-		System.out.println("driver class: " + driverClassName);
-		System.out.println("URL template: " + urlTemplate);
-
 		String jdbcURL = urlTemplate;
 		jdbcURL = jdbcURL.replaceAll("<HOST>", host);
 		jdbcURL = jdbcURL.replaceAll("<PORT>", port);
 		if (databaseName == null) databaseName = "";
 		jdbcURL = jdbcURL.replaceAll("<DATABASE>", databaseName);
-		
-		System.out.println("URL: "+jdbcURL);
 		
 		// load database driver
 		try {

@@ -16,16 +16,6 @@ public class Mart extends Root{
 	private String databaseName;
 	private String schemaName;
 
-	public Mart(String name, String version, Location location) {
-		
-		log.info("creating Mart Object: " + name);
-		partitionTables = new LinkedList();
-		
-		this.name = name;
-		this.version = version;
-		this.location = location;
-	}
-	
 	public Mart(String name, String version, String databaseName,
 			String schemaName, Location location) {
 
@@ -60,20 +50,25 @@ public class Mart extends Root{
 		}
 		
 		// TODO: try to get the XML from metatable in the DB, or create one if it's necessary
-		
+		//System.out.println(conn);
 		
 		
 		return metaInfoXML;
 	}
 	
 	/**
+	 * main for testing
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+		Location myLocation = new Location("ensembl", "mysql", "localhost", "3306", "", "");
+		Mart myMart = new Mart("ensembl", "51", "jz_ensembl_mart_51_08", "", myLocation);
 
+		System.out.println(myMart.getMetaInfoXML());
 	}
 
+	
 	public String getDatabaseName() {
 		return databaseName;
 	}
