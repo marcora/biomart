@@ -5,12 +5,7 @@ package org.biomart.lib.BioMart;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -49,6 +44,8 @@ public class MartMetaInfoHelper extends Root{
 		// some variables
 		String metaInfoXML = null;
 		
+		ArrayList dbTable = new ArrayList();
+		
 		TreeSet dbDataset = new TreeSet(); // values are dataset name with partition name removed if any; scan only main table names
 		LinkedHashMap dbDatasetToPartitionMap = new LinkedHashMap(); // key: gene_ensembl, value: {hsap=12, mmus=15,,,,}
 		Hashtable dbDatasetToPartitionIndex = new Hashtable(); // {gene_ensembl=1, marker_start=2, ,,,}
@@ -78,7 +75,10 @@ public class MartMetaInfoHelper extends Root{
 				log.warning("table name (" + tableName + ") doesn't conform with naming convention, skipped.");
 				continue;
 			}
+			dbTable.add(tableName);
 
+			if (tableNameDivisions[2].equals("dm")) continue;  // deals with dm tables later
+			
 			log.info("processing table: " + tableName);
 
 			String dataset = tableNameDivisions[0];
@@ -111,21 +111,64 @@ public class MartMetaInfoHelper extends Root{
 				}
 			}
 			
-			// new process tables
+			//TODO: populate dbDatasetMainTable and dbDatasetTableColumn
 			
-		
+			
 		}
-
 		tables.close();
 
+		// populate dbDatasetToPartitionIndex
 		Iterator dsIterator = dbDatasetToPartitionMap.keySet().iterator();
 		int position = 1;
 		while(dsIterator.hasNext()){
 			dbDatasetToPartitionIndex.put(dsIterator.next(), new Integer(position));
 			position++;
 		}
+
+		// now process dm tables
+		for (int i=0; i<dbTable.size(); i++) {
+			String tableName = (String) dbTable.get(i);
+			
+			String [] tableNameDivisions = tableName.split(tableNameDivisionDelimiter);
+
+			if (tableNameDivisions[2].equals("main")) continue; // skip main tables which have been processed earlier.
+			
+			String dataset = tableNameDivisions[0];
+			String datasetPartitionEntry = null;
+
+			Pattern pattern = Pattern.compile(patternPartiDataset);
+			Matcher matcher = pattern.matcher(dataset);
+			
+			if (matcher.find()){  // check if this is a partitioned dataset
+				// System.out.println("Matched: " + matcher.group(0) + " " + matcher.group(1) + " " + matcher.group(2) + " " + matcher.group(3));
+				dataset = matcher.group(3);  // dataset name with partition portion removed
+				datasetPartitionEntry = matcher.group(1);
+			}
+
+			if (!dbDataset.contains(dataset) ||
+					(dbDatasetToPartitionMap.containsKey(dataset)) && !((Hashtable) dbDatasetToPartitionMap.get(dataset))
+					.containsKey(datasetPartitionEntry)) {  // dm table that has no main table, should warn this error
+				log.warning("dimension table (" + tableName + ") doesn't have any associated main table, skipped.");
+				continue;
+			}
+
+			String tablePartitionEntry = null;
+			String content = tableNameDivisions[1];
+			pattern = Pattern.compile(patternPartiTable);
+			matcher = pattern.matcher(content);
+			
+			if (matcher.find()) {  // check if this is a partitioned table
+				// System.out.println("Matched: " + matcher.group(0) + " " + matcher.group(1) + " " + matcher.group(2) + " " + matcher.group(3));
+				content = matcher.group(1);  // 
+				tablePartitionEntry = matcher.group(2);
+			}
+			
+			//TODO: populate dbDatasetDmTable, dbDatasetTablePartition and dbDatasetTableColumn
+			
+		}
+	
+		// TODO: populate dbDatasetTableColumnPartitionRange
 		
-		 
 		
 		//System.out.println(dbDataset);
 		//System.out.println(dbDatasetToPartitionIndex);
