@@ -46,17 +46,19 @@ public class MartMetaInfoHelper extends Root{
 		
 		ArrayList dbTable = new ArrayList();
 		
-		TreeSet dbDataset = new TreeSet(); // values are dataset name with partition name removed if any; scan only main table names
-		LinkedHashMap dbDatasetToPartitionMap = new LinkedHashMap(); // key: gene_ensembl, value: {hsap=12, mmus=15,,,,}
+		TreeSet dbDataset = new TreeSet(); // values are dataset name with partition name removed if any; scan only main table names {gene_ensembl, marker_start, ,,}
+		LinkedHashMap dbDatasetToPartitionRow = new LinkedHashMap(); // {gene_ensembl={hsap=12, mmus=15,,,,}, marker_start={hsap=1,,,}}
 		Hashtable dbDatasetToPartitionIndex = new Hashtable(); // {gene_ensembl=1, marker_start=2, ,,,}
 		
-		Map dbDatasetMainTable = new HashMap(); // {gene_ensembl=[gene, transcript, translation], marker_start=[start],,, }
-		Map dbDatasetDmTable = new HashMap(); // {gene_ensembl=[go, ox, pfeat,,,], , , }  # with partition portion removed
-		Map dbDatasetTablePartition = new HashMap(); // key: gene_ensembl__go, value: [process,function,,,]
-		Map dbDatasetTableColumn = new HashMap(); // key: gene_ensembl__go:process, value: [id,primary_acc,,,,]
+		// the reason each of MainTable and DmTable needs one variable is that they may 
+		// have almost the same name (except for the last part), eg, ensembl__gene__main and ensembl__gene__dm
+		Map dbDatasetMainTable = new HashMap(); // {gene_ensembl={gene,transcript,translation}, marker_start={start},,, }
+		Map dbDatasetDmTable = new HashMap(); // {gene_ensembl={go,ox,pfeat,,,}, , , }  # with partition portion removed
+		Map dbDatasetTableToPartitionRow = new HashMap(); // {gene_ensembl__go={process=1,function=2,,,}, gene_ensembl__ox={refseq=1,,,},, evoc__ontology={pathology=1,,},}
+		Map dbDatasetTableToPartitionIndex = new HashMap(); // {gene_ensembl__go=8, gene_ensembl__ox=9,,,, evoc__ontology=15,,,}
 		
-		Map dbDatasetTableToPartitionIndex = new HashMap(); // key: gene_ensembl__go, value: P8; gene_ensembl__pfeat, value: P9,
-		Map dbDatasetTableColumnPartitionRange = new HashMap(); // key: gene_ensembl__go:process:id, value: [P1R1:P7R3,,,]
+		Map dbDatasetTablePartitionRange = new HashMap(); // {gene_ensembl__gene=[P1R1,P1R2,P1R5,P1R8,,,],gene_ensembl__go=[P1R1:P8R1,P1R2:P8R1,,P1R1:P8R2,,,],,,}
+		Map dbDatasetTableColumnPartitionRange = new HashMap(); // {gene_ensembl__gene={id=[P1R1,P1R2,P1R5,P1R8,,,],name=[,,,]},gene_ensembl__go{id=[,,,],,,}}
 		
 		
 		
@@ -95,30 +97,32 @@ public class MartMetaInfoHelper extends Root{
 
 			dbDataset.add(dataset);  // add dataset
 			
-			// populate datasetToPartitionMap when the dataset has partition
+			// populate dbDatasetToPartitionRow when the dataset has partition
 			if (datasetPartitionEntry != null && !datasetPartitionEntry.equals("")) {
-				if (dbDatasetToPartitionMap.containsKey(dataset)) {
-					if (!((Hashtable) dbDatasetToPartitionMap.get(dataset))
+				if (dbDatasetToPartitionRow.containsKey(dataset)) {
+					if (!((Hashtable) dbDatasetToPartitionRow.get(dataset))
 							.containsKey(datasetPartitionEntry)) { // new partitonEntry
-						int nextPos = ((Hashtable) dbDatasetToPartitionMap
+						int nextPos = ((Hashtable) dbDatasetToPartitionRow
 								.get(dataset)).size() + 1;
-						((Hashtable) dbDatasetToPartitionMap.get(dataset))
+						((Hashtable) dbDatasetToPartitionRow.get(dataset))
 								.put(datasetPartitionEntry, new Integer(nextPos));
 					}
 				} else { // new dataset, of course with the first partitionEntry if there is any
-					dbDatasetToPartitionMap.put(dataset, new Hashtable());
-					((Hashtable) dbDatasetToPartitionMap.get(dataset)).put(datasetPartitionEntry, new Integer(1));
+					dbDatasetToPartitionRow.put(dataset, new Hashtable());
+					((Hashtable) dbDatasetToPartitionRow.get(dataset)).put(datasetPartitionEntry, new Integer(1));
 				}
 			}
 			
-			//TODO: populate dbDatasetMainTable and dbDatasetTableColumn
+			if (!dbDatasetMainTable.containsKey(dataset))
+				dbDatasetMainTable.put(dataset, new TreeSet());
 			
+			((TreeSet) dbDatasetMainTable.get(dataset)).add(tableNameDivisions[1]);
 			
 		}
 		tables.close();
 
 		// populate dbDatasetToPartitionIndex
-		Iterator dsIterator = dbDatasetToPartitionMap.keySet().iterator();
+		Iterator dsIterator = dbDatasetToPartitionRow.keySet().iterator();
 		int position = 1;
 		while(dsIterator.hasNext()){
 			dbDatasetToPartitionIndex.put(dsIterator.next(), new Integer(position));
@@ -146,7 +150,7 @@ public class MartMetaInfoHelper extends Root{
 			}
 
 			if (!dbDataset.contains(dataset) ||
-					(dbDatasetToPartitionMap.containsKey(dataset)) && !((Hashtable) dbDatasetToPartitionMap.get(dataset))
+					(dbDatasetToPartitionRow.containsKey(dataset)) && !((Hashtable) dbDatasetToPartitionRow.get(dataset))
 					.containsKey(datasetPartitionEntry)) {  // dm table that has no main table, should warn this error
 				log.warning("dimension table (" + tableName + ") doesn't have any associated main table, skipped.");
 				continue;
@@ -163,16 +167,16 @@ public class MartMetaInfoHelper extends Root{
 				tablePartitionEntry = matcher.group(2);
 			}
 			
-			//TODO: populate dbDatasetDmTable, dbDatasetTablePartition and dbDatasetTableColumn
+			//TODO: populate dbDatasetDmTable, dbDatasetTableToPartitionRow and dbDatasetTableToPartitionIndex
 			
 		}
 	
-		// TODO: populate dbDatasetTableColumnPartitionRange
+		// TODO: one more loop to populate dbDatasetTablePartitionRange and dbDatasetTableColumnPartitionRange
 		
 		
 		//System.out.println(dbDataset);
 		//System.out.println(dbDatasetToPartitionIndex);
-		//System.out.println(dbDatasetToPartitionMap);
+		//System.out.println(dbDatasetToPartitionRow);
 		
 		return metaInfoXML;
 	}
