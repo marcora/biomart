@@ -22,6 +22,7 @@ public class MartMetaInfoHelper extends Root{
 	static final String tableNameDivisionDelimiter = "__";
 	static final String keyColumnSuffix = "_key";
 	static final String booleanColumnSuffix = "_bool";
+	static final boolean skipBooleanCol = true;
 	static final String patternPartiDataset = "^((P\\d+).+\\2)_(.+)";
 	static final String patternPartiTable = "(.+)_((P\\d+).+\\3)";
 
@@ -42,7 +43,7 @@ public class MartMetaInfoHelper extends Root{
 	public String makeMetaInfoXML(DatabaseMetaData dmd, String schemaName) throws Exception {
 		
 		// some variables
-		String metaInfoXML = null;
+		StringBuilder metaInfoXML = new StringBuilder();
 		
 		ArrayList dbTable = new ArrayList();
 		Map dbValidMartTable = new HashMap(); // {P1aaegyptiP1_egene__go_P7sequenceP7__dm={dataset=egene,content=go,type=dm,dsPt=P1aaegyptiP1,dtPt=P7sequenceP7},,,,}
@@ -218,7 +219,6 @@ public class MartMetaInfoHelper extends Root{
 			partitionIndex++;
 		}
 		
-		// TODO: one more loop to populate dbDatasetTablePartitionRange and dbDatasetTableColumnPartitionRange
 		iterator = dbValidMartTable.keySet().iterator();
 		while(iterator.hasNext()){
 			String dbTableName = (String) iterator.next();
@@ -261,7 +261,9 @@ public class MartMetaInfoHelper extends Root{
 			ResultSet columns = dmd.getColumns(null, schemaName, dbTableName, null);
 			while(columns.next()){
 				String columnName = columns.getString(4);
-				//System.out.println(columnName);
+				
+				if (skipBooleanCol && columnName.endsWith(booleanColumnSuffix)) continue;
+				
 				if (!dbDatasetTableColumnPartitionRange.containsKey(martTableName)) {  // new table, new column
 					dbDatasetTableColumnPartitionRange.put(martTableName, new LinkedHashMap());
 					((LinkedHashMap) dbDatasetTableColumnPartitionRange.get(martTableName))
@@ -269,17 +271,122 @@ public class MartMetaInfoHelper extends Root{
 					((ArrayList) ((LinkedHashMap) dbDatasetTableColumnPartitionRange.
 								get(martTableName)).get(columnName)).add(partitionRange);
 				} else {  // exist table, new column
-					if (!((LinkedHashMap) dbDatasetTableColumnPartitionRange.get(martTableName)).containsKey(columnName)) {  // exist table, new column
+					if (!((LinkedHashMap) dbDatasetTableColumnPartitionRange
+							.get(martTableName)).containsKey(columnName)) {  // exist table, new column
 						((LinkedHashMap) dbDatasetTableColumnPartitionRange.get(martTableName)).put(columnName, new ArrayList());
 					}
-					((ArrayList) ((LinkedHashMap) dbDatasetTableColumnPartitionRange.
-							get(martTableName)).get(columnName)).add(partitionRange);
+					((ArrayList) ((LinkedHashMap) dbDatasetTableColumnPartitionRange
+							.get(martTableName)).get(columnName)).add(partitionRange);
 				}
 			}
 
 		}
+
+		// output partitions for datasets
+		iterator = dbDatasetToPartitionIndex.keySet().iterator();
+		while(iterator.hasNext()){
+			String partition = (String) iterator.next();
+
+			metaInfoXML.append("<partitionTable name=\"P" + dbDatasetToPartitionIndex.get(partition) + "\" rows=\"\" cols=\"\">\n");
+			Iterator i = ((Hashtable) dbDatasetToPartitionRow.get(partition)).keySet().iterator();
+			while(i.hasNext()) {
+				String partitionEntry = (String) i.next();
+				String rowNumber = ((Hashtable) dbDatasetToPartitionRow.get(partition)).get(partitionEntry).toString();
+				metaInfoXML.append("\t<cell row=\"" + rowNumber + "\" " + "col=\"1\">" + partitionEntry + "</cell>\n");
+			}
+			metaInfoXML.append("</partitionTable>\n");
+		}
 		
+		// output partitions for dm tables
+		iterator = dbDatasetTableToPartitionIndex.keySet().iterator();
+		while(iterator.hasNext()){
+			String partition = (String) iterator.next();
+
+			metaInfoXML.append("<partitionTable name=\"P" + dbDatasetTableToPartitionIndex.get(partition) + "\" rows=\"\" cols=\"\">\n");
+			Iterator i = ((Hashtable) dbDatasetTableToPartitionRow.get(partition)).keySet().iterator();
+			while(i.hasNext()) {
+				String partitionEntry = (String) i.next();
+				String rowNumber = ((Hashtable) dbDatasetTableToPartitionRow.get(partition)).get(partitionEntry).toString();
+				metaInfoXML.append("\t<cell row=\"" + rowNumber + "\" " + "col=\"1\">" + partitionEntry + "</cell>\n");
+			}
+			metaInfoXML.append("</partitionTable>\n");
+		}
+
+		// output datasets
+		iterator = dbDataset.iterator();
+		while (iterator.hasNext()) {
+			String dataset = (String) iterator.next();
+			
+			metaInfoXML.append("<dataset name=\"" + dataset + "\">\n");
+
+			String myDataset = dataset;
+			//TODO: we need to test if this is a partitioned dataset
+			if (dbDatasetToPartitionIndex.containsKey(myDataset)) {
+				String datasetPartitionIndex = ((Integer) dbDatasetToPartitionIndex.get(myDataset)).toString();
+				myDataset = "(P" + datasetPartitionIndex + "C1)_"+ dataset;
+			}
+			
+			// output main tables
+			Iterator i = ((TreeSet) dbDatasetMainTable.get(dataset)).iterator();
+			while(i.hasNext()) {
+				String table = (String) i.next();
+				metaInfoXML.append("\t<table name=\"" + myDataset + "__" + table + "__main\"");
+				metaInfoXML.append(" key=\"\"");
+				String range = "";
+				if (dbDatasetTablePartitionRange.containsKey(dataset + tableNameDivisionDelimiter + table)){
+					range = dbDatasetTablePartitionRange.get(dataset + tableNameDivisionDelimiter + table).toString();
+				}
+				metaInfoXML.append(" range=\"" + range + "\"");
+				metaInfoXML.append(">\n");
+				
+				// output table fields
+				Iterator j = ((LinkedHashMap) dbDatasetTableColumnPartitionRange
+						.get(dataset + tableNameDivisionDelimiter + table)).keySet().iterator();
+				while(j.hasNext()){
+					String columnName = (String) j.next();
+					String colRange = ((LinkedHashMap) dbDatasetTableColumnPartitionRange
+							.get(dataset + tableNameDivisionDelimiter + table)).get(columnName).toString();
+					metaInfoXML.append("\t\t<attribute range=\"" + colRange + "\">" + columnName + "</attribute>\n");
+				}
+								
+				metaInfoXML.append("\t</table>\n");
+			}
+
+			// output dm tables
+			i = ((TreeSet) dbDatasetDmTable.get(dataset)).iterator();
+			while(i.hasNext()) {
+				String table = (String) i.next();
+				String myTable = table;
+				if (dbDatasetTableToPartitionIndex.containsKey(dataset + tableNameDivisionDelimiter + table)) {
+					String tablePartitionIndex = ((Integer) dbDatasetTableToPartitionIndex.get(dataset + tableNameDivisionDelimiter + table)).toString();
+					myTable = table + "_(P" + tablePartitionIndex + "C1)";
+				}
+				metaInfoXML.append("\t<table name=\"" + myDataset + "__" + myTable + "__dm\"");
+				metaInfoXML.append(" key=\"\"");
+				String range = "";
+				if (dbDatasetTablePartitionRange.containsKey(dataset + tableNameDivisionDelimiter + table)){
+					range = dbDatasetTablePartitionRange.get(dataset + tableNameDivisionDelimiter + table).toString();
+				}
+				metaInfoXML.append(" range=\"" + range + "\"");
+				metaInfoXML.append(">\n");
+				
+				// output table fields
+				Iterator j = ((LinkedHashMap) dbDatasetTableColumnPartitionRange
+						.get(dataset + tableNameDivisionDelimiter + table)).keySet().iterator();
+				while(j.hasNext()){
+					String columnName = (String) j.next();
+					String colRange = ((LinkedHashMap) dbDatasetTableColumnPartitionRange
+							.get(dataset + tableNameDivisionDelimiter + table)).get(columnName).toString();
+					metaInfoXML.append("\t\t<attribute range=\"" + colRange + "\">" + columnName + "</attribute>\n");
+				}
+				
+				metaInfoXML.append("\t</table>\n");
+			}
+			
+			metaInfoXML.append("</dataset>\n");
+		}
 		
+/*
 		System.out.println("dbDataset=" + dbDataset);
 		System.out.println("dbDatasetToPartitionIndex=" + dbDatasetToPartitionIndex);
 		System.out.println("dbDatasetToPartitionRow=" + dbDatasetToPartitionRow);
@@ -289,8 +396,11 @@ public class MartMetaInfoHelper extends Root{
 		System.out.println("dbDatasetTableToPartitionIndex=" + dbDatasetTableToPartitionIndex);
 		System.out.println("dbDatasetTablePartitionRange=" + dbDatasetTablePartitionRange);
 		System.out.println("dbDatasetTableColumnPartitionRange=" + dbDatasetTableColumnPartitionRange);
+*/
 		
-		return metaInfoXML;
+		if (metaInfoXML.toString().length() == 0) return null;
+		log.info("metaInfoXML generated");
+		return metaInfoXML.toString();
 	}
 
 
