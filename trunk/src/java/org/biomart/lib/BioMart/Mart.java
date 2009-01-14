@@ -1,5 +1,8 @@
 package org.biomart.lib.BioMart;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -96,10 +99,11 @@ public class Mart extends Root{
 	/**
 	 * main for testing
 	 * @param args
+	 * @throws IOException 
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
-		Location myLocation = new Location("ensembl", "mysql", "localhost", "3306", "", "");
+		Location myLocation = new Location("ensembl", "mysql", "dev1.res", "3306", "martadmin", "");
 		Mart myMart = new Mart("ensembl", "51", "jz_ensembl_mart_51_08", "", myLocation);
 		String xml = null;
 		try {
@@ -111,7 +115,12 @@ public class Mart extends Root{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println(xml);
+		
+		//System.out.println(xml);
+		
+		BufferedWriter bw = new BufferedWriter(new FileWriter("registry08.xml"));
+		bw.write(xml);
+		bw.close();
 	}
 
 	
