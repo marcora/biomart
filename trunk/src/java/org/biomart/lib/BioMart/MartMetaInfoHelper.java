@@ -27,6 +27,10 @@ public class MartMetaInfoHelper extends Root{
 	static final String patternPartiTable = "(.+)_((P\\d+).+\\3)";
 
 	// some private fields
+	
+	private String locationName = "";
+	private String martName = "";
+	
 	private StringBuilder metaInfoXML = new StringBuilder();
 	
 	private ArrayList dbTable = new ArrayList();
@@ -55,7 +59,10 @@ public class MartMetaInfoHelper extends Root{
 	 * @return String
 	 * @throws Exception 
 	 */
-	public String makeMetaInfoXML(DatabaseMetaData dmd, String schemaName) throws Exception {
+	public String makeMetaInfoXML(DatabaseMetaData dmd, String schemaName, String locationName, String martName) throws Exception {
+		
+		this.locationName = locationName;
+		this.martName = martName;
 		
 		ResultSet tables = dmd.getTables(null, schemaName, null, null);
 		
@@ -65,7 +72,7 @@ public class MartMetaInfoHelper extends Root{
 			// skipping meta tables
 			if (tableName.startsWith(metaTablePrefix)) continue;
 			
-			//if (tableName.contains("egene")) continue;  // TODO: remove this later. this is just for quickly testing a dataset without partition
+			// if (tableName.contains("egene")) continue;  // TODO: remove this later. this is just for quickly testing a dataset without partition
 			
 			String [] tableNameDivisions = tableName.split(tableNameDivisionDelimiter);
 			
@@ -387,7 +394,7 @@ public class MartMetaInfoHelper extends Root{
 		outputConfInfo(dataset, "templateConfig");
 		
 		// output user config TODO: do we really need to generate user config for naive?
-		//outputConfInfo(dataset, "userConfig");
+		outputConfInfo(dataset, "userConfig");
 		
 		metaInfoXML.append("\t</config>\n");
 	}
@@ -434,66 +441,92 @@ public class MartMetaInfoHelper extends Root{
 		
 		Iterator i = ((LinkedHashSet) dbDatasetMartTable.get(dataset)).iterator();
 		while(i.hasNext()) {
-			String [] tempStr = ((String) i.next()).split(tableNameDivisionDelimiter);;
+			String [] tempStr = ((String) i.next()).split(tableNameDivisionDelimiter);
 			
 			String table = tempStr[0];
 			String tableType = tempStr[1];
 			String martTableName = dataset + tableNameDivisionDelimiter + table + tableNameDivisionDelimiter + tableType;
 
-			String dtRange = "";
-			if (((ArrayList)dbDatasetTablePartitionRange.get(martTableName)).size() > 0) {
-				StringBuilder sb = new StringBuilder();
-				for (int j = 0; j < ((ArrayList)dbDatasetTablePartitionRange.get(martTableName)).size(); j++) {
-					sb.append("[" + ((ArrayList)dbDatasetTablePartitionRange.get(martTableName)).get(j) + ":1]");
+			String dmPartitionIndex = "";
+			if (dbPartitionIndex.indexOf(martTableName) >= 0 && confType.equals("userConfig"))  // only under this conditions we platen the config
+					dmPartitionIndex = "P" + (dbPartitionIndex.indexOf(martTableName) + 1);
+			
+			int dmPartitionRow = 0;
+			while (dmPartitionIndex.equals("") || dmPartitionRow < ((ArrayList)dbDatasetTablePartitionRange.get(martTableName)).size()) {
+			
+				dmPartitionRow++;
+				String dmPartitionIR = "";
+				if (!dmPartitionIndex.equals(""))
+						dmPartitionIR = dmPartitionIndex + "R" + dmPartitionRow;
+				
+				String dtRange = "";
+				if (((ArrayList)dbDatasetTablePartitionRange.get(martTableName)).size() > 0) {
+					StringBuilder sb = new StringBuilder();
+					for (int j = 0; j < ((ArrayList)dbDatasetTablePartitionRange.get(martTableName)).size(); j++) {
+						if (!dmPartitionIndex.equals("") && 
+									!((String) ((ArrayList)dbDatasetTablePartitionRange.get(martTableName)).get(j)).endsWith(dmPartitionIR))
+								continue;
+						sb.append("[" + ((ArrayList)dbDatasetTablePartitionRange.get(martTableName)).get(j) + ":1]");
+					}
+					dtRange = sb.toString();
+					// skip while dtRange is empty for userConfig
+					if (dtRange.equals("")) continue;
 				}
-				dtRange = sb.toString();
-			}
 
-			String myTable = table;
-			if (tableType.equals("dm") && dbPartitionIndex.indexOf(martTableName) >= 0) { // check if this is a partitioned dm table
-				metaInfoXML.append(xmlLeadingTab + "<container name=\"P" + (dbPartitionIndex.indexOf(martTableName) + 1) + "\"");
+				String myTable = table;
+				if (tableType.equals("dm") && dbPartitionIndex.indexOf(martTableName) >= 0) { // check if this is a partitioned dm table
+					metaInfoXML.append(xmlLeadingTab + "<container name=\"P" + (dbPartitionIndex.indexOf(martTableName) + 1) + "\"");
+					metaInfoXML.append(" queryRestriction=\"0\"");
+					metaInfoXML.append(" range=\"" + dtRange + "\"");
+					metaInfoXML.append(">\n");
+					myTable = table + "_(P" + (dbPartitionIndex.indexOf(martTableName) + 1) + "C1)";
+					extraTab = "\t";
+				}
+
+				// opening table level container
+				metaInfoXML.append(xmlLeadingTab + extraTab + "<container name=\"" + myDataset + tableNameDivisionDelimiter + myTable + tableNameDivisionDelimiter + tableType + "\"");
 				metaInfoXML.append(" queryRestriction=\"0\"");
 				metaInfoXML.append(" range=\"" + dtRange + "\"");
 				metaInfoXML.append(">\n");
-				myTable = table + "_(P" + (dbPartitionIndex.indexOf(martTableName) + 1) + "C1)";
-				extraTab = "\t";
-			}
-
-			// opening table level container
-			metaInfoXML.append(xmlLeadingTab + extraTab + "<container name=\"" + myDataset + tableNameDivisionDelimiter + myTable + tableNameDivisionDelimiter + tableType + "\"");
-			metaInfoXML.append(" queryRestriction=\"0\"");
-			metaInfoXML.append(" range=\"" + dtRange + "\"");
-			metaInfoXML.append(">\n");
 			
-			// output attributes
-			Iterator j = ((LinkedHashMap) dbDatasetTableColumnPartitionRange
-					.get(martTableName)).keySet().iterator();
-			while(j.hasNext()){
-				String columnName = (String) j.next();
-				StringBuilder sb = new StringBuilder();
-				for (int k=0; k < ((ArrayList) ((HashMap) dbDatasetTableColumnPartitionRange.get(martTableName)).get(columnName)).size(); k++) {
-					sb.append("[" + ((ArrayList) ((HashMap) dbDatasetTableColumnPartitionRange.get(martTableName)).get(columnName)).get(k) + ":1]");
-				}
-				String tcRange = sb.toString();
+				// output attributes
+				Iterator j = ((LinkedHashMap) dbDatasetTableColumnPartitionRange
+						.get(martTableName)).keySet().iterator();
+				while(j.hasNext()){
+					String columnName = (String) j.next();
+					StringBuilder sb = new StringBuilder();
+					for (int k=0; k < ((ArrayList) ((HashMap) dbDatasetTableColumnPartitionRange.get(martTableName)).get(columnName)).size(); k++) {
+						if (!dmPartitionIndex.equals("") && 
+								!((String) ((ArrayList) ((HashMap) dbDatasetTableColumnPartitionRange.get(martTableName)).get(columnName)).get(k)).endsWith(dmPartitionIR))
+							continue;
+						sb.append("[" + ((ArrayList) ((HashMap) dbDatasetTableColumnPartitionRange.get(martTableName)).get(columnName)).get(k) + ":1]");
+					}
+					String tcRange = sb.toString();
+					
+					// skip while tcRange is empty for userConfig and there is a partition for either dataset or dm
+					if (((ArrayList)dbDatasetTablePartitionRange.get(martTableName)).size() > 0 
+							&& confType.equals("userConfig") && tcRange.equals("")) continue;
 
-				metaInfoXML.append(xmlLeadingTab + extraTab + "\t<attributePointer name=\"" + columnName + "\"\n");
-				metaInfoXML.append(xmlLeadingTab + extraTab + "\t\tpoint=\"false\" field=\"" + columnName + "\" location=\"" + "\"\n");
-				metaInfoXML.append(xmlLeadingTab + extraTab + "\t\tmart=\"\" version=\"\" dataset=\"" + dataset + "\" config=\"naive\"\n");
-				metaInfoXML.append(xmlLeadingTab + extraTab + "\t\ttable=\"" + myDataset + tableNameDivisionDelimiter + myTable + tableNameDivisionDelimiter + tableType + "\" sourceRange=\"\"\n");
-				metaInfoXML.append(xmlLeadingTab + extraTab + "\t\trange=\"" + tcRange + "\">\n");
-				metaInfoXML.append(xmlLeadingTab + extraTab + "\t\t<displayName value=\"" + columnName + " + SOMETHING\" />\n");
-				metaInfoXML.append(xmlLeadingTab + extraTab + "\t\t<default value=\"1\" />\n");
+					metaInfoXML.append(xmlLeadingTab + extraTab + "\t<attributePointer name=\"" + columnName + "\"\n");
+					metaInfoXML.append(xmlLeadingTab + extraTab + "\t\tpoint=\"false\" field=\"" + columnName + "\" location=\"" + locationName + "\"\n");
+					metaInfoXML.append(xmlLeadingTab + extraTab + "\t\tmart=\"" + martName + "\" version=\"\" dataset=\"" + dataset + "\" config=\"naive\"\n");
+					metaInfoXML.append(xmlLeadingTab + extraTab + "\t\ttable=\"" + myDataset + tableNameDivisionDelimiter + myTable + tableNameDivisionDelimiter + tableType + "\" sourceRange=\"\"\n");
+					metaInfoXML.append(xmlLeadingTab + extraTab + "\t\trange=\"" + tcRange + "\">\n");
+					metaInfoXML.append(xmlLeadingTab + extraTab + "\t\t<displayName value=\"" + columnName + " + SOMETHING\" />\n");
+					metaInfoXML.append(xmlLeadingTab + extraTab + "\t\t<default value=\"1\" />\n");
 				
-				metaInfoXML.append(xmlLeadingTab + extraTab + "\t</attributePointer>\n");
-			}
+					metaInfoXML.append(xmlLeadingTab + extraTab + "\t</attributePointer>\n");
+				}
 
-			// closing table level container
-			metaInfoXML.append(xmlLeadingTab + extraTab + "</container>\n");
-			if (!myTable.equals(table)) { // this is a partitioned dm table 
-				metaInfoXML.append(xmlLeadingTab + "</container>\n");
-				extraTab = "";
+				// closing table level container
+				metaInfoXML.append(xmlLeadingTab + extraTab + "</container>\n");
+				if (!myTable.equals(table)) { // this is a partitioned dm table 
+					metaInfoXML.append(xmlLeadingTab + "</container>\n");
+					extraTab = "";
+				}
+				
+				if (dmPartitionIndex.equals("")) break;  // no flattening, we just need to run this loop once
 			}
-			
 		}
 	}
 	

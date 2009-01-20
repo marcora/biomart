@@ -89,7 +89,7 @@ public class Mart extends Root{
 		*/
 		
 		// go directly to make metaInfoXML from DB schema for now
-		metaInfoXML = (new MartMetaInfoHelper()).makeMetaInfoXML(dmd, schemaName);
+		metaInfoXML = (new MartMetaInfoHelper()).makeMetaInfoXML(dmd, schemaName, location.name, name);
 		
 		conn.close();
 		return metaInfoXML;
@@ -103,7 +103,7 @@ public class Mart extends Root{
 	 */
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
-		Location myLocation = new Location("ensembl", "mysql", "dev1.res", "3306", "martadmin", "");
+		Location myLocation = new Location("ensembl", "mysql", "localhost", "3306", "martadmin", "biomart");
 		Mart myMart = new Mart("ensembl", "51", "jz_ensembl_mart_51_08", "", myLocation);
 		String xml = null;
 		try {
