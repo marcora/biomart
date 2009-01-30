@@ -23,8 +23,8 @@ public class MartMetaInfoHelper extends Root{
 	static final String keyColumnSuffix = "_key";
 	static final String booleanColumnSuffix = "_bool";
 	static final boolean skipBooleanCol = true;
-	static final String patternPartiDataset = "^((P\\d+).+\\2)_(.+)";
-	static final String patternPartiTable = "(.+)_((P\\d+).+\\3)";
+	static final Pattern partitionPatternDS = Pattern.compile("((P\\d+)(.+)(\\2))_", Pattern.CASE_INSENSITIVE);
+	static final Pattern partitionPatternDM = Pattern.compile("_((P\\d+)(.+)(\\2))", Pattern.CASE_INSENSITIVE);
 
 	// some private fields
 	
@@ -34,19 +34,15 @@ public class MartMetaInfoHelper extends Root{
 	private StringBuilder metaInfoXML = new StringBuilder();
 	
 	private ArrayList dbTable = new ArrayList();
-	private Map dbValidMartTable = new LinkedHashMap(); // {P1aaegyptiP1_egene__go_P7sequenceP7__dm={dataset=egene,content=go,type=dm,dsPt=P1aaegyptiP1,dtPt=P7sequenceP7},,,,}
 	
-	private TreeSet dbDataset = new TreeSet(); // values are dataset name with partition name removed if any; scan only main table names {gene_ensembl, marker_start, ,,}
-	private HashMap dbPartitionRow = new HashMap(); // {gene_ensembl={hsap=12, mmus=15,,,,}, marker_start={hsap=1,,,}, gene_ensembl__go__dm={process=1,function=2,,,}, gene_ensembl__ox__dm={refseq=1,,,},, evoc__ontology__dm={pathology=1,,},}
-	private ArrayList dbPartitionIndex = new ArrayList();  // [gene_ensembl, marker_start, ,,, gene_ensembl__go__dm, gene_ensembl__ox__dm,,,,]
+	private TreeMap partitionTable = new TreeMap(); // partitionTable
+	private LinkedHashMap dbDataset = new LinkedHashMap(); // {(P1C1)_egene=[[P1R1],[P1R2], (P1C1)_(P8C1)_homology=[[P1R1,P8R1],[P1R1,P8R2],, ],,,}
+	private HashMap dbDatasetTable = new HashMap(); // {(P1C1)_egene={(P1C1)_egene__gene__main=[[P1R1],[P1R2],,],,},,}
+	private HashMap dbTableColumn = new HashMap(); // {(P1C1)_egene={(P1C1)_egene__gene__main={id=[[P1R1],[P1R2],,],,}},,,}
 	
-	private Map dbDatasetMartTable = new HashMap(); //{gene_ensembl={gene__main,transcript__main,,,go__dm,ox__dm,pfeat__dm,,,}, marker_start={start__main},,, } # with partition portion (if any) removed
-	
-	private Map dbDatasetTablePartitionRange = new HashMap(); // {gene_ensembl__gene__main=[P1R1,P1R2,P1R5,P1R8,,,],gene_ensembl__go__dm=[P1R1:P8R1,P1R2:P8R1,,P1R1:P8R2,,,],,,}
-	private Map dbDatasetTableColumnPartitionRange = new HashMap(); // {gene_ensembl__gene__main={id=[P1R1,P1R2,P1R5,P1R8,,,],name=[,,,]},gene_ensembl__go__dm={id=[,,,],,,}}
 	
 	/**
-	 * 
+	 *  empty constructor 
 	 */
 	public MartMetaInfoHelper() {
 		
@@ -64,221 +60,113 @@ public class MartMetaInfoHelper extends Root{
 		this.locationName = locationName;
 		this.martName = martName;
 		
-		ResultSet tables = dmd.getTables(null, schemaName, null, null);
-		
+		// construct dbTable so that main tables go first, then dm tables
+		ResultSet tables = dmd.getTables(null, schemaName, "%main", null);
 		while(tables.next()){
-			String tableName = tables.getString(3);
+			dbTable.add(tables.getString(3));
+		}
+		tables.close();
+		tables = dmd.getTables(null, schemaName, "%dm", null);
+		while(tables.next()){
+			dbTable.add(tables.getString(3));
+		}
+		tables.close();
+		
+		// processing tables (it's guaraunteed that main tables come before dm tables 
+		Iterator tableIt = dbTable.iterator();
+		while(tableIt.hasNext()){
+			String tableName = (String) tableIt.next();
 			
 			// skipping meta tables
 			if (tableName.startsWith(metaTablePrefix)) continue;
 			
-			// if (tableName.contains("egene")) continue;  // TODO: remove this later. this is just for quickly testing a dataset without partition
+			//if (tableName.contains("egene")) continue;  // TODO: remove this later. this is just for quickly testing a dataset without partition
 			
 			String [] tableNameDivisions = tableName.split(tableNameDivisionDelimiter);
 			
 			if (tableNameDivisions.length != 3 ||
 					(!tableNameDivisions[2].equals("main") && !tableNameDivisions[2].equals("dm"))) {
-				log.warning("table name (" + tableName + ") doesn't conform with naming convention, skipped.");
+				log.warning("table name '" + tableName + "' doesn't conform with naming convention, skipped.");
 				continue;
 			}
-			dbTable.add(tableName);
 
-			if (tableNameDivisions[2].equals("dm")) continue;  // deals with dm tables later
-
-			log.info("processing main table: " + tableName);
+			log.info("processing table: " + tableName);
 
 			String dataset = tableNameDivisions[0];
-			String datasetPartitionEntry = null;
+			ArrayList partitionRange = new ArrayList();
 
-			Pattern pattern = Pattern.compile(patternPartiDataset);
-			Matcher matcher = pattern.matcher(dataset);
-
-			if (matcher.find()){  // check if this is a partitioned dataset
-				// System.out.println("Matched: " + matcher.group(0) + " " + matcher.group(1) + " " + matcher.group(2) + " " + matcher.group(3));
-				dataset = matcher.group(3);  // dataset name with partition portion removed
-				datasetPartitionEntry = matcher.group(1);
+			HashMap partitionInfoDS = partitionParser(partitionPatternDS, dataset);
+			
+			// populating partitionTable and looking up partitionRow
+			if (partitionInfoDS.containsKey("partition")) {
+				dataset = (String) partitionInfoDS.get("partitionedName");
+				if (tableNameDivisions[2].equals("main")) {  // main table
+					partitionRange = partitionLookup((ArrayList) partitionInfoDS.get("partition"), false);
+				} else {  // dm table
+					partitionRange = partitionLookup((ArrayList) partitionInfoDS.get("partition"), true);
+					if (partitionRange == null) {
+						log.warning("dimenssion table '" + tableName + "' in dataset '" + dataset + "' does not have any associated main table with the same partition(s), skipped!");
+						continue;
+					}
+				}
 			}
 
-			dbDataset.add(dataset);  // add dataset
+			// populating dbDataset when it's main table
+			if (tableNameDivisions[2].equals("main")) {
+				if (!dbDataset.containsKey(dataset))  // if it's a new dataset
+					dbDataset.put(dataset, new LinkedHashSet());  // add dataset
 			
-			// populate dbPartitionRow when the dataset has partition
-			if (datasetPartitionEntry != null && !datasetPartitionEntry.equals("")) {
-				if (dbPartitionRow.containsKey(dataset)) {
-					if (!((LinkedHashMap) dbPartitionRow.get(dataset))
-							.containsKey(datasetPartitionEntry)) { // new partitonEntry
-						int nextPos = ((LinkedHashMap) dbPartitionRow
-								.get(dataset)).size() + 1;
-						((LinkedHashMap) dbPartitionRow.get(dataset))
-								.put(datasetPartitionEntry, new Integer(nextPos));
-					}
-				} else { // new dataset, of course with the first partitionEntry if there is any
-					dbPartitionRow.put(dataset, new LinkedHashMap());
-					((LinkedHashMap) dbPartitionRow.get(dataset)).put(datasetPartitionEntry, new Integer(1));
-					dbPartitionIndex.add(dataset);
+				if (partitionRange.size() > 0)  // if it's a partitioned dataset
+					((LinkedHashSet) dbDataset.get(dataset)).add(partitionRange);  // add the partitionRange
+			} else { // dm table, validate it
+				if (!dbDataset.containsKey(dataset)) { // if it's a non-exist dataset
+					log.warning("dimenssion table '" + tableName + "' does not have any associated main table, skipping the dm table, skipping creating dataset '" + dataset + "'!");
+					continue;
 				}
 			}
 			
-			if (!dbDatasetMartTable.containsKey(dataset))
-				dbDatasetMartTable.put(dataset, new LinkedHashSet());
-			
-			((LinkedHashSet) dbDatasetMartTable.get(dataset)).add(tableNameDivisions[1] + tableNameDivisionDelimiter + "main");
-			
-			// populate dbValidMartTable
-			dbValidMartTable.put(tableName, new HashMap());
-			((HashMap)dbValidMartTable.get(tableName)).put("dataset", dataset);
-			((HashMap)dbValidMartTable.get(tableName)).put("content", tableNameDivisions[1]);
-			((HashMap)dbValidMartTable.get(tableName)).put("type", "main");
-			((HashMap)dbValidMartTable.get(tableName))
-					.put("martTableName", dataset + tableNameDivisionDelimiter + tableNameDivisions[1] + tableNameDivisionDelimiter + "main");
-			if (datasetPartitionEntry != null && !datasetPartitionEntry.equals("")) 
-					((HashMap)dbValidMartTable.get(tableName)).put("dsPt", datasetPartitionEntry);
-
-		}
-		tables.close();
-
-		// now process dm tables
-		for (int i=0; i<dbTable.size(); i++) {
-			String tableName = (String) dbTable.get(i);
-			
-			String [] tableNameDivisions = tableName.split(tableNameDivisionDelimiter);
-			
-			if (tableNameDivisions[2].equals("main")) continue; // skip main tables which have been processed earlier.
-			
-			String dataset = tableNameDivisions[0];
-			String datasetPartitionEntry = null;
-
-			Pattern pattern = Pattern.compile(patternPartiDataset);
-			Matcher matcher = pattern.matcher(dataset);
-			
-			if (matcher.find()){  // check if this is a partitioned dataset
-				// System.out.println("Matched: " + matcher.group(0) + " " + matcher.group(1) + " " + matcher.group(2) + " " + matcher.group(3));
-				dataset = matcher.group(3);  // dataset name with partition portion removed
-				datasetPartitionEntry = matcher.group(1);
-			}
-
-			if (
-					!dbDataset.contains(dataset) ||	
-					((dbPartitionRow.containsKey(dataset)) && !((LinkedHashMap) dbPartitionRow.get(dataset)).containsKey(datasetPartitionEntry))
-						) {  // dm table that has no main table, should warn this error
-				log.warning("dimension table (" + tableName + ") doesn't have any associated main table, skipped.");
-				continue;
-			}
-
-			log.info("processing dm table: " + tableName);
-
-			String tablePartitionEntry = null;
+			// populate dbDatasetTable and dbTableColumn
 			String content = tableNameDivisions[1];
-			pattern = Pattern.compile(patternPartiTable);
-			matcher = pattern.matcher(content);
-			
-			if (matcher.find()) {  // check if this is a partitioned dm table
-				// System.out.println("Matched: " + matcher.group(0) + " " + matcher.group(1) + " " + matcher.group(2) + " " + matcher.group(3));
-				content = matcher.group(1);  // with partition part removed
-				tablePartitionEntry = matcher.group(2);
-			}
-			
-			if (!dbDatasetMartTable.containsKey(dataset))
-				dbDatasetMartTable.put(dataset, new LinkedHashSet());
 
-			((LinkedHashSet) dbDatasetMartTable.get(dataset)).add(content + tableNameDivisionDelimiter + "dm");
-
-			// populating dbPartitionRow: {gene_ensembl__go__dm={process=1,function=2,,,}, gene_ensembl__ox__dm={refseq=1,,,},, evoc__ontology__dm={pathology=1,,},}
-			String martTableName = dataset + tableNameDivisionDelimiter + content + tableNameDivisionDelimiter + "dm";
-			if (tablePartitionEntry != null && !tablePartitionEntry.equals("")) {
-				if (dbPartitionRow.containsKey(martTableName)){
-					if (!((LinkedHashMap) dbPartitionRow.get(martTableName))
-							.containsKey(tablePartitionEntry)) { // new partitonEntry
-						int nextPos = ((LinkedHashMap) dbPartitionRow
-								.get(martTableName)).size() + 1;
-						((LinkedHashMap) dbPartitionRow.get(martTableName))
-								.put(tablePartitionEntry, new Integer(nextPos));
-					}
-				} else { // new partitioned dm table, of course with the first partitionEntry if there is any
-					dbPartitionRow.put(martTableName, new LinkedHashMap());
-					((LinkedHashMap) dbPartitionRow.get(martTableName))
-							.put(tablePartitionEntry, new Integer(1));
-					dbPartitionIndex.add(martTableName);
-				}
+			HashMap partitionInfoDM = partitionParser(partitionPatternDM, content);
+			
+			// populating partitionTable and looking up partitionRow
+			if (partitionInfoDM.containsKey("partition")) {
+				content = (String) partitionInfoDM.get("partitionedName");
+				partitionRange.addAll(partitionLookup((ArrayList) partitionInfoDM.get("partition"), false));
 			}
 
-			// populate dbValidMartTable
-			// {P1aaegyptiP1_egene__go_P7sequenceP7__dm={dataset=egene,content=go,type=dm,dsPt=P1aaegyptiP1,dtPt=P7sequenceP7},,,,}
-			dbValidMartTable.put(tableName, new HashMap());
-			((HashMap)dbValidMartTable.get(tableName)).put("dataset", dataset);
-			((HashMap)dbValidMartTable.get(tableName)).put("content", content);
-			((HashMap)dbValidMartTable.get(tableName)).put("type", "dm");
-			((HashMap)dbValidMartTable.get(tableName))
-					.put("martTableName", dataset + tableNameDivisionDelimiter + content + tableNameDivisionDelimiter + "dm");
-			if (datasetPartitionEntry != null && !datasetPartitionEntry.equals(""))
-				((HashMap)dbValidMartTable.get(tableName)).put("dsPt", datasetPartitionEntry);
-			if (tablePartitionEntry != null && !tablePartitionEntry.equals(""))
-				((HashMap)dbValidMartTable.get(tableName)).put("dtPt", tablePartitionEntry);
+			String dbMartTableName = dataset + tableNameDivisionDelimiter + content + tableNameDivisionDelimiter + tableNameDivisions[2];
+			if (!dbDatasetTable.containsKey(dataset)) {
+				dbDatasetTable.put(dataset, new LinkedHashMap());  // add dataset to dbDatasetTable
+				dbTableColumn.put(dataset, new LinkedHashMap());  // add dataset to dbTableColumn
+			}
+			
+			if (!((LinkedHashMap) dbDatasetTable.get(dataset)).containsKey(dbMartTableName)) { // it's a new table
+				((LinkedHashMap) dbDatasetTable.get(dataset)).put(dbMartTableName, new LinkedHashSet());  // add the new table with it's value being an empty LinkedHashSet
+				((LinkedHashMap) dbTableColumn.get(dataset)).put(dbMartTableName, new LinkedHashMap());  // add the new table with it's value being an empty LinkedHashMap for columns
+			}
+			
+			if (partitionRange.size() > 0)
+				((LinkedHashSet)((LinkedHashMap) dbDatasetTable.get(dataset)).get(dbMartTableName)).add(partitionRange);
+
+			// scan table columns and populate dbTableColumn
+			ResultSet columns = dmd.getColumns(null, schemaName, tableName, null);
+            while(columns.next()){
+                    String columnName = columns.getString(4);
+                    
+                    if (skipBooleanCol && columnName.endsWith(booleanColumnSuffix)) continue;
+                    
+                    if (!((LinkedHashMap) ((LinkedHashMap) dbTableColumn.get(dataset)).get(dbMartTableName)).containsKey(columnName))
+                    	((LinkedHashMap) ((LinkedHashMap) dbTableColumn.get(dataset)).get(dbMartTableName)).put(columnName, new LinkedHashSet());
+
+                    if (partitionRange.size() > 0)
+                    	((LinkedHashSet) ((LinkedHashMap) ((LinkedHashMap) dbTableColumn.get(dataset))
+                    			.get(dbMartTableName)).get(columnName)).add(partitionRange);
+            }
 
 		}
 
-		// iterate through all mart tables to populate dbDatasetTablePartitionRange and dbDatasetTableColumnPartitionRange 
-		log.info("processing table columns, this may take a few minutes ...");
-		Iterator iterator = dbValidMartTable.keySet().iterator();
-		while(iterator.hasNext()){
-			String dbTableName = (String) iterator.next();
-			HashMap martTableInfo = (HashMap) dbValidMartTable.get(dbTableName);
-			String dataset = (String) martTableInfo.get("dataset");
-			String content = (String) martTableInfo.get("content");
-			String type = (String) martTableInfo.get("type");
-			String dsPt = (String) martTableInfo.get("dsPt");
-			String dtPt = (String) martTableInfo.get("dtPt");
-			String martTableName = (String) martTableInfo.get("martTableName");
-			
-			//System.out.println(dataset + " " + content + " " + type + " " + dsPt + " " + dtPt);
-			
-			String partitionRange = null;
-			
-			if (dsPt != null && dtPt != null) {
-				String dsP =  dbPartitionIndex.indexOf(dataset) + 1 + "";
-				String dsPR = ((Integer) ((LinkedHashMap) dbPartitionRow.get(dataset)).get(dsPt)).toString();
-				String dtP =  dbPartitionIndex.indexOf(martTableName) + 1 + "";
-				String dtPR = ((Integer) ((LinkedHashMap) dbPartitionRow.get(martTableName)).get(dtPt)).toString();
-				partitionRange = "P" + dsP + "R" + dsPR + ":" + "P" + dtP + "R" + dtPR;
-			} else if (dsPt != null) {
-				String dsP =  dbPartitionIndex.indexOf(dataset) + 1 + "";
-				String dsPR = ((Integer) ((LinkedHashMap) dbPartitionRow.get(dataset)).get(dsPt)).toString();
-				partitionRange = "P" + dsP + "R" + dsPR;
-			} else if (dtPt != null) {
-				String dtP =  dbPartitionIndex.indexOf(martTableName) + 1 + "";
-				String dtPR = ((Integer) ((LinkedHashMap) dbPartitionRow.get(martTableName)).get(dtPt)).toString();
-				partitionRange = "P" + dtP + "R" + dtPR;
-			}
-			
-			// dbDatasetTablePartitionRange: {gene_ensembl__gene__main=[P1R1,P1R2,P1R5,P1R8,,,],gene_ensembl__go__dm=[P1R1:P8R1,P1R2:P8R1,,P1R1:P8R2,,,],,,}
-			if (!dbDatasetTablePartitionRange.containsKey(martTableName))
-					dbDatasetTablePartitionRange.put(martTableName, new ArrayList());
-			if (partitionRange != null)
-					((ArrayList) dbDatasetTablePartitionRange.get(martTableName)).add(partitionRange);
-			
-			///* temporarily comment out this time consuming process for faster debugging
-			// dbDatasetTableColumnPartitionRange: {gene_ensembl__gene__main={id=[P1R1,P1R2,P1R5,P1R8,,,],name=[,,,]},gene_ensembl__go__dm={id=[,,,],,,}}
-			ResultSet columns = dmd.getColumns(null, schemaName, dbTableName, null);
-			while(columns.next()){
-				String columnName = columns.getString(4);
-				
-				if (skipBooleanCol && columnName.endsWith(booleanColumnSuffix)) continue;
-				
-				if (!dbDatasetTableColumnPartitionRange.containsKey(martTableName)) {  // new table, new column
-					dbDatasetTableColumnPartitionRange.put(martTableName, new LinkedHashMap());
-					((LinkedHashMap) dbDatasetTableColumnPartitionRange.get(martTableName))
-							.put(columnName, new ArrayList());
-				} else {  // exist table, new column
-					if (!((LinkedHashMap) dbDatasetTableColumnPartitionRange
-							.get(martTableName)).containsKey(columnName)) {  // exist table, new column
-						((LinkedHashMap) dbDatasetTableColumnPartitionRange.get(martTableName)).put(columnName, new ArrayList());
-					}
-				}
-				if (partitionRange != null)
-						((ArrayList) ((LinkedHashMap) dbDatasetTableColumnPartitionRange
-							.get(martTableName)).get(columnName)).add(partitionRange);
-			}
-
-		}
 
 		// output partitions
 		log.info("generating partition information ...");
@@ -286,15 +174,13 @@ public class MartMetaInfoHelper extends Root{
 		
 		// output datasets
 		log.info("generating dataset information ...");
-		outputDatasetInf();
+		//outputDatasetInf();
 
 		// print for debugging
-//		System.out.println("dbDataset=" + dbDataset);
-//		System.out.println("dbPartitionIndex=" + dbPartitionIndex);
-//		System.out.println("dbPartitionRow=" + dbPartitionRow);
-//		System.out.println("dbDatasetMartTable=" + dbDatasetMartTable);
-//		System.out.println("dbDatasetTablePartitionRange=" + dbDatasetTablePartitionRange);
-//		System.out.println("dbDatasetTableColumnPartitionRange=" + dbDatasetTableColumnPartitionRange);
+		System.out.println("partitionTable=" + partitionTable);
+		System.out.println("dbDataset=" + dbDataset);
+		System.out.println("dbDatasetTable=" + dbDatasetTable);
+		System.out.println("dbTableColumn=" + dbTableColumn);
 		
 		if (metaInfoXML.toString().length() == 0) return null;
 		log.info("metaInfoXML generated");
@@ -302,232 +188,83 @@ public class MartMetaInfoHelper extends Root{
 	}
 
 
-
-	private void outputPartitionInf() {
+	private HashMap partitionParser (Pattern pattern, String fullname){
+		HashMap partitionInfo = new HashMap();
+		partitionInfo.put("name", fullname);
 		
-		for (int i = 0; i < dbPartitionIndex.size(); i++) {
-			metaInfoXML.append("<partitionTable name=\"P" + (i + 1) + "\" rows=\"\" cols=\"\">\n");
-			Iterator it = ((LinkedHashMap) dbPartitionRow.get(dbPartitionIndex.get(i))).keySet().iterator();
-			while(it.hasNext()) {
-				String partitionEntry = (String) it.next();
-				String rowNumber = ((LinkedHashMap) dbPartitionRow.get(dbPartitionIndex.get(i))).get(partitionEntry).toString();
-				metaInfoXML.append("\t<cell row=\"" + rowNumber + "\" " + "col=\"1\">" + partitionEntry + "</cell>\n");
+		ArrayList partition = new ArrayList();
+		String partitionString = "";
+		String partitionTemplate = "";
+		
+		Matcher m = pattern.matcher(fullname);
+		while (m.find()) {
+			if (m.group(2).equals(m.group(4))) {
+				partition.add(new String [] {m.group(2), m.group(1)});
+				if (partitionString.equals("")) {
+					partitionString = m.group(1);
+					partitionTemplate = "(" + m.group(2) + "C1)";
+				} else {
+					partitionString = partitionString + "_" + m.group(1);
+					partitionTemplate = partitionTemplate + "_" + "(" + m.group(2) + "C1)";
+				}
+			}
+		}
+		
+		if (partition.size() > 0) {
+			String name = m.replaceAll(""); 
+			if (fullname.startsWith(name) && fullname.equals(name + "_" + partitionString)) {
+				partitionInfo.put("name", name);
+				partitionInfo.put("partitionedName", name + "_" + partitionTemplate);
+				partitionInfo.put("partition", partition);
+			}else if (fullname.endsWith(name) && fullname.equals(partitionString + "_" + name)) {
+				partitionInfo.put("name", name);
+				partitionInfo.put("partitionedName", partitionTemplate + "_" + name);
+				partitionInfo.put("partition", partition);
+			}
+		}
+		
+		return partitionInfo;
+	}
+
+	
+	// this method does dual jobs: 1. populating partitionTable; 2. looking up partitionRow
+	private ArrayList partitionLookup (ArrayList partitionInfo, boolean lookupOnly) {
+		ArrayList partitionRange = new ArrayList();
+		
+		Iterator i = partitionInfo.iterator();
+		while(i.hasNext()){
+			String [] partitionData = (String []) i.next();
+			if (!partitionTable.containsKey(partitionData[0])) { // if it's a new partitionName
+				if (lookupOnly) return null;  // if it's lookupOnly, we can return null right away
+				partitionTable.put(partitionData[0], new LinkedHashSet());  // add it
+			}
+			
+			if (!((LinkedHashSet) partitionTable.get(partitionData[0])).contains(partitionData[1])) {  // new partitionRow
+				if (lookupOnly) return null;  // if it's lookupOnly, we can return null right away
+				((LinkedHashSet) partitionTable.get(partitionData[0])).add(partitionData[1]);  // add it
+			}
+			
+			// now find out the partitionRow
+			ArrayList partitionRows = new ArrayList((LinkedHashSet) partitionTable.get(partitionData[0]));
+			
+			partitionRange.add(partitionData[0] + "R" + (partitionRows.indexOf(partitionData[1]) + 1));
+		}
+		
+		return partitionRange;
+	}
+	
+	private void outputPartitionInf() {
+		Iterator pI = partitionTable.keySet().iterator();
+		while(pI.hasNext()){
+			String partitionName = (String) pI.next();
+			metaInfoXML.append("<partitionTable name=\"" + partitionName + "\">\n");
+			Iterator prI = ((LinkedHashSet) partitionTable.get(partitionName)).iterator();
+			int prow = 1;
+			while(prI.hasNext()){
+				metaInfoXML.append("\t<cell row=\"" + prow + "\" col=\"1\">" + prI.next() + "</cell>\n");
+				prow++;
 			}
 			metaInfoXML.append("</partitionTable>\n");
 		}
-
 	}
-
-
-	private void outputDatasetInf() {
-
-		Iterator i = dbDataset.iterator();
-		while (i.hasNext()) {
-			String dataset = (String) i.next();
-			
-			metaInfoXML.append("<dataset name=\"" + dataset + "\">\n");
-
-			// output tables
-			outputTableInfo(dataset);
-			
-			// output config
-			outputConfigInfo(dataset);
-			
-			metaInfoXML.append("</dataset>\n");
-		}
-
-		
-	}
-
-
-	private void outputTableInfo(String dataset) {
-
-		String myDataset = dataset;
-
-		if (dbPartitionIndex.indexOf(dataset) >= 0)   // check if this is a partitioned dataset
-			myDataset = "(P" + (dbPartitionIndex.indexOf(dataset) + 1) + "C1)_"+ dataset;
-		
-		Iterator i = ((LinkedHashSet) dbDatasetMartTable.get(dataset)).iterator();
-		while(i.hasNext()) {
-			String [] tempStr = ((String) i.next()).split(tableNameDivisionDelimiter);;
-			
-			String table = tempStr[0];
-			String tableType = tempStr[1];
-			String martTableName = dataset + tableNameDivisionDelimiter + table + tableNameDivisionDelimiter + tableType;
-
-			String myTable = table;
-			if (tableType.equals("dm") && dbPartitionIndex.indexOf(martTableName) >= 0)  // check if this is a partitioned dm table
-				myTable = table + "_(P" + (dbPartitionIndex.indexOf(martTableName) + 1) + "C1)";
-			
-			metaInfoXML.append("\t<table name=\"" + myDataset + tableNameDivisionDelimiter + myTable + tableNameDivisionDelimiter + tableType + "\"");
-			metaInfoXML.append(" key=\"\"");
-			String dtRange = "";
-			if (((ArrayList)dbDatasetTablePartitionRange.get(martTableName)).size() > 0) {
-				StringBuilder sb = new StringBuilder();
-				for (int j = 0; j < ((ArrayList)dbDatasetTablePartitionRange.get(martTableName)).size(); j++) {
-					sb.append("[" + ((ArrayList)dbDatasetTablePartitionRange.get(martTableName)).get(j) + "]");
-				}
-				dtRange = sb.toString();
-			}
-			metaInfoXML.append(" range=\"" + dtRange + "\"");
-			metaInfoXML.append(">\n");
-			
-			// output attributes
-			Iterator j = ((LinkedHashMap) dbDatasetTableColumnPartitionRange
-					.get(martTableName)).keySet().iterator();
-			while(j.hasNext()){
-				String columnName = (String) j.next();
-				metaInfoXML.append("\t\t<attribute>" + columnName + "</attribute>\n");
-			}
-
-			metaInfoXML.append("\t</table>\n");
-
-		}
-		
-		
-	}
-
-	private void outputConfigInfo(String dataset) {
-		metaInfoXML.append("\t<config name=\"naive\" dataset=\"" + dataset + "\">\n");
-		
-		// output template config
-		outputConfInfo(dataset, "templateConfig");
-		
-		// output user config TODO: do we really need to generate user config for naive?
-		outputConfInfo(dataset, "userConfig");
-		
-		metaInfoXML.append("\t</config>\n");
-	}
-
-	private void outputConfInfo(String dataset, String confType) {
-		
-		// opening config
-		metaInfoXML.append("\t\t<" + confType + " name=\"" + confType + "\">\n");
-	
-		// first dataset level container
-		String partitionIndex = "P" + (dbPartitionIndex.indexOf(dataset) + 1);
-		String dsRange = "";
-		
-		if (partitionIndex.equals("P0")) {  // not a partitioned dataset
-			partitionIndex = dataset;
-		} else {
-			StringBuilder sb = new StringBuilder();
-			for (int rnum = 1; rnum <= ((HashMap) dbPartitionRow.get(dataset)).size(); rnum++) {
-				sb.append("[" + partitionIndex + "R" + rnum + ":1]");
-			}
-			dsRange = sb.toString();
-		}
-		
-		// opening dataset level container
-		metaInfoXML.append("\t\t\t<container name=\"" + partitionIndex + "\" queryRestriction=\"0\" range=\"" + dsRange + "\">\n");
-		
-		outputTableLevelContainer(dataset, confType);
-		
-		// closing dataset level container
-		metaInfoXML.append("\t\t\t</container>\n");
-		
-		// closing config
-		metaInfoXML.append("\t\t</" + confType + ">\n");
-		
-	}
-
-	private void outputTableLevelContainer (String dataset, String confType) {
-		String myDataset = dataset;
-		String xmlLeadingTab = "\t\t\t\t";
-		String extraTab = "";
-		
-		if (dbPartitionIndex.indexOf(dataset) >= 0)   // check if this is a partitioned dataset
-			myDataset = "(P" + (dbPartitionIndex.indexOf(dataset) + 1) + "C1)_"+ dataset;
-		
-		Iterator i = ((LinkedHashSet) dbDatasetMartTable.get(dataset)).iterator();
-		while(i.hasNext()) {
-			String [] tempStr = ((String) i.next()).split(tableNameDivisionDelimiter);
-			
-			String table = tempStr[0];
-			String tableType = tempStr[1];
-			String martTableName = dataset + tableNameDivisionDelimiter + table + tableNameDivisionDelimiter + tableType;
-
-			String dmPartitionIndex = "";
-			if (dbPartitionIndex.indexOf(martTableName) >= 0 && confType.equals("userConfig"))  // only under this conditions we platen the config
-					dmPartitionIndex = "P" + (dbPartitionIndex.indexOf(martTableName) + 1);
-			
-			int dmPartitionRow = 0;
-			while (dmPartitionIndex.equals("") || dmPartitionRow < ((ArrayList)dbDatasetTablePartitionRange.get(martTableName)).size()) {
-			
-				dmPartitionRow++;
-				String dmPartitionIR = "";
-				if (!dmPartitionIndex.equals(""))
-						dmPartitionIR = dmPartitionIndex + "R" + dmPartitionRow;
-				
-				String dtRange = "";
-				if (((ArrayList)dbDatasetTablePartitionRange.get(martTableName)).size() > 0) {
-					StringBuilder sb = new StringBuilder();
-					for (int j = 0; j < ((ArrayList)dbDatasetTablePartitionRange.get(martTableName)).size(); j++) {
-						if (!dmPartitionIndex.equals("") && 
-									!((String) ((ArrayList)dbDatasetTablePartitionRange.get(martTableName)).get(j)).endsWith(dmPartitionIR))
-								continue;
-						sb.append("[" + ((ArrayList)dbDatasetTablePartitionRange.get(martTableName)).get(j) + ":1]");
-					}
-					dtRange = sb.toString();
-					// skip while dtRange is empty for userConfig
-					if (dtRange.equals("")) continue;
-				}
-
-				String myTable = table;
-				if (tableType.equals("dm") && dbPartitionIndex.indexOf(martTableName) >= 0) { // check if this is a partitioned dm table
-					metaInfoXML.append(xmlLeadingTab + "<container name=\"P" + (dbPartitionIndex.indexOf(martTableName) + 1) + "\"");
-					metaInfoXML.append(" queryRestriction=\"0\"");
-					metaInfoXML.append(" range=\"" + dtRange + "\"");
-					metaInfoXML.append(">\n");
-					myTable = table + "_(P" + (dbPartitionIndex.indexOf(martTableName) + 1) + "C1)";
-					extraTab = "\t";
-				}
-
-				// opening table level container
-				metaInfoXML.append(xmlLeadingTab + extraTab + "<container name=\"" + myDataset + tableNameDivisionDelimiter + myTable + tableNameDivisionDelimiter + tableType + "\"");
-				metaInfoXML.append(" queryRestriction=\"0\"");
-				metaInfoXML.append(" range=\"" + dtRange + "\"");
-				metaInfoXML.append(">\n");
-			
-				// output attributes
-				Iterator j = ((LinkedHashMap) dbDatasetTableColumnPartitionRange
-						.get(martTableName)).keySet().iterator();
-				while(j.hasNext()){
-					String columnName = (String) j.next();
-					StringBuilder sb = new StringBuilder();
-					for (int k=0; k < ((ArrayList) ((HashMap) dbDatasetTableColumnPartitionRange.get(martTableName)).get(columnName)).size(); k++) {
-						if (!dmPartitionIndex.equals("") && 
-								!((String) ((ArrayList) ((HashMap) dbDatasetTableColumnPartitionRange.get(martTableName)).get(columnName)).get(k)).endsWith(dmPartitionIR))
-							continue;
-						sb.append("[" + ((ArrayList) ((HashMap) dbDatasetTableColumnPartitionRange.get(martTableName)).get(columnName)).get(k) + ":1]");
-					}
-					String tcRange = sb.toString();
-					
-					// skip while tcRange is empty for userConfig and there is a partition for either dataset or dm
-					if (((ArrayList)dbDatasetTablePartitionRange.get(martTableName)).size() > 0 
-							&& confType.equals("userConfig") && tcRange.equals("")) continue;
-
-					metaInfoXML.append(xmlLeadingTab + extraTab + "\t<attributePointer name=\"" + columnName + "\"\n");
-					metaInfoXML.append(xmlLeadingTab + extraTab + "\t\tpoint=\"false\" field=\"" + columnName + "\" location=\"" + locationName + "\"\n");
-					metaInfoXML.append(xmlLeadingTab + extraTab + "\t\tmart=\"" + martName + "\" version=\"\" dataset=\"" + dataset + "\" config=\"naive\"\n");
-					metaInfoXML.append(xmlLeadingTab + extraTab + "\t\ttable=\"" + myDataset + tableNameDivisionDelimiter + myTable + tableNameDivisionDelimiter + tableType + "\" sourceRange=\"\"\n");
-					metaInfoXML.append(xmlLeadingTab + extraTab + "\t\trange=\"" + tcRange + "\">\n");
-					metaInfoXML.append(xmlLeadingTab + extraTab + "\t\t<displayName value=\"" + columnName + " + SOMETHING\" />\n");
-					metaInfoXML.append(xmlLeadingTab + extraTab + "\t\t<default value=\"1\" />\n");
-				
-					metaInfoXML.append(xmlLeadingTab + extraTab + "\t</attributePointer>\n");
-				}
-
-				// closing table level container
-				metaInfoXML.append(xmlLeadingTab + extraTab + "</container>\n");
-				if (!myTable.equals(table)) { // this is a partitioned dm table 
-					metaInfoXML.append(xmlLeadingTab + "</container>\n");
-					extraTab = "";
-				}
-				
-				if (dmPartitionIndex.equals("")) break;  // no flattening, we just need to run this loop once
-			}
-		}
-	}
-	
 }
