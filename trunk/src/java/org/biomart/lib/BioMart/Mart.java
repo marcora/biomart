@@ -116,10 +116,10 @@ public class Mart extends Root{
 			e.printStackTrace();
 		}
 		
-		//System.out.println(xml);
+		
 		
 		BufferedWriter bw = new BufferedWriter(new FileWriter("registry08.xml"));
-		bw.write(xml);
+		if(xml != null) bw.write(xml);
 		bw.close();
 	}
 
