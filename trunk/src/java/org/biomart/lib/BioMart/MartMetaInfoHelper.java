@@ -52,6 +52,8 @@ public class MartMetaInfoHelper extends Root{
 	/**
 	 * @param dmd 
 	 * @param schemaName 
+	 * @param locationName 
+	 * @param martName 
 	 * @return String
 	 * @throws Exception
 	 * TODO: to add validation for all necessary dataset components 
@@ -73,7 +75,7 @@ public class MartMetaInfoHelper extends Root{
 		}
 		tables.close();
 		
-		// processing tables (it's guaraunteed that main tables come before dm tables 
+		// processing tables (it's guaranteed that main tables come before dm tables 
 		Iterator tableIt = dbTable.iterator();
 		while(tableIt.hasNext()){
 			String tableName = (String) tableIt.next();
@@ -81,7 +83,7 @@ public class MartMetaInfoHelper extends Root{
 			// skipping meta tables
 			if (tableName.startsWith(metaTablePrefix)) continue;
 			
-			if (tableName.contains("egene")) continue;  // TODO: remove this later. this is just for quickly testing a dataset without partition
+			if (tableName.contains("egene")) continue;  // TODO: remove this later. this is just for quicker testing
 			
 			String [] tableNameDivisions = tableName.split(tableNameDivisionDelimiter);
 			
@@ -101,9 +103,9 @@ public class MartMetaInfoHelper extends Root{
 			// populating partitionTable and looking up partitionRow
 			if (partitionInfoDS.containsKey("partition")) {
 				dataset = (String) partitionInfoDS.get("partitionedName");
-				if (tableNameDivisions[2].equals("main")) {  // main table
+				if (tableNameDivisions[2].equals("main")) {  // main table, populate partitionTable
 					partitionRange = partitionLookup((ArrayList) partitionInfoDS.get("partition"), false);
-				} else {  // dm table
+				} else {  // dm table, lookup in partitionTable to validate dm table
 					partitionRange = partitionLookup((ArrayList) partitionInfoDS.get("partition"), true);
 					if (partitionRange == null) {
 						log.warning("dimenssion table '" + tableName + "' in dataset '" + dataset + "' does not have any associated main table with the same partition(s), skipped!");
@@ -117,7 +119,7 @@ public class MartMetaInfoHelper extends Root{
 				if (!dbDataset.containsKey(dataset))  // if it's a new dataset
 					dbDataset.put(dataset, new LinkedHashSet());  // add dataset
 			
-				((LinkedHashSet) dbDataset.get(dataset)).add(partitionRange);  // add the partitionRange
+				((Set) dbDataset.get(dataset)).add(partitionRange);  // add the partitionRange
 			} else { // dm table, validate it
 				if (!dbDataset.containsKey(dataset)) { // if it's a non-exist dataset
 					log.warning("dimenssion table '" + tableName + "' does not have any associated main table, skipping the dm table, skipping creating dataset '" + dataset + "'!");
@@ -128,7 +130,7 @@ public class MartMetaInfoHelper extends Root{
 			// populate dbDatasetTable and dbTableColumn
 			String content = tableNameDivisions[1];
 
-			HashMap partitionInfoDM = partitionParser(partitionPatternDM, content);
+			Map partitionInfoDM = partitionParser(partitionPatternDM, content);
 			
 			// populating partitionTable and looking up partitionRow
 			if (partitionInfoDM.containsKey("partition")) {
@@ -142,12 +144,12 @@ public class MartMetaInfoHelper extends Root{
 				dbTableColumn.put(dataset, new LinkedHashMap());  // add dataset to dbTableColumn
 			}
 			
-			if (!((LinkedHashMap) dbDatasetTable.get(dataset)).containsKey(dbMartTableName)) { // it's a new table
-				((LinkedHashMap) dbDatasetTable.get(dataset)).put(dbMartTableName, new LinkedHashSet());  // add the new table with it's value being an empty LinkedHashSet
-				((LinkedHashMap) dbTableColumn.get(dataset)).put(dbMartTableName, new LinkedHashMap());  // add the new table with it's value being an empty LinkedHashMap for columns
+			if (!((Map) dbDatasetTable.get(dataset)).containsKey(dbMartTableName)) { // it's a new table
+				((Map) dbDatasetTable.get(dataset)).put(dbMartTableName, new LinkedHashSet());  // add the new table with it's value being an empty LinkedHashSet
+				((Map) dbTableColumn.get(dataset)).put(dbMartTableName, new LinkedHashMap());  // add the new table with it's value being an empty LinkedHashMap for columns
 			}
 			
-			((LinkedHashSet)((LinkedHashMap) dbDatasetTable.get(dataset)).get(dbMartTableName)).add(partitionRange);
+			((Set)((Map) dbDatasetTable.get(dataset)).get(dbMartTableName)).add(partitionRange);
 
 			// scan table columns and populate dbTableColumn
 			ResultSet columns = dmd.getColumns(null, schemaName, tableName, null);
@@ -156,16 +158,14 @@ public class MartMetaInfoHelper extends Root{
                     
                     if (skipBooleanCol && columnName.endsWith(booleanColumnSuffix)) continue;
                     
-                    if (!((LinkedHashMap) ((LinkedHashMap) dbTableColumn.get(dataset)).get(dbMartTableName)).containsKey(columnName))
-                    	((LinkedHashMap) ((LinkedHashMap) dbTableColumn.get(dataset)).get(dbMartTableName)).put(columnName, new LinkedHashSet());
+                    if (!((Map) ((Map) dbTableColumn.get(dataset)).get(dbMartTableName)).containsKey(columnName))
+                    	((Map) ((Map) dbTableColumn.get(dataset)).get(dbMartTableName)).put(columnName, new LinkedHashSet());
 
-                   	((LinkedHashSet) ((LinkedHashMap) ((LinkedHashMap) dbTableColumn.get(dataset))
+                   	((Set) ((Map) ((Map) dbTableColumn.get(dataset))
                    			.get(dbMartTableName)).get(columnName)).add(partitionRange);
             }
 
 		}
-
-		
 
 		// output partitions
 		log.info("generating partition information ...");
@@ -176,9 +176,9 @@ public class MartMetaInfoHelper extends Root{
 		outputDatasetInfo();
 
 		// print for debugging
-		System.out.println("partitionTable=" + partitionTable);
-		System.out.println("dbDataset=" + dbDataset);
-		System.out.println("dbDatasetTable=" + dbDatasetTable);
+		//System.out.println("partitionTable=" + partitionTable);
+		//System.out.println("dbDataset=" + dbDataset);
+		//System.out.println("dbDatasetTable=" + dbDatasetTable);
 		//System.out.println("dbTableColumn=" + dbTableColumn);
 		
 		if (metaInfoXML.toString().length() == 0) return null;
@@ -187,8 +187,8 @@ public class MartMetaInfoHelper extends Root{
 	}
 
 
-	private HashMap partitionParser (Pattern pattern, String fullname){
-		HashMap partitionInfo = new HashMap();
+	private Map partitionParser (Pattern pattern, String fullname){
+		Map partitionInfo = new HashMap();
 		partitionInfo.put("name", fullname);
 		
 		ArrayList partition = new ArrayList();
@@ -198,7 +198,8 @@ public class MartMetaInfoHelper extends Root{
 		Matcher m = pattern.matcher(fullname);
 		while (m.find()) {
 			if (m.group(2).equals(m.group(4))) {
-				partition.add(new String [] {m.group(2), m.group(1)});
+				// partition is a ArrayList of a String array
+				partition.add(new String [] {m.group(2), m.group(1)}); //for P1hsapP1 m.group(2)="P1", m.group(1)="hsap"
 				if (partitionString.equals("")) {
 					partitionString = m.group(1);
 					partitionTemplate = "(" + m.group(2) + "C1)";
@@ -210,12 +211,12 @@ public class MartMetaInfoHelper extends Root{
 		}
 		
 		if (partition.size() > 0) {
-			String name = m.replaceAll(""); 
-			if (fullname.startsWith(name) && fullname.equals(name + "_" + partitionString)) {
+			String name = m.replaceAll(""); // remove partition tags from fullname
+			if (fullname.startsWith(name) && fullname.equals(name + "_" + partitionString)) { // for dm partition; fullname can be reconstructed from partitionString
 				partitionInfo.put("name", name);
 				partitionInfo.put("partitionedName", name + "_" + partitionTemplate);
 				partitionInfo.put("partition", partition);
-			}else if (fullname.endsWith(name) && fullname.equals(partitionString + "_" + name)) {
+			}else if (fullname.endsWith(name) && fullname.equals(partitionString + "_" + name)) { // for dataset partition; fullname can be reconstructed from partitionString
 				partitionInfo.put("name", name);
 				partitionInfo.put("partitionedName", partitionTemplate + "_" + name);
 				partitionInfo.put("partition", partition);
@@ -238,13 +239,13 @@ public class MartMetaInfoHelper extends Root{
 				partitionTable.put(partitionData[0], new LinkedHashSet());  // add it
 			}
 			
-			if (!((LinkedHashSet) partitionTable.get(partitionData[0])).contains(partitionData[1])) {  // new partitionRow
+			if (!((Set) partitionTable.get(partitionData[0])).contains(partitionData[1])) {  // new partitionRow
 				if (lookupOnly) return null;  // if it's lookupOnly, we can return null right away
-				((LinkedHashSet) partitionTable.get(partitionData[0])).add(partitionData[1]);  // add it
+				((Set) partitionTable.get(partitionData[0])).add(partitionData[1]);  // add it
 			}
 			
 			// now find out the partitionRow
-			ArrayList partitionRows = new ArrayList((LinkedHashSet) partitionTable.get(partitionData[0]));
+			ArrayList partitionRows = new ArrayList((Set) partitionTable.get(partitionData[0]));
 			
 			partitionRange.add(partitionData[0] + "R" + (partitionRows.indexOf(partitionData[1]) + 1));
 		}
@@ -257,7 +258,7 @@ public class MartMetaInfoHelper extends Root{
 		while(pI.hasNext()){
 			String partitionName = (String) pI.next();
 			metaInfoXML.append("<partitionTable name=\"" + partitionName + "\">\n");
-			Iterator prI = ((LinkedHashSet) partitionTable.get(partitionName)).iterator();
+			Iterator prI = ((Set) partitionTable.get(partitionName)).iterator();
 			int prow = 1;
 			while(prI.hasNext()){
 				metaInfoXML.append("\t<cell row=\"" + prow + "\" col=\"1\">" + prI.next() + "</cell>\n");
@@ -271,13 +272,13 @@ public class MartMetaInfoHelper extends Root{
 		Iterator dI = dbDataset.keySet().iterator();
 		while(dI.hasNext()){
 			String datasetName = (String) dI.next(); 
-			Iterator pI = ((LinkedHashSet) dbDataset.get(datasetName)).iterator();
-			String range = getPartitionRange(pI);
+			Iterator pI = ((Set) dbDataset.get(datasetName)).iterator();
+			String range = getPartitionRangeString(pI, false);
 
 			metaInfoXML.append("<dataset name=\"" + datasetName 
 								+ "\" range=\"" + range + "\">\n");
 			// outputTable
-			outputTableInfo((LinkedHashMap) dbDatasetTable.get(datasetName), datasetName);
+			outputTableInfo((Map) dbDatasetTable.get(datasetName), datasetName);
 			
 			// outputConfig
 			outputConfig(datasetName);
@@ -302,7 +303,7 @@ public class MartMetaInfoHelper extends Root{
 	private void outputTemplateConfig(String datasetName, Map skeletonConfig) {
 		metaInfoXML.append("\t\t<templateConfig name=\"templateConfig\">\n");
 		
-		outputContainer(datasetName, skeletonConfig, 0, true);
+		outputContainer(datasetName, skeletonConfig, 0, null);
 		
 		metaInfoXML.append("\t\t</templateConfig>\n");
 	}
@@ -310,80 +311,170 @@ public class MartMetaInfoHelper extends Root{
 	private void outputUserConfig(String datasetName, Map skeletonConfig) {
 		metaInfoXML.append("\t\t<userConfig name=\"userConfig\">\n");
 		
-		outputContainer(datasetName, skeletonConfig, 0, false);
+		outputContainer(datasetName, skeletonConfig, 0, "");
 		
 		metaInfoXML.append("\t\t</userConfig>\n");		
 	}
 
-	private void outputContainer(String datasetName, Map container, int level, boolean isTemplate) {
+	private void outputContainer(String datasetName, Map container, int level, String partitionPathNoRootLevel) {
 		Iterator cIt = container.keySet().iterator();
 		while(cIt.hasNext()){
-			String containerName = (String) cIt.next();
+			String containerFullName = (String) cIt.next();
 			
-			String [] containerNameParts = containerName.split("\\.");
+			String [] containerFullNameParts = containerFullName.split("\\.");
 			
-			String [] containerPath = containerNameParts[0].split(":");
-			
-						
-			String partitionRangeString = "";
-			
+			String [] containerPath = containerFullNameParts[0].split(":");
 			
 			char [] tab = new char [level + 3];
 			Arrays.fill(tab, '\t');
 			String xmlLeadingTab = new String(tab);
 			
-			String name = containerName;
-			//String name = containerPath[containerPath.length-1];
-			
-			
-			
-			// START outputing partition containers
-			metaInfoXML.append(xmlLeadingTab + "<container name=\"" + name + "\">\n");
-			
-			// START outputing tables
-			String nameWithPartition = containerNameParts[containerNameParts.length - 1];
-			List partition = getPartitionsByName(nameWithPartition);
-			
-			if (containerNameParts.length == 1  // non-partitioned dataset
-					|| (partition.size() == containerPath.length && !nameWithPartition.contains(tableNameDivisionDelimiter))) {  // dataset level
+			//String outputContainerName = containerFullName;
+			String outputContainerName = containerPath[containerPath.length-1]; // we may choose this as output container name
 
-				//metaInfoXML.append(xmlLeadingTab + "\toutput dataset (non-partitioned) tables:" + datasetName + "\n");
-				Iterator tIt = ((Map) dbDatasetTable.get(datasetName)).keySet().iterator();
-				while (tIt.hasNext()) {
-					String tableName = (String) tIt.next();
-					String [] nameParts = tableName.split(tableNameDivisionDelimiter);
-					if (nameParts[1].contains("(")) continue;  //skip partitioned tables
-					
-					metaInfoXML.append(xmlLeadingTab + "\t<container name=\""+ tableName + "\">\n");
-					
-					metaInfoXML.append(xmlLeadingTab + "\t</container>\n");					
+			// Start: getting container partition range without
+			Set partitionRange = new LinkedHashSet();
+			if (level == 0 && containerFullNameParts.length == 1) { // root level container and non-partitioned dataset
+				partitionRange.add("");
+			} else if (level != 0 && containerFullNameParts.length == 1) { // this will never happen, this is kept for completeness
+				// never happens
+			} else { // up to here containerNameParts.length is always greater than 1, ie, we have partitions
+				boolean isDatasetPartitioned = true;
+				Iterator pI;
+				if (!containerFullNameParts[1].contains(tableNameDivisionDelimiter)) { // dataset level partition container
+					pI = ((Set) dbDataset.get(datasetName)).iterator();
+				} else { // table level partition container
+					// check if isDatasetPartitioned first?
+					if (!datasetName.contains("(")) isDatasetPartitioned = false;
+					pI = ((Set) ((Map) dbDatasetTable.get(datasetName)).get(containerFullNameParts[1])).iterator();
 				}
 				
-			}else if (partition.size() == containerPath.length) {  // partitioned table level
-
-				//metaInfoXML.append(xmlLeadingTab + "\toutput partitioned table:" + datasetName + "." + nameWithPartition + "\n");
-				metaInfoXML.append(xmlLeadingTab + "\t<container name=\""+ nameWithPartition + "\">\n");
+				partitionRange = getPartionRangeByLevel (pI, level, partitionPathNoRootLevel, isDatasetPartitioned);
 				
-				metaInfoXML.append(xmlLeadingTab + "\t</container>\n");					
-
 			}
-			// END outputing tables
+			// End: getting container partition range
+
+			//System.out.println(partitionRange);
 			
-			if (((Map)container.get(containerName)).size() > 0)
-				outputContainer(datasetName, (Map)container.get(containerName), level+1, isTemplate);
+			Iterator pRI = partitionRange.iterator();
+			while(pRI.hasNext()){
+				String range = (String) pRI.next();
+				// START outputing partition containers
+				metaInfoXML.append(xmlLeadingTab + "<container name=\"" + outputContainerName + "\" range=\"" + range + "\">\n");
 			
-			metaInfoXML.append(xmlLeadingTab + "</container>\n");
-			// END outputing partition containers
+				// START outputing tables
+				String nameWithPartition = containerFullNameParts[containerFullNameParts.length - 1];
+				List partition = getPartitionsByPartitionedName(nameWithPartition);
+			
+				// under the following two conditions we are ready to output non-partitioned tables
+				if (containerFullNameParts.length == 1  // non-partitioned dataset
+						|| (partition.size() == containerPath.length && !nameWithPartition.contains(tableNameDivisionDelimiter))) {  // this container is for the last level partition of a dataset
+
+					Iterator tIt = ((Map) dbDatasetTable.get(datasetName)).keySet().iterator();
+					while (tIt.hasNext()) {
+						String tableName = (String) tIt.next();
+						String [] nameParts = tableName.split(tableNameDivisionDelimiter);
+						if (nameParts[1].contains("(")) continue;  //skip partitioned tables
+			
+						outputTable(xmlLeadingTab, datasetName, tableName, partitionPathNoRootLevel, range);
+					}
+				
+				// under the following condition we are ready to output partitioned tables
+				}else if (partition.size() == containerPath.length) {  // this container is for the last level partition of a partitioned table
+					outputTable(xmlLeadingTab, datasetName, nameWithPartition, partitionPathNoRootLevel, range);
+				}
+				// END outputing tables
+			
+				if (((Map)container.get(containerFullName)).size() > 0) {
+					if (partitionPathNoRootLevel != null && level > 0) { // we have to update partitionPathNoRootLevel if it's not null, we only do it when it's non-root level (ie, level > 0)
+						String firstPR = range.split(":1\\]")[0];
+						firstPR = firstPR.substring(1);
+						if (!datasetName.contains("(")) { // dataset is not partitioned, don't need to remove the root level partition entry
+							partitionPathNoRootLevel = firstPR;
+						} else { // dataset is partitioned
+							Pattern p = Pattern.compile("^P\\d+R\\d+:", Pattern.CASE_INSENSITIVE);
+							Matcher m = p.matcher(firstPR);
+							partitionPathNoRootLevel = m.replaceAll("");
+						}
+					}
+					outputContainer(datasetName, (Map)container.get(containerFullName), level+1, partitionPathNoRootLevel);
+				}
+			
+				metaInfoXML.append(xmlLeadingTab + "</container>\n");
+				// END outputing partition containers
+			}
+			
 		}
 	}
+
+	private void outputTable(String xmlLeadingTab, String datasetName, String tableName, String partitionPathNoRootLevel, String tableContainerRange) {
 	
+		metaInfoXML.append(xmlLeadingTab + "\t<container name=\"" + tableName + "\" range=\"" + tableContainerRange + "\">\n");
+		Iterator tcI = ((Map) ((Map) dbTableColumn.get(datasetName)).get(tableName)).keySet().iterator();
+		while(tcI.hasNext()){
+			String columnName = (String) tcI.next();
+			Iterator tcpI = ((Set) ((Map) ((Map) dbTableColumn.get(datasetName)).get(tableName)).get(columnName)).iterator();
+			
+			String columnPartitionRange = getPartitionRangeString(tcpI, true);
+			if (partitionPathNoRootLevel != null) { // userConfig, we have to filter column range by looking up to table range
+				columnPartitionRange = getCommonRange(tableContainerRange, columnPartitionRange);
+			}
+			
+			if (columnPartitionRange == null && !tableContainerRange.equals(""))
+				continue;  // skip if container has range but this column is not in it's range (empty string)
+
+			if (columnPartitionRange == null && tableContainerRange.equals(""))
+				columnPartitionRange = "";  // skip if container has range but this column is not in it's range (empty string)
+			
+			metaInfoXML.append(xmlLeadingTab + "\t\t<attributePointer name=\"" + columnName + "\"\n");
+			metaInfoXML.append(xmlLeadingTab + "\t\t\tpointer=\"false\" field=\"" + columnName + "\" location=\"" + locationName + "\"\n");
+            metaInfoXML.append(xmlLeadingTab + "\t\t\tmart=\"" + martName + "\" version=\"\" dataset=\"" + datasetName + "\" config=\"naive\"\n");
+            metaInfoXML.append(xmlLeadingTab + "\t\t\ttable=\"" + tableName + "\" sourceRange=\"\"\n");
+			metaInfoXML.append(xmlLeadingTab + "\t\t\trange=\"" + columnPartitionRange + "\">\n");
+			metaInfoXML.append(xmlLeadingTab + "\t\t\t<displayName value=\"" + columnName + " + SOMETHING\" />\n");
+			metaInfoXML.append(xmlLeadingTab + "\t\t</attributePointer>\n");
+		
+		}
+		metaInfoXML.append(xmlLeadingTab + "\t</container>\n");
+
+	}
+	
+	// method to find out common partition range
+	// partitionRange format: [P1R1:P2R1:1][P1R2:P2R1:1]
+	private String getCommonRange(String partitionRange1, String partitionRange2) {
+		if (partitionRange1 == null || partitionRange2 == null
+				|| partitionRange1.equals("") || partitionRange2.equals(""))
+			return null;
+		
+		partitionRange1 = partitionRange1.substring(1, partitionRange1.length()-1);	// first let's remove first "[" and last "]"
+		String [] pRange1 = partitionRange1.split("\\]\\[");
+		Set partition1 = new HashSet();
+		for (int i=0; i<pRange1.length; i++){
+			partition1.add(pRange1[i]);
+		}
+
+		partitionRange2 = partitionRange2.substring(1, partitionRange2.length()-1);	// first let's remove first "[" and last "]"
+		String [] pRange2 = partitionRange2.split("\\]\\[");
+
+		StringBuilder sb = new StringBuilder();
+		for (int i=0; i<pRange2.length; i++){
+			if (partition1.contains(pRange2[i]))
+				sb.append("[" + pRange2[i] + "]");
+		}
+		
+		if (sb.toString().equals("")){
+			return null;
+		} else {
+			return sb.toString();
+		}
+	}
 	
 	// this method builds skeletonConfig with all level of containers, including partitions in dataset and table levels
 	private Map skeletonConfigBuilder (String datasetName){
 		Map skeletonConfig = new LinkedHashMap();
 		
 		// get partitions for dataset
-		List datasetPartition = getPartitionsByName(datasetName);
+		List datasetPartition = getPartitionsByPartitionedName(datasetName);
 		Map currentNode = skeletonConfig;
 		String containerPath = "";
 
@@ -413,7 +504,7 @@ public class MartMetaInfoHelper extends Root{
 			
 			Map myCurrentNode = currentNode;
 			String myContainerPath = containerPath;
-			List tablePartition = getPartitionsByName(tableNameDivisions[1]);
+			List tablePartition = getPartitionsByPartitionedName(tableNameDivisions[1]);
 			
 			for (int i=0; i<tablePartition.size(); i++) {
 				if (myContainerPath.equals("")) {
@@ -428,12 +519,12 @@ public class MartMetaInfoHelper extends Root{
 			}
 		}
 		
-		System.out.println(skeletonConfig);
+		//System.out.println("skeletonConfig{" + datasetName + "}="+ skeletonConfig);
 		return skeletonConfig;
 	}
 	
 	// this method parses name of a dataset or a table, and return partition names (if there are any) in an ArrayList
-	private List getPartitionsByName (String name) {
+	private List getPartitionsByPartitionedName (String name) {
 		List partition = new ArrayList();
 		
 		Pattern p = Pattern.compile("\\((p\\d+?)C1\\)_", Pattern.CASE_INSENSITIVE);
@@ -446,204 +537,34 @@ public class MartMetaInfoHelper extends Root{
 		return partition;
 	}
 	
-/*
-	private void outputConfigInfo(String datasetName, boolean isTemplate) {
-		String xmlLeadingTab = "\t\t";
-
-		String configName = isTemplate ? "templateConfig" : "userConfig";
-		metaInfoXML.append(xmlLeadingTab + "<" + configName + " name=\""+ configName + "\">\n");
-
-		outputDatasetContainer(datasetName, "", 0, isTemplate);
-		
-		metaInfoXML.append(xmlLeadingTab + "</" + configName + ">\n");
-	}
-
-	private void outputDatasetContainer(String datasetName, String rangeWithNoRootPartition, int levelIndex, boolean isTemplate) {
-		char [] tab = new char [levelIndex + 3];
-		Arrays.fill(tab, '\t');
-		String xmlLeadingTab = new String(tab);
-		
-		Pattern rvRowTag = Pattern.compile("R\\d+$");
-		
-		ArrayList partitionTree = new ArrayList();
-		partitionTree.addAll( (LinkedHashSet) dbDataset.get(datasetName) );
-		
-		int partitionLevels = ((ArrayList) (partitionTree.get(0))).size();
-		
-		if (partitionLevels == 0) {  // non-partitioned dataset TODO: sort out non-partitioned dataset later
-			// outputTableConfig
-			metaInfoXML.append(xmlLeadingTab + "<container name=\"" + datasetName + "\" rang=\"\">\n");
-			//metaInfoXML.append(xmlLeadingTab + "\tTODO: outputTableConfig: " + isTemplate + "\n");
-			// TODO:
-			Iterator tableI = ((LinkedHashMap) dbDatasetTable.get(datasetName)).keySet().iterator();
-			while (tableI.hasNext()) {
-				//outputTableContainer();
-				outputTableContainer(datasetName, (String) tableI.next(), "", 0, isTemplate);
-			}
-			metaInfoXML.append(xmlLeadingTab + "</container>\n");
-			return;
-		}
-		
-		if (isTemplate || levelIndex == 0) {  // template or root level partition
-			Iterator pI = partitionTree.iterator();
-		
-			String range = getPartialPartitionRange(pI, levelIndex, "");
-		
-			String partitionName = rvRowTag.matcher((String) ((ArrayList) partitionTree.get(0)).get(levelIndex)).replaceAll("");
-			metaInfoXML.append(xmlLeadingTab + "<container name=\"" + partitionName + "\" range=\"" + range + "\">\n");
-
-			if (levelIndex == partitionLevels - 1) {
-				//metaInfoXML.append(xmlLeadingTab + "\tTODO: outputTableConfig: " + isTemplate + "\n");
-				Iterator tableI = ((LinkedHashMap) dbDatasetTable.get(datasetName)).keySet().iterator();
-				while (tableI.hasNext()) {
-					//outputTableContainer();
-					outputTableContainer(datasetName, (String) tableI.next(), "", levelIndex + 1, isTemplate);
-				}
-			}
-		
-			// recursively call itself
-			if (levelIndex < partitionLevels - 1) outputDatasetContainer(datasetName, "", levelIndex + 1, isTemplate);
-		
-			metaInfoXML.append(xmlLeadingTab + "</container>\n");
-		} else {  // userConfig
-			// iterate partitionRow for this level
-			LinkedHashSet partitionRow = new LinkedHashSet();
-			for (int prow = 0; prow < partitionTree.size(); prow++) {
-				partitionRow.add((String)((ArrayList) partitionTree.get(prow)).get(levelIndex));
-			}
-			
-			Iterator prI = partitionRow.iterator();
-			while(prI.hasNext()) {
-				
-				String pRow = (String) prI.next();
-				
-				String myRangeWithNoRootPartition = rangeWithNoRootPartition.equals("") ? pRow : rangeWithNoRootPartition + ":" + pRow;
-
-				Iterator pI = partitionTree.iterator();
-
-				String range = getPartialPartitionRange(pI, levelIndex, myRangeWithNoRootPartition);
-		
-				metaInfoXML.append(xmlLeadingTab + "<container name=\"" + pRow + "\" range=\"" + range + "\">\n");
-
-				if (levelIndex == partitionLevels - 1) {
-					metaInfoXML.append(xmlLeadingTab + "\tTODO: outputTableConfig: " + isTemplate + "\n");
-					// TODO:
-				}
-		
-				// recursively call itself
-				if (levelIndex < partitionLevels - 1) outputDatasetContainer(datasetName, myRangeWithNoRootPartition, levelIndex + 1, isTemplate);
-		
-				metaInfoXML.append(xmlLeadingTab + "</container>\n");
-			}
-		}
-
-	}
 	
-	private void outputTableContainer(String datasetName, String tableName, String rangeWithNoRootPartition, int levelIndex, boolean isTemplate) {
-
-		char [] tab = new char [levelIndex + 4];
-		Arrays.fill(tab, '\t');
-		String xmlLeadingTab = new String(tab);
-		
-		Pattern rvRowTag = Pattern.compile("R\\d+$");
-		
-		ArrayList partitionTree = new ArrayList();
-		partitionTree.addAll( (LinkedHashSet) ((LinkedHashMap) dbDatasetTable.get(datasetName)).get(tableName));
-
-		int partitionLevels = ((ArrayList) (partitionTree.get(0))).size();
-		
-		if (levelIndex == partitionLevels) {  // non-partitioned table, ready to output
-			// outputTableConfig
-			Iterator pI = partitionTree.iterator();
-			String range = getPartialPartitionRange(pI, levelIndex-1, "");  // for non-partitioned table, range is the same as dataset level range 
-			metaInfoXML.append(xmlLeadingTab + "<container name=\"" + tableName + "\" rang=\"" + range + "\">\n");
-			metaInfoXML.append(xmlLeadingTab + "\tTODO: " + levelIndex + " outputTableAttributes: " + isTemplate + "\n");
-			metaInfoXML.append(xmlLeadingTab + "</container>\n");
-			return;
-		}
-		
-		if (isTemplate) {  // template
-			Iterator pI = partitionTree.iterator();
-		
-			String range = getPartialPartitionRange(pI, levelIndex, "");
-		
-			String partitionName = rvRowTag.matcher((String) ((ArrayList) partitionTree.get(0)).get(levelIndex)).replaceAll("");
-			metaInfoXML.append(xmlLeadingTab + "<container name=\"" + partitionName + "\" range=\"" + range + "\">\n");
-
-			if (levelIndex == partitionLevels - 1) {  // at the last partitionIndex, we output the actual table container
-				metaInfoXML.append(xmlLeadingTab + "\t<container name=\"" + tableName + "\" range=\"" + range + "\">\n");
-				metaInfoXML.append(xmlLeadingTab + "\t\tTODO: " + levelIndex + " outputTableAttributes: " + isTemplate + "\n");
-				metaInfoXML.append(xmlLeadingTab + "\t</container>\n");
-			}
-		
-			// recursively call itself
-			if (levelIndex < partitionLevels - 1) outputTableContainer(datasetName, tableName, "", levelIndex + 1, isTemplate);
-		
-			metaInfoXML.append(xmlLeadingTab + "</container>\n");
-		} else {  // userConfig TODO:
-			// iterate partitionRow for this level
-			LinkedHashSet partitionRow = new LinkedHashSet();
-			for (int prow = 0; prow < partitionTree.size(); prow++) {
-				partitionRow.add((String)((ArrayList) partitionTree.get(prow)).get(levelIndex));
-			}
-			
-			Iterator prI = partitionRow.iterator();
-			while (prI.hasNext()) {
-				
-				String pRow = (String) prI.next();
-				
-				String myRangeWithNoRootPartition = rangeWithNoRootPartition.equals("") ? pRow : rangeWithNoRootPartition + ":" + pRow;
-
-				Iterator pI = partitionTree.iterator();
-
-				String range = getPartialPartitionRange(pI, levelIndex, myRangeWithNoRootPartition);
-		
-				metaInfoXML.append(xmlLeadingTab + "<container name=\"" + pRow + "\" range=\"" + range + "\">\n");
-
-				if (levelIndex == partitionLevels - 1) {
-					metaInfoXML.append(xmlLeadingTab + "\tTODO: outputTableConfig: " + isTemplate + "\n");
-				}
-		
-				// recursively call itself
-				if (levelIndex < partitionLevels - 1) outputDatasetContainer(datasetName, myRangeWithNoRootPartition, levelIndex + 1, isTemplate);
-		
-				metaInfoXML.append(xmlLeadingTab + "</container>\n");
-			}
-		}
-
-		//metaInfoXML.append(xmlLeadingTab + "TODO: " + levelIndex + " table:" + tableName + " " + partitionTree + "\n");
-
-
-	}
-*/
-	
-	private void outputTableInfo(LinkedHashMap martTables, String datasetName) {
+	private void outputTableInfo(Map martTables, String datasetName) {
 		Iterator tI = (martTables).keySet().iterator();
 		while(tI.hasNext()){
 			String tableName = (String) tI.next();
-			Iterator pI = ((LinkedHashSet) martTables.get(tableName)).iterator();
-			String range = getPartitionRange(pI);
+			Iterator pI = ((Set) martTables.get(tableName)).iterator();
+			String range = getPartitionRangeString(pI, false);
 
 			metaInfoXML.append("\t<table name=\"" + tableName 
 					+ "\" range=\"" + range + "\">\n");
-			outputColumnInfo((LinkedHashMap) ((LinkedHashMap) dbTableColumn.get(datasetName)).get(tableName));
+			outputColumnInfo((Map) ((Map) dbTableColumn.get(datasetName)).get(tableName));
 			metaInfoXML.append("\t</table>\n");
 		}
 	}
 	
-	private void outputColumnInfo(LinkedHashMap martTableColumns) {
+	private void outputColumnInfo(Map martTableColumns) {
 		Iterator tI = (martTableColumns).keySet().iterator();
 		while(tI.hasNext()){
 			String columnName = (String) tI.next();
-			Iterator pI = ((LinkedHashSet) martTableColumns.get(columnName)).iterator();
-			String range = getPartitionRange(pI);
+			Iterator pI = ((Set) martTableColumns.get(columnName)).iterator();
+			String range = getPartitionRangeString(pI, false);
 
 			metaInfoXML.append("\t\t<attribute name=\"" + columnName 
 					+ "\" range=\"" + range + "\"/>\n");
 		}
 	}
 	
-	private String getPartitionRange (Iterator partition) {
+	private String getPartitionRangeString (Iterator partition, boolean extraTag) {
 		StringBuilder range = new StringBuilder();
 		
 		while(partition.hasNext()){
@@ -658,50 +579,84 @@ public class MartMetaInfoHelper extends Root{
 				}
 			}
 			if (!partitionRange.equals(""))
-					range.append("[" + partitionRange + "]");
+					range.append("[" + partitionRange + (extraTag ? ":1" : "") + "]");
 		}
 				
 		return range.toString();
 	}
 
-	
-	// arguments levelIndex and nodeWithoutRootPartition are mutually exclusive
-	private String getPartialPartitionRange (Iterator partition, int levelIndex, String rangeWithNoRootPartition) {
-		StringBuilder range = new StringBuilder();
-		HashSet uniqueChecker = new HashSet(); 
+	private Set getPartionRangeByLevel (Iterator partition, int level, String partitionPathNoRootLevel, boolean isDatasetPartitioned) {
+		Set partitionRange = new LinkedHashSet ();
 		
-		//TODO: a little fix is needed for table partition when there is no dataset partition; levelIndex needs to reduce 1
-		
-		while(partition.hasNext()){
-			ArrayList partitionRow = (ArrayList) partition.next();
-
-			String partitionRange = "";
-			int totalPartitionLevels = partitionRow.size();
-			int partitionLevel = levelIndex < 0 ? totalPartitionLevels : 
-									(levelIndex >= totalPartitionLevels ? totalPartitionLevels : levelIndex + 1);
-			
-			for(int i=0; i<partitionLevel; i++){
-				if(i==0){
-					partitionRange = (String) partitionRow.get(0);
-					if (!rangeWithNoRootPartition.equals("")) {
-						partitionRange = partitionRange + ":" + rangeWithNoRootPartition;
-						break;
-					}
-				}else{
-					partitionRange = partitionRange + ":" + partitionRow.get(i);
-				}
-			}
-			
-			if (!partitionRange.equals("")) {
-				String toAdd = "[" + partitionRange + ":1]";
-				if (!uniqueChecker.contains(toAdd)) {
-					range.append(toAdd);
-					uniqueChecker.add(toAdd);
-				}
-			}
+		if (level == 0 && !isDatasetPartitioned) {
+			partitionRange.add("");
+			return partitionRange;
 		}
+		
+		int levelIndex = level;
+		if (!isDatasetPartitioned) levelIndex = level - 1;
+		
+		if (level == 0 || partitionPathNoRootLevel == null) { // return collapsed range
+			while(partition.hasNext()) {
+				ArrayList partitionRow = (ArrayList) partition.next();
+
+				String partitionString = "";
+				for(int i=0; i <= levelIndex; i++){
+					if(partitionString.equals("")){
+						partitionString = (String) partitionRow.get(i);
+					}else{
+						partitionString = partitionString + ":" + (String) partitionRow.get(i);
+					}
+				}
 				
-		return range.toString();
+				partitionRange.add("[" + partitionString + ":1]");
+			}
+
+			Iterator pRI = partitionRange.iterator();
+			StringBuilder sb = new StringBuilder();
+			while(pRI.hasNext()){
+				sb.append((String) pRI.next());
+			}
+			partitionRange.clear();
+			partitionRange.add(sb.toString());
+
+		} else { // return partially expended range, root level is still collapsed
+			Map myLevelPartition = new LinkedHashMap();
+			while(partition.hasNext()) {
+				ArrayList partitionRow = (ArrayList) partition.next();
+
+				String partitionString = "";
+
+				if (levelIndex == 0) { // partitioned dm table in a non-partitioned dataset
+					partitionString = (level == 1 ? "" : partitionPathNoRootLevel + ":")
+											+ (String) partitionRow.get(levelIndex);
+				} else {
+					partitionString = (String) partitionRow.get(0)
+											+ (level == 1 ? "" : ":" + partitionPathNoRootLevel)
+											+ ":" + (String) partitionRow.get(levelIndex);
+				}
+
+				if (!myLevelPartition.containsKey(partitionRow.get(levelIndex)))
+						myLevelPartition.put(partitionRow.get(levelIndex), new LinkedHashSet());
+					
+				((Set) myLevelPartition.get(partitionRow.get(levelIndex))).add(partitionString);
+					
+			}
+			
+			Iterator myPI = myLevelPartition.keySet().iterator();
+			while(myPI.hasNext()){
+				String partitionString = "";
+				Iterator myLevelsI =  ((Set) myLevelPartition.get((String) myPI.next())).iterator();
+				while(myLevelsI.hasNext()){
+					partitionString = partitionString + "[" + myLevelsI.next() + ":1]";
+				}
+				
+				partitionRange.add(partitionString);
+			}
+						
+		}
+		
+		return partitionRange;
 	}
 
 }
