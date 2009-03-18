@@ -83,7 +83,7 @@ public class MartMetaInfoHelper extends Root{
 			// skipping meta tables
 			if (tableName.startsWith(metaTablePrefix)) continue;
 			
-			if (tableName.contains("egene")) continue;  // TODO: remove this later. this is just for quicker testing
+			if (tableName.contains("egene")) continue;  // TODO: remove this later. this is just for a quicker testing
 			
 			String [] tableNameDivisions = tableName.split(tableNameDivisionDelimiter);
 			
@@ -153,17 +153,17 @@ public class MartMetaInfoHelper extends Root{
 
 			// scan table columns and populate dbTableColumn
 			ResultSet columns = dmd.getColumns(null, schemaName, tableName, null);
-            while(columns.next()){
-                    String columnName = columns.getString(4);
-                    
-                    if (skipBooleanCol && columnName.endsWith(booleanColumnSuffix)) continue;
-                    
-                    if (!((Map) ((Map) dbTableColumn.get(dataset)).get(dbMartTableName)).containsKey(columnName))
-                    	((Map) ((Map) dbTableColumn.get(dataset)).get(dbMartTableName)).put(columnName, new LinkedHashSet());
+			while(columns.next()){
+				String columnName = columns.getString(4);
 
-                   	((Set) ((Map) ((Map) dbTableColumn.get(dataset))
-                   			.get(dbMartTableName)).get(columnName)).add(partitionRange);
-            }
+				if (skipBooleanCol && columnName.endsWith(booleanColumnSuffix)) continue;
+                    
+				if (!((Map) ((Map) dbTableColumn.get(dataset)).get(dbMartTableName)).containsKey(columnName))
+					((Map) ((Map) dbTableColumn.get(dataset)).get(dbMartTableName)).put(columnName, new LinkedHashSet());
+
+				((Set) ((Map) ((Map) dbTableColumn.get(dataset))
+						.get(dbMartTableName)).get(columnName)).add(partitionRange);
+			}
 
 		}
 
@@ -303,7 +303,7 @@ public class MartMetaInfoHelper extends Root{
 	private void outputTemplateConfig(String datasetName, Map skeletonConfig) {
 		metaInfoXML.append("\t\t<templateConfig name=\"templateConfig\">\n");
 		
-		outputContainer(datasetName, skeletonConfig, 0, null);
+		metaInfoXML.append(outputContainer(datasetName, skeletonConfig, 0, null));
 		
 		metaInfoXML.append("\t\t</templateConfig>\n");
 	}
@@ -311,12 +311,14 @@ public class MartMetaInfoHelper extends Root{
 	private void outputUserConfig(String datasetName, Map skeletonConfig) {
 		metaInfoXML.append("\t\t<userConfig name=\"userConfig\">\n");
 		
-		outputContainer(datasetName, skeletonConfig, 0, "");
+		metaInfoXML.append(outputContainer(datasetName, skeletonConfig, 0, ""));
 		
 		metaInfoXML.append("\t\t</userConfig>\n");		
 	}
 
-	private void outputContainer(String datasetName, Map container, int level, String partitionPathNoRootLevel) {
+	private String outputContainer(String datasetName, Map container, int level, String partitionPathNoRootLevel) {
+		StringBuilder sbOuterCont = new StringBuilder();
+		boolean noOuterOutput = true;
 		Iterator cIt = container.keySet().iterator();
 		while(cIt.hasNext()){
 			String containerFullName = (String) cIt.next();
@@ -355,12 +357,13 @@ public class MartMetaInfoHelper extends Root{
 			// End: getting container partition range
 
 			//System.out.println(partitionRange);
-			
 			Iterator pRI = partitionRange.iterator();
 			while(pRI.hasNext()){
+				StringBuilder sbContainer = new StringBuilder();
+				boolean noOutput = true;
 				String range = (String) pRI.next();
 				// START outputing partition containers
-				metaInfoXML.append(xmlLeadingTab + "<container name=\"" + outputContainerName + "\" range=\"" + range + "\">\n");
+				sbContainer.append(xmlLeadingTab + "<container name=\"" + outputContainerName + "\" range=\"" + range + "\">\n");
 			
 				// START outputing tables
 				String nameWithPartition = containerFullNameParts[containerFullNameParts.length - 1];
@@ -376,12 +379,20 @@ public class MartMetaInfoHelper extends Root{
 						String [] nameParts = tableName.split(tableNameDivisionDelimiter);
 						if (nameParts[1].contains("(")) continue;  //skip partitioned tables
 			
-						outputTable(xmlLeadingTab, datasetName, tableName, partitionPathNoRootLevel, range);
+						String tableString = outputTable(xmlLeadingTab, datasetName, tableName, partitionPathNoRootLevel, range);
+						if (!tableString.equals("")) {
+							sbContainer.append(tableString);
+							noOutput = false;
+						}
 					}
 				
 				// under the following condition we are ready to output partitioned tables
 				}else if (partition.size() == containerPath.length) {  // this container is for the last level partition of a partitioned table
-					outputTable(xmlLeadingTab, datasetName, nameWithPartition, partitionPathNoRootLevel, range);
+					String tableString = outputTable(xmlLeadingTab, datasetName, nameWithPartition, partitionPathNoRootLevel, range);
+					if (!tableString.equals("")) {
+						sbContainer.append(tableString);
+						noOutput = false;
+					}
 				}
 				// END outputing tables
 			
@@ -397,19 +408,37 @@ public class MartMetaInfoHelper extends Root{
 							partitionPathNoRootLevel = m.replaceAll("");
 						}
 					}
-					outputContainer(datasetName, (Map)container.get(containerFullName), level+1, partitionPathNoRootLevel);
+					String containerString = outputContainer(datasetName, (Map)container.get(containerFullName), level+1, partitionPathNoRootLevel);
+					if (!containerString.equals("")) {
+						sbContainer.append(containerString);
+						noOutput = false;
+					}
+
 				}
 			
-				metaInfoXML.append(xmlLeadingTab + "</container>\n");
+				sbContainer.append(xmlLeadingTab + "</container>\n");
 				// END outputing partition containers
+				if (!noOutput) {
+					sbOuterCont.append(sbContainer.toString());
+					noOuterOutput = false;
+				}
+
 			}
 			
 		}
+		
+		if (noOuterOutput) {
+			return "";
+		} else {
+			return sbOuterCont.toString();
+		}
+		
 	}
 
-	private void outputTable(String xmlLeadingTab, String datasetName, String tableName, String partitionPathNoRootLevel, String tableContainerRange) {
-	
-		metaInfoXML.append(xmlLeadingTab + "\t<container name=\"" + tableName + "\" range=\"" + tableContainerRange + "\">\n");
+	private String outputTable(String xmlLeadingTab, String datasetName, String tableName, String partitionPathNoRootLevel, String tableContainerRange) {
+		StringBuilder sbTable = new StringBuilder();
+		boolean noOutputColumn = true;
+		sbTable.append(xmlLeadingTab + "\t<container name=\"" + tableName + "\" range=\"" + tableContainerRange + "\">\n");
 		Iterator tcI = ((Map) ((Map) dbTableColumn.get(datasetName)).get(tableName)).keySet().iterator();
 		while(tcI.hasNext()){
 			String columnName = (String) tcI.next();
@@ -426,17 +455,22 @@ public class MartMetaInfoHelper extends Root{
 			if (columnPartitionRange == null && tableContainerRange.equals(""))
 				columnPartitionRange = "";  // skip if container has range but this column is not in it's range (empty string)
 			
-			metaInfoXML.append(xmlLeadingTab + "\t\t<attributePointer name=\"" + columnName + "\"\n");
-			metaInfoXML.append(xmlLeadingTab + "\t\t\tpointer=\"false\" field=\"" + columnName + "\" location=\"" + locationName + "\"\n");
-            metaInfoXML.append(xmlLeadingTab + "\t\t\tmart=\"" + martName + "\" version=\"\" dataset=\"" + datasetName + "\" config=\"naive\"\n");
-            metaInfoXML.append(xmlLeadingTab + "\t\t\ttable=\"" + tableName + "\" sourceRange=\"\"\n");
-			metaInfoXML.append(xmlLeadingTab + "\t\t\trange=\"" + columnPartitionRange + "\">\n");
-			metaInfoXML.append(xmlLeadingTab + "\t\t\t<displayName value=\"" + columnName + " + SOMETHING\" />\n");
-			metaInfoXML.append(xmlLeadingTab + "\t\t</attributePointer>\n");
-		
+			sbTable.append(xmlLeadingTab + "\t\t<attributePointer name=\"" + columnName + "\"\n");
+			sbTable.append(xmlLeadingTab + "\t\t\tpointer=\"false\" field=\"" + columnName + "\" location=\"" + locationName + "\"\n");
+            sbTable.append(xmlLeadingTab + "\t\t\tmart=\"" + martName + "\" version=\"\" dataset=\"" + datasetName + "\" config=\"naive\"\n");
+            sbTable.append(xmlLeadingTab + "\t\t\ttable=\"" + tableName + "\" sourceRange=\"\"\n");
+			sbTable.append(xmlLeadingTab + "\t\t\trange=\"" + columnPartitionRange + "\">\n");
+			sbTable.append(xmlLeadingTab + "\t\t\t<displayName value=\"" + columnName + " + SOMETHING\" />\n");
+			sbTable.append(xmlLeadingTab + "\t\t</attributePointer>\n");
+			noOutputColumn = false;
 		}
-		metaInfoXML.append(xmlLeadingTab + "\t</container>\n");
+		sbTable.append(xmlLeadingTab + "\t</container>\n");
 
+		if (noOutputColumn) {
+			return "";
+		} else {
+			return sbTable.toString();
+		}
 	}
 	
 	// method to find out common partition range
