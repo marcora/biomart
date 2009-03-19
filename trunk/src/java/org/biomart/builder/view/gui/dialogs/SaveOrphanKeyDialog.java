@@ -1,6 +1,7 @@
 package org.biomart.builder.view.gui.dialogs;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Frame;
@@ -31,11 +32,22 @@ import javax.swing.filechooser.FileFilter;
 import org.biomart.common.resources.Resources;
 import org.biomart.common.resources.Settings;
 
+/**
+ * Ask the user to save the orphan key relations before proceed
+ * @author yliang
+ *
+ */
 public class SaveOrphanKeyDialog extends JDialog {
 	
-	private static boolean isSave = false;
+	private static final long serialVersionUID = 1L;
+	private boolean isSave = false;
 
-	private SaveOrphanKeyDialog(final String title, final String text) {
+	/**
+	 * 
+	 * @param title
+	 * @param text
+	 */
+	public SaveOrphanKeyDialog(final String title, final String text) {
 		// Create the content pane for the dialog.
 		final JPanel content = new JPanel(new BorderLayout());
 		this.setContentPane(content);
@@ -46,19 +58,20 @@ public class SaveOrphanKeyDialog extends JDialog {
 		
 		this.addWindowListener(new WindowAdapter() {
 		    public void windowClosing(WindowEvent we) {
-		    	 if (!SaveOrphanKeyDialog.this.isSave){
+/*		    	 if (!SaveOrphanKeyDialog.this.isSave){
 					 Frame frame = new Frame();
 					 JOptionPane.showMessageDialog(frame,
-							    "You must save the text before closing the window!",
+							    Resources.get("orphanKeyDialogMessage"),
 							    "WARNING",
 							    JOptionPane.WARNING_MESSAGE);
 					
 				 }
 		    	 else{
+		    	 */
 		    		 Window parent = SwingUtilities.getWindowAncestor((Component) we.getSource());
                      // Close the popup window
                      parent.dispose(); 
-		    	 }
+//		    	 }
 		    }
 		});
 
@@ -170,7 +183,7 @@ public class SaveOrphanKeyDialog extends JDialog {
 							if (fw != null)
 								try {
 									fw.close();
-									SaveOrphanKeyDialog.this.isSave = true;
+									setSaved(true);
 								} catch (final IOException ex) {
 									ex.printStackTrace();
 									// Ignore this one.
@@ -188,37 +201,50 @@ public class SaveOrphanKeyDialog extends JDialog {
 		
 		// Build the toolbar.
 		//final JToolBar closeWindowBarPane = new JToolBar();
-		final JPanel closeWindowBarPane = new JPanel();
+		final JPanel closeWindowBarPane = new JPanel(new FlowLayout());
 		//closeWindowBarPane.setFloatable(false);
 		//closeWindowBarPane.setRollover(true);
 		
 		// Make a print button.
-		final JButton closeWindowButton = new JButton("Close Window");
-		closeWindowButton.setLocation(50,50);
+		final JButton closeWindowButton = new JButton(Resources.get("synchronizeButton"));
+//		closeWindowButton.setLocation(50,50);
+		
+		final JButton cancelButton = new JButton(Resources.get("cancelButton"));
 		
 	
 		closeWindowButton.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent e) {
 				 if (e.getSource() instanceof Component)
                  {
-					 if (!SaveOrphanKeyDialog.this.isSave){
+					 if (!checkSaved()){
 						 Frame frame = new Frame();
 						 JOptionPane.showMessageDialog(frame,
-								    "You must save the text before closing the window!",
+								    Resources.get("orphanKeyDialogMessage"),
 								    "WARNING",
 								    JOptionPane.WARNING_MESSAGE);
 
 					 }
 					 else {
-                     Window parent = SwingUtilities.getWindowAncestor((Component) e.getSource());
+						 Window parent = SwingUtilities.getWindowAncestor((Component) e.getSource());
                      // Close the popup window
-                     parent.dispose();
+						 parent.dispose();
 					 }
                  }
 			}
 		});
-		closeWindowBarPane.add(closeWindowButton);
 		
+		cancelButton.addActionListener(new ActionListener(){
+			public void actionPerformed(final ActionEvent e) 
+			{
+	    		 Window parent = SwingUtilities.getWindowAncestor((Component) e.getSource());
+                 // Close the popup window
+                 parent.dispose(); 
+			}
+		});
+		
+		closeWindowBarPane.add(closeWindowButton, BorderLayout.EAST);
+		closeWindowBarPane.add(cancelButton, BorderLayout.WEST);
+		closeWindowButton.setSelected(true);
 		
 		// Construct the content panel.
 		content.add(toolBarPane, BorderLayout.PAGE_START);
@@ -232,8 +258,17 @@ public class SaveOrphanKeyDialog extends JDialog {
 		this.setLocationRelativeTo(null);
 	}
 	
-	public static void displayText(final String title, final String textBuffer) {
-		// Create and show a window frame.
-		new SaveOrphanKeyDialog(title, textBuffer).setVisible(true);
+	/**
+	 * check if the orphen key information is saved
+	 * @return boolean
+	 */
+	public boolean checkSaved()
+	{
+		return this.isSave;
+	}
+	
+	private void setSaved(boolean b)
+	{
+		this.isSave=b;
 	}
 }
