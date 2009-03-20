@@ -58,16 +58,7 @@ public class SaveOrphanKeyDialog extends JDialog {
 		
 		this.addWindowListener(new WindowAdapter() {
 		    public void windowClosing(WindowEvent we) {
-/*		    	 if (!SaveOrphanKeyDialog.this.isSave){
-					 Frame frame = new Frame();
-					 JOptionPane.showMessageDialog(frame,
-							    Resources.get("orphanKeyDialogMessage"),
-							    "WARNING",
-							    JOptionPane.WARNING_MESSAGE);
-					
-				 }
-		    	 else{
-		    	 */
+		    		 setSaved(false);
 		    		 Window parent = SwingUtilities.getWindowAncestor((Component) we.getSource());
                      // Close the popup window
                      parent.dispose(); 
@@ -236,6 +227,7 @@ public class SaveOrphanKeyDialog extends JDialog {
 		cancelButton.addActionListener(new ActionListener(){
 			public void actionPerformed(final ActionEvent e) 
 			{
+				 setSaved(false);
 	    		 Window parent = SwingUtilities.getWindowAncestor((Component) e.getSource());
                  // Close the popup window
                  parent.dispose(); 
