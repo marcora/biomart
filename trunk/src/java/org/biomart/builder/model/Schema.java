@@ -1338,7 +1338,7 @@ public class Schema implements Comparable, DataLink, TransactionListener {
 					// frame, orphanSearch + "\n", "Update Operation Will
 					// Corrupt Schema. Do you still want to proceed?",
 					// JOptionPane.YES_NO_OPTION);
-					if (n == JOptionPane.NO_OPTION) {
+					if (n != JOptionPane.YES_OPTION) {
 						//CorruptSchemaTextDialog.displayText("Orphan Foreign Key", orphanSearch);
 						return;						
 					}
