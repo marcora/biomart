@@ -1285,11 +1285,23 @@ public class Schema implements Comparable, DataLink, TransactionListener {
 
 			// By opening, executing, then closing a DMD query we will test
 			// the connection fully without actually having to read anything
-			// from it.
+			// from it. 
+			// modified by yong liang for checking the lowercase/uppercase schema
 			final String catalog = connection.getCatalog();
-			final ResultSet rs = dmd.getTables(
+			ResultSet rs = dmd.getTables(
 					"".equals(dmd.getSchemaTerm()) ? this.getDataLinkSchema()
 							: catalog, this.getDataLinkSchema(), "%", null);
+			
+			if (!rs.isBeforeFirst()) {
+				rs = dmd.getTables(
+						"".equals(dmd.getSchemaTerm()) ? this.getDataLinkSchema().toUpperCase()
+								: catalog, this.getDataLinkSchema().toUpperCase(), "%", null);
+			}
+			if (!rs.isBeforeFirst()) {
+				rs = dmd.getTables(
+						"".equals(dmd.getSchemaTerm()) ? this.getDataLinkSchema().toLowerCase()
+								: catalog, this.getDataLinkSchema().toLowerCase(), "%", null);			}
+			
 			final boolean worked = rs.isBeforeFirst();
 			rs.close();
 
