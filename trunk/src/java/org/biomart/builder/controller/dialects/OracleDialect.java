@@ -409,7 +409,7 @@ public class OracleDialect extends DatabaseDialect {
 		this.checkColumnName(optColName);
 
 		statements.add("alter table " + schemaName + "." + optTableName
-				+ " add column (" + optColName + " integer default 0)");
+				+ " add (" + optColName + " integer default 0)");
 
 		final StringBuffer sb = new StringBuffer();
 		sb.append("update " + schemaName + "." + optTableName + " a set "
@@ -604,8 +604,6 @@ public class OracleDialect extends DatabaseDialect {
 		final String schemaName = action.getDataSetSchemaName();
 		final String tableName = action.getTable();
 
-		statements.add("set search_path=" + schemaName + ",pg_catalog");
-
 		for (final Iterator i = action.getColumns().iterator(); i.hasNext();)
 			statements.add("alter table " + schemaName + "." + tableName
 					+ " set unused (" + (String) i.next() + ")");
@@ -627,8 +625,8 @@ public class OracleDialect extends DatabaseDialect {
 			throws Exception {
 		final String schemaName = action.getDataSetSchemaName();
 		final String tableName = action.getTable();
-
-		statements.add("drop table " + schemaName + "." + tableName + "");
+		//do purge here
+		statements.add("drop table " + schemaName + "." + tableName + " purge");
 	}
 
 	/**
