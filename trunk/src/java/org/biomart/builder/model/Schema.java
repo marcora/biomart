@@ -1430,10 +1430,14 @@ public class Schema implements Comparable, DataLink, TransactionListener {
 					if (schemaPrefix == null)
 						continue;
 				}
-
+				
 				// What is the table called?
 				final String dbTableName = dbTables.getString("TABLE_NAME");
 				Log.debug("Processing table " + dbTableName);
+
+				//this is hardcode for oracle, check if this table is from recyclebin
+				if(this.driverClassName.equals("oracle.jdbc.driver.OracleDriver") && dbTableName.indexOf("BIN$")==0)
+					continue;
 
 				// Look to see if we already have a table by this name defined.
 				// If we do, reuse it. If not, create a new table.
