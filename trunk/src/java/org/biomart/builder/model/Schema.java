@@ -1288,19 +1288,11 @@ public class Schema implements Comparable, DataLink, TransactionListener {
 			// from it. 
 			// modified by yong liang for checking the lowercase/uppercase schema
 			final String catalog = connection.getCatalog();
-			ResultSet rs = dmd.getTables(
-					"".equals(dmd.getSchemaTerm()) ? this.getDataLinkSchema()
-							: catalog, this.getDataLinkSchema(), "%", null);
-			
-			if (!rs.isBeforeFirst()) {
-				rs = dmd.getTables(
-						"".equals(dmd.getSchemaTerm()) ? this.getDataLinkSchema().toUpperCase()
-								: catalog, this.getDataLinkSchema().toUpperCase(), "%", null);
-			}
-			if (!rs.isBeforeFirst()) {
-				rs = dmd.getTables(
-						"".equals(dmd.getSchemaTerm()) ? this.getDataLinkSchema().toLowerCase()
-								: catalog, this.getDataLinkSchema().toLowerCase(), "%", null);			}
+//			ResultSet rs = dmd.getTables(
+//					"".equals(dmd.getSchemaTerm()) ? this.realSchemaName
+//							: catalog, this.realSchemaName, "%", null);
+			//FIXME: It should use the same format as getConnection and synchronize in the future
+			ResultSet rs = dmd.getTables(catalog, this.realSchemaName, "%", null);
 			
 			final boolean worked = rs.isBeforeFirst();
 			rs.close();
@@ -2252,8 +2244,11 @@ public class Schema implements Comparable, DataLink, TransactionListener {
 				// have this property is skipped.
 				final Column firstPKCol = pk.getColumns()[0];
 				String firstPKColName = firstPKCol.getName();
-				final int idPrefixIndex = firstPKColName.indexOf(Resources
+				int idPrefixIndex = firstPKColName.indexOf(Resources
 						.get("primaryKeySuffix"));
+				//then try uppercase, in Oracle, names are uppercase
+				if(idPrefixIndex<0) 
+					idPrefixIndex = firstPKColName.toUpperCase().indexOf(Resources.get("primaryKeySuffix").toUpperCase());
 				if (idPrefixIndex >= 0)
 					firstPKColName = firstPKColName.substring(0, idPrefixIndex);
 				if (!firstPKColName.equals(pkTable.getName())
