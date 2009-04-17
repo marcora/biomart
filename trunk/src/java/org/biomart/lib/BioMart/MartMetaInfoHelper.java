@@ -83,7 +83,7 @@ public class MartMetaInfoHelper extends Root{
 			// skipping meta tables
 			if (tableName.startsWith(metaTablePrefix)) continue;
 			
-			if (tableName.contains("egene")) continue;  // TODO: remove this later. this is just for a quicker testing
+			//if (!tableName.contains("egene")) continue;  // TODO: remove this later. this is just for a quicker testing
 			
 			String [] tableNameDivisions = tableName.split(tableNameDivisionDelimiter);
 			
@@ -331,8 +331,8 @@ public class MartMetaInfoHelper extends Root{
 			Arrays.fill(tab, '\t');
 			String xmlLeadingTab = new String(tab);
 			
-			//String outputContainerName = containerFullName;
-			String outputContainerName = containerPath[containerPath.length-1]; // we may choose this as output container name
+			String outputContainerName = containerFullName;
+			//String outputContainerName = containerPath[containerPath.length-1]; // we may choose this as output container name
 
 			// Start: getting container partition range without
 			Set partitionRange = new LinkedHashSet();
@@ -379,7 +379,7 @@ public class MartMetaInfoHelper extends Root{
 						String [] nameParts = tableName.split(tableNameDivisionDelimiter);
 						if (nameParts[1].contains("(")) continue;  //skip partitioned tables
 			
-						String tableString = outputTable(xmlLeadingTab, datasetName, tableName, partitionPathNoRootLevel, range);
+						String tableString = outputTableContainer(xmlLeadingTab, datasetName, tableName, partitionPathNoRootLevel, range);
 						if (!tableString.equals("")) {
 							sbContainer.append(tableString);
 							noOutput = false;
@@ -388,7 +388,7 @@ public class MartMetaInfoHelper extends Root{
 				
 				// under the following condition we are ready to output partitioned tables
 				}else if (partition.size() == containerPath.length) {  // this container is for the last level partition of a partitioned table
-					String tableString = outputTable(xmlLeadingTab, datasetName, nameWithPartition, partitionPathNoRootLevel, range);
+					String tableString = outputTableContainer(xmlLeadingTab, datasetName, nameWithPartition, partitionPathNoRootLevel, range);
 					if (!tableString.equals("")) {
 						sbContainer.append(tableString);
 						noOutput = false;
@@ -435,7 +435,7 @@ public class MartMetaInfoHelper extends Root{
 		
 	}
 
-	private String outputTable(String xmlLeadingTab, String datasetName, String tableName, String partitionPathNoRootLevel, String tableContainerRange) {
+	private String outputTableContainer(String xmlLeadingTab, String datasetName, String tableName, String partitionPathNoRootLevel, String tableContainerRange) {
 		StringBuilder sbTable = new StringBuilder();
 		boolean noOutputColumn = true;
 		sbTable.append(xmlLeadingTab + "\t<container name=\"" + tableName + "\" range=\"" + tableContainerRange + "\">\n");
@@ -476,6 +476,9 @@ public class MartMetaInfoHelper extends Root{
 	// method to find out common partition range
 	// partitionRange format: [P1R1:P2R1:1][P1R2:P2R1:1]
 	private String getCommonRange(String partitionRange1, String partitionRange2) {
+		if (partitionRange1.equals("") && partitionRange2.equals(""))
+			return "";
+		
 		if (partitionRange1 == null || partitionRange2 == null
 				|| partitionRange1.equals("") || partitionRange2.equals(""))
 			return null;
