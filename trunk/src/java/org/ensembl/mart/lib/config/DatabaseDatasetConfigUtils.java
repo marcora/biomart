@@ -26,6 +26,7 @@ import java.io.OutputStream;
 import java.security.DigestOutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -2991,15 +2992,19 @@ public class DatabaseDatasetConfigUtils {
 			ps1.setString(1, displayName);
 			ps1.setString(2, dataset);
 			ps1.setString(3, description);
-			ps2.setString(1, datasetID);
+			ps2.setInt(1, Integer.parseInt(datasetID));
+			//ps2.setString(1, datasetID);
+//			ps2.setClob(2, (Clob) new ByteArrayInputStream(uncompressedXML));
 			ps2.setBinaryStream(2, new ByteArrayInputStream(uncompressedXML),
 					uncompressedXML.length);// uncompressed
 			ps2.setBinaryStream(3, new ByteArrayInputStream(xml), xml.length);// compressed
 			ps2.setBytes(4, md5);
 			ps1.setString(4, type);
-			ps1.setString(5, visible);
+//			ps1.setString(5, visible);
+			ps1.setInt(5, Integer.parseInt(visible));
 			ps1.setString(6, version);
-			ps1.setString(7, datasetID);
+			ps1.setInt(7, Integer.parseInt(datasetID));
+//			ps1.setString(7, datasetID);
 
 			// Timestamp tstamp = new Timestamp(System.currentTimeMillis());
 			ps1.setTimestamp(8, tstamp);
@@ -3787,7 +3792,8 @@ public class DatabaseDatasetConfigUtils {
 
 			conn = this.dsource.getConnection();
 			final PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setString(1, datasetID);
+			//ps.setString(1, datasetID);
+			ps.setInt(1,Integer.parseInt(datasetID));
 			ps.setString(2, dataset);
 
 			final ResultSet rs = ps.executeQuery();
@@ -3833,7 +3839,9 @@ public class DatabaseDatasetConfigUtils {
 	 */
 	public DatasetConfig getXSLTransformedConfig(final DatasetConfig config)
 			throws ConfigurationException {
+		
 		try {
+			
 			final Document sourceDoc = MartEditor.getDatasetConfigXMLUtils()
 					.getDocumentForDatasetConfig(config);
 			// Element thisElement = sourceDoc.getRootElement();
@@ -3886,6 +3894,7 @@ public class DatabaseDatasetConfigUtils {
 					"Caught Exception during transformation of requested DatasetConfig: "
 							+ e.getMessage(), e);
 		}
+		
 	}
 
 	/**
@@ -4285,8 +4294,9 @@ public class DatabaseDatasetConfigUtils {
 			// ps.setString(1, internalName);
 			// if (displayName != null)
 			// ps.setString(3, displayName);
-			ps.setString(1, datasetID);
-
+			//ps.setString(1, datasetID);
+			ps.setInt(1, Integer.parseInt(datasetID));
+			
 			final ResultSet rs = ps.executeQuery();
 			rs.next();
 			ret = rs.getInt(1);
@@ -4344,10 +4354,12 @@ public class DatabaseDatasetConfigUtils {
 		try {
 			conn = this.dsource.getConnection();
 			PreparedStatement ds = conn.prepareStatement(deleteSQL1);
-			ds.setString(1, datasetID);
+			//ds.setString(1, datasetID);
+			ds.setInt(1, Integer.parseInt(datasetID));
 			rowsdeleted = ds.executeUpdate();
 			ds = conn.prepareStatement(deleteSQL2);
-			ds.setString(1, datasetID);
+			//ds.setString(1, datasetID);
+			ds.setInt(1, Integer.parseInt(datasetID));
 			ds.executeUpdate();
 			ds.close();
 		} catch (final SQLException e) {
@@ -4626,7 +4638,8 @@ public class DatabaseDatasetConfigUtils {
 				+ "."
 				+ this.MARTXMLTABLE
 				+ "(dataset_id_key integer,"
-				+ "xml text, compressed_xml bytea, message_digest bytea,UNIQUE (dataset_id_key))";
+//				+ "xml text, compressed_xml bytea, message_digest bytea,UNIQUE (dataset_id_key))";
+				+ "xml bytea, compressed_xml bytea, message_digest bytea,UNIQUE (dataset_id_key))";
 		final String POSTGRES_USER = CREATETABLE
 				+ "."
 				+ this.MARTUSERTABLE
@@ -6479,7 +6492,11 @@ public class DatabaseDatasetConfigUtils {
 
 			while (rsTab.next()) {
 				final String tableName = rsTab.getString(3);
-				potentials.add(tableName);
+//				potentials.add(tableName);
+				final String tableDataset = tableName.split("__")[0];
+				if (datasetName == null || tableDataset.equals(datasetName))
+					potentials.add(tableName);
+
 			}
 			rsTab.close();
 
@@ -6490,7 +6507,10 @@ public class DatabaseDatasetConfigUtils {
 				// NN
 				// System.out.println(tableName);
 
-				if (!potentials.contains(tableName))
+				//if (!potentials.contains(tableName))
+				//	potentials.add(tableName);
+				final String tableDataset = tableName.split("__")[0];
+				if (datasetName == null || tableDataset.equals(datasetName.toUpperCase()))
 					potentials.add(tableName);
 			}
 			rsTab.close();
@@ -6543,8 +6563,10 @@ public class DatabaseDatasetConfigUtils {
 				final String tableName = rsTab.getString(3);
 
 				// System.out.println("tableName "+tableName);
-
-				potentials.add(tableName);
+				//modified by yong liang for #25
+				final String tableDataset = tableName.split("__")[0];
+				if (datasetName == null || tableDataset.equals(datasetName))
+					potentials.add(tableName);
 			}
 			rsTab.close();
 
@@ -6555,7 +6577,10 @@ public class DatabaseDatasetConfigUtils {
 				// NN
 				// System.out.println(tableName);
 
-				if (!potentials.contains(tableName))
+//				if (!potentials.contains(tableName))
+//					potentials.add(tableName);
+				final String tableDataset = tableName.split("__")[0];
+				if (datasetName == null || tableDataset.equals(datasetName.toUpperCase()))
 					potentials.add(tableName);
 			}
 			rsTab.close();
