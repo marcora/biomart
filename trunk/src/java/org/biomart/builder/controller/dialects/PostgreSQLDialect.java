@@ -664,7 +664,9 @@ public class PostgreSQLDialect extends DatabaseDialect {
 		this.checkColumnName(optColName);
 
 		statements.add("alter table " + schemaName + "." + optTableName
-				+ " add column (" + optColName + " integer default 0)");
+				+ " add column " + optColName + " integer default 0");
+//modified by yong liang for ticket #25
+//		+ " add column (" + optColName + " integer default 0)");
 
 		final StringBuffer sb = new StringBuffer();
 		sb.append("update " + schemaName + "." + optTableName + " set "
