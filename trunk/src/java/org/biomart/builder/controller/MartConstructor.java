@@ -357,6 +357,10 @@ public interface MartConstructor {
 							PartitionTable.UNLIMITED_ROWS);
 				while (fakeDSPartition ? true : dsPta != null
 						&& dsPta.getPartitionTable().nextRow()) {
+					//added by Yong Liang, clear the optimiser before dataset partition started
+					this.uniqueOptCols.clear();
+					this.indexOptCols.clear();
+
 					fakeDSPartition = false;
 					// Make more specific.
 					String partitionedDataSetName = dataset.getName();
@@ -577,7 +581,7 @@ public interface MartConstructor {
 
 				// Update the previous table.
 				previousTempTable = tempTable;
-			}
+			} //end of for loop
 
 			// Do a final left-join against the parent to reinstate
 			// any potentially missing rows.
@@ -794,6 +798,7 @@ public interface MartConstructor {
 						schemaPrefix, dsPta, dmPta, dsTable, dataset
 								.getDataSetOptimiserType());
 				// The key cols are those from the primary key.
+				//TODO add <String> for keyCols
 				final List keyCols = new ArrayList();
 				for (int y = 0; y < dsTable.getPrimaryKey().getColumns().length; y++)
 					keyCols.add(((DataSetColumn) dsTable.getPrimaryKey()
@@ -986,10 +991,10 @@ public interface MartConstructor {
 										.singletonList(optCol));
 								this.issueAction(index);
 							}
-						}
-					}
-				}
-			}
+						} // end of if (dsTable.getType().equals(...)
+					} //for (final Iterator j = restrictValues.iterator() 
+				} //end of for (final Iterator i = restrictCols.entrySet().iterator()
+			}//end of if (!dsTable.getType().equals(DataSetTableType.MAIN))
 		}
 
 		private void doSelectFromTable(final Schema templateSchema,
@@ -1960,8 +1965,7 @@ public interface MartConstructor {
 			try {
 				// Begin.
 				Log.debug("Construction started");
-				this
-						.issueListenerEvent(MartConstructorListener.CONSTRUCTION_STARTED);
+				this.issueListenerEvent(MartConstructorListener.CONSTRUCTION_STARTED);
 
 				// Work out how many datasets we have.
 				final int totalDataSetCount = this.datasets.size();
@@ -1976,8 +1980,7 @@ public interface MartConstructor {
 						throw t;
 					}
 				}
-				this
-						.issueListenerEvent(MartConstructorListener.CONSTRUCTION_ENDED);
+				this.issueListenerEvent(MartConstructorListener.CONSTRUCTION_ENDED);
 				Log.info("Construction ended");
 			} catch (final ConstructorException e) {
 				// This is so the users see a nice message straight away.
