@@ -61,7 +61,7 @@ public class TransformationYongPrototype {
 		File file = createTmpFolders(initialHost);
 		HostAndVirtualSchema hostAndVirtualSchema = TransformationMain.computeHostAndVirtualSchema(martName);
 		Transformation transformation = TransformationMain.transform(true, null, initialHost, 
-				hostAndVirtualSchema.getMartServiceIdentifier(), hostAndVirtualSchema.getVirtualSchema(), datasetName);
+				hostAndVirtualSchema.getMartServiceIdentifier(), file.getAbsolutePath(), hostAndVirtualSchema.getVirtualSchema(), datasetName);
 		boolean b = deleteDir(file);
 		MyUtils.checkStatusProgram(b && !file.exists());
 		return transformation.getTransformedDocument();

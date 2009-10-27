@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 import org.biomart.common.general.constants.MyConstants;
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
@@ -41,10 +40,8 @@ public class TransformationMain {
 	
 	public static final boolean ENABLE_PROPERTIES_CHECK = true;
 	
-	public static String PROPERTIES_FILE_FOLDER_PATH_AND_NAME = "./src/martConfigurator/transformation/";
 	public static String TRANSFORMATIONS_GENERAL_OUTPUT = "/home/anthony/Desktop/Transformation/";
 	
-	//public static final String TRANSFORMATION_PROPERTY_FILE_NAME = "transformation.prop";
 	public static final String DEFAULT_DATA_FOLDER_NAME = "DataFolder";
 	public static final String DATABASE_DESCRIPTION_OUTPUT_FILE_NAME = "DatabaseDescription";
 	public static final String TABLE_LIST_SERIAL_FILE_NAME = "SerialTableList";
@@ -174,9 +171,9 @@ public class TransformationMain {
 				//transform(false, "55", "default", "gene_vega");
 				//transform(false, "55", "default", "variation");
 				
-				martRegistryList.add(transform(false, "55", "default", "gene_ensembl").getMartRegistry());
-				martRegistryList.add(transform(false, "55", "default", "gene_vega").getMartRegistry());
-				martRegistryList.add(transform(false, "55", "default", "variation").getMartRegistry());
+				martRegistryList.add(transform(false, "55", "default", TRANSFORMATIONS_GENERAL_OUTPUT, "gene_ensembl").getMartRegistry());
+				martRegistryList.add(transform(false, "55", "default", TRANSFORMATIONS_GENERAL_OUTPUT, "gene_vega").getMartRegistry());
+				martRegistryList.add(transform(false, "55", "default", TRANSFORMATIONS_GENERAL_OUTPUT, "variation").getMartRegistry());
 				
 			} else {
 				MartServiceIdentifier initialHost = new MartServiceIdentifier(
@@ -189,24 +186,24 @@ public class TransformationMain {
 				String martName = "ensembl";
 				String datasetName = "hsapiens_gene_ensembl";
 				HostAndVirtualSchema hostAndVirtualSchema = computeHostAndVirtualSchema(martName);
-				Transformation transformation = transform(true, "55", initialHost, 
-						hostAndVirtualSchema.getMartServiceIdentifier(), hostAndVirtualSchema.getVirtualSchema(), datasetName);
+				Transformation transformation = transform(true, "55", initialHost, hostAndVirtualSchema.getMartServiceIdentifier(), 
+						TRANSFORMATIONS_GENERAL_OUTPUT, hostAndVirtualSchema.getVirtualSchema(), datasetName);
 				MartRegistry martRegistry = transformation.getMartRegistry();
 				martRegistryList.add(martRegistry);
 				
 				String martName2 = "ensembl";
 				String datasetName2 = "mmusculus_gene_ensembl";
 				HostAndVirtualSchema hostAndVirtualSchema2 = computeHostAndVirtualSchema(martName2);
-				Transformation transformation2 = transform(true, "55", initialHost, 
-						hostAndVirtualSchema2.getMartServiceIdentifier(), hostAndVirtualSchema2.getVirtualSchema(), datasetName2);
+				Transformation transformation2 = transform(true, "55", initialHost, hostAndVirtualSchema2.getMartServiceIdentifier(), 
+						TRANSFORMATIONS_GENERAL_OUTPUT, hostAndVirtualSchema2.getVirtualSchema(), datasetName2);
 				MartRegistry martRegistry2 = transformation2.getMartRegistry();
 				martRegistryList.add(martRegistry2);
 				
 				String martName4 = "uniprot_mart";
 				String datasetName4 = "UNIPROT";
 				HostAndVirtualSchema hostAndVirtualSchema4 = computeHostAndVirtualSchema(martName4);
-				Transformation transformation4 = transform(true, "55", initialHost, 
-						hostAndVirtualSchema4.getMartServiceIdentifier(), hostAndVirtualSchema4.getVirtualSchema(), datasetName4);
+				Transformation transformation4 = transform(true, "55", initialHost, hostAndVirtualSchema4.getMartServiceIdentifier(), 
+						TRANSFORMATIONS_GENERAL_OUTPUT, hostAndVirtualSchema4.getVirtualSchema(), datasetName4);
 				MartRegistry martRegistry4 = transformation4.getMartRegistry();
 				martRegistryList.add(martRegistry4);
 				
@@ -281,7 +278,7 @@ if (currentMart.martName.equals("ensembl_expressionmart_48") && biomartPortalDat
 						String martName = currentMart.getMartName();
 						HostAndVirtualSchema hostAndVirtualSchema = computeHostAndVirtualSchema(martName);
 						Transformation transformation = transform(true, null, martServiceIdentifier, hostAndVirtualSchema.getMartServiceIdentifier(), 
-							hostAndVirtualSchema.getVirtualSchema(), biomartPortalDataset.datasetName);
+							TRANSFORMATIONS_GENERAL_OUTPUT, hostAndVirtualSchema.getVirtualSchema(), biomartPortalDataset.datasetName);
 						martRegistryList.add(transformation.getMartRegistry());
 
 					}
@@ -319,31 +316,33 @@ if (currentMart.martName.equals("ensembl_expressionmart_48") && biomartPortalDat
 		}*/
 	}
 	
-	public static Transformation transform(boolean webService, String version, 
+	public static Transformation transform(boolean webService, String version, String transformationsGeneralOutput,
 			String virtualSchema, String templateName)
 	throws TechnicalException, FunctionalException{
-		return transform(webService, version, null, null, virtualSchema, null, templateName);
+		return transform(webService, version, null, null, transformationsGeneralOutput, virtualSchema, null, templateName);
 	}
 	public static Transformation transform(boolean webService, String version, 
-			MartServiceIdentifier portalIdentifier, MartServiceIdentifier hostLocal, String virtualSchema, String datasetName)
+			MartServiceIdentifier portalIdentifier, MartServiceIdentifier hostLocal, String transformationsGeneralOutput,
+			String virtualSchema, String datasetName)
 	throws TechnicalException, FunctionalException{
-		return transform(webService, version, portalIdentifier, hostLocal, virtualSchema, datasetName, null);
+		return transform(webService, version, portalIdentifier, hostLocal, transformationsGeneralOutput, virtualSchema, datasetName, null);
 	}
 	public static Transformation transform(boolean webService, String version, 
-			MartServiceIdentifier portalIdentifier, MartServiceIdentifier trueHostIdentifier, String virtualSchema, String datasetName, String templateName)
+			MartServiceIdentifier portalIdentifier, MartServiceIdentifier trueHostIdentifier, String transformationsGeneralOutput,
+			String virtualSchema, String datasetName, String templateName)
 	throws TechnicalException, FunctionalException{
 		System.out.println("start.");
 		
 		String transformationTypeFolderName = TransformationUtils.generateTransformationTypeFolderName(webService, version);
 		String datasetOrTemplateName = templateName!=null ? templateName : datasetName;
-		String datasetGeneralOutputFolderPathAndName = TRANSFORMATIONS_GENERAL_OUTPUT + transformationTypeFolderName + MyUtils.FILE_SEPARATOR + 
+		String datasetGeneralOutputFolderPathAndName = transformationsGeneralOutput + transformationTypeFolderName + MyUtils.FILE_SEPARATOR + 
 		TransformationUtils.generateIdentifier(webService, version, trueHostIdentifier, virtualSchema, datasetOrTemplateName) + MyUtils.FILE_SEPARATOR;	
 		
 		//Properties properties = getPropertiesFile();
 				
 		TransformationGeneralVariable general = new TransformationGeneralVariable(version,
 				(webService ? webServiceConfigurationMap : null), portalIdentifier,
-				TRANSFORMATIONS_GENERAL_OUTPUT, datasetGeneralOutputFolderPathAndName,
+				transformationsGeneralOutput, datasetGeneralOutputFolderPathAndName,
 				DATABASE_PARAMETER, DATABASE_NAMES);
 		
 		// Fetch all database information if not using webservice 
