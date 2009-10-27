@@ -200,6 +200,10 @@ public class Mart {
 	public DataSets getDataSetObj() {
 		return this.datasetsObj;
 	}
+	
+	public DataSet getDataSet(String name) {
+		return this.datasetsObj.getDataSet(name);
+	}
 
 	public Location getMartLocation() {
 		return this.location;

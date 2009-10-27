@@ -15,6 +15,9 @@ import javax.swing.JPanel;
 import org.biomart.common.resources.Resources;
 import org.biomart.configurator.jdomUtils.JDomNodeAdapter;
 import org.biomart.configurator.jdomUtils.JDomUtils;
+import org.biomart.configurator.model.object.McDsColumn;
+import org.biomart.configurator.model.object.McDsTable;
+import org.biomart.configurator.utils.type.McNodeType;
 import org.jdom.Element;
 
 public class DsTablesDialog extends JDialog {
@@ -25,7 +28,7 @@ public class DsTablesDialog extends JDialog {
 	private static final long serialVersionUID = 1L;
 	private JDomNodeAdapter dataset;
 	private JComboBox dsCombo;
-	private String partitionColumn;
+	private McDsColumn partitionColumn;
 	private String partitionTable;
 	
 	public DsTablesDialog(JDomNodeAdapter ds) {
@@ -38,16 +41,24 @@ public class DsTablesDialog extends JDialog {
 	}
 	
 	private void init() {
-		JPanel content = new JPanel(new BorderLayout());
-		
+		JPanel content = new JPanel(new BorderLayout());		
 		JPanel comboPanel = new JPanel(new FlowLayout());
 		JLabel label = new JLabel("Choose Dataset Table: ");
 		comboPanel.add(label);
 		
-		dsCombo = new JComboBox();
-		List<Element> dsTableList = JDomUtils.searchElementList(this.dataset.getNode(), Resources.get("DSTABLE"), null);
+		if(dsCombo!=null)
+			dsCombo.removeAllItems();
+		else
+			dsCombo = new JComboBox();
+		
+		Element dsElement = this.dataset.getNode();
+		List<Element> dsTableList = this.dataset.getNode().getChildren(Resources.get("DSTABLE"));
 		for(Element dsTable:dsTableList) {
-			dsCombo.addItem(dsTable.getAttributeValue(Resources.get("NAME")));
+			McDsTable mcDs = new McDsTable(McNodeType.DataSet,dsElement.getParentElement().getParentElement().
+					getAttributeValue(Resources.get("NAME")),dsElement.getParentElement().
+					getAttributeValue(Resources.get("NAME")),dsElement.getAttributeValue(Resources.get("NAME")),
+					dsTable.getAttributeValue(Resources.get("NAME")));
+			dsCombo.addItem(mcDs);
 		}
 		comboPanel.add(dsCombo);
 		content.add(comboPanel, BorderLayout.NORTH);
@@ -65,7 +76,8 @@ public class DsTablesDialog extends JDialog {
 		JButton cancelButton = new JButton("Cancel");
 		cancelButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
+				DsTablesDialog.this.partitionColumn = null;
+				DsTablesDialog.this.setVisible(false);
 			}
 		});
 		buttonPanel.add(cancelButton);
@@ -76,18 +88,18 @@ public class DsTablesDialog extends JDialog {
 	}
 	
 	private void showColumnsDialog() {
-		String dsTable = (String)this.dsCombo.getSelectedItem();
-		this.setPartitionTable(dsTable);
-		Element dsTableElement = JDomUtils.searchElement(this.dataset.getNode(), Resources.get("DSTABLE"), dsTable);
-		DsColumnsDialog dscDialog = new DsColumnsDialog(dsTableElement);
+		McDsTable dsTable = (McDsTable)this.dsCombo.getSelectedItem();
+		this.setPartitionTable(dsTable.getName());
+		Element dsTableElement = JDomUtils.searchElement(this.dataset.getNode(), Resources.get("DSTABLE"), dsTable.getName());
+		DsColumnsDialog dscDialog = new DsColumnsDialog(dsTable,dsTableElement);
 		this.setPartitionColumn(dscDialog.getPartitionColumn());
 	}
 	
-	private void setPartitionColumn(String columnName) {
-		this.partitionColumn = columnName;
+	private void setPartitionColumn(McDsColumn column) {
+		this.partitionColumn = column;
 	}
 	
-	public String getPartitionColumn() {
+	public McDsColumn getPartitionColumn() {
 		return this.partitionColumn;
 	}
 	

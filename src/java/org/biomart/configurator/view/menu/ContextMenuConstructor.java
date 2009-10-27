@@ -292,23 +292,13 @@ public class ContextMenuConstructor implements ActionListener {
 			if(row>0)
 				ltree.setSelectionRow(row-1);
 			ltree.setSelectionRow(row);			
-		}else if(e.getActionCommand().equals("create partition")) {
-			//hardcode
-			List<String> values = new ArrayList<String>();
-			values.add("celegans");
-			values.add("mmusculus");
-			values.add("hsapiens");
-			node.addPartition(node.getNode().getAttributeValue(Resources.get("NAME")),"pt1",
-					"pt1",values);
-			ltree.getModel().nodeStructureChanged(node);
 		}else if(e.getActionCommand().equals("partition")) {
 			DsTablesDialog dsDialog = new DsTablesDialog(node);
-			List<String> values = new ArrayList<String>();
-			values.add("celegans");
-			values.add("mmusculus");
-			values.add("hsapiens");
+			if(dsDialog.getPartitionColumn()==null)
+				return;
+			List<String> values = node.getPartitionValue(dsDialog.getPartitionColumn());
 			node.addPartition(node.getNode().getAttributeValue(Resources.get("NAME")),
-					dsDialog.getPartitionTable(),dsDialog.getPartitionColumn(), values);
+					dsDialog.getPartitionColumn().getDataSetTableName(),dsDialog.getPartitionColumn().getName(), values);
 			ltree.getModel().nodeStructureChanged(node);
 			McGuiUtils.refreshGui(node);
 		}else if(e.getActionCommand().equals("add container")) {

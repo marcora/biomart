@@ -34,9 +34,6 @@ import org.biomart.configurator.view.idwViews.McViews;
 		private boolean keyDependency;
 
 		private boolean expressionDependency;
-
-		private String partitionedName = null;
-
 		private final List partitionCols = new ArrayList();
 
 		private TransformationUnit tu;

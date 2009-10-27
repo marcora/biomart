@@ -4,20 +4,18 @@ package org.biomart.configurator.jdomUtils;
 
 import general.exceptions.FunctionalException;
 import general.exceptions.TechnicalException;
-import java.io.File;
-import java.io.FileOutputStream;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
-
 import java.util.HashMap;
-
 import java.util.Iterator;
-
 import java.util.List;
-
 import java.util.Map;
 import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultMutableTreeNode;
-
 import javax.swing.tree.TreeNode;
 import martConfigurator.transformation.TransformationMain;
 import martConfigurator.transformation.helpers.MartServiceIdentifier;
@@ -47,8 +45,11 @@ import org.biomart.common.view.gui.dialogs.StackTrace;
 
 import org.biomart.configurator.model.Location;
 
+import org.biomart.configurator.model.object.McDsColumn;
 import org.biomart.configurator.model.object.Processor;
 
+import org.biomart.configurator.utils.ConnectionObject;
+import org.biomart.configurator.utils.ConnectionPool;
 import org.biomart.configurator.utils.DsConnectionObject;
 import org.biomart.configurator.utils.TransformationYongPrototype;
 
@@ -62,22 +63,12 @@ import org.biomart.configurator.utils.type.DataSetTableType;
 import org.biomart.configurator.utils.type.EventType;
 import org.biomart.configurator.utils.type.IdwViewType;
 import org.biomart.configurator.utils.type.McGuiType;
-
 import org.biomart.configurator.view.idwViews.McViewSchema;
-
 import org.biomart.configurator.view.idwViews.McViews;
-
 import org.biomart.configurator.view.gui.dialogs.AddLinkedDataSetsDialog;
-
 import org.biomart.configurator.view.gui.dialogs.LocationConnectionDialog;
-
 import org.jdom.Document;
-
 import org.jdom.Element;
-import org.jdom.output.XMLOutputter;
-
-
-
 
 
 /**
@@ -1183,84 +1174,44 @@ public class JDomNodeAdapter extends DefaultMutableTreeNode {
 
     }
 
-
-
-    /**
-
-     * ptValue is hardcoded for now
-
-     */
-
     public void addPartition(String dsName, String dsTableName, String colName, List<String> ptValues) {
-
     	//current node is dataset
-
     	//find the datasettable type : main, submain, dm
-
     	Element dsTableElement = JDomUtils.searchElement(this.getNode(), Resources.get("DSTABLE"), dsTableName);
-
     	Element partElement = new Element(Resources.get("PARTITIONTABLE"));
-
     	List<Element> ptList = this.node.getChildren(Resources.get("PARTITIONTABLE"));
-
     	String ptName = Resources.get("PTPREFIX")+(ptList.size()+1);
 
-    	
-
     	partElement.setAttribute(Resources.get("NAME"), ptName);
-
     	partElement.setAttribute(Resources.get("DATASET"),dsName);
-
     	partElement.setAttribute(Resources.get("DSTABLE"),dsTableName);
-
     	partElement.setAttribute(Resources.get("COLUMN"),colName);
-
     	partElement.setAttribute("cols","1");
-
     	String dstType = dsTableElement.getAttributeValue(Resources.get("TYPE"));
-
     	partElement.setAttribute(Resources.get("TYPE"),dstType);
 
     	//default not flatten on dm
-
     	if(dstType.equals("2"))
-
     		partElement.setAttribute(Resources.get("FLATTEN"),"0");
 
     	this.node.addContent(partElement);
-
-    	
-
     	int row = 1;
 
     	for(String item:ptValues) {
-
     		Element cellElement = new Element("cell");
-
         	cellElement.setAttribute("row", ""+row);
-
         	cellElement.setAttribute("col","1");
-
         	cellElement.setAttribute("value", item);
-
         	row++;
-
         	partElement.addContent(cellElement);
-
     	}
 
     	partElement.setAttribute("rows",""+(row-1));
-
     	//update filters and attributes
-
     	Element filterElement = JDomUtils.searchElement(this.getNode(), Resources.get("FILTER"), colName);
-
     	Element attElement = JDomUtils.searchElement(this.getNode(), Resources.get("ATTRIBUTEPOINTER"), colName);
-
     	filterElement.setAttribute(Resources.get("PARTITIONTABLE"),ptName);
-
     	attElement.setAttribute(Resources.get("PARTITIONTABLE"),ptName);
-
      }
 
     
@@ -1465,25 +1416,16 @@ public class JDomNodeAdapter extends DefaultMutableTreeNode {
 
 
     private void addLocationFromDocument(Document doc) {
-
     	//find location name
-
     	String nameStr = Resources.get("NAME");
-
     	Element sourceLoc = doc.getRootElement().getChild(Resources.get("LOCATION"));
-
     	Element sourceMart = sourceLoc.getChild(Resources.get("MART"));
-
     	String locName = sourceLoc.getAttributeValue(nameStr);
-
     	String martName = sourceMart.getAttributeValue(nameStr);
-
+    	
     	Element locElement = JDomUtils.searchElementInUser(((JDomNodeAdapter)this.getRoot()).getNode(), 
-
     			McGuiUtils.INSTANCE.getCurrentUser().getUserName(),
-
     			Resources.get("LOCATION"), 
-
     			locName);
 
     	Element martElement = null;
@@ -1753,33 +1695,48 @@ public class JDomNodeAdapter extends DefaultMutableTreeNode {
     
 
     public void hideForCurrentUser() {
-
     	String hideStr = this.node.getAttributeValue(Resources.get("HIDE"));
-
     	String currentUser = McGuiUtils.INSTANCE.getCurrentUser().getUserName();
-
     	if(null==hideStr)
-
     		this.node.setAttribute(Resources.get("HIDE"),currentUser);
-
     	else {
-
     		if(hideStr.equals(currentUser))
-
     			return;
-
     		else {
-
     			hideStr = hideStr+","+currentUser;
-
     			this.node.setAttribute(Resources.get("HIDE"),hideStr);
-
     		}
-
     	}
-
-    		
-
     }
 
+    public List<String> getPartitionValue(McDsColumn mcDsCol) {
+    	List<String> result = new ArrayList<String>();
+    	DataSetColumn dsCol = mcDsCol.getDsColumn();
+    	if(dsCol instanceof WrappedColumn) {
+    		WrappedColumn wc = (WrappedColumn) dsCol;
+    		String colName = wc.getWrappedColumn().getName();
+    		String tableName = wc.getWrappedColumn().getTable().getName();
+    		
+    		//
+    		Location location = mcDsCol.getLocation();
+    		ConnectionObject genObj = location.getConnectionObject();
+    		ConnectionObject conObj = new ConnectionObject(genObj.getJdbcUrl(),genObj.getDatabaseName(),genObj.getUserName(),
+    				genObj.getPassword(),genObj.getDriverClassString());
+    		Connection con = ConnectionPool.Instance.getConnection(conObj);
+    		String sql = "select distinct "+colName +" from "+tableName;
+    		try {
+				Statement st = con.createStatement();
+				ResultSet rs = st.executeQuery(sql);
+				while(rs.next()) {
+					result.add(rs.getString(colName));
+				}
+				ConnectionPool.Instance.releaseConnection(conObj);
+			} catch (SQLException e) {
+				
+				e.printStackTrace();
+			} 
+			return result;
+    	}
+    	return null;
+    }
 }

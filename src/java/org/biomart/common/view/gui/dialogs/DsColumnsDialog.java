@@ -13,6 +13,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.biomart.common.resources.Resources;
+import org.biomart.configurator.model.object.McDsColumn;
+import org.biomart.configurator.model.object.McDsTable;
 import org.jdom.Element;
 
 public class DsColumnsDialog extends JDialog {
@@ -23,11 +25,13 @@ public class DsColumnsDialog extends JDialog {
 	 */
 	private static final long serialVersionUID = 1L;
 	private Element dstElement;
-	private String partitionColumn;
+	private McDsColumn partitionColumn;
 	private JComboBox dsCombo;
+	private McDsTable mcDsTable;
 	
-	public DsColumnsDialog(Element dsTable) {
-		this.dstElement = dsTable;
+	public DsColumnsDialog(McDsTable mcDsTable, Element dstElement) {
+		this.dstElement = dstElement;
+		this.mcDsTable = mcDsTable;
 		this.init();
 		this.setModal(true);
 		this.pack();
@@ -42,10 +46,14 @@ public class DsColumnsDialog extends JDialog {
 		JLabel label = new JLabel("Choose column: ");
 		comboPanel.add(label);
 		
-		dsCombo = new JComboBox();
+		if(dsCombo!=null)
+			dsCombo.removeAllItems();
+		else
+			dsCombo = new JComboBox();
 		List<Element> dsTableList = dstElement.getChildren(Resources.get("COLUMN"));
 		for(Element dsTable:dsTableList) {
-			dsCombo.addItem(dsTable.getAttributeValue(Resources.get("NAME")));
+			McDsColumn mcDsCol = new McDsColumn(this.mcDsTable,dsTable.getAttributeValue(Resources.get("NAME")));
+			dsCombo.addItem(mcDsCol);
 		}
 		comboPanel.add(dsCombo);
 		content.add(comboPanel, BorderLayout.NORTH);
@@ -70,10 +78,10 @@ public class DsColumnsDialog extends JDialog {
 	}
 	
 	private void setPartitionColumn() {
-		this.partitionColumn = (String)this.dsCombo.getSelectedItem();
+		this.partitionColumn = (McDsColumn)this.dsCombo.getSelectedItem();
 	}
 	
-	public String getPartitionColumn() {
+	public McDsColumn getPartitionColumn() {
 		return this.partitionColumn;
 	}
 }

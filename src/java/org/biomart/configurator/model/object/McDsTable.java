@@ -2,31 +2,33 @@ package org.biomart.configurator.model.object;
 
 import org.biomart.configurator.utils.type.McNodeType;
 
-public class McDataSet extends McObject {
+public class McDsTable extends McObject {
+
 	protected String locationName;
 	protected String martName;
+	protected String dataSetName;
 	
-	public void setLocationName(String locationName) {
-		this.locationName = locationName;
-	}
 	public String getLocationName() {
 		return locationName;
-	}
-	public void setMartName(String martName) {
-		this.martName = martName;
 	}
 	public String getMartName() {
 		return martName;
 	}
+	public String getDataSetName() {
+		return this.dataSetName;
+	}
 	
-	public McDataSet(McNodeType type, String locName, String martName, String name) {
+	public McDsTable(McNodeType type, String locName, String martName, String datasetName, String name) {
 		this.nodeType = type;
 		this.name = name;
 		this.locationName = locName;
 		this.martName = martName;
+		this.dataSetName = datasetName;
 	}
 	
 	public String toString() {
-		return this.locationName+"->"+this.martName+"->"+this.name;
+		return this.locationName+"->"+this.martName+"->"+this.dataSetName+"->"+this.name;
 	}
+
+	
 }

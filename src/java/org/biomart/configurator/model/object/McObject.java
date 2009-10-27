@@ -9,5 +9,12 @@ public abstract class McObject {
 	public McNodeType getNodeType() {
 		return this.nodeType;
 	}
+
+	public String toString() {
+		return this.name;
+	}
 	
+	public String getName() {
+		return this.name;
+	}
 }

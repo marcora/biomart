@@ -20,10 +20,6 @@ package org.biomart.builder.model;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.lang.ref.WeakReference;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,17 +32,12 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
-
-import org.biomart.builder.exceptions.PartitionException;
 import org.biomart.builder.exceptions.ValidationException;
 import org.biomart.builder.model.Key.ForeignKey;
 import org.biomart.builder.model.Key.PrimaryKey;
-
 import org.biomart.builder.model.Relation.Cardinality;
 import org.biomart.builder.model.Relation.CompoundRelationDefinition;
 import org.biomart.builder.model.Relation.RestrictedRelationDefinition;
-import org.biomart.builder.model.Relation.UnrolledRelationDefinition;
 import org.biomart.builder.model.TransformationUnit.JoinTable;
 import org.biomart.builder.model.TransformationUnit.SelectFromTable;
 import org.biomart.builder.model.TransformationUnit.SkipTable;
@@ -333,15 +324,6 @@ public class DataSet extends Schema {
 
 
 
-	/**
-	 * Obtain all tables used by this dataset, in the order in which they were
-	 * included.
-	 * 
-	 * @return all tables.
-	 */
-	public Collection getIncludedTables() {
-		return this.includedTables;
-	}
 
 	/**
 	 * Obtain all relations used by this dataset, in the order in which they
