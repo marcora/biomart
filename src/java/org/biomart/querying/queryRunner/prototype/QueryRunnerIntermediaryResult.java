@@ -70,8 +70,6 @@ public class QueryRunnerIntermediaryResult implements Cloneable {
 	
 	public List<List<String>> getTransposedValues() {	// By row instead of by field
 		
-		debug(values);
-		
 		MyUtils.pressKeyToContinue();
 		
 		List<List<String>> transposedValues = new ArrayList<List<String>>();
@@ -107,17 +105,6 @@ MyUtils.checkStatusProgram(fieldValuesList.size()==totalValues,
 		return stringBuffer.toString();
 	}
 
-	public static void debug(List<List<String>> list) {
-		StringBuffer stringBuffer = new StringBuffer();
-		for (List<String> l : list) {
-			for (String s : l) {
-				stringBuffer.append(s + MyUtils.TAB_SEPARATOR);
-			}
-			stringBuffer.append(MyUtils.LINE_SEPARATOR);
-		}
-		MyUtils.writeFile("/home/anthony/Desktop/zed", stringBuffer.toString());
-System.exit(0);		
-	}
 	public List<List<String>> getValues() {
 		return values;
 	}

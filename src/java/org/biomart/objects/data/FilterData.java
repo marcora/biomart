@@ -79,14 +79,6 @@ public class FilterData implements Serializable {
 		return rowForPartValue.get(cascadeChild);
 	}
 	
-	/*this.dataFile = new File("/home/anthony/Desktop/debug.xml");
-	try {
-		writeFile();
-	} catch (TechnicalException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}*/
-	
 	public ArrayList<filterDataRow> addCascadeChildForRowAndPart(
 			Part part, filterDataRow dataRow, Filter cascadeChild) throws FunctionalException {
 		ArrayList<filterDataRow> cascadeChildForRowAndPartMapValue = 

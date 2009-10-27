@@ -147,7 +147,7 @@ public class TransformationMain {
 		
 		Element newRootElement = martRegistry.generateXml();
 		try {
-			String destinationFolder = "/home/anthony/workspace/biomart-java/files/";
+			String destinationFolder = "./files/";
 			MyUtils.writeSerializedObject(martRegistry, destinationFolder + 
 					(webServiceTransformation ? "web" : "db") + "_portal.serial");
 			MyUtils.writeXmlFile(newRootElement, destinationFolder + 
