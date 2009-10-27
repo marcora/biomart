@@ -144,10 +144,9 @@ public class TransformationMain {
 		
 		Element newRootElement = martRegistry.generateXml();
 		try {
-			String destinationFolder = "./files/";
-			MyUtils.writeSerializedObject(martRegistry, destinationFolder + 
+			MyUtils.writeSerializedObject(martRegistry, "./conf/files/" + 
 					(webServiceTransformation ? "web" : "db") + "_portal.serial");
-			MyUtils.writeXmlFile(newRootElement, destinationFolder + 
+			MyUtils.writeXmlFile(newRootElement, "./conf/xml/" + 
 					(webServiceTransformation ? "web" : "db") + "_portal.xml");
 		} catch (TechnicalException e) {
 			e.printStackTrace();

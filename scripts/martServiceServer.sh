@@ -1,7 +1,7 @@
 # run as root (sudo bash)
 SERVER=http://localhost:8082
 WEB_PROJECT_NAME=MartService
-PROJECT_PATH=/home/anthony/workspace/00MartConfigurator
+PROJECT_PATH=/home/anthony/workspace/biomart-java
 WEB_PROJECT_PATH=/home/anthony/workspace/$WEB_PROJECT_NAME
 WAR_NAME=$WEB_PROJECT_NAME
 APPLICATION_PATH=$SERVER/$WAR_NAME
@@ -10,9 +10,9 @@ SERVLET_PATH=$APPLICATION_PATH/$SERVLET_NAME
 TOMCAT_WEBAPP_FOLDER=/var/lib/tomcat6/webapps
 
 # copy files
-cp $PROJECT_PATH/xml/martservice.xsd $WEB_PROJECT_PATH/xml/
-cp $PROJECT_PATH/xml/web.xml $WEB_PROJECT_PATH/WEB-INF/
-cp $PROJECT_PATH/files/portal.serial $WEB_PROJECT_PATH/files/
+cp $PROJECT_PATH/conf/xml/martservice.xsd $WEB_PROJECT_PATH/xml/
+cp $PROJECT_PATH/conf/xml/web.xml $WEB_PROJECT_PATH/WEB-INF/
+cp $PROJECT_PATH/conf/files/portal.serial $WEB_PROJECT_PATH/files/
 cp $PROJECT_PATH/web/index.jsp $WEB_PROJECT_PATH/
 cp $PROJECT_PATH/lib/* $WEB_PROJECT_PATH/WEB-INF/lib/
 cd $WEB_PROJECT_PATH
