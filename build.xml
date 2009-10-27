@@ -71,7 +71,6 @@
         <include name="xerces.jar" />
         <include name="log4j-1.2.15.jar" />
     	<include name="idw-gpl.jar"/>
-    	<include name="martServiceTransformation.jar"/>
     </fileset>
 
     <!-- patternsets to use in various zip and tar filesets during the dist-* targets -->
