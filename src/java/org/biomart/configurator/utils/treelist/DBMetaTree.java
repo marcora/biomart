@@ -29,19 +29,19 @@ import javax.swing.tree.TreePath;
 import org.biomart.common.view.gui.SwingWorker;
 import org.biomart.common.view.gui.dialogs.ProgressDialog2;
 import org.biomart.common.view.gui.dialogs.StackTrace;
-import org.biomart.configurator.utils.ConnectionObject;
+import org.biomart.configurator.utils.DbInfoObject;
 import org.biomart.configurator.utils.ConnectionPool;
 
 
 public class DBMetaTree extends TreeListComponent implements TreeSelectionListener {
     
-	private ConnectionObject conObject;
+	private DbInfoObject conObject;
 		
 	public DBMetaTree() {
 		super("Databases");
 	}
 	
-	public void setConnectionObject(ConnectionObject object) {
+	public void setConnectionObject(DbInfoObject object) {
 		this.conObject = object;
 	}
 
@@ -124,7 +124,7 @@ public class DBMetaTree extends TreeListComponent implements TreeSelectionListen
 		
 	}
 	
-	public void updateTree(ConnectionObject conObject) {
+	public void updateTree(DbInfoObject conObject) {
 		this.conObject = conObject;
 		
 		this.getDatabases();

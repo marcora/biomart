@@ -61,7 +61,7 @@ import org.biomart.configurator.jdomUtils.JDomNodeAdapter;
 import org.biomart.configurator.jdomUtils.JDomUtils;
 import org.biomart.configurator.model.Location;
 import org.biomart.configurator.model.McModel;
-import org.biomart.configurator.utils.ConnectionObject;
+import org.biomart.configurator.utils.DbInfoObject;
 import org.biomart.configurator.utils.McEventObject;
 import org.biomart.configurator.utils.McGuiUtils;
 import org.biomart.configurator.utils.McUtils;
@@ -574,7 +574,7 @@ public class McViewSchema extends McView implements TreeSelectionListener {
 			String schemaName = se.getAttributeValue(Resources.get("NAME"));
 			if(mart.getSchemas().get(schemaName)!=null)
 				continue;
-			ConnectionObject conObj = new ConnectionObject(
+			DbInfoObject conObj = new DbInfoObject(
 					se.getAttributeValue("url"),
 					se.getAttributeValue("databaseName"),
 					se.getAttributeValue("userName"), 
@@ -741,7 +741,7 @@ public class McViewSchema extends McView implements TreeSelectionListener {
 		Element schemaElement = dsElement.getChild(Resources.get("SOURCESCHEMA"));
 		String schemaName = schemaElement.getAttributeValue(Resources.get("NAME"));
 
-		ConnectionObject conObj = new ConnectionObject(
+		DbInfoObject conObj = new DbInfoObject(
 				schemaElement.getAttributeValue("url"),
 				schemaElement.getAttributeValue("databaseName"),
 				schemaElement.getAttributeValue("userName"), 

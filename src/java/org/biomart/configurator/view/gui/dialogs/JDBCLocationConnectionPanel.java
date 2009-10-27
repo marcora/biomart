@@ -55,7 +55,7 @@ import org.biomart.common.view.gui.SwingWorker;
 import org.biomart.common.view.gui.dialogs.ProgressDialog2;
 import org.biomart.common.view.gui.dialogs.StackTrace;
 import org.biomart.configurator.model.Location;
-import org.biomart.configurator.utils.ConnectionObject;
+import org.biomart.configurator.utils.DbInfoObject;
 import org.biomart.configurator.utils.treelist.DBMetaTree;
 import org.biomart.configurator.utils.type.MartType;
 
@@ -125,7 +125,7 @@ import org.biomart.configurator.utils.type.MartType;
 		private JTextField username;
 		private DBMetaTree dbPreview;
 		private JCheckBox keyguessing;
-		private ConnectionObject conObject;
+		private DbInfoObject conObject;
 
 		/**
 		 * This constructor creates a panel with all the fields necessary to
@@ -489,7 +489,7 @@ import org.biomart.configurator.utils.type.MartType;
 			final String username = this.username.getText();
 			final String password = new String(this.password.getPassword());
 			// Construct a JDBCSchema based on them.
-			ConnectionObject conObj = new ConnectionObject(url,"",username,password,driverClassName);
+			DbInfoObject conObj = new DbInfoObject(url,"",username,password,driverClassName);
 			final JDBCSchema schema = new JDBCSchema(null, conObj,
 					 "", name, this.keyguessing.isSelected(), "", 
 					"");
@@ -560,7 +560,7 @@ import org.biomart.configurator.utils.type.MartType;
 			if (!this.validateFields(true))
 				return;
 
-			conObject = new ConnectionObject(this.jdbcURL.getText(),"",
+			conObject = new DbInfoObject(this.jdbcURL.getText(),"",
 					this.username.getText(),
 					new String(this.password.getPassword()),
 					this.driverClass.getText());
@@ -614,7 +614,7 @@ import org.biomart.configurator.utils.type.MartType;
 			if(null==locations || locations.get(name) == null) {
 				loc = new Location(name);
 				
-				ConnectionObject conObj = new ConnectionObject(this.jdbcURL.getText(),"",
+				DbInfoObject conObj = new DbInfoObject(this.jdbcURL.getText(),"",
 						this.username.getText(),
 						new String(this.password.getPassword()),
 						this.driverClass.getText());

@@ -1,6 +1,11 @@
 package org.biomart.configurator.utils;
 
-public class ConnectionObject {
+/**
+ * Has all information for creating a JDBC connection
+ * @author yliang
+ *
+ */
+public class DbInfoObject {
 	private String jdbcUrl;
 	private String databaseName;
 	private String userName;
@@ -26,7 +31,7 @@ public class ConnectionObject {
 		return password;
 	}
 	
-	public ConnectionObject(String url,String dbName, String userName, String pwd, String driverClassString) {
+	public DbInfoObject(String url,String dbName, String userName, String pwd, String driverClassString) {
 		this.jdbcUrl = url;
 		this.userName = userName;
 		this.password = pwd;
@@ -50,10 +55,10 @@ public class ConnectionObject {
 		if(this.getClass() != obj.getClass())
 			return false;
 		
-		if(!(obj instanceof ConnectionObject))
+		if(!(obj instanceof DbInfoObject))
 			return false;
 		
-		ConnectionObject conObj = (ConnectionObject)obj;
+		DbInfoObject conObj = (DbInfoObject)obj;
 		if(conObj.getDriverClassString().equals(this.driverClassString) && 
 				conObj.getJdbcUrl().equals(this.jdbcUrl) && 
 				conObj.getUserName().equals(this.userName) &&

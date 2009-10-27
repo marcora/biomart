@@ -15,15 +15,16 @@ import java.util.Map;
 public enum ConnectionPool {
 	Instance;
 	
-	private Map<ConnectionObject, Connection> connections;
+	private Map<DbInfoObject, Connection> connections;
 	
 	private ConnectionPool() {
-		this.connections = new HashMap<ConnectionObject, Connection>();
+		this.connections = new HashMap<DbInfoObject, Connection>();
 	}
 	/*
 	 * if cannot find a connection object, create a new one and put it in pool
+	 * if the conObject has databasename, the url will include it.
 	 */
-	public Connection getConnection(ConnectionObject conObject) {
+	public Connection getConnection(DbInfoObject conObject) {
 		Connection con = this.connections.get(conObject);
 		if(con==null) {
 			try {
@@ -40,7 +41,7 @@ public enum ConnectionPool {
 		return con;
 	}
 	
-	public void releaseConnection(ConnectionObject conObject) {
+	public void releaseConnection(DbInfoObject conObject) {
 		Connection con = this.connections.get(conObject);
 		if(con != null) {
 			try {

@@ -48,7 +48,7 @@ import org.biomart.configurator.model.Location;
 import org.biomart.configurator.model.object.McDsColumn;
 import org.biomart.configurator.model.object.Processor;
 
-import org.biomart.configurator.utils.ConnectionObject;
+import org.biomart.configurator.utils.DbInfoObject;
 import org.biomart.configurator.utils.ConnectionPool;
 import org.biomart.configurator.utils.DsConnectionObject;
 import org.biomart.configurator.utils.TransformationYongPrototype;
@@ -1716,12 +1716,13 @@ public class JDomNodeAdapter extends DefaultMutableTreeNode {
     		WrappedColumn wc = (WrappedColumn) dsCol;
     		String colName = wc.getWrappedColumn().getName();
     		String tableName = wc.getWrappedColumn().getTable().getName();
-    		
+    		String schemaName = wc.getWrappedColumn().getTable().getSchema().getName();
     		//
     		Location location = mcDsCol.getLocation();
-    		ConnectionObject genObj = location.getConnectionObject();
-    		ConnectionObject conObj = new ConnectionObject(genObj.getJdbcUrl(),genObj.getDatabaseName(),genObj.getUserName(),
+    		DbInfoObject genObj = location.getConnectionObject();
+    		DbInfoObject conObj = new DbInfoObject(genObj.getJdbcUrl(),genObj.getDatabaseName(),genObj.getUserName(),
     				genObj.getPassword(),genObj.getDriverClassString());
+    		conObj.setDatabaseName(schemaName);
     		Connection con = ConnectionPool.Instance.getConnection(conObj);
     		String sql = "select distinct "+colName +" from "+tableName;
     		try {
@@ -1735,8 +1736,7 @@ public class JDomNodeAdapter extends DefaultMutableTreeNode {
 				
 				e.printStackTrace();
 			} 
-			return result;
     	}
-    	return null;
+    	return result;
     }
 }

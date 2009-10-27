@@ -12,7 +12,7 @@ import org.biomart.builder.model.Mart;
 import org.biomart.builder.model.Schema;
 import org.biomart.builder.model.Table;
 import org.biomart.common.resources.Settings;
-import org.biomart.configurator.utils.ConnectionObject;
+import org.biomart.configurator.utils.DbInfoObject;
 import org.biomart.configurator.utils.McUtils;
 
 /**
@@ -25,7 +25,7 @@ public class Location {
 	private String name;
 	//TODO should be a generic connectionobject
 	//TODO should have a location type
-	private ConnectionObject conObject;
+	private DbInfoObject conObject;
 	private boolean isKeyGuessing=true;
 	private boolean isSourceSchema = true;
 	//TODO this one should not be here
@@ -75,11 +75,11 @@ public class Location {
 		Settings.saveHistoryProperties(Location.class, this.name, history);
 	}
 	
-	public void setConnectionObject(ConnectionObject conObj) {
+	public void setConnectionObject(DbInfoObject conObj) {
 		this.conObject = conObj;
 	}
 	
-	public ConnectionObject getConnectionObject() {
+	public DbInfoObject getConnectionObject() {
 		return this.conObject;
 	}
 		

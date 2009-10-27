@@ -297,10 +297,12 @@ public class ContextMenuConstructor implements ActionListener {
 			if(dsDialog.getPartitionColumn()==null)
 				return;
 			List<String> values = node.getPartitionValue(dsDialog.getPartitionColumn());
-			node.addPartition(node.getNode().getAttributeValue(Resources.get("NAME")),
-					dsDialog.getPartitionColumn().getDataSetTableName(),dsDialog.getPartitionColumn().getName(), values);
-			ltree.getModel().nodeStructureChanged(node);
-			McGuiUtils.refreshGui(node);
+			if(values.size()>0) {
+				node.addPartition(node.getNode().getAttributeValue(Resources.get("NAME")),
+						dsDialog.getPartitionColumn().getDataSetTableName(),dsDialog.getPartitionColumn().getName(), values);
+				ltree.getModel().nodeStructureChanged(node);
+				McGuiUtils.refreshGui(node);
+			}
 		}else if(e.getActionCommand().equals("add container")) {
 			node.addContainer();
 			ltree.getModel().nodeStructureChanged(node);

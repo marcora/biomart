@@ -38,7 +38,7 @@ import org.biomart.common.resources.Settings;
 import org.biomart.common.utils.InverseMap;
 import org.biomart.common.view.gui.dialogs.ProgressDialog2;
 import org.biomart.configurator.controller.dialects.DatabaseDialect;
-import org.biomart.configurator.utils.ConnectionObject;
+import org.biomart.configurator.utils.DbInfoObject;
 import org.biomart.configurator.utils.McUtils;
 
 	/**
@@ -66,7 +66,7 @@ import org.biomart.configurator.utils.McUtils;
 public class JDBCSchema extends Schema implements JDBCDataLink{
 		private static final long serialVersionUID = 1L;
 		private Connection connection;
-		private ConnectionObject conObj;
+		private DbInfoObject conObj;
 		private String realSchemaName;
 		private SchemaDiagram schemaDiagram;
 		
@@ -113,7 +113,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 		 * @param partitionNameExpression
 		 *            partition stuff.
 		 */
-		public JDBCSchema(final Mart mart, ConnectionObject conObject,
+		public JDBCSchema(final Mart mart, DbInfoObject conObject,
 				final String dataLinkSchema, final String name,
 				final boolean keyGuessing, final String partitionRegex,
 				final String partitionNameExpression) {
@@ -355,7 +355,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 				}
 		}
 
-		public ConnectionObject getConnectionObject() {
+		public DbInfoObject getConnectionObject() {
 			return this.conObj;
 		}
 
