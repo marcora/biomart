@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://schemas.xmlsoap.org/soap/envelope/ /home/anthony/workspace/MartService/test4.xml"
+xmlns:test="/home/anthony/workspace/00MartConfigurator/XML/test.xsd" >
+
+<!--  <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:mar="http://www.biomart.org:80/MartServiceSoap">-->
+   <soapenv:Header/>
+   <soapenv:Body>
+      <test:orderss>
+			<test:order value="my_value"/>
+		</test:orderss>
+   </soapenv:Body>
+</soapenv:Envelope>

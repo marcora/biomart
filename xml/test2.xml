@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<test:orders 
+	xmlns:test="http://www.mynamespace.com/mynamespace">
+	<test:order value="my_value"/>
+</test:orders>

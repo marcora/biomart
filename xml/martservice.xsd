@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema 
+	targetNamespace="http://localhost:8082:/MartService/NameSpace"
+	xmlns:tns="http://localhost:8082:/MartService/NameSpace" 
+	xmlns:xs="http://www.w3.org/2001/XMLSchema" >
+
+	<!-- ================================================================================================================== -->
+	<!-- shared by different requests -->
+	<xs:simpleType name="locationTypeType">
+	  <xs:restriction base="xs:string">
+	    <xs:enumeration value="url"/>
+	    <xs:enumeration value="rdbms"/>
+	  </xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="formatType">
+	  <xs:restriction base="xs:string">
+	    <xs:enumeration value="xml"/>
+	    <xs:enumeration value="json"/>
+	  </xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="partitionFilterType"><xs:restriction base="xs:string" /></xs:simpleType>	<!-- partitionFilterType=species."hsap,mmus,dmel" -->
+	<xs:simpleType name="nameType"><xs:restriction base="xs:string" /></xs:simpleType>
+	<xs:simpleType name="displayNameType"><xs:restriction base="xs:string" /></xs:simpleType>
+	<xs:simpleType name="descriptionType"><xs:restriction base="xs:string" /></xs:simpleType>
+	<xs:simpleType name="visibleType"><xs:restriction base="xs:boolean" /></xs:simpleType>
+	
+	<xs:simpleType name="martVersionType"><xs:restriction base="xs:integer" /></xs:simpleType>
+
+	<!-- ================================================================================================================== -->
+	<!-- getRegistry -->
+	<xs:element name="getRegistry">
+		<xs:complexType>
+			<xs:attribute name="username" type="xs:string" use="optional" default="anonymous"/>
+			<xs:attribute name="password" type="xs:string" use="optional" default=""/>
+			<xs:attribute name="format" type="tns:formatType" use="optional" default="xml"/>
+		</xs:complexType>
+	</xs:element>
+	
+	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - -->
+	<!-- getRegistryResponse -->
+	<xs:element name="getRegistryResponse">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="mart" type="tns:martType" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>		
+	</xs:element>
+	
+	<xs:complexType name="martType">
+		<xs:attribute name="name" type="tns:nameType" use="required" />
+		<xs:attribute name="displayName" type="tns:displayNameType" use="required" />
+		<xs:attribute name="visible" type="tns:visibleType" use="required" />
+		<xs:attribute name="description" type="tns:descriptionType" use="required" />
+							
+		<xs:attribute name="version" type="tns:martVersionType" use="required" />
+		
+		<xs:attribute name="locationName" type="tns:nameType" use="required" />
+		<xs:attribute name="locationDisplayName" type="tns:displayNameType" use="required" />
+		<xs:attribute name="locationVisible" type="tns:visibleType" use="required" />
+		<xs:attribute name="locationDescription" type="tns:descriptionType" use="required" />
+		
+		<xs:attribute name="host" type="xs:anyURI" use="required" />
+		<xs:attribute name="type" type="tns:locationTypeType" use="required" />
+		<xs:attribute name="user" type="xs:string" use="required" />
+		
+	</xs:complexType>
+	
+	<!-- ================================================================================================================== -->
+	<!-- getDatasets -->	
+	
+	<xs:element name="getDatasets">
+		<xs:complexType>
+			<xs:attribute name="username" type="xs:string" use="optional" default="anonymous"/>
+			<xs:attribute name="password" type="xs:string" use="optional" default=""/>
+			<xs:attribute name="format" type="tns:formatType" use="optional" default="xml"/>
+			
+			<xs:attribute name="martName" type="tns:nameType" use="required" />
+			<xs:attribute name="martVersion" type="tns:martVersionType" use="required" />
+		</xs:complexType>
+	</xs:element>
+	
+	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - -->
+	<!-- getDatasetsResponse -->
+	<xs:element name="getDatasetsResponse">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="dataset" type="tns:datasetType" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>		
+	</xs:element>
+	
+	<xs:complexType name="datasetType">
+		<xs:attribute name="name" type="tns:nameType" use="required" />
+		<xs:attribute name="displayName" type="tns:displayNameType" use="required" />
+		<xs:attribute name="visible" type="tns:visibleType" use="required" />
+		<xs:attribute name="description" type="tns:descriptionType" use="optional" />
+							
+		<xs:attribute name="materialized" type="xs:boolean" use="required" />
+		<xs:attribute name="centralTable" type="xs:string" use="required" />
+	</xs:complexType>
+	
+	<!-- ================================================================================================================== -->
+	<!-- "getContainees" -->
+	
+	<xs:complexType name="getContaineesType">
+			<xs:attribute name="username" type="xs:string" use="optional" default="anonymous"/>
+			<xs:attribute name="password" type="xs:string" use="optional" default=""/>
+			<xs:attribute name="format" type="tns:formatType" use="optional" default="xml"/>
+			
+			<xs:attribute name="datasetName" type="tns:nameType" use="required" />
+			<xs:attribute name="partitionFilter" type="tns:partitionFilterType" use="optional" />
+	</xs:complexType>
+	
+	<xs:complexType name="attributeType">
+		<xs:attribute name="name" type="tns:nameType" use="required" />
+		
+		<xs:attribute name="default" type="xs:boolean" use="optional" />		<!-- selection by default -->
+				
+<xs:attribute name="displayName" type="tns:displayNameType" use="optional" />
+<xs:attribute name="visible" type="tns:visibleType" use="optional" />
+<xs:attribute name="description" type="tns:descriptionType" use="optional" />
+				
+		<xs:attribute name="pointer" type="xs:boolean" use="required" />
+		<xs:attribute name="attribute" type="xs:string" use="optional" />
+		<xs:attribute name="filter" type="xs:string" use="optional" />
+		
+		<xs:attribute name="maxLength" type="xs:integer" use="optional" />
+		<xs:attribute name="linkURL" type="xs:string" use="optional" />
+	</xs:complexType>
+	
+	<xs:complexType name="filterType">
+		<xs:attribute name="name" type="tns:nameType" use="required" />
+		
+		<xs:attribute name="default" type="xs:boolean" use="optional" />		<!-- selection by default -->
+				
+<xs:attribute name="displayName" type="tns:displayNameType" use="optional" />
+<xs:attribute name="visible" type="tns:visibleType" use="optional" />
+<xs:attribute name="description" type="tns:descriptionType" use="optional" />
+		
+		<xs:attribute name="pointer" type="xs:boolean" use="required" />
+		<xs:attribute name="attribute" type="xs:string" use="optional" />
+		<xs:attribute name="filter" type="xs:string" use="optional" />
+		
+		<!-- all filters -->
+		<xs:attribute name="qualifier" type="xs:string" use="optional" />
+		<xs:attribute name="caseSensitive" type="xs:boolean" use="optional" />
+		
+		<!-- simple filters -->
+		<xs:attribute name="orderBy" type="xs:string" use="optional" />
+		<xs:attribute name="displayType" type="xs:string" use="optional" />
+		<xs:attribute name="upload" type="xs:boolean" use="optional" />
+		<xs:attribute name="multiValue" type="xs:boolean" use="optional" />
+		<xs:attribute name="cascadeChildren" type="xs:string" use="optional" />	<!-- comma separated list -->
+		<xs:attribute name="buttonURL" type="xs:string" use="optional" />
+		<xs:attribute name="trueValue" type="xs:string" use="optional" />
+		<xs:attribute name="trueDisplay" type="xs:string" use="optional" />
+		<xs:attribute name="falseValue" type="xs:string" use="optional" />
+		<xs:attribute name="falseDisplay" type="xs:string" use="optional" />
+		
+		<!-- group filters -->
+		<xs:attribute name="logicalOperator" type="xs:string" use="optional" />
+		<xs:attribute name="multipleFilter" type="xs:string" use="optional" />
+		<xs:attribute name="filterList" type="xs:string" use="optional" />	<!-- comma separated list -->
+	</xs:complexType>
+	
+	<!-- ================================================================================================================== -->
+	<!-- getRootContainer -->
+	<xs:element name="getRootContainer" type="tns:getContaineesType" />
+	
+	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - -->
+	<!-- getRootContainerResponse -->
+	<xs:element name="getRootContainerResponse">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="container" type="tns:recursiveContainerType" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>		
+	</xs:element>
+	
+	<xs:complexType name="recursiveContainerType">
+		<xs:choice minOccurs="0" maxOccurs="unbounded">	<!-- order doesn't matter -->
+			<xs:element name="container" type="tns:recursiveContainerType"/>
+			<xs:element name="attribute" type="tns:attributeType"/>
+			<xs:element name="filter" type="tns:filterType"/>
+		</xs:choice>
+		<xs:attribute name="name" type="tns:nameType" use="required" />
+		<xs:attribute name="displayName" type="tns:displayNameType" use="required" />
+		<xs:attribute name="visible" type="tns:visibleType" use="required" />
+		<xs:attribute name="description" type="tns:descriptionType" use="optional" />
+							
+		<xs:attribute name="level" type="xs:integer" use="required" />
+		<xs:attribute name="queryRestriction" type="xs:integer" use="optional" />
+	</xs:complexType>
+	
+	<!-- ================================================================================================================== -->
+	<!-- getAttributes -->
+	<xs:element name="getAttributes" type="tns:getContaineesType" />
+	
+	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - -->
+	<!-- getAttributesResponse -->
+	<xs:element name="getAttributesResponse">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="attribute" type="tns:attributeType" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>		
+	</xs:element>
+	
+	<!-- ================================================================================================================== -->
+	<!-- getFilters -->
+	<xs:element name="getFilters" type="tns:getContaineesType" />
+	
+	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - -->
+	<!-- getFiltersResponse -->
+	<xs:element name="getFiltersResponse">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="filter" type="tns:filterType" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>		
+	</xs:element>
+	
+	<!-- ================================================================================================================== -->
+	<!-- getLinks -->
+	<xs:element name="getLinks">
+		<xs:complexType>
+			<xs:attribute name="username" type="xs:string" use="optional" default="anonymous"/>
+			<xs:attribute name="password" type="xs:string" use="optional" default=""/>
+			<xs:attribute name="format" type="tns:formatType" use="optional" default="xml"/>
+			
+			<xs:attribute name="datasetName" type="tns:nameType" use="required" />
+		</xs:complexType>
+	</xs:element>
+	
+	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - -->
+	<!-- getLinksResponse -->
+		<xs:element name="getLinksResponse">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="dataset" type="tns:datasetType" minOccurs="0" maxOccurs="unbounded"/>		<!--  see getDatasets -->
+			</xs:sequence>
+		</xs:complexType>		
+	</xs:element>
+	
+	<!-- ================================================================================================================== -->
+	<!-- query -->
+	<!-- XML query request -->
+	<xs:element name="queryRequest">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="query" type="tns:queryRequestType" minOccurs="1" maxOccurs="1" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	
+	<xs:complexType name="queryRequestType">
+		<xs:sequence>
+			<xs:element name="dataset" type="tns:queryDatasetType" minOccurs="1" maxOccurs="1" />
+		</xs:sequence>
+		<xs:attribute name="formerVirtualSchema" type="xs:string" use="optional" />
+		<xs:attribute name="datasetConfigVersion" type="xs:string" use="optional" />
+		<xs:attribute name="processor" type="xs:string" use="optional" />
+		<xs:attribute name="header" type="xs:boolean" use="optional" />
+		<xs:attribute name="uniqueRows" type="xs:boolean" use="optional" />
+		<xs:attribute name="count" type="xs:boolean" use="optional" />
+		<xs:attribute name="limitStart" type="xs:integer" use="optional" />
+		<xs:attribute name="limitSize" type="xs:integer" use="optional" />
+	</xs:complexType>
+	
+	<xs:complexType name="queryDatasetType">
+		<xs:choice minOccurs="1" maxOccurs="unbounded">
+			<xs:element name="attribute" type="tns:queryAttributeType" minOccurs="1" maxOccurs="unbounded" />
+			<xs:element name="filter" type="tns:queryFilterType" minOccurs="0" maxOccurs="unbounded" />
+		</xs:choice>
+		<xs:attribute name="name" type="xs:string" use="required" />
+		<xs:attribute name="operation" type="xs:string" use="optional" />
+	</xs:complexType>
+	
+	<xs:complexType name="queryAttributeType">
+		<xs:attribute name="name" type="xs:string" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="queryFilterType">
+		<xs:attribute name="name" type="xs:string" use="required" />
+		<xs:attribute name="value" type="xs:string" use="required" />
+	</xs:complexType>
+	
+	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - -->
+	<!-- queryResponse -->
+	<xs:element name="queryResponse">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="rows" type="tns:rowsType" minOccurs="1" maxOccurs="1" />	<!-- only 1 <rows> element that hold all rows + associated info -->
+			</xs:sequence>
+		</xs:complexType>		
+	</xs:element>
+	
+	<xs:complexType name="rowsType">
+		<xs:sequence>
+			<xs:element name="row" type="tns:rowType" minOccurs="0" maxOccurs="unbounded" />	<!-- as many rows as wanted -->
+		</xs:sequence>
+		<xs:attribute name="count" type="xs:integer" use="required" />	<!-- gives row count -->
+	</xs:complexType>
+	
+	<xs:complexType name="rowType">
+		<xs:sequence>
+			<xs:element name="field" type="tns:fieldType" minOccurs="1" maxOccurs="unbounded" />	<!-- at least 1 attribute -->
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="fieldType" >
+		<xs:simpleContent>
+			<xs:extension base="xs:string">											<!-- value -->
+				<xs:attribute name="fieldName" type="xs:string" use="required" />	<!-- field name -->
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	
+	<!-- ================================================================================================================== -->
+	
+</xs:schema>
+

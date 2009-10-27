@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema 
+	targetNamespace="http://www.mynamespace.com/mynamespace"
+	xmlns:tns="http://www.mynamespace.com/mynamespace" 
+	xmlns:xs="http://www.w3.org/2001/XMLSchema" >
+	
+	<xs:simpleType name="formatType">
+	  <xs:restriction base="xs:string">
+	    <xs:enumeration value="xml"/>
+	    <xs:enumeration value="json"/>
+	  </xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="martNameType"><xs:restriction base="xs:string" /></xs:simpleType>
+	<xs:simpleType name="martVersionType"><xs:restriction base="xs:integer" /></xs:simpleType>
+	<xs:simpleType name="datasetNameType"><xs:restriction base="xs:string" /></xs:simpleType>
+	
+	<xs:element name="getDatasets">
+		<xs:complexType>
+			<xs:attribute name="username" type="xs:string" use="optional" default="anonymous"/>
+			<xs:attribute name="password" type="xs:string" use="optional" default=""/>
+			<xs:attribute name="format" type="tns:formatType" use="optional" default="xml"/>
+			
+			<xs:attribute name="martName" type="tns:martNameType" use="required" />
+			<xs:attribute name="martVersion" type="tns:martVersionType" use="required" />
+		</xs:complexType>
+	</xs:element>
+	
+	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - -->
+	<!-- getDatasetsResponse -->
+	<xs:element name="getDatasetsResponse">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="dataset" type="tns:datasetType" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>		
+	</xs:element>
+	
+	<xs:complexType name="datasetType">
+		<xs:attribute name="datasetName" type="tns:datasetNameType" use="required" />
+		<xs:attribute name="displayName" type="xs:string" use="required" />
+		<xs:attribute name="materialized" type="xs:boolean" use="required" />
+		<xs:attribute name="visible" type="xs:boolean" use="required" />
+		<xs:attribute name="description" type="xs:string" />					
+	</xs:complexType>
+	
+</xs:schema>
+
