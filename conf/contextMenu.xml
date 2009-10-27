@@ -1,0 +1,47 @@
+<!-- inViews = "" -->
+<contextMenu>
+	<node name="martRegistry">
+		<menuItem name="updateAll" title="update" inViews="Update" disabled="1"/>
+	</node>
+	<node name="container">
+		<menuItem name="add container" title="add container"/>
+		<menuItem name="hide" title="Hide" inViews="Configuration"/>
+		<menuItem name="hide4user" title="Hide for current user" inViews="Configuration"/>
+	</node>
+	<node name="filter">
+		<menuItem name="hide" title="Hide" inViews="Configuration"/>
+		<menuItem name="hide4user" title="Hide for current user" inViews="Configuration"/>
+	</node>
+	<node name="mart">
+		<menuItem name="hide" title="Hide" inViews="Configuration"/>
+		<menuItem name="hide4user" title="Hide for current user" inViews="Configuration"/>
+	</node>
+	<node name="dataset">
+		<menuItem name="Materialize" title="Materialize" inViews="Materialize"/>
+		<menuItem name="create importables" title="create importables" inViews="Link"/>
+		<menuItem name="create exportables" title="create exportables" inViews="Link"/>
+		<menuItem name="partition" title="partition" inViews="Partition"/>
+		<menuItem name="add container" title="add container" inViews="Configuration"/>
+		<menuItem name="update" title="update" inViews="Update"/>
+		<menuItem name="addProcessor" title="add processor" inViews="Configuration">
+			<menuItem name="genomicSequence" title="Genomic Sequence" disabled="1"/>
+			<menuItem name="kaplanMeyer" title="Kaplan Meyer" disabled="1"/>
+			<menuItem name="pieChart" title="Pie Chart"/>
+			<menuItem name="barChart" title="Bar Chart" disabled="1"/>
+		</menuItem>	
+		<menuItem name="addLinkedDataSet" title="add filters and attributes from..." inViews="Link"/>	
+		<menuItem name="hide" title="Hide" inViews="Configuration"/>
+		<menuItem name="hide4user" title="Hide for current user" inViews="Configuration"/>
+		<menuItem name="addLinkIndices" title="add link indices" inViews="Link"/>
+	</node>
+	<node name="attributepointer">
+		<menuItem name="hide" title="Hide" inViews="Configuration"/>
+		<menuItem name="hide4user" title="Hide for current user" inViews="Configuration"/>	
+	</node>
+	<node name="importable">
+		<menuItem name="remove importable" title="remove importable"/>
+	</node>
+	<node name="exportable">
+		<menuItem name="remove exportable" title="remove exportable"/>
+	</node>	
+</contextMenu>
