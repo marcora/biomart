@@ -1,0 +1,21 @@
+Warnings/Errors for dataset "UNIPROT"
+
+Unused tables in dataset (no main partition on it based on aliases):
+
+Obsolete elements (no table+key+field combination in database):
+
+Elements pointing to genomic sequence:
+
+Elements pointing to unexisting datasets:
+
+Elements pointing to unexisting elements:
+
+Name conflicts on the following names:
+
+Exporables refering to invalid attributes:
+
+Extra push action values specified that will be ignored:
+
+
+=====================================================================================
+
