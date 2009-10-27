@@ -4,8 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.biomart.configurator.utils.type.MartType;
-
-import martService.Configuration;
+import org.biomart.old.martService.Configuration;
 
 /**
  * should merge with ConnectionObject class

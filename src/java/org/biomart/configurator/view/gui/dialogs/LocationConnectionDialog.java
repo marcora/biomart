@@ -18,8 +18,6 @@
 
 package org.biomart.configurator.view.gui.dialogs;
 
-import general.exceptions.FunctionalException;
-import general.utils.MyUtils;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.FlowLayout;
@@ -40,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
@@ -47,19 +46,22 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import org.biomart.configurator.utils.DsConnectionObject;
-import martService.Configuration;
-import martService.objects.MartInVirtualSchema;
+
 import org.biomart.builder.model.Schema;
 import org.biomart.common.exceptions.BioMartError;
+import org.biomart.common.general.exceptions.FunctionalException;
+import org.biomart.common.general.utils.MyUtils;
 import org.biomart.common.resources.Resources;
 import org.biomart.common.resources.Settings;
 import org.biomart.common.view.gui.dialogs.StackTrace;
 import org.biomart.configurator.model.Location;
+import org.biomart.configurator.utils.DsConnectionObject;
 import org.biomart.configurator.utils.treelist.URLMetaTree;
 import org.biomart.configurator.utils.type.IdwViewType;
 import org.biomart.configurator.utils.type.MartType;
 import org.biomart.configurator.view.idwViews.McViews;
+import org.biomart.old.martService.Configuration;
+import org.biomart.old.martService.objects.MartInVirtualSchema;
 import org.jdom.JDOMException;
 
 /**

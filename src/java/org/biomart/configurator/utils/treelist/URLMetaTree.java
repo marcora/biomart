@@ -1,45 +1,30 @@
 package org.biomart.configurator.utils.treelist;
 
-import general.exceptions.FunctionalException;
-
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Font;
 import java.awt.GridLayout;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.EventObject;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import javax.swing.AbstractCellEditor;
-import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
-import javax.swing.UIManager;
 import javax.swing.JTree.DynamicUtilTreeNode;
-import javax.swing.event.ChangeEvent;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeCellEditor;
-import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
-import martConfigurator.transformation.helpers.TransformationUtils;
-import martService.Configuration;
-import martService.objects.DatasetInMart;
-import martService.objects.MartInVirtualSchema;
+import org.biomart.common.general.exceptions.FunctionalException;
+import org.biomart.old.martService.Configuration;
+import org.biomart.old.martService.objects.DatasetInMart;
+import org.biomart.old.martService.objects.MartInVirtualSchema;
+import org.biomart.transformation.helpers.TransformationUtils;
 
 public class URLMetaTree extends TreeListComponent implements TreeSelectionListener{
 

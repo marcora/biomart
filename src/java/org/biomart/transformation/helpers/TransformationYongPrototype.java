@@ -72,18 +72,7 @@ public class TransformationYongPrototype {
 		String fs = System.getProperty("file.separator");
 		File file = new File("." + fs + identifier + fs);
 		file.mkdirs();
-
-		/*TransformationMain.PROPERTIES_FILE_FOLDER_PATH_AND_NAME = file.getAbsolutePath() + fs;
-		TransformationMain.TRANSFORMATIONS_GENERAL_OUTPUT = file.getAbsolutePath() + fs;
-
-		StringBuffer stringBuffer = new StringBuffer();
-		stringBuffer.append(TransformationConstants.PROPERTY_ERROR_FILE_PATH_AND_NAME + "=" +
-				file.getAbsolutePath() + fs+"Errors" + MyUtils.LINE_SEPARATOR);
-		stringBuffer.append(TransformationConstants.PROPERTY_SERVER + "=" + initialHost.getServer() + MyUtils.LINE_SEPARATOR);
-		stringBuffer.append(TransformationConstants.PROPERTY_PATH_TO_MART_SERVICE + "=" + initialHost.getPath() + MyUtils.LINE_SEPARATOR);
-		MyUtils.writeFile(file.getAbsolutePath() + fs + TRANSFORMATION_PROPERTY_FILE_NAME, stringBuffer.toString());*/
 		return file;
-
 	}
 
     public static boolean deleteDir(File dir) {

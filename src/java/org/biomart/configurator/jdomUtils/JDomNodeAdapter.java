@@ -2,9 +2,6 @@
 
 package org.biomart.configurator.jdomUtils;
 
-import general.exceptions.FunctionalException;
-import general.exceptions.TechnicalException;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,59 +11,51 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
-import martConfigurator.transformation.TransformationMain;
-import martConfigurator.transformation.helpers.MartServiceIdentifier;
+
 import org.biomart.builder.model.Column;
+import org.biomart.builder.model.DataSet;
 import org.biomart.builder.model.DataSetColumn;
 import org.biomart.builder.model.DataSetTable;
 import org.biomart.builder.model.InheritedColumn;
-import org.biomart.builder.model.WrappedColumn;
-import org.biomart.builder.model.DataSet;
-
+import org.biomart.builder.model.JDBCSchema;
 import org.biomart.builder.model.Mart;
 import org.biomart.builder.model.Relation;
-
 import org.biomart.builder.model.Schema;
-
 import org.biomart.builder.model.Table;
+import org.biomart.builder.model.WrappedColumn;
 import org.biomart.builder.model.Key.ForeignKey;
-
 import org.biomart.builder.model.Key.PrimaryKey;
-import org.biomart.builder.model.JDBCSchema;
-
-import org.biomart.common.resources.*;
-
+import org.biomart.common.general.exceptions.FunctionalException;
+import org.biomart.common.general.exceptions.TechnicalException;
+import org.biomart.common.resources.Log;
+import org.biomart.common.resources.Resources;
 import org.biomart.common.view.gui.SwingWorker;
 import org.biomart.common.view.gui.dialogs.ProgressDialog2;
 import org.biomart.common.view.gui.dialogs.StackTrace;
-
 import org.biomart.configurator.model.Location;
-
 import org.biomart.configurator.model.object.McDsColumn;
 import org.biomart.configurator.model.object.Processor;
-
-import org.biomart.configurator.utils.DbInfoObject;
 import org.biomart.configurator.utils.ConnectionPool;
+import org.biomart.configurator.utils.DbInfoObject;
 import org.biomart.configurator.utils.DsConnectionObject;
-import org.biomart.configurator.utils.TransformationYongPrototype;
-
 import org.biomart.configurator.utils.McEventObject;
-
-
 import org.biomart.configurator.utils.McGuiUtils;
-
 import org.biomart.configurator.utils.McUtils;
 import org.biomart.configurator.utils.type.DataSetTableType;
 import org.biomart.configurator.utils.type.EventType;
 import org.biomart.configurator.utils.type.IdwViewType;
 import org.biomart.configurator.utils.type.McGuiType;
-import org.biomart.configurator.view.idwViews.McViewSchema;
-import org.biomart.configurator.view.idwViews.McViews;
 import org.biomart.configurator.view.gui.dialogs.AddLinkedDataSetsDialog;
 import org.biomart.configurator.view.gui.dialogs.LocationConnectionDialog;
+import org.biomart.configurator.view.idwViews.McViewSchema;
+import org.biomart.configurator.view.idwViews.McViews;
+import org.biomart.transformation.TransformationMain;
+import org.biomart.transformation.helpers.MartServiceIdentifier;
+import org.biomart.transformation.helpers.TransformationYongPrototype;
 import org.jdom.Document;
 import org.jdom.Element;
 
