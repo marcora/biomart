@@ -60,17 +60,29 @@
         <include name="junit.jar" />
         <include name="jython.jar" />
         <include name="libreadline-java.jar" />
-         <include name="mysql-connector-java-3.1.14-bin.jar" />
         <include name="postgresql-8.3-604.jdbc3.jar"/>
         <include name="optional.jar" />
         <include name="xalan.jar" />
         <include name="p6spy.jar" />
         <include name="ojdbc14.jar" />
-       <include name="jline.jar" />
-        <include name="jdom.jar" />
-        <include name="xerces.jar" />
+        <include name="jline.jar" />
         <include name="log4j-1.2.15.jar" />
     	<include name="idw-gpl.jar"/>
+    	<include name="mysql-connector-java-5.1.7-bin.jar"/>
+    	<include name="servlet-api.jar"/>
+
+    	<!-- JSON -->
+    	<include name="json-lib-2.3-jdk15.jar"/>
+    	<include name="commons-collections.jar"/>
+    	<include name="commons-logging-1.1.1.jar"/>
+    	<include name="commons-beanutils-1.7.jar"/>
+    	<include name="commons-lang.jar"/>
+    	<include name="ezmorph.jar"/>
+		
+    	<!-- JDOM & validation -->
+    	<include name="jdom-1.0.jar"/>
+    	<include name="xercesImpl-2.8.1.jar"/>
+    	
     </fileset>
 
     <!-- patternsets to use in various zip and tar filesets during the dist-* targets -->
