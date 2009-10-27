@@ -321,7 +321,7 @@ public class LocationConnectionDialog extends JDialog implements ItemListener{
 			this.setVisible(false);
 			conObject = new DsConnectionObject();
 			conObject.setType(MartType.URL);
-			conObject.setDsInfoMap(this.urlMeta.getDSInfo());
+			conObject.setDsInfoMap(this.urlMeta.getDBInfo(false));
 			String host = this.urlTF.getText();
 			int index = host.indexOf("://");
 			host = host.substring(index+3);

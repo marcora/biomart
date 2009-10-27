@@ -155,7 +155,7 @@ public class DBMetaTree extends TreeListComponent implements TreeSelectionListen
 	/**
 	 * table info in the current selected node is not stored, need special handle. 
 	 */
-	public Map<String, List<String>> getDBInfo() {
+	public Map<String, List<String>> getDBInfo(boolean all) {
 		DynamicUtilTreeNode currentNode;
 		CheckBoxNode currentCBN=null;
 		TreePath path =this.tree.getSelectionPath();
@@ -175,9 +175,9 @@ public class DBMetaTree extends TreeListComponent implements TreeSelectionListen
 			CheckBoxNode cbn = (CheckBoxNode)node.getUserObject();
 			if(cbn.isSelected()) {
 				if(currentCBN!=null && cbn.getText().equals(currentCBN.getText()))
-					this.treelistInfoMap.put(cbn.getText(), this.checkBoxList.getSelectedItems());
+					this.treelistInfoMap.put(cbn.getText(), this.checkBoxList.getItems(all));
 				else
-					this.treelistInfoMap.put(cbn.getText(),cbn.getSelectedTable());
+					this.treelistInfoMap.put(cbn.getText(),cbn.getTable(all));
 			}
 		}
 		return this.treelistInfoMap;

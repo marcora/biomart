@@ -754,6 +754,34 @@ public class Schemas {
 				((SchemaDiagram) Schemas.this.schemasMap.get(schema
 						.getName()).getSchemaDiagram()).repaintDiagram();
 	}
+	
+	/**
+	 * Syncs this schema against the database.
+	 * 
+	 * @param schema
+	 *            the schema to synchronise.
+	 * @param transactionMod
+	 *            <tt>true</tt> if the transaction is allowed to show visible
+	 *            modifications.
+	 */
+	public void requestInitSchema(final Schema schema,
+			final boolean transactionMod, final List<String> tables) {
+				Transaction.start(transactionMod);
+				try {
+					schema.init(tables);
+				} catch (final Throwable t) {
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							StackTrace.showStackTrace(t);
+						}
+					});
+				}
+				Transaction.end();
+				// This is to ensure that any modified flags get cleared.
+				((SchemaDiagram) Schemas.this.schemasMap.get(schema
+						.getName()).getSchemaDiagram()).repaintDiagram();
+	}
+
 
 	/**
 	 * Request that all changes on this schema are accepted.

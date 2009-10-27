@@ -259,10 +259,17 @@ class CheckBoxNode {
 		  return this.tableList;
 	  }
 	  
-	  public List<String> getSelectedTable() {
+	  /**
+	   * if all = false, only selected tables return
+	   * @param all
+	   * @return
+	   */
+	  public List<String> getTable(boolean all) {
 		  List<String> sl = new ArrayList<String>();
 		  for(CheckBoxNode node:this.tableList) {
-			  if(node.isSelected())
+			  if(all)
+				  sl.add(node.getText());
+			  else if(node.isSelected())
 				  sl.add(node.getText());
 		  }
 		  return sl;

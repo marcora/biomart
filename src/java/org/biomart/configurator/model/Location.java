@@ -30,6 +30,7 @@ public class Location {
 	private boolean isSourceSchema = true;
 	//TODO this one should not be here
 	private Map<String, List<String>> selectedTables;
+	private Map<String, List<String>> dbtablesMap;
 	//should use BeanMap later
 	private Map<String, Mart> marts;
 	
@@ -48,7 +49,15 @@ public class Location {
 	public void addSelectedTables(Map<String, List<String>> tables) {
 		this.selectedTables = tables;
 	}
+
+	public void addDBTablesMap(Map<String, List<String>> tables) {
+		this.dbtablesMap = tables;
+	}
 	
+	public Map<String, List<String>> getDbTablesMap() {
+		return this.dbtablesMap;
+	}
+
 	public Map<String, List<String>> getSelectedTables() {
 		return this.selectedTables;
 	}
@@ -120,7 +129,7 @@ public class Location {
 			List<String> stStrings = selectedTables.get(mart.getMartName());
 			if(stStrings == null || stStrings.size()==0) 
 				continue;
-			this.requestLoadMart(mart, false);
+			this.requestLoadMart(mart, false,this.dbtablesMap.get(mart.getMartName()));
 		}
 		
 		
@@ -159,7 +168,7 @@ public class Location {
 			if(stStrings == null || stStrings.size()==0)
 				continue;
 			mart.setMainTableList(selectedTables.get(mart.getMartName()));
-			this.requestLoadMart(mart, true);
+			this.requestLoadMart(mart, true,this.dbtablesMap.get(mart.getMartName()));
 		}
 		
 		
@@ -200,11 +209,11 @@ public class Location {
 		return this.isSourceSchema;
 	}
 
-	public boolean requestLoadMart(Mart mart, boolean isMart) {
+	public boolean requestLoadMart(Mart mart, boolean isTarget, List<String> tablesInDb) {
 		for(Iterator<JDBCSchema> i=mart.getSchemasObj().getSchemas().values().iterator(); i.hasNext();) {
 			JDBCSchema schema = i.next();
-			schema.setIsMart(isMart);
-			this.marts.get(mart.getMartName()).getSchemasObj().requestSynchroniseSchema(schema, false);
+			schema.setIsMart(isTarget);
+			this.marts.get(mart.getMartName()).getSchemasObj().requestInitSchema(schema, false, tablesInDb);
 		}
 		return true;
 	}

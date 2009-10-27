@@ -167,7 +167,12 @@ public class URLMetaTree extends TreeListComponent implements TreeSelectionListe
 		this.checkBoxList.setItems(node.getTables());
 	}
 	
-	public Map<String, List<String>> getDSInfo() {
+	/**
+	 * if all=false, only selected tables return;
+	 * @param all
+	 * @return
+	 */
+	public Map<String, List<String>> getDBInfo(boolean all) {
 		DynamicUtilTreeNode currentNode;
 		CheckBoxNode currentCBN=null;
 		TreePath path =this.tree.getSelectionPath();
@@ -186,10 +191,10 @@ public class URLMetaTree extends TreeListComponent implements TreeSelectionListe
 			
 			CheckBoxNode cbn = (CheckBoxNode)node.getUserObject();
 			if(cbn.isSelected()) {
-				if(currentCBN!=null && cbn.getText().equals(currentCBN.getText()))
-					dbInfo.put(cbn.getText(), this.checkBoxList.getSelectedItems());
+				if(currentCBN!=null && cbn.getText().equals(currentCBN.getText())) 
+					dbInfo.put(cbn.getText(), this.checkBoxList.getItems(all));
 				else
-					dbInfo.put(cbn.getText(),cbn.getSelectedTable());
+					dbInfo.put(cbn.getText(),cbn.getTable(all));
 			}
 		}
 		return dbInfo;

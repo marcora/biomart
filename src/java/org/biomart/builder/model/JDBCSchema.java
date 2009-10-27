@@ -19,16 +19,13 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
-
 import javax.swing.JOptionPane;
-
 import org.biomart.builder.model.DataLink.JDBCDataLink;
 import org.biomart.builder.model.Key.ForeignKey;
 import org.biomart.builder.model.Key.PrimaryKey;
 import org.biomart.builder.model.Relation.Cardinality;
 import org.biomart.builder.view.gui.diagrams.SchemaDiagram;
 import org.biomart.builder.view.gui.dialogs.SaveOrphanKeyDialog;
-
 import org.biomart.common.exceptions.AssociationException;
 import org.biomart.common.exceptions.BioMartError;
 import org.biomart.common.exceptions.DataModelException;
@@ -39,7 +36,7 @@ import org.biomart.common.utils.InverseMap;
 import org.biomart.common.view.gui.dialogs.ProgressDialog2;
 import org.biomart.configurator.controller.dialects.DatabaseDialect;
 import org.biomart.configurator.utils.DbInfoObject;
-import org.biomart.configurator.utils.McUtils;
+
 
 	/**
 	 * This implementation of the {@link Schema} interface connects to a JDBC
@@ -1827,4 +1824,69 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 		public void setUsername(String username) {
 			this.conObj.setUserName(username);
 		}
-	}
+
+		public void init(List<String> tablesInDb) throws DataModelException, SQLException {
+			Log.info("Initialize " + this);
+			ProgressDialog2.getInstance().setStatus("creating "+this);
+			super.init(tablesInDb);
+			
+			final DatabaseMetaData dmd = this.getConnection(null).getMetaData();
+			final String catalog = this.getConnection(null).getCatalog();
+			
+			// Do the loop.
+			final Collection<Table> tablesToBeKept = new HashSet<Table>();
+			for(String tableStr: tablesInDb) {
+				Log.debug("Processing table " + tableStr);
+				ProgressDialog2.getInstance().setStatus("Processing table " + tableStr);
+
+				Table dbTable;
+
+				try {
+						dbTable = new Table(this, tableStr);
+						this.getTables().put(tableStr, dbTable);
+					} catch (final Throwable t) {
+						throw new BioMartError(t);
+					}
+
+				tablesToBeKept.add(dbTable);
+			}
+
+			// Loop over all columns.
+			for (Table dbTable: tablesToBeKept) {
+				final String dbTableName = dbTable.getName();
+				// Load the table columns from the database, then loop over
+				// them.
+				Log.debug("Loading table column list for " + dbTableName);
+				ResultSet dbTblCols;
+
+				dbTblCols = dmd.getColumns(catalog, this.realSchemaName,dbTableName, "%");
+
+				// FIXME: When using Oracle, if the table is a synonym then the
+				// above call returns no results.
+				while (dbTblCols.next()) {
+					// Check schema and catalog.
+					final String catalogName = dbTblCols.getString("TABLE_CAT");
+					final String schemaName = dbTblCols.getString("TABLE_SCHEM");
+
+					// What is the column called, and is it nullable?
+					final String dbTblColName = dbTblCols.getString("COLUMN_NAME");
+					Log.debug("Processing column " + dbTblColName);
+
+					try {
+						Column dbTblCol = new Column(dbTable, dbTblColName);
+						dbTable.getColumns().put(dbTblCol.getName(),dbTblCol);
+					} catch (final Throwable t) {
+						throw new BioMartError(t);
+					}
+				}
+				dbTblCols.close();
+			}
+
+			// Get and create primary keys.
+			// Work out a list of all foreign keys currently existing.
+			// Any remaining in this list later will be dropped.
+			this.createPkFks(dmd, catalog, 1);
+			Log.info("Done synchronising");
+			Log.info("forward message to controller");
+		}
+}

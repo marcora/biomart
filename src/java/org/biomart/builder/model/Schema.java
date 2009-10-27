@@ -717,5 +717,12 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 		this.partitionCache.clear();
 	}
 
-
+	/**
+	 * replace synchronise if the schema is first time created. To create a schema fast. 
+	 * @throws SQLException 
+	 * @throws DataModelException 
+	 */
+	public void init(List<String> tablesInDb) throws DataModelException, SQLException {
+		
+	}
 }

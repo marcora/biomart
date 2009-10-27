@@ -606,7 +606,8 @@ import org.biomart.configurator.utils.type.MartType;
 
 		
 		public Location createLocation(String name, MartType type, Map<String, Location> locations) {
-			if(this.dbPreview.getDBInfo().size()<=0) 
+			Map<String, List<String>> selectedTablesMap = this.dbPreview.getDBInfo(false);
+			if(selectedTablesMap.size()<=0) 
 				return null;
 
 			//check if this location already exist
@@ -623,8 +624,9 @@ import org.biomart.configurator.utils.type.MartType;
 			} else
 				loc = locations.get(name);
 			
-			loc.addSelectedTables(this.dbPreview.getDBInfo());
-			for(Iterator<String> it = this.dbPreview.getDBInfo().keySet().iterator(); it.hasNext();) {
+			loc.addSelectedTables(selectedTablesMap);
+			loc.addDBTablesMap(this.dbPreview.getDBInfo(true));
+			for(Iterator<String> it = selectedTablesMap.keySet().iterator(); it.hasNext();) {
 				String dbName = it.next();
 				//check if mart is already exist
 				if(loc.getMart(dbName) == null) {

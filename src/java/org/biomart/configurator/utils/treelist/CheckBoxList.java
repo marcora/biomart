@@ -47,12 +47,19 @@ public class CheckBoxList extends JList implements ListSelectionListener {
     	
     }
     
-    public List<String> getSelectedItems() {
+    /**
+     * if all=false, only add those selected
+     * @param all
+     * @return
+     */
+    public List<String> getItems(boolean all) {
     	DefaultListModel model = (DefaultListModel)this.getModel();
     	List<String> result = new ArrayList<String>();
     	for(int i=0; i<model.getSize(); i++) {
     		CheckBoxNode node = (CheckBoxNode)model.get(i);
-    		if(node.isSelected())
+    		if(all)
+    			result.add(node.getText());
+    		else if(node.isSelected())
     			result.add(node.getText());
     	}
     	return result;
