@@ -1,0 +1,64 @@
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements. See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership. The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License. You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing,
+  ~ software distributed under the License is distributed on an
+  ~ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ KIND, either express or implied. See the License for the
+  ~ specific language governing permissions and limitations
+  ~ under the License.
+  -->
+
+<project name="martService" basedir="../.." default="generate.service">
+
+    <property environment="env"/>
+    <property name="AXIS2_HOME" value="../libraries/axis2-1.5.1"/>
+    <property name="BIOMART_HOME" value="."/>
+	<property name="build.dir" value="./build"/>
+
+	<!-- include all jars from axis and biomart -->
+    <path id="classpath">
+        <fileset dir="${AXIS2_HOME}/lib">
+            <include name="*.jar"/>
+        </fileset>
+        <fileset dir="${BIOMART_HOME}/lib">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+
+    
+    <target name="compile.service">
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${build.dir}/classes"/>
+
+        <!--First let's compile the classes--><!--
+        <javac debug="on" 
+               fork="true"
+               destdir="${build.dir}/classes" 
+               srcdir="${basedir}/src/java"
+               classpathref="classpath">
+        </javac>-->
+        <copy todir="${build.dir}/classes" >
+	    	<fileset dir="./bin/java"/>
+	    </copy>
+    </target>
+    
+    <target name="generate.service" depends="compile.service">
+        <!--aar them up -->
+        <mkdir dir="${build.dir}/classes/META-INF"/>
+        <copy file="./conf/xml/services.xml" todir="${build.dir}/classes/META-INF"/>
+        <jar destfile="${build.dir}/MartService.aar" />
+    </target>
+
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+    </target>
+</project>

@@ -1,12 +1,14 @@
 package org.biomart.martRemote.objects.response;
 
 
-import java.io.PrintWriter;
+import java.io.IOException;
+import java.io.Writer;
 
 import net.sf.json.JSONObject;
 
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
+import org.biomart.common.general.utils.MyUtils;
 import org.biomart.martRemote.MartRemoteUtils;
 import org.biomart.martRemote.objects.MartServiceAction;
 import org.biomart.martRemote.objects.request.MartServiceRequest;
@@ -34,16 +36,20 @@ public abstract class MartServiceResponse extends MartServiceAction {
 	}
 	
 	public Document getXmlRegistry() throws TechnicalException {
-		return getXmlRegistry(false, null);
+		return getXmlDocument(false, null);
 	}
 	/**
 	 * Always check that martServiceResult is valid afterwards (if it validates)
 	 */
-	public Document getXmlRegistry(boolean debug, PrintWriter printWriter) throws TechnicalException {
+	public Document getXmlDocument(boolean debug, Writer printWriter) throws TechnicalException {
 		Document document = createNewResponseXmlDocument(this.responseName);
 		document = createXmlResponse(document);
 		if (debug && printWriter!=null) {
-			printWriter.println(MartRemoteUtils.getXmlDocumentString(document));
+			try {
+				printWriter.append(MartRemoteUtils.getXmlDocumentString(document) + MyUtils.LINE_SEPARATOR);
+			} catch (IOException e) {
+				throw new TechnicalException(e);
+			}
 		}
 		
 		validateXml(document);	// Validation with XSD
@@ -52,7 +58,7 @@ public abstract class MartServiceResponse extends MartServiceAction {
 		return document;
 	}	
 
-	public JSONObject getJsonRegistry() {
+	public JSONObject getJsonObject() {
 		return createJsonResponse();	// no pre/post processing
 	}
 	

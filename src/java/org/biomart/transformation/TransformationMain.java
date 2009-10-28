@@ -103,15 +103,16 @@ public class TransformationMain {
 	}
 
 	public static void main(String[] args) {
-		rebuildCentralPortalRegistry();
+		MartRegistry martRegistry = rebuildCentralPortalRegistry(TRANSFORMATIONS_GENERAL_OUTPUT, true);
 		//run();
+		System.out.println(martRegistry.getLocationList().size());
 	}
 	
-	public static void rebuildCentralPortalRegistry() {
+	public static MartRegistry rebuildCentralPortalRegistry(String transformationsGeneralOutput, boolean serialize) {
 		
 		MartRegistry martRegistry = new MartRegistry();
         
-		List<MartRegistry> martRegistryList = run();
+		List<MartRegistry> martRegistryList = run(transformationsGeneralOutput, serialize);
 		
 		List<Location> locationList = new ArrayList<Location>();
 		Map<Location, List<Mart>> martMap = new HashMap<Location, List<Mart>>();
@@ -143,19 +144,22 @@ public class TransformationMain {
 		}
 		
 		Element newRootElement = martRegistry.generateXml();
-		try {
-			MyUtils.writeSerializedObject(martRegistry, "./conf/files/" + 
-					(webServiceTransformation ? "web" : "db") + "_portal.serial");
-			MyUtils.writeXmlFile(newRootElement, "./conf/xml/" + 
-					(webServiceTransformation ? "web" : "db") + "_portal.xml");
-		} catch (TechnicalException e) {
-			e.printStackTrace();
+		if (serialize) {
+			try {
+				MyUtils.writeSerializedObject(martRegistry, "./conf/files/" + 
+						(webServiceTransformation ? "web" : "db") + "_portal.serial");
+				MyUtils.writeXmlFile(newRootElement, "./conf/xml/" + 
+						(webServiceTransformation ? "web" : "db") + "_portal.xml");
+			} catch (TechnicalException e) {
+				e.printStackTrace();
+			}
 		}
+		return martRegistry;
 	}
 	
 	static boolean webServiceTransformation = true;
 	
-	public static List<MartRegistry> run() {
+	public static List<MartRegistry> run(String transformationsGeneralOutput, boolean serialize) {
 		List<MartRegistry> martRegistryList = new ArrayList<MartRegistry>();
 		try {
 			
@@ -170,23 +174,23 @@ public class TransformationMain {
 				//transform(false, "55", "default", "gene_vega");
 				//transform(false, "55", "default", "variation");
 				
-				martRegistryList.add(transform(false, "55", "default", TRANSFORMATIONS_GENERAL_OUTPUT, "gene_ensembl").getMartRegistry());
-				martRegistryList.add(transform(false, "55", "default", TRANSFORMATIONS_GENERAL_OUTPUT, "gene_vega").getMartRegistry());
-				martRegistryList.add(transform(false, "55", "default", TRANSFORMATIONS_GENERAL_OUTPUT, "variation").getMartRegistry());
+				martRegistryList.add(transform(false, "55", "default", transformationsGeneralOutput, "gene_ensembl").getMartRegistry());
+				martRegistryList.add(transform(false, "55", "default", transformationsGeneralOutput, "gene_vega").getMartRegistry());
+				martRegistryList.add(transform(false, "55", "default", transformationsGeneralOutput, "variation").getMartRegistry());
 				
 			} else {
 				MartServiceIdentifier initialHost = new MartServiceIdentifier(
 						MyConstants.CENTRAL_PORTAL_SERVER, String.valueOf(80), MartServiceConstants.DEFAULT_PATH_TO_MART_SERVICE);
 				
 				String configurationMapSerialFilePathAndName = 
-					fetchWebServiceConfigurationMap(initialHost, TRANSFORMATIONS_GENERAL_OUTPUT);
+					fetchWebServiceConfigurationMap(initialHost, transformationsGeneralOutput);
 				MyUtils.checkStatusProgram(null!=webServiceConfigurationMap && webServiceConfigurationMap.size()>=1 && initialConfiguration!=null);
 				
 				String martName = "ensembl";
 				String datasetName = "hsapiens_gene_ensembl";
 				HostAndVirtualSchema hostAndVirtualSchema = computeHostAndVirtualSchema(martName);
 				Transformation transformation = transform(true, "55", initialHost, hostAndVirtualSchema.getMartServiceIdentifier(), 
-						TRANSFORMATIONS_GENERAL_OUTPUT, hostAndVirtualSchema.getVirtualSchema(), datasetName);
+						transformationsGeneralOutput, hostAndVirtualSchema.getVirtualSchema(), datasetName);
 				MartRegistry martRegistry = transformation.getMartRegistry();
 				martRegistryList.add(martRegistry);
 				
@@ -194,7 +198,7 @@ public class TransformationMain {
 				String datasetName2 = "mmusculus_gene_ensembl";
 				HostAndVirtualSchema hostAndVirtualSchema2 = computeHostAndVirtualSchema(martName2);
 				Transformation transformation2 = transform(true, "55", initialHost, hostAndVirtualSchema2.getMartServiceIdentifier(), 
-						TRANSFORMATIONS_GENERAL_OUTPUT, hostAndVirtualSchema2.getVirtualSchema(), datasetName2);
+						transformationsGeneralOutput, hostAndVirtualSchema2.getVirtualSchema(), datasetName2);
 				MartRegistry martRegistry2 = transformation2.getMartRegistry();
 				martRegistryList.add(martRegistry2);
 				
@@ -202,14 +206,16 @@ public class TransformationMain {
 				String datasetName4 = "UNIPROT";
 				HostAndVirtualSchema hostAndVirtualSchema4 = computeHostAndVirtualSchema(martName4);
 				Transformation transformation4 = transform(true, "55", initialHost, hostAndVirtualSchema4.getMartServiceIdentifier(), 
-						TRANSFORMATIONS_GENERAL_OUTPUT, hostAndVirtualSchema4.getVirtualSchema(), datasetName4);
+						transformationsGeneralOutput, hostAndVirtualSchema4.getVirtualSchema(), datasetName4);
 				MartRegistry martRegistry4 = transformation4.getMartRegistry();
 				martRegistryList.add(martRegistry4);
 				
 				//martRegistryList.addAll(webTransformCentralPortal(initialHost));
 				
 				System.out.println("webServiceConfigurationMap = " + webServiceConfigurationMap.keySet());
-				MyUtils.writeSerializedObject(webServiceConfigurationMap, configurationMapSerialFilePathAndName);
+				if (serialize) {
+					MyUtils.writeSerializedObject(webServiceConfigurationMap, configurationMapSerialFilePathAndName);
+				}
 			}
 		} catch (TechnicalException e) {
 			e.printStackTrace();
@@ -232,7 +238,8 @@ public class TransformationMain {
 	}));
 	
 	@SuppressWarnings("unused")
-	private static List<MartRegistry> webTransformCentralPortal(MartServiceIdentifier martServiceIdentifier) throws TechnicalException, FunctionalException {
+	private static List<MartRegistry> webTransformCentralPortal(
+			MartServiceIdentifier martServiceIdentifier, String transformationsGeneralOutput) throws TechnicalException, FunctionalException {
 
 		List<MartRegistry> martRegistryList = new ArrayList<MartRegistry>();
 		
@@ -277,7 +284,7 @@ if (currentMart.martName.equals("ensembl_expressionmart_48") && biomartPortalDat
 						String martName = currentMart.getMartName();
 						HostAndVirtualSchema hostAndVirtualSchema = computeHostAndVirtualSchema(martName);
 						Transformation transformation = transform(true, null, martServiceIdentifier, hostAndVirtualSchema.getMartServiceIdentifier(), 
-							TRANSFORMATIONS_GENERAL_OUTPUT, hostAndVirtualSchema.getVirtualSchema(), biomartPortalDataset.datasetName);
+							transformationsGeneralOutput, hostAndVirtualSchema.getVirtualSchema(), biomartPortalDataset.datasetName);
 						martRegistryList.add(transformation.getMartRegistry());
 
 					}

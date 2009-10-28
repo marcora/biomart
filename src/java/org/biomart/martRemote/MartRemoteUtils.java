@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
 import org.biomart.common.general.exceptions.TechnicalException;
@@ -20,12 +21,16 @@ public class MartRemoteUtils {
 	public static String getXmlDocumentString(Document document) throws TechnicalException {
 		XMLOutputter prettyFormat = new XMLOutputter(Format.getPrettyFormat());
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		String xmlDocumentString = null;
 		try {
 			prettyFormat.output(document, baos);
+			xmlDocumentString = baos.toString("UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			throw new TechnicalException(e);
 		} catch (IOException e) {
 			throw new TechnicalException(e);
 		}
-		return baos.toString();
+		return xmlDocumentString;
 	}
 	
 	// Xml validation

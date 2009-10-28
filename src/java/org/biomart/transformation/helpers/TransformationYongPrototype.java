@@ -5,11 +5,11 @@ package org.biomart.transformation.helpers;
 import java.io.File;
 import java.util.Map;
 
-
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.MyUtils;
 import org.biomart.objects.helpers.DatabaseParameter;
+import org.biomart.objects.objects.MartRegistry;
 import org.biomart.old.martService.Configuration;
 import org.biomart.transformation.Transformation;
 import org.biomart.transformation.TransformationMain;
@@ -23,7 +23,10 @@ public class TransformationYongPrototype {
 	public static final String DEFAULT_DATA_FOLDER_NAME = "DataFolder";
 
 	public static void main(String[] args) {
+		test();
+	}
 
+	public static void test() {
 		MyUtils.CHECK = true;
 		MyUtils.EXCEPTION = true;
 		MyUtils.EXIT_PROGRAM = false;
@@ -53,22 +56,29 @@ public class TransformationYongPrototype {
 		} catch (FunctionalException e) {
 			e.printStackTrace();
 		}
-	}
 		
+		/*MartRegistry martRegistry = wrappedRebuildCentralPortalRegistry();
+		System.out.println(martRegistry.getLocationList().size());*/
+	}
 	public static Document wrappedTransform(MartServiceIdentifier initialHost, String martName, String datasetName)
 	throws TechnicalException, FunctionalException {
 		
-		File file = createTmpFolders(initialHost);
+		File transformationsGeneralOutputTemporaryFolder = createTmpFolders(initialHost.generateIdentifier());
 		HostAndVirtualSchema hostAndVirtualSchema = TransformationMain.computeHostAndVirtualSchema(martName);
 		Transformation transformation = TransformationMain.transform(true, null, initialHost, 
-				hostAndVirtualSchema.getMartServiceIdentifier(), file.getAbsolutePath(), hostAndVirtualSchema.getVirtualSchema(), datasetName);
-		boolean b = deleteDir(file);
-		MyUtils.checkStatusProgram(b && !file.exists());
+				hostAndVirtualSchema.getMartServiceIdentifier(), transformationsGeneralOutputTemporaryFolder.getAbsolutePath(), hostAndVirtualSchema.getVirtualSchema(), datasetName);
+		boolean b = deleteDir(transformationsGeneralOutputTemporaryFolder);
+		MyUtils.checkStatusProgram(b && !transformationsGeneralOutputTemporaryFolder.exists());
 		return transformation.getTransformedDocument();
 	}
-	public static File createTmpFolders(MartServiceIdentifier initialHost) {
-
-		String identifier = initialHost.generateIdentifier();
+	public static MartRegistry wrappedRebuildCentralPortalRegistry() {
+		File transformationsGeneralOutputTemporaryFolder = createTmpFolders("portal");
+		MartRegistry martRegistry = TransformationMain.rebuildCentralPortalRegistry(transformationsGeneralOutputTemporaryFolder.getAbsolutePath(), false);
+		boolean b = deleteDir(transformationsGeneralOutputTemporaryFolder);
+		MyUtils.checkStatusProgram(b && !transformationsGeneralOutputTemporaryFolder.exists());
+		return martRegistry;
+	}
+	public static File createTmpFolders(String identifier) {
 		String fs = System.getProperty("file.separator");
 		File file = new File("." + fs + identifier + fs);
 		file.mkdirs();

@@ -3,6 +3,7 @@ package org.biomart.martRemote;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ import org.biomart.martRemote.objects.response.GetRootContainerResponse;
 import org.biomart.martRemote.objects.response.MartServiceResponse;
 import org.biomart.martRemote.objects.response.QueryResponse;
 import org.biomart.objects.objects.MartRegistry;
+import org.biomart.transformation.helpers.TransformationYongPrototype;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -113,7 +115,8 @@ public class MartApi {
 	
 	private Boolean debug = null;
 	
-	private String xsdFile = null;
+	private String xsdFilePath = null;
+	//private String xsdFileUrl = null;
 	
 	private MartRegistry martRegistry = null;
 	private SAXBuilder builder = null;
@@ -121,16 +124,17 @@ public class MartApi {
 	private Namespace xsiNamespace = null;
 	
 	public MartApi() throws IOException, JDOMException, TechnicalException {
-		this(false, MartRemoteConstants.XSD_FILE_FILE_PATH_AND_NAME, MartRemoteConstants.PORTAL_SERIAL_FILE_PATH_AND_NAME);
+		this(false, null, MartRemoteConstants.XSD_FILE_FILE_PATH_AND_NAME, null, MartRemoteConstants.PORTAL_SERIAL_FILE_PATH_AND_NAME);
 	}
-	public MartApi(boolean webService, String xsdFile, String portalSerialFile) throws TechnicalException {
+	public MartApi(boolean webService, String xsdFilePath, String xsdFileUrl, String portalSerialPath, String portalSerialFileUrl) throws TechnicalException {
 		this.debug = !webService;
-		this.xsdFile = xsdFile;
+		this.xsdFilePath = xsdFilePath;
+		//this.xsdFileUrl = xsdFileUrl;
 			
 		builder = new SAXBuilder();
         Document xsd = null;
         try {
-			xsd = builder.build(new URL(xsdFile));
+			xsd = builder.build(new URL(xsdFileUrl));
 		} catch (MalformedURLException e) {
 			throw new TechnicalException(e);
 		} catch (JDOMException e) {
@@ -144,11 +148,12 @@ public class MartApi {
         xsiNamespace = Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
 		URL portalSerialUrl = null;
 		try {
-			portalSerialUrl = new URL(portalSerialFile);
+			portalSerialUrl = new URL(portalSerialFileUrl);
 		} catch (MalformedURLException e) {
 			throw new TechnicalException(e);
 		}
 		martRegistry = (MartRegistry)MyUtils.readSerializedObject(portalSerialUrl);
+		//martRegistry = TransformationYongPrototype.wrappedRebuildCentralPortalRegistry();
 	}
 	
 	// Request preparation
@@ -183,20 +188,20 @@ public class MartApi {
 	// Request exectution
 	public GetRegistryResponse executeGetRegistry(MartServiceRequest martServiceRequest) {
 		GetRegistryResponse getRegistryResponse = new GetRegistryResponse(
-				MartRemoteEnum.GET_REGISTRY.getResponseName(), martServiceNamespace, xsiNamespace, xsdFile, 
+				MartRemoteEnum.GET_REGISTRY.getResponseName(), martServiceNamespace, xsiNamespace, xsdFilePath, 
 				martRegistry, martServiceRequest);
 		getRegistryResponse.populateObjects();
 		return getRegistryResponse;
 	}
 	public GetDatasetsResponse executeGetDatasets(MartServiceRequest martServiceRequest) {
 		GetDatasetsResponse getDatasetsResponse = new GetDatasetsResponse(
-				MartRemoteEnum.GET_DATASETS.getResponseName(), martServiceNamespace, xsiNamespace, xsdFile, martRegistry, martServiceRequest);
+				MartRemoteEnum.GET_DATASETS.getResponseName(), martServiceNamespace, xsiNamespace, xsdFilePath, martRegistry, martServiceRequest);
 		getDatasetsResponse.populateObjects();
 		return getDatasetsResponse;
 	}
 	public GetRootContainerResponse executeGetRootContainer(MartServiceRequest martServiceRequest) {
 		GetRootContainerResponse getRootContainerResponse = new GetRootContainerResponse(
-				MartRemoteEnum.GET_ROOT_CONTAINER.getResponseName(), martServiceNamespace, xsiNamespace, xsdFile, martRegistry, martServiceRequest);
+				MartRemoteEnum.GET_ROOT_CONTAINER.getResponseName(), martServiceNamespace, xsiNamespace, xsdFilePath, martRegistry, martServiceRequest);
 		getRootContainerResponse.populateObjects();
 		return getRootContainerResponse;
 	}
@@ -254,14 +259,14 @@ public class MartApi {
 	}*/
 	public GetLinksResponse executeGetLinks(MartServiceRequest martServiceRequest) {
 		GetLinksResponse getLinksResponse = new GetLinksResponse(
-				MartRemoteEnum.GET_LINKS.getResponseName(), martServiceNamespace, xsiNamespace, xsdFile, martRegistry, martServiceRequest);
+				MartRemoteEnum.GET_LINKS.getResponseName(), martServiceNamespace, xsiNamespace, xsdFilePath, martRegistry, martServiceRequest);
 		getLinksResponse.populateObjects();
 		return getLinksResponse;
 	}
 	
 	public QueryRequest prepareQuery(String username, String password, MartServiceFormat format, String queryString) 
 	throws JDOMException, IOException, TechnicalException, FunctionalException {
-		QueryRequest queryRequest = new QueryRequest(MartRemoteEnum.QUERY.getRequestName(), martServiceNamespace, xsiNamespace, xsdFile, 
+		QueryRequest queryRequest = new QueryRequest(MartRemoteEnum.QUERY.getRequestName(), martServiceNamespace, xsiNamespace, xsdFilePath, 
 				username, password, format, queryString) ;
 		queryRequest.rebuildQueryDocument();	// adding proper namespaces and wrapper
 							// update errorMessage if not validation fails
@@ -273,7 +278,7 @@ public class MartApi {
 	public QueryResponse executeQuery(MartServiceRequest martServiceRequest) 
 	throws JDOMException, IOException, TechnicalException, FunctionalException {			
 		QueryResponse queryResponse = new QueryResponse(
-				MartRemoteEnum.QUERY.getResponseName(), martServiceNamespace, xsiNamespace, xsdFile, martRegistry, martServiceRequest);
+				MartRemoteEnum.QUERY.getResponseName(), martServiceNamespace, xsiNamespace, xsdFilePath, martRegistry, martServiceRequest);
 		queryResponse.populateObjects();
 		
 		return queryResponse;
@@ -313,36 +318,50 @@ public class MartApi {
 	}*/
 	
 	// Response writing
-	public String processMartServiceResult(MartServiceResponse martServiceResponse, PrintWriter printWriter) throws TechnicalException {
+	public String processMartServiceResult(MartServiceResponse martServiceResponse, Writer writer) throws TechnicalException {
 		if (martServiceResponse.getMartServiceRequest().getFormat().isXml()) {
-			Document document = martServiceResponse.getXmlRegistry(this.debug, printWriter);
+			Document document = martServiceResponse.getXmlDocument(this.debug, writer);
 			if (martServiceResponse.isValid()) {
-				return writeXmlResponse(document, printWriter);					
+				return writeXmlResponse(document, writer);					
 			}
 		} else if (martServiceResponse.getMartServiceRequest().getFormat().isJson()) {
-			JSONObject jsonObject = martServiceResponse.getJsonRegistry();
+			JSONObject jsonObject = martServiceResponse.getJsonObject();
 			if (martServiceResponse.isValid()) {					
-				return writeJsonResponse(jsonObject, printWriter);
+				return writeJsonResponse(jsonObject, writer);
 			}
 		}
-		return writeError(martServiceResponse.getErrorMessage(), printWriter);	//	if (!martServiceResult.isValid())
+		return writeError(martServiceResponse.getErrorMessage(), writer);	//	if (!martServiceResult.isValid())
 	}
-	public String writeXmlResponse(Document document, PrintWriter printWriter) throws TechnicalException {
-		XMLOutputter compactFormat = new XMLOutputter(Format.getCompactFormat());
-		try {
-			compactFormat.output(document, printWriter);
-		} catch (IOException e) {
-			throw new TechnicalException(e);
+	public String writeXmlResponse(Document document, Writer writer) throws TechnicalException {
+		if (null!=writer) {
+			try {
+				XMLOutputter compactFormat = new XMLOutputter(Format.getCompactFormat());
+				compactFormat.output(document, writer);
+			} catch (IOException e) {
+				throw new TechnicalException(e);
+			}
 		}
 		return MartRemoteUtils.getXmlDocumentString(document);
 	}
-	public String writeJsonResponse(JSONObject root, PrintWriter printWriter) {
-		printWriter.print(root);
+	public String writeJsonResponse(JSONObject root, Writer writer) throws TechnicalException {
+		if (null!=writer) {
+			try {
+				writer.append(root + MyUtils.LINE_SEPARATOR);
+			} catch (IOException e) {
+				throw new TechnicalException(e);
+			}
+		}
 		return root.toString();
 	}
-	public String writeError(StringBuffer errorMessage, PrintWriter printWriter) {
+	public String writeError(StringBuffer errorMessage, Writer writer) throws TechnicalException {
 		String message = "ERROR" + MyUtils.LINE_SEPARATOR + errorMessage;
-		printWriter.println(message);
+		if (null!=writer) {
+			try {
+				writer.append(message + MyUtils.LINE_SEPARATOR);
+			} catch (IOException e) {
+				throw new TechnicalException(e);
+			}
+		}
 		return message;
 	}	
 }
