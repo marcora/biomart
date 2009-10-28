@@ -27,11 +27,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Vector;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
@@ -79,7 +77,7 @@ public class Schemas {
 
 	// Make a listener which knows how to handle masking and
 	// renaming.
-	private final PropertyChangeListener updateListener = new PropertyChangeListener() {
+	public final PropertyChangeListener updateListener = new PropertyChangeListener() {
 		public void propertyChange(PropertyChangeEvent evt) {
 			final Schema sch = (Schema) evt.getSource();
 			if (evt.getPropertyName().equals("name")) {
@@ -96,34 +94,6 @@ public class Schemas {
 					Schemas.this.removeSchemaTab(sch.getName(), true);
 				else
 					Schemas.this.addSchema(sch);
-			}
-		}
-	};
-
-	// A listener for updating our tabs.
-	private final PropertyChangeListener tabListener = new PropertyChangeListener() {
-		public void propertyChange(final PropertyChangeEvent evt) {
-			// Listen to masked schema and rename
-			// schema events on each new schema added
-			// regardless of tab presence.
-			// Mass change. Copy to prevent concurrent mods.
-			final Set<String> oldSchs = new HashSet<String>(Schemas.this.schemasMap
-					.keySet());
-			for (final Iterator i = Schemas.this.mart
-					.getSchemas().values().iterator(); i.hasNext();) {
-				final Schema sch = (Schema) i.next();
-				if (!oldSchs.remove(sch.getName())) {
-					// Single-add.
-					if (!sch.isMasked())
-						Schemas.this.addSchema(sch);
-					sch.addPropertyChangeListener("masked",
-							Schemas.this.updateListener);
-					sch.addPropertyChangeListener("name",
-							Schemas.this.updateListener);
-				}
-			}
-			for(String item: oldSchs) {
-				Schemas.this.removeSchemaTab(item, true);
 			}
 		}
 	};
@@ -150,26 +120,25 @@ public class Schemas {
 		// a scrollpane.
 		// Populate the map to hold the relation between schemas and the
 		// diagrams representing them.
-		for (final Iterator i = mart.getSchemas().values()
-				.iterator(); i.hasNext();) {
-			final Schema sch = (Schema)i.next();
-			// Don't add schemas which are initially masked.
-			if (!sch.isMasked())
-				this.addSchema(sch);
-			sch.addPropertyChangeListener("masked", this.updateListener);
-			sch.addPropertyChangeListener(Resources.get("PCNAME"), this.updateListener);
+		if(mart.getSchemas()!=null) {
+			for (final Iterator i = mart.getSchemas().values()
+					.iterator(); i.hasNext();) {
+				final Schema sch = (Schema)i.next();
+				// Don't add schemas which are initially masked.
+				if (!sch.isMasked())
+					this.addSchema(sch);
+				sch.addPropertyChangeListener("masked", this.updateListener);
+				sch.addPropertyChangeListener(Resources.get("PCNAME"), this.updateListener);
+			}
 		}
 
-		// Listen to add/remove/mass change schema events.
-		mart.getSchemas().addPropertyChangeListener(
-				this.tabListener);
 		//set DiagramContext
 		final SchemaContext context = new SchemaContext(mart);
 		this.setDiagramContext(context);
 
 	}
 
-	private synchronized void addSchema(final Schema schema) {
+	public synchronized void addSchema(final Schema schema) {
 		if(!(schema instanceof JDBCSchema))
 			return;
 		JDBCSchema jdbcSchema = (JDBCSchema)schema;
@@ -238,7 +207,7 @@ public class Schemas {
 				candidates.toArray(), null);
 	}
 
-	private synchronized void removeSchemaTab(final String schemaName,
+	public synchronized void removeSchemaTab(final String schemaName,
 			final boolean select) {
 		this.schemasMap.remove(schemaName);
 	}
@@ -617,31 +586,6 @@ public class Schemas {
 		}.start();
 	}
 
-	/**
-	 * Confirms with user then removes a schema.
-	 * 
-	 * @param schema
-	 *            the schema to remove.
-	 */
-	public void requestRemoveSchema(final Schema schema) {
-		// Confirm if the user really wants to do it.
-		final int choice = JOptionPane.showConfirmDialog(null, Resources
-				.get("confirmDelSchema"), Resources.get("questionTitle"),
-				JOptionPane.YES_NO_OPTION);
-
-		// If they don't, cancel out.
-		if (choice != JOptionPane.YES_OPTION)
-			return;
-
-		new LongProcess() {
-			public void run() {
-				Transaction.start(false);
-				Schemas.this.mart.getSchemas().remove(
-						schema.getOriginalName());
-				Transaction.end();
-			}
-		}.start();
-	}
 
 	/**
 	 * Asks user for a new name, then renames a schema.

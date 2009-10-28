@@ -64,7 +64,7 @@ public class DataSets {
 
 	// Make a listener which knows how to handle masking and
 	// renaming.
-	private final PropertyChangeListener renameListener = new PropertyChangeListener() {
+	public final PropertyChangeListener renameListener = new PropertyChangeListener() {
 		public void propertyChange(PropertyChangeEvent evt) {
 			final DataSet ds = (DataSet) evt.getSource();
 			if (evt.getPropertyName().equals("name")) {
@@ -124,6 +124,7 @@ public class DataSets {
 		// so it is held inside a scrollpane.
 		// Populate the map to hold the relation between schemas and the
 		// diagrams representing them.
+		if(mart.getDataSets()!=null)
 		for (final Iterator i = mart.getDataSets().values()
 				.iterator(); i.hasNext();) {
 			final DataSet ds = (DataSet) i.next();
@@ -141,7 +142,7 @@ public class DataSets {
 
 	/**
 	 */
-	private synchronized void addDataSet(final DataSet dataset) {
+	public synchronized void addDataSet(final DataSet dataset) {
 		// Create the diagram to represent this dataset.
 		final DataSetDiagram datasetDiagram = new DataSetDiagram(this.mart,dataset);
 
@@ -180,6 +181,10 @@ public class DataSets {
 	
 	public DataSet getDataSet(String name) {
 		return this.datasetsMap.get(name);
+	}
+	
+	public Map<String,DataSet> getDataSets() {
+		return this.datasetsMap;
 	}
 	
 	/**
@@ -717,7 +722,7 @@ public class DataSets {
 		// Ask the user what tables they want to work with and what
 		// mode they want.
 		final SuggestDataSetDialog dialog = new SuggestDataSetDialog(
-				this.mart.getSchemas().values(), table);
+				this.mart.getSchemasObj().getSchemas().values(), table);
 		dialog.setVisible(true);
 
 		// If they cancelled it, return without doing anything.

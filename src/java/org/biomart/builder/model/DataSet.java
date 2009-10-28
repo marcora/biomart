@@ -104,13 +104,6 @@ public class DataSet extends Schema {
 		}
 	};
 
-	private final PropertyChangeListener existenceListener = new PropertyChangeListener() {
-		public void propertyChange(final PropertyChangeEvent evt) {
-			// Are we deaded?
-			DataSet.this.deadCheck = true;
-		}
-	};
-
 	private final Table centralTable;
 
 	private final Collection<Relation> includedRelations;
@@ -195,7 +188,7 @@ public class DataSet extends Schema {
 	protected void tableDropped(final Table table) {
 		final DataSetTable dsTable = (DataSetTable) table;
 		// Remove all mods.
-		for (final Iterator j = this.getMart().getSchemas().values().iterator(); j
+		for (final Iterator j = this.getMart().getSchemasObj().getSchemas().values().iterator(); j
 				.hasNext();) {
 			final Schema sch = (Schema) j.next();
 			for (final Iterator k = sch.getTables().values().iterator(); k
@@ -212,7 +205,7 @@ public class DataSet extends Schema {
 			throws TransactionException {
 		try {
 			if (this.deadCheck
-					&& !this.getMart().getSchemas().containsKey(
+					&& !this.getMart().getSchemasObj().getSchemas().containsKey(
 							this.centralTable.getSchema().getOriginalName())
 					|| !this.centralTable.getSchema().getTables().containsKey(
 							this.centralTable.getName()))
@@ -666,9 +659,9 @@ public class DataSet extends Schema {
 
 		// How many times are allowed to iterate over each relation?
 		final Map relationCount = new HashMap();
-		for (final Iterator i = this.getMart().getSchemas().values().iterator(); i
+		for (final Iterator<JDBCSchema> i = this.getMart().getSchemasObj().getSchemas().values().iterator(); i
 				.hasNext();) {
-			final Schema schema = (Schema) i.next();
+			final JDBCSchema schema =  i.next();
 			final Set relations = new HashSet();
 			for (final Iterator j = schema.getTables().values().iterator(); j
 					.hasNext();) {
@@ -1720,16 +1713,6 @@ public class DataSet extends Schema {
 			this.getTables().remove(deadTbl.getName());
 			this.mods.remove(deadTbl.getName());
 		}
-
-		// Add us as a listener to mart's schemas to remove ourselves
-		// if our central table's parent schema is removed.
-		this.getMart().getSchemas().addPropertyChangeListener(
-				this.existenceListener);
-
-		// Add us as a listener to the schema's tables so that
-		// if the central table is removed, so are we.
-		this.centralTable.getSchema().getTables().addPropertyChangeListener(
-				this.existenceListener);
 
 		// Add us as a listener to all included rels and schs, replacing
 		// ourselves if we are already listening to them.

@@ -44,7 +44,6 @@ import org.biomart.common.exceptions.DataModelException;
 import org.biomart.common.resources.Log;
 import org.biomart.common.resources.Resources;
 import org.biomart.common.utils.BeanMap;
-import org.biomart.common.utils.WeakPropertyChangeSupport;
 import org.biomart.common.view.gui.SwingWorker;
 import org.biomart.common.view.gui.dialogs.ProgressDialog;
 import org.biomart.common.view.gui.dialogs.StackTrace;
@@ -62,16 +61,8 @@ import org.biomart.configurator.utils.type.MartType;
  * @since 0.5
  */
 public class Mart {
-	private static final long serialVersionUID = 1L;
-
-	/**
-	 * Subclasses use this field to fire events of their own.
-	 */
-	protected final WeakPropertyChangeSupport pcs = new WeakPropertyChangeSupport(
-			this);
 
 	private final BeanMap datasets;
-	private final BeanMap schemas;
 	//TODO should merge with datasets and schemas
 	private Schemas schemasObj;
 	private DataSets datasetsObj;
@@ -84,7 +75,7 @@ public class Mart {
 	private String overridePort = null;
 	private boolean hideMaskedDataSets = false;
 	private boolean hideMaskedSchemas = false;
-	//hack for marteditor
+	//hack for marteditor, should be in the dataset
 	private List<String> mainTableList;
 	/**
 	 * Constant referring to table and column name conversion.
@@ -102,74 +93,11 @@ public class Mart {
 	// For use in hash code and equals to prevent dups in prop change.
 	private static int ID_SERIES = 0;
 	private final int uniqueID = Mart.ID_SERIES++;
-	private Collection<Schema> schemaCache;
-	private Collection<DataSet> datasetCache;
 	private Location location;	
 	private String name;
 	private MartType martType; 
 
-	private final PropertyChangeListener schemaCacheBuilder = new PropertyChangeListener() {
-		public void propertyChange(final PropertyChangeEvent evt) {
-			final Collection newSchs = new HashSet(Mart.this.schemas.values());
-			if (!newSchs.equals(Mart.this.schemaCache)) {
-//				Mart.this.setDirectModified(true);
-				// Identify dropped ones.
-				final Collection dropped = new HashSet(Mart.this.schemaCache);
-				dropped.removeAll(newSchs);
-				// Identify new ones.
-				newSchs.removeAll(Mart.this.schemaCache);
-				// Drop dropped ones.
-				for (final Iterator i = dropped.iterator(); i.hasNext();)
-					Mart.this.schemaCache.remove(i.next());
-				// Add added ones.
-				for (final Iterator i = newSchs.iterator(); i.hasNext();) {
-					final Schema sch = (Schema) i.next();
-					Mart.this.schemaCache.add(sch);
-				}
-			}
-		}
-	};
 
-	private final PropertyChangeListener datasetCacheBuilder = new PropertyChangeListener() {
-		public void propertyChange(final PropertyChangeEvent evt) {
-			final Collection newDss = new HashSet(Mart.this.datasets.values());
-			if (!newDss.equals(Mart.this.datasetCache)) {
-//				Mart.this.setDirectModified(true);
-				// Identify dropped ones.
-				final Collection dropped = new HashSet(Mart.this.datasetCache);
-				dropped.removeAll(newDss);
-				// Identify new ones.
-				newDss.removeAll(Mart.this.datasetCache);
-				// Drop dropped ones.
-				for (final Iterator i = dropped.iterator(); i.hasNext();) {
-					final DataSet deadDS = (DataSet) i.next();
-					try {
-						deadDS.setPartitionTable(false);
-					} catch (final Exception pe) {
-						pe.printStackTrace();
-					}
-					// Also remove all related mods in rels and tbls.
-					for (final Iterator j = Mart.this.schemas.values()
-							.iterator(); j.hasNext();) {
-						final Schema sch = (Schema) j.next();
-						for (final Iterator k = sch.getTables().values()
-								.iterator(); k.hasNext();)
-							((Table) k.next()).dropMods(deadDS, null);
-						for (final Iterator k = sch.getRelations().iterator(); k
-								.hasNext();)
-							((Relation) k.next()).dropMods(deadDS, null);
-					}
-					// Remove from cache.
-					Mart.this.datasetCache.remove(deadDS);
-				}
-				// Add added ones.
-				for (final Iterator i = newDss.iterator(); i.hasNext();) {
-					final DataSet ds = (DataSet) i.next();
-					Mart.this.datasetCache.add(ds);
-				}
-			}
-		}
-	};
 
 	/**
 	 * Construct a new, empty, mart.
@@ -180,17 +108,9 @@ public class Mart {
 		this.name = name;
 		this.martType = type;
 		this.datasets = new BeanMap(new TreeMap());
-		this.schemas = new BeanMap(new TreeMap());
 		this.datasetsObj = new DataSets(this);
 		this.schemasObj = new Schemas(this);
-
-
-		// Listeners on schema and dataset additions to spot
-		// and handle renames.
-		this.schemaCache = new HashSet<Schema>();
-		this.schemas.addPropertyChangeListener(this.schemaCacheBuilder);
-		this.datasetCache = new HashSet<DataSet>();
-		this.datasets.addPropertyChangeListener(this.datasetCacheBuilder);
+		
 	}
 	
 	public Schemas getSchemasObj() {
@@ -223,7 +143,7 @@ public class Mart {
 	 */
 	public int getNextUniqueId() {
 		int x = 0;
-		for (final Iterator i = this.schemaCache.iterator(); i.hasNext();)
+		for (final Iterator i = this.schemasObj.getSchemas().values().iterator(); i.hasNext();)
 			x = Math.max(x, ((Schema) i.next()).getUniqueId());
 		return x + 1;
 	}
@@ -502,8 +422,11 @@ public class Mart {
 	 * @return a set of schema objects. Keys are names, values are actual
 	 *         schemas.
 	 */
-	public BeanMap getSchemas() {
-		return this.schemas;
+	public Map<String,JDBCSchema> getSchemas() {
+		if(this.schemasObj!=null)
+			return this.schemasObj.getSchemas();
+		else 
+			return null;
 	}
 
 	/**
@@ -869,5 +792,24 @@ public class Mart {
 		progressMonitor.setVisible(true);
 	}
 
+	public void addSchema(Schema newSch) {
+		final Set<String> oldSchs = new HashSet<String>(this.schemasObj.getSchemas()
+				.keySet());
+			if (!oldSchs.remove(newSch.getName())) {
+				// Single-add.
+				if (!newSch.isMasked())
+					this.getSchemasObj().addSchema(newSch);
+				newSch.addPropertyChangeListener("masked",
+						this.getSchemasObj().updateListener);
+				newSch.addPropertyChangeListener("name",
+						this.getSchemasObj().updateListener);
+			}
+		
+		for(String item: oldSchs) {
+			this.getSchemasObj().removeSchemaTab(item, true);
+		}
 
+		this.schemasObj.getSchemas().put(newSch.getOriginalName(), (JDBCSchema)newSch);
+	}
+	
 }

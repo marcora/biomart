@@ -635,7 +635,7 @@ import org.biomart.configurator.utils.type.MartType;
 					loc.getConnectionObject().setDatabaseName(dbName);
 					final JDBCSchema schema = new JDBCSchema(mart, loc.getConnectionObject(),
 							 dbName, dbName, true, "", "");
-					mart.getSchemas().put(schema.getOriginalName(), schema);
+					mart.addSchema(schema);
 					
 					loc.addMart(mart);
 				}

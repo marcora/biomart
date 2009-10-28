@@ -583,7 +583,7 @@ public class McViewSchema extends McView implements TreeSelectionListener {
 					);
 			Schema schema = new JDBCSchema(mart, conObj, se
 					.getAttributeValue("schemaName"),  schemaName, true, "", "");
-			mart.getSchemas().put(schema.getOriginalName(), schema);
+			mart.addSchema(schema);
 			// construct table
 			List<Element> teList = JDomUtils.searchElementList(se, Resources
 					.get("TABLE"), null);
@@ -750,7 +750,7 @@ public class McViewSchema extends McView implements TreeSelectionListener {
 				);
 		Schema schema = new JDBCSchema(mart, conObj, schemaElement
 				.getAttributeValue(Resources.get("NAME")),  schemaName, true, "", "");
-		mart.getSchemas().put(schema.getOriginalName(), schema);
+		mart.addSchema(schema);
 		// construct table
 		List<Element> teList = schemaElement.getChildren(Resources.get("TABLE"));
 		List<Relation> subRelations = new ArrayList<Relation>();

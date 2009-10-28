@@ -135,9 +135,9 @@ public class JDomNodeAdapter extends DefaultMutableTreeNode {
 
 
     	List<JDomNodeAdapter> newNodes = new ArrayList<JDomNodeAdapter>();
-		for (final Iterator<Schema> i = mart.getSchemas().values().iterator(); i.hasNext();) {
+		for (final Iterator<JDBCSchema> i = mart.getSchemas().values().iterator(); i.hasNext();) {
 			final Schema schema = i.next();
-			if (schema instanceof JDBCSchema) {
+		
 				Log.debug("Writing JDBC schema");
 				// It's a JDBC schema.
 				final JDBCSchema jdbcSchema = (JDBCSchema) schema;
@@ -306,7 +306,7 @@ public class JDomNodeAdapter extends DefaultMutableTreeNode {
 
 				newNodes.add(new JDomNodeAdapter(schemaElement));
 
-			}
+			
 
 		}
 
