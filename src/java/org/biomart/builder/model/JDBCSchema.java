@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -1885,8 +1886,211 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 			// Get and create primary keys.
 			// Work out a list of all foreign keys currently existing.
 			// Any remaining in this list later will be dropped.
-			this.createPkFks(dmd, catalog, 1);
+			
+			this.initPkFks(dmd, catalog);
 			Log.info("Done synchronising");
 			Log.info("forward message to controller");
 		}
+		
+		private void initPkFks(DatabaseMetaData dmd, final String catalog) throws SQLException, DataModelException {
+			// Get and create primary keys.
+			// Work out a list of all foreign keys currently existing.
+			// Any remaining in this list later will be dropped.
+			
+			//do the pk for the main table first if it is mart
+			List<String> mainTableList = this.getMart().getMartMTNameList();
+			Table[] orderedTables = null;
+			Map<Table, ArrayList<Column>> mtColsMap = new HashMap<Table, ArrayList<Column>>();
+			if(mainTableList!=null) {
+				orderedTables = new Table[mainTableList.size()];
+				for(String tableStr:mainTableList) {
+					Table table = (Table)this.getTables().get(tableStr);
+					//find the column numbers
+					int count = 0;
+					ArrayList<Column> colList = new ArrayList<Column>();
+					for(final Iterator i = table.getColumns().values().iterator(); i.hasNext();){
+						final Column column = (Column)i.next();
+						if(column.getName().indexOf(Resources.get("martPKSuffix"))>=0) {
+							colList.add(column);
+							count++;
+						}
+					}
+					if(count-1>orderedTables.length)
+						return; //error
+					orderedTables[count-1]=table;
+					mtColsMap.put(table, colList);
+				}
+				//check 
+				for(Table t:orderedTables) {
+					if(t==null)
+						return;
+				}
+			}
+
+			for (final Iterator i = this.getTables().values().iterator(); i.hasNext();) {
+				final Table t = (Table) i.next();
+
+				// Obtain the primary key from the database. Even in databases
+				// without referential integrity, the primary key is still
+				// defined and can be obtained from the metadata.
+				Log.debug("Loading table primary keys");
+				String searchCatalog = catalog;
+				String searchSchema = this.realSchemaName;
+
+				final ResultSet dbTblPKCols = dmd.getPrimaryKeys(searchCatalog,
+						searchSchema, t.getName());
+
+				// Load the primary key columns into a map keyed by column
+				// position.
+				// In other words, the first column in the key has a map key of
+				// 1, and so on. We do this because we can't guarantee we'll
+				// read the key columns from the database in the correct order.
+				// We keep the map sorted, so that when we iterate over it later
+				// we get back the columns in the correct order.
+				final Map<Short, Column> pkCols = new TreeMap<Short, Column>();
+				while (dbTblPKCols.next()) {
+					final String pkColName = dbTblPKCols
+							.getString("COLUMN_NAME");
+					final Short pkColPosition = new Short(dbTblPKCols
+							.getShort("KEY_SEQ"));
+					pkCols.put(pkColPosition, (Column)t.getColumns().get(pkColName));
+				}
+				dbTblPKCols.close();
+
+				// Did DMD find a PK? If not, which is really unusual but
+				// potentially may happen, attempt to find one by looking for a
+				// single column with the same name as the table or with '_id'
+				// appended if it is source. For the mart, pk is the columns with '_key'.
+				// Only do this if we are using key-guessing.
+				if (pkCols.isEmpty() && this.isKeyGuessing()) {
+					Log.debug("Found no primary key, so attempting to guess one");
+					if(!this.isMart()) {
+						// Plain version first.
+						Column candidateCol = (Column) t.getColumns().get(
+								t.getName());
+						// Try with '_id' appended if plain version turned up
+						// nothing.
+						if (candidateCol == null)
+							candidateCol = (Column) t
+									.getColumns()
+									.get(
+											t.getName()
+													+ Resources
+															.get("primaryKeySuffix"));
+						// Found something? Add it to the primary key columns map,
+						// with a dummy key of 1. (Use Short for the key because
+						// that
+						// is what DMD would have used had it found anything
+						// itself).
+						if (candidateCol != null)
+							pkCols.put(Short.valueOf("1"), candidateCol);
+					}else {
+						Short colPosition = 1;
+						if(mtColsMap.containsKey(t)) {
+							List<Column> currentKeysList = mtColsMap.get(t);
+							int keySize = currentKeysList.size();
+							if(keySize == 1) //central main
+								pkCols.put(Short.valueOf("1"),mtColsMap.get(t).get(0));
+							else {
+								//get parent table
+								Table parentTable = orderedTables[keySize-2];
+								//parent key list
+								List<Column> pkeysList = mtColsMap.get(parentTable);
+								for(Column col:currentKeysList) {
+									boolean found = false;
+									for(Column pcol:pkeysList) {
+										if(pcol.getName().equals(col.getName())) {
+											found = true;
+											break;
+										}
+									}
+									if(found == false)
+										pkCols.put(Short.valueOf("1"),col);
+								}
+							}
+						}else {
+							for(Iterator ci = t.getColumns().values().iterator();ci.hasNext();){
+								Column candidateCol = (Column)ci.next();
+								if(candidateCol.getName().indexOf(Resources.get("martPKSuffix"))>=0) {
+									pkCols.put(colPosition, candidateCol);
+									colPosition++;
+								}
+							}
+						}
+					}
+				}
+
+				// Obtain the existing primary key on the table, if the table
+				// previously existed and even had one in the first place.
+				final PrimaryKey existingPK = t.getPrimaryKey();
+
+				// Did we find a PK on the database copy of the table?
+				if (!pkCols.isEmpty()) {
+
+					// Yes, we found a PK on the database copy of the table. So,
+					// create a new key based around the columns we identified.
+					PrimaryKey candidatePK;
+					try {
+						candidatePK = new PrimaryKey((Column[]) pkCols.values()
+								.toArray(new Column[0]));
+					} catch (final Throwable th) {
+						throw new BioMartError(th);
+					}
+
+					// If the existing table has no PK, or has a PK which
+					// matches and is not incorrect, or has a PK which does not
+					// match
+					// and is not handmade, replace that PK with the one we
+					// found.
+					// This way we preserve any existing handmade PKs, and don't
+					// override any marked as incorrect.
+					try {
+						if (existingPK == null)
+							t.setPrimaryKey(candidatePK);
+						else if (existingPK.equals(candidatePK)
+								&& existingPK.getStatus().equals(
+										ComponentStatus.HANDMADE))
+							existingPK.setStatus(ComponentStatus.INFERRED);
+						else if (!existingPK.equals(candidatePK)
+								&& !existingPK.getStatus().equals(
+										ComponentStatus.HANDMADE))
+							t.setPrimaryKey(candidatePK);
+					} catch (final Throwable th) {
+						throw new BioMartError(th);
+					}
+				} else // No, we did not find a PK on the database copy of the
+				// table, so that table should not have a PK at all. So if the
+				// existing table has a PK which is not handmade, remove it.
+				// the orphan PK is already cleaned by clearOrphanKey();
+				if (existingPK != null
+						&& !existingPK.getStatus().equals(
+								ComponentStatus.HANDMADE))
+					try {
+						t.setPrimaryKey(null);
+					} catch (final Throwable th) {
+						throw new BioMartError(th);
+					}
+			} //end of for (final Iterator i = this.getTables().values().iterator(); i.hasNext();)
+
+			// Are we key-guessing? Key guess the foreign keys, passing in a
+			// reference to the list of existing foreign keys. After this call
+			// has completed, the list will contain all those foreign keys which
+			// no longer exist, and can safely be dropped.
+			if (this.isKeyGuessing()) {
+				if(this.isMart())					
+					this.synchroniseKeysUsingMartKeyGuessing(Collections.emptySet(), 1, orderedTables);
+				else
+					this.synchroniseKeysUsingKeyGuessing(Collections.emptySet(), 1);
+			// Otherwise, use DMD to do the same, also passing in the list of
+			// existing foreign keys to be updated as the call progresses. Also
+			// pass in the DMD details so it doesn't have to work them out for
+			// itself.
+			}
+			else
+				this.synchroniseKeysUsingDMD(Collections.emptySet(), dmd,
+						this.realSchemaName, catalog, 1);
+
+		}
+		
+
 }
