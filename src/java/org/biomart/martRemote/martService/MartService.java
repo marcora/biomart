@@ -10,6 +10,7 @@ import org.biomart.martRemote.MartRemoteConstants;
 import org.biomart.martRemote.enums.MartServiceFormat;
 import org.biomart.martRemote.objects.request.MartServiceRequest;
 import org.biomart.martRemote.objects.response.MartServiceResponse;
+import org.jdom.Document;
 
 
 /**
@@ -40,17 +41,7 @@ public class MartService {
 		//SERVER_PATH + MartRemoteConstants.ADDITIONAL_FILES_FOLDER_NAME + MyUtils.FILE_SEPARATOR + MartRemoteConstants.PORTAL_SERIAL_FILE_NAME;
 		//MyConstants.FILE_SYSTEM_PROTOCOL + "/var/lib/tomcat5.5/webapps/MartService" + MyUtils.FILE_SEPARATOR + MartRemoteConstants.ADDITIONAL_FILES_FOLDER_NAME + MyUtils.FILE_SEPARATOR + MartRemoteConstants.PORTAL_SERIAL_FILE_NAME;
 		
-	private static MartApi martServiceApi = null;
-	
-	public static String initialize() {
-		try {
-			MartService.martServiceApi = new MartApi(true, XSD_FILE_PATH, XSD_FILE_URL, PORTAL_SERIAL_FILE_PATH, PORTAL_SERIAL_FILE_URL);
-		} catch (TechnicalException e) {
-			e.printStackTrace();
-			return e.getMessage();
-		}
-		return null;
-	}
+	public static MartApi martServiceApi = null;
 	
 	public String test(String arg1, String arg2) {
 		return "ok: " + arg1 + " " + arg2;
@@ -60,7 +51,7 @@ public class MartService {
 		String result = null;
 		
 		if (null==MartService.martServiceApi) {	// should happen only once
-			String initializeError = initialize();
+			String initializeError = MartServiceHelper.initialize();
 			if (null!=initializeError) {
 				return "initializeError = " + initializeError;
 			}
@@ -79,5 +70,32 @@ public class MartService {
 		}
 		
 		return result;
+	}
+	
+	public Document getRegistry2(String username, String password, String format) {
+		String result = null;
+		
+		if (null==MartService.martServiceApi) {	// should happen only once
+			String initializeError = MartServiceHelper.initialize();
+			if (null!=initializeError) {
+				return null;
+			}
+		}
+		
+		MartServiceFormat martServiceFormat = MartServiceFormat.getFormat(format);
+		MartServiceRequest martServiceRequest = MartService.martServiceApi.prepareGetRegistry(username, password, martServiceFormat);
+		MartServiceResponse martServiceResponse = MartService.martServiceApi.executeGetRegistry(martServiceRequest);
+		Document d = null;
+		try {
+			StringWriter sw = new StringWriter();
+			MartService.martServiceApi.processMartServiceResult(martServiceResponse, sw);
+			result = sw.toString();
+			d = martServiceResponse.getXmlDocument();
+		} catch (TechnicalException e) {
+			result = e.getMessage();
+			e.printStackTrace();
+		}
+		
+		return d;
 	}
 }

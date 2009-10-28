@@ -55,7 +55,9 @@
         <!--aar them up -->
         <mkdir dir="${build.dir}/classes/META-INF"/>
         <copy file="./conf/xml/services.xml" todir="${build.dir}/classes/META-INF"/>
-        <jar destfile="${build.dir}/MartService.aar" />
+        <jar destfile="${build.dir}/MartService.aar" >
+            <fileset dir="${build.dir}/classes"/>
+        </jar>
     </target>
 
     <target name="clean">

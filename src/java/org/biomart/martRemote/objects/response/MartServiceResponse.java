@@ -35,7 +35,7 @@ public abstract class MartServiceResponse extends MartServiceAction {
 		return martServiceRequest;
 	}
 	
-	public Document getXmlRegistry() throws TechnicalException {
+	public Document getXmlDocument() throws TechnicalException {
 		return getXmlDocument(false, null);
 	}
 	/**
