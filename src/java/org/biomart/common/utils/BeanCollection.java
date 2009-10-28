@@ -149,7 +149,7 @@ public class BeanCollection<E> extends WeakPropertyChangeSupport implements Coll
 		return this.delegate.toArray();
 	}
 
-	public Object[] toArray(final Object[] arg0) {
+	public <T> T[] toArray(final T[] arg0) {
 		return this.delegate.toArray(arg0);
 	}
 

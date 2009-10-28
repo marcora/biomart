@@ -7,7 +7,7 @@
 <project default="compile" basedir=".">
 
 
-    <property name="name" value="martconfigurator" />
+    <property name="name" value="biomart-java" />
     <property name="version" value="0.8" />
     <property name="build.name" value="${name}-${version}" />
     <property name="build.compiler" value="modern" />
@@ -26,8 +26,8 @@
 	<property name="spy.properties" value="spy.properties" />
     <property name="jre.dir" value="./jre" />
     <property name="src.dir" value="./src/java" />
-    <property name="data.dir" value="./data" />
-    <property name="manifest.file" value="${data.dir}/defaultmanifest.txt" />
+    <property name="conf.dir" value="conf" />
+    <property name="manifest.file" value="${conf.dir}/defaultmanifest.txt" />
     <property name="packages" value="org.*" />
     <property name="bin.dir" value="./bin" />
     <property name="lib.dir" value="./lib" />
@@ -55,7 +55,6 @@
         <include name="ensj.jar" />
         <include name="ensj-util.jar" />
         <include name="java-getopt-1.0.9.jar" />
-        <include name="jaf-1_1-fr.jar" />
         <include name="jdbc2_0-stdext.jar" />
         <include name="junit.jar" />
         <include name="jython.jar" />
@@ -71,7 +70,7 @@
     	<include name="mysql-connector-java-5.1.7-bin.jar"/>
     	<include name="servlet-api.jar"/>
 
-    	<!-- JSON -->
+    	
     	<include name="json-lib-2.3-jdk15.jar"/>
     	<include name="commons-collections.jar"/>
     	<include name="commons-logging-1.1.1.jar"/>
@@ -79,7 +78,7 @@
     	<include name="commons-lang.jar"/>
     	<include name="ezmorph.jar"/>
 		
-    	<!-- JDOM & validation -->
+    	
     	<include name="jdom-1.0.jar"/>
     	<include name="xercesImpl-2.8.1.jar"/>
     	
@@ -97,7 +96,6 @@
         <include name="${announce}" />
         <include name="${mqlexamples}" />
         <include name="${knownissues}" />
-        <include name="example*.xml" />
     </patternset>
 
     <!-- binary distribution jars -->
@@ -117,15 +115,15 @@
         <include name="macosx/**" />
     </patternset>
 
-    <!-- binary distribution data files -->
-    <patternset id="dist.bin.data" >
+    <!-- binary distribution conf files -->
+    <patternset id="dist.bin.conf" >
         <include name="**" />
         <exclude name="*.conf" />
         <exclude name="xmltest/**" />
     </patternset>
 
-    <!-- test distribution data files -->
-    <patternset id="dist.test.data" >
+    <!-- test distribution conf files -->
+    <patternset id="dist.test.conf" >
         <include name="xmltest/**" />
     </patternset>
 
@@ -135,8 +133,8 @@
     <target name="init">
 
         <tstamp >
-            <format property="TODAY_UK" pattern="yyyy-MM-d-HH-mm" locale="en"/>
-            <format property="TODAY_UK_LONG" pattern="d MMM yyyy H:mm a" locale="en"/>
+            <format property="TODAY_CA" pattern="yyyy-MM-d-HH-mm" locale="en"/>
+            <format property="TODAY_CA_LONG" pattern="d MMM yyyy H:mm a" locale="en"/>
             <format property="TODAY_TIME" pattern="HH-mm" locale="en"/>
         </tstamp>
 
@@ -157,8 +155,6 @@
         <mkdir dir="${dist.root}" />
         <mkdir dir="${dist.dir}" />
     
-        <mkdir dir="${reports.dir}" />
-        <mkdir dir="${reports.tests}" />
     </target>
 
 
@@ -171,7 +167,6 @@
 
         <delete dir="${build.dir}" />
         <delete dir="${dist.root}" />
-        <delete dir="${reports.dir}" />
 
     </target>
 
@@ -213,8 +208,8 @@
         	</fileset>
         </copy>
         <copy
-        todir="${bin.dir}/data">
-        	<fileset dir="${data.dir}" casesensitive="yes">        	
+        todir="${bin.dir}/conf">
+        	<fileset dir="${conf.dir}" casesensitive="yes">        	
         	</fileset>
         </copy>
 
@@ -229,11 +224,9 @@
             basedir="${build.classes}"
             includes="*/**">
             <fileset dir=".">
-                <include name="data/**" />
                 <exclude name="*~" />
                 <exclude name="**/CVS/**" />
                 <exclude name="**/*Test*" />
-                <exclude name="data/examples/**" />
             </fileset>
         </jar>
             
@@ -293,8 +286,8 @@
             </fileset> 
         </copy>
    
-        <copy todir="${dist.dir}/data">
-            <fileset dir="${data.dir}">
+        <copy todir="${dist.dir}/conf">
+            <fileset dir="${conf.dir}">
                 <include name="**/*"/>
                 <exclude name="**/*test_connection*"/>
                 <exclude name="**/CVS/**"/>
@@ -333,8 +326,8 @@
 			<fileset dir="${bin.dir}" casesensitive="yes">
 		  		<include name="*.sh"/>
 			  	<include name="*.bat"/>
-				<include name="data/*.xml"/>
-				<include name="data/images/*.*"/>
+				<include name="conf/*.xml"/>
+				<include name="images/*.*"/>
     			<exclude name="**/CVS" />
 			</fileset>
         </copy>
@@ -353,8 +346,8 @@
                 mode="755"
                 preserveLeadingSlashes="true">
                 <include name="**/bin/*.sh"/>
-            	<include name="**/data/*.xml"/>
-            	<include name="**/data/images/*"/>
+            	<include name="**/conf/*.xml"/>
+            	<include name="**/images/*"/>
             </tarfileset>
 
             <!-- bin/martshell.bat -->
@@ -378,11 +371,11 @@
                 <patternset refid="readline.libs"/>
             </tarfileset>
 
-            <!-- dist.bin.data -->
-            <tarfileset dir="${dist.dir}/${data.dir}"
-                prefix="${build.name}/data"
+            <!-- dist.bin.conf -->
+            <tarfileset dir="${dist.dir}/${conf.dir}"
+                prefix="${build.name}/conf"
                 preserveLeadingSlashes="true">
-                <patternset refid="dist.bin.data"/>
+                <patternset refid="dist.bin.conf"/>
             </tarfileset>
          
         </tar>
@@ -399,8 +392,8 @@
             <zipfileset dir="${dist.dir}"
                 prefix="${build.name}">
                 <include name="**/bin/*.bat"/>
-            	<include name="**/data/*.xml"/>
-            	<include name="**/data/images/*"/>
+            	<include name="**/conf/*.xml"/>
+            	<include name="**/images/*"/>
             </zipfileset>
         
             <!-- dist.bin.jars -->    
@@ -415,10 +408,10 @@
                 <patternset refid="readline.libs"/>
             </zipfileset>
 
-            <!-- dist.bin.data -->
-            <zipfileset dir="${dist.dir}/${data.dir}"
-                prefix="${build.name}/data">
-                <patternset refid="dist.bin.data"/>
+            <!-- dist.bin.conf -->
+            <zipfileset dir="${dist.dir}/${conf.dir}"
+                prefix="${build.name}/conf">
+                <patternset refid="dist.bin.conf"/>
             </zipfileset>
 
         </zip>
@@ -435,8 +428,8 @@
 			<fileset dir="${bin.dir}" casesensitive="yes">
 		  		<include name="*.sh"/>
 			  	<include name="*.bat"/>
-				<include name="data/*.xml"/>
-				<include name="data/images/*.*"/>
+				<include name="conf/*.xml"/>
+				<include name="images/*.*"/>
     			<exclude name="**/CVS" />
 			</fileset>
         </copy>
@@ -460,8 +453,8 @@
                 mode="755"
                 preserveLeadingSlashes="true">
                 <include name="**/bin/*.sh"/>
-            	<include name="**/data/*.xml"/>
-            	<include name="**/data/images/*"/>
+            	<include name="**/conf/*.xml"/>
+            	<include name="**/images/*"/>
             </tarfileset>
 
             <!-- bin/martshell.bat -->
@@ -485,11 +478,11 @@
                 <patternset refid="readline.libs"/>
             </tarfileset>
 
-            <!-- dist.bin.data -->
-            <tarfileset dir="${dist.dir}/${data.dir}"
-                prefix="${build.name}/data"
+            <!-- dist.bin.conf -->
+            <tarfileset dir="${dist.dir}/${conf.dir}"
+                prefix="${build.name}/conf"
                 preserveLeadingSlashes="true">
-                <patternset refid="dist.bin.data"/>
+                <patternset refid="dist.bin.conf"/>
             </tarfileset>
          
         </tar>
@@ -506,8 +499,8 @@
             <zipfileset dir="${dist.dir}"
                 prefix="${build.name}">
                 <include name="**/bin/*.bat"/>
-            	<include name="**/data/*.xml"/>
-            	<include name="**/data/images/*"/>
+            	<include name="**/conf/*.xml"/>
+            	<include name="**/images/*"/>
             </zipfileset>
         
             <!-- dist.bin.jars -->    
@@ -522,10 +515,10 @@
                 <patternset refid="readline.libs"/>
             </zipfileset>
 
-            <!-- dist.bin.data -->
-            <zipfileset dir="${dist.dir}/${data.dir}"
-                prefix="${build.name}/data">
-                <patternset refid="dist.bin.data"/>
+            <!-- dist.bin.conf -->
+            <zipfileset dir="${dist.dir}/${conf.dir}"
+                prefix="${build.name}/conf">
+                <patternset refid="dist.bin.conf"/>
             </zipfileset>
 
         </zip>
@@ -539,8 +532,8 @@
         <mkdir dir="${dist.dir}/dmg/bin"/>
    			 <copy todir="${dist.dir}/dmg/bin">
    						<fileset dir="${bin.dir}" casesensitive="yes">
-   					  		<include name="**/data/*.xml"/>
-   							<include name="**/data/images/*"/>
+   					  		<include name="**/conf/*.xml"/>
+   							<include name="**/images/*"/>
    			    			<exclude name="**/CVS" />
    						</fileset>
    			        </copy>
@@ -578,10 +571,10 @@
                 <patternset refid="readline.libs"/>
 			</fileset>
         </copy>
-            <mkdir dir="${dist.dir}/dmg/data"/>
-        <copy todir="${dist.dir}/dmg/data">
-			<fileset dir="${dist.dir}/${data.dir}" casesensitive="yes">
-                <patternset refid="dist.bin.data"/>
+            <mkdir dir="${dist.dir}/dmg/conf"/>
+        <copy todir="${dist.dir}/dmg/conf">
+			<fileset dir="${dist.dir}/${conf.dir}" casesensitive="yes">
+                <patternset refid="dist.bin.conf"/>
 			</fileset>
         </copy>        
         <delete file="${build.dir}/${name}-bin.dmg" />
@@ -657,11 +650,11 @@
                 <patternset refid="readline.libs"/>
             </tarfileset>
 
-            <!-- dist.bin.data -->
-            <tarfileset dir="${dist.dir}/${data.dir}"
-                prefix="${build.name}/data"
+            <!-- dist.bin.conf -->
+            <tarfileset dir="${dist.dir}/${conf.dir}"
+                prefix="${build.name}/conf"
                 preserveLeadingSlashes="true">
-                <patternset refid="dist.bin.data"/>
+                <patternset refid="dist.bin.conf"/>
             </tarfileset>
          
         </tar>
@@ -696,10 +689,10 @@
                 <patternset refid="readline.libs"/>
             </zipfileset>
 
-            <!-- dist.bin.data -->
-            <zipfileset dir="${dist.dir}/${data.dir}"
-                prefix="${build.name}/data">
-                <patternset refid="dist.bin.data"/>
+            <!-- dist.bin.conf -->
+            <zipfileset dir="${dist.dir}/${conf.dir}"
+                prefix="${build.name}/conf">
+                <patternset refid="dist.bin.conf"/>
             </zipfileset>
 
         </zip>
@@ -754,11 +747,11 @@
                 <patternset refid="readline.libs"/>
             </tarfileset>
 
-            <!-- dist.bin.data -->
-            <tarfileset dir="${dist.dir}/${data.dir}"
-                prefix="${build.name}/data"
+            <!-- dist.bin.conf -->
+            <tarfileset dir="${dist.dir}/${conf.dir}"
+                prefix="${build.name}/conf"
                 preserveLeadingSlashes="true">
-                <patternset refid="dist.bin.data"/>
+                <patternset refid="dist.bin.conf"/>
             </tarfileset>
          
         </tar>
@@ -794,10 +787,10 @@
                 <patternset refid="readline.libs"/>
             </zipfileset>
 
-            <!-- dist.bin.data -->
-            <zipfileset dir="${dist.dir}/${data.dir}"
-                prefix="${build.name}/data">
-                <patternset refid="dist.bin.data"/>
+            <!-- dist.bin.conf -->
+            <zipfileset dir="${dist.dir}/${conf.dir}"
+                prefix="${build.name}/conf">
+                <patternset refid="dist.bin.conf"/>
             </zipfileset>
 
         </zip>
@@ -853,11 +846,11 @@
                 <patternset refid="readline.libs"/>
             </tarfileset>
 
-            <!-- dist.bin.data -->
-            <tarfileset dir="${dist.dir}/${data.dir}"
-                prefix="${build.name}/data"
+            <!-- dist.bin.conf -->
+            <tarfileset dir="${dist.dir}/${conf.dir}"
+                prefix="${build.name}/conf"
                 preserveLeadingSlashes="true">
-                <patternset refid="dist.bin.data"/>
+                <patternset refid="dist.bin.conf"/>
             </tarfileset>
          
         </tar>
@@ -892,10 +885,10 @@
                 <patternset refid="readline.libs"/>
             </zipfileset>
 
-            <!-- dist.bin.data -->
-            <zipfileset dir="${dist.dir}/${data.dir}"
-                prefix="${build.name}/data">
-                <patternset refid="dist.bin.data"/>
+            <!-- dist.bin.conf -->
+            <zipfileset dir="${dist.dir}/${conf.dir}"
+                prefix="${build.name}/conf">
+                <patternset refid="dist.bin.conf"/>
             </zipfileset>
 
         </zip>
@@ -910,10 +903,10 @@
                 <patternset refid="dist.test.jars" />
             </tarfileset>
 
-            <tarfileset dir="${dist.dir}/data"
-                prefix="${build.name}/data"
+            <tarfileset dir="${dist.dir}/conf"
+                prefix="${build.name}/conf"
                 preserveLeadingSlashes="true" >
-                <patternset refid="dist.test.data" />
+                <patternset refid="dist.test.conf" />
             </tarfileset>
         </tar>
 
@@ -926,9 +919,9 @@
                 <patternset refid="dist.test.jars" />
             </zipfileset>
 
-            <zipfileset dir="${dist.dir}/data"
-                prefix="${build.name}/data" >
-                <patternset refid="dist.test.data" />
+            <zipfileset dir="${dist.dir}/conf"
+                prefix="${build.name}/conf" >
+                <patternset refid="dist.test.conf" />
             </zipfileset>
         </zip>
 

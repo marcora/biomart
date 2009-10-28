@@ -611,7 +611,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 			}
 			else
 				this.synchroniseKeysUsingDMD(fksToBeDropped, dmd,
-						this.realSchemaName, catalog, stepSize);
+						this.realSchemaName, catalog);
 
 			// Drop any foreign keys that are left over (but not handmade ones).
 			// the orphan FK is already cleaned by clearOrphanKey();
@@ -1064,7 +1064,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 		 */
 		private void synchroniseKeysUsingDMD(final Collection fksToBeDropped,
 				final DatabaseMetaData dmd, final String schema,
-				final String catalog, final double stepSize)
+				final String catalog)
 				throws SQLException, DataModelException {
 			Log.debug("Running DMD key synchronisation");
 			// Loop through all the tables in the database, which is the same
@@ -1072,8 +1072,6 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 			Log.debug("Finding tables");
 			for (final Iterator i = this.getTables().values().iterator(); i
 					.hasNext();) {
-				// Update progress;
-				this.progress += stepSize;
 
 				// Obtain the table and its primary key.
 				final Table pkTable = (Table) i.next();
@@ -1984,7 +1982,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 						// itself).
 						if (candidateCol != null)
 							pkCols.put(Short.valueOf("1"), candidateCol);
-					}else {
+					}else { //database is a target database
 						Short colPosition = 1;
 						if(mtColsMap.containsKey(t)) {
 							List<Column> currentKeysList = mtColsMap.get(t);
@@ -1992,7 +1990,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 							if(keySize == 1) //central main
 								pkCols.put(Short.valueOf("1"),mtColsMap.get(t).get(0));
 							else {
-								//get parent table
+								//get parent table, a submain table should ignore its parent's key, take another key
 								Table parentTable = orderedTables[keySize-2];
 								//parent key list
 								List<Column> pkeysList = mtColsMap.get(parentTable);
@@ -2020,10 +2018,6 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 					}
 				}
 
-				// Obtain the existing primary key on the table, if the table
-				// previously existed and even had one in the first place.
-				final PrimaryKey existingPK = t.getPrimaryKey();
-
 				// Did we find a PK on the database copy of the table?
 				if (!pkCols.isEmpty()) {
 
@@ -2045,31 +2039,11 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 					// This way we preserve any existing handmade PKs, and don't
 					// override any marked as incorrect.
 					try {
-						if (existingPK == null)
-							t.setPrimaryKey(candidatePK);
-						else if (existingPK.equals(candidatePK)
-								&& existingPK.getStatus().equals(
-										ComponentStatus.HANDMADE))
-							existingPK.setStatus(ComponentStatus.INFERRED);
-						else if (!existingPK.equals(candidatePK)
-								&& !existingPK.getStatus().equals(
-										ComponentStatus.HANDMADE))
-							t.setPrimaryKey(candidatePK);
+						t.setPrimaryKey(candidatePK);
 					} catch (final Throwable th) {
 						throw new BioMartError(th);
 					}
-				} else // No, we did not find a PK on the database copy of the
-				// table, so that table should not have a PK at all. So if the
-				// existing table has a PK which is not handmade, remove it.
-				// the orphan PK is already cleaned by clearOrphanKey();
-				if (existingPK != null
-						&& !existingPK.getStatus().equals(
-								ComponentStatus.HANDMADE))
-					try {
-						t.setPrimaryKey(null);
-					} catch (final Throwable th) {
-						throw new BioMartError(th);
-					}
+				} 
 			} //end of for (final Iterator i = this.getTables().values().iterator(); i.hasNext();)
 
 			// Are we key-guessing? Key guess the foreign keys, passing in a
@@ -2088,7 +2062,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 			}
 			else
 				this.synchroniseKeysUsingDMD(Collections.emptySet(), dmd,
-						this.realSchemaName, catalog, 1);
+						this.realSchemaName, catalog);
 
 		}
 		

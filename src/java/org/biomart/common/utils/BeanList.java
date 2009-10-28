@@ -42,6 +42,7 @@ import java.util.ListIterator;
  * 			$Author: rh4 $
  * @since 0.7
  */
+
 public class BeanList<E> extends BeanCollection<E> implements List<E> {
 
 	private static final long serialVersionUID = 1L;
@@ -138,4 +139,6 @@ public class BeanList<E> extends BeanCollection<E> implements List<E> {
 		this.firePropertyChange(BeanCollection.propertyName, null, arg1);
 		return result;
 	}
+	
+
 }
