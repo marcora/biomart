@@ -42,7 +42,7 @@ import org.jdom.Element;
  *
  */
 public class ContextMenuConstructor implements ActionListener {
-	private String contextMenuXML = "data/contextMenu.xml";
+	private String contextMenuXML = "conf/xml/contextMenu.xml";
 	private JPopupMenu contextMenu;
 	private static ContextMenuConstructor instance = null;
 	private Element root;

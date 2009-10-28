@@ -17,27 +17,19 @@
     <property name="env.classpath" value="${java.class.path}" />
     <property name="readme" value="README" />
     <property name="license" value="LICENSE" />
-    <property name="install" value="INSTALL" />
-    <property name="acknowledgements" value="ACKNOWLEDGEMENTS" />
-    <property name="announce" value="ANNOUNCE" />
-    <property name="mqlexamples" value="MQLEXAMPLES" />
-    <property name="knownissues" value="KNOWNISSUES" />
     <property name="buildfile" value="build.xml" />
 	<property name="spy.properties" value="spy.properties" />
     <property name="jre.dir" value="./jre" />
     <property name="src.dir" value="./src/java" />
-    <property name="conf.dir" value="conf" />
+    <property name="conf.dir" value="./conf" />
+	<property name="images.dir" value="./images" />
+	<property name="scripts.dir" value="./scripts" />
     <property name="manifest.file" value="${conf.dir}/defaultmanifest.txt" />
     <property name="packages" value="org.*" />
     <property name="bin.dir" value="./bin" />
     <property name="lib.dir" value="./lib" />
-    <property name="docs.dir" value="./docs" />
-    <property name="api.dir" value="${docs.dir}/api" /> 
-
     <property name="build.dir" value="./build" />
     <property name="build.classes" value="${build.dir}/classes" />
-    <property name="reports.dir" value="./reports" />
-    <property name="reports.tests" value="${reports.dir}/tests" />
     <property name="dist.root" value="./dist" />
     <property name="dist.dir" value="${dist.root}/${build.name}"    />
 
@@ -56,7 +48,6 @@
         <include name="ensj-util.jar" />
         <include name="java-getopt-1.0.9.jar" />
         <include name="jdbc2_0-stdext.jar" />
-        <include name="junit.jar" />
         <include name="jython.jar" />
         <include name="libreadline-java.jar" />
         <include name="postgresql-8.3-604.jdbc3.jar"/>
@@ -69,43 +60,21 @@
     	<include name="idw-gpl.jar"/>
     	<include name="mysql-connector-java-5.1.7-bin.jar"/>
     	<include name="servlet-api.jar"/>
+    	<include name="jdom-1.0.jar"/>
+    	<include name="xercesImpl-2.8.1.jar"/>
 
-    	
+    	<!-- json -->
     	<include name="json-lib-2.3-jdk15.jar"/>
     	<include name="commons-collections.jar"/>
     	<include name="commons-logging-1.1.1.jar"/>
     	<include name="commons-beanutils-1.7.jar"/>
     	<include name="commons-lang.jar"/>
-    	<include name="ezmorph.jar"/>
-		
-    	
-    	<include name="jdom-1.0.jar"/>
-    	<include name="xercesImpl-2.8.1.jar"/>
-    	
+    	<include name="ezmorph.jar"/>    	
     </fileset>
-
-    <!-- patternsets to use in various zip and tar filesets during the dist-* targets -->
-
-    <!-- distribution files -->
-    <patternset id="dist.files" >
-        <include name="${readme}" />
-        <include name="${license}" />
-        <include name="${install}" />
-        <include name="${buildfile}" />
-        <include name="${acknowledgements}" />
-        <include name="${announce}" />
-        <include name="${mqlexamples}" />
-        <include name="${knownissues}" />
-    </patternset>
 
     <!-- binary distribution jars -->
     <patternset id="dist.bin.jars" >
         <include name= "*.jar" />  
-    </patternset>
-
-    <!-- test distribution jars -->
-    <patternset id="dist.test.jars" >
-        <include name= "*.jar" />
     </patternset>
 
     <!-- readline platform dependant libraries -->
@@ -118,26 +87,17 @@
     <!-- binary distribution conf files -->
     <patternset id="dist.bin.conf" >
         <include name="**" />
-        <exclude name="*.conf" />
-        <exclude name="xmltest/**" />
-    </patternset>
-
-    <!-- test distribution conf files -->
-    <patternset id="dist.test.conf" >
-        <include name="xmltest/**" />
     </patternset>
 
     <!-- Prepend library files to front of classpath -->
     <property name="build.classpath" value="last"/>
 
     <target name="init">
-
         <tstamp >
             <format property="TODAY_CA" pattern="yyyy-MM-d-HH-mm" locale="en"/>
             <format property="TODAY_CA_LONG" pattern="d MMM yyyy H:mm a" locale="en"/>
             <format property="TODAY_TIME" pattern="HH-mm" locale="en"/>
         </tstamp>
-
     </target>
 
 
@@ -149,12 +109,10 @@
 
     <!-- Creates directories for build and dist. -->
     <target name="prepare">
-        <mkdir dir="${api.dir}" />
         <mkdir dir="${build.dir}" />
         <mkdir dir="${build.classes}" />
         <mkdir dir="${dist.root}" />
-        <mkdir dir="${dist.dir}" />
-    
+        <mkdir dir="${dist.dir}" />    
     </target>
 
 
@@ -162,9 +120,6 @@
     <target name="clean" 
         description="Removes generated directories and files."
         >
-
-        <delete dir="${api.dir}" />
-
         <delete dir="${build.dir}" />
         <delete dir="${dist.root}" />
 
@@ -208,8 +163,8 @@
         	</fileset>
         </copy>
         <copy
-        todir="${bin.dir}/conf">
-        	<fileset dir="${conf.dir}" casesensitive="yes">        	
+        todir="${bin.dir}">
+        	<fileset dir="${scripts.dir}" casesensitive="yes">        	
         	</fileset>
         </copy>
 
@@ -294,12 +249,6 @@
             </fileset>
         </copy>
 
-        <copy todir="${dist.dir}">
-            <fileset dir="./">
-                <patternset refid="dist.files"/>
-            </fileset>
-        </copy>
-
         <copy todir="${dist.dir}/${src.dir}">
             <fileset  dir="${src.dir}" >
                 <exclude name="**/*.dfPackage"/>
@@ -315,7 +264,7 @@
     </target>
 
     <!-- creates all distribution sets -->
-    <target name="dist-all" depends="dist-bin, dist-test, dist-src, dist-api" 
+    <target name="dist-all" depends="dist-bin, dist-src" 
     description="Build all file sets for distribution." />
 
 	<target name="dist" description="Create the dist without extra jar for mac" depends="jar,prepare-dist">
@@ -444,7 +393,6 @@
             <tarfileset dir="${dist.dir}"
                 prefix="${build.name}"
                 preserveLeadingSlashes="true">
-                <patternset refid="dist.files"/>
             </tarfileset>
 
             <!-- bin/*.sh with correct unix file mode -->
@@ -492,7 +440,6 @@
         <zip destfile="${build.dir}/${name}-bin.zip" >
             <!-- distribution files -->
             <zipfileset dir="${dist.dir}" prefix="${build.name}">
-                <patternset refid="dist.files"/>
             </zipfileset>
 
             <!-- bin/martshell.bat -->
@@ -894,40 +841,6 @@
         </zip>
     </target>
 
-    <target name="dist-test" depends="prepare-dist">
-
-        <tar destfile="${build.dir}/${name}-test.tar">
-            <tarfileset dir="${dist.dir}/lib"
-                prefix="${build.name}/lib"
-                preserveLeadingSlashes="true" >
-                <patternset refid="dist.test.jars" />
-            </tarfileset>
-
-            <tarfileset dir="${dist.dir}/conf"
-                prefix="${build.name}/conf"
-                preserveLeadingSlashes="true" >
-                <patternset refid="dist.test.conf" />
-            </tarfileset>
-        </tar>
-
-        <gzip zipfile="${build.dir}/${name}-test.tgz" src="${build.dir}/${name}-test.tar" />
-        <delete file="${build.dir}/${name}-test.tar"/>
-
-        <zip destfile="${build.dir}/${name}-test.zip" >
-            <zipfileset dir="${dist.dir}/lib"
-                prefix="${build.name}/lib" >
-                <patternset refid="dist.test.jars" />
-            </zipfileset>
-
-            <zipfileset dir="${dist.dir}/conf"
-                prefix="${build.name}/conf" >
-                <patternset refid="dist.test.conf" />
-            </zipfileset>
-        </zip>
-
-    </target>
-
-
     <target name="dist-src" depends="prepare-dist">
 
         <tar destfile="${build.dir}/${name}-src.tar">
@@ -943,31 +856,6 @@
         <zip destfile="${build.dir}/${name}-src.zip" >
             <zipfileset dir="${dist.dir}/src/java" includes="**/*" prefix="${build.name}/src/java"/>
         </zip>
-    </target>
-
-
-    <target name="dist-api" depends="prepare-dist">
-
-        <copy todir="${dist.dir}/docs" >
-            <fileset dir="${docs.dir}" />
-        </copy>
-
-        <tar destfile="${build.dir}/${name}-api.tar" >
-
-            <tarfileset dir="${dist.dir}/docs/api" 
-            prefix="${build.name}/docs/api" 
-            includes="**/*" />
-        </tar>
-
-        <gzip zipfile="${build.dir}/${name}-api.tgz" src="${build.dir}/${name}-api.tar" />
-        <delete file="${build.dir}/${name}-api.tar"/>
-
-        <zip destfile="${build.dir}/${name}-api.zip" >
-
-            <zipfileset dir="${dist.dir}/docs/api" prefix="${build.name}/docs/api" includes="**/*" />
-
-        </zip>
-
     </target>
 
 
