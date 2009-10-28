@@ -1,7 +1,6 @@
 package org.biomart.martRemote.objects.response;
 
 
-import java.io.IOException;
 import java.io.PrintWriter;
 
 import net.sf.json.JSONObject;
@@ -34,13 +33,13 @@ public abstract class MartServiceResponse extends MartServiceAction {
 		return martServiceRequest;
 	}
 	
-	public Document getXmlRegistry() throws IOException {
+	public Document getXmlRegistry() throws TechnicalException {
 		return getXmlRegistry(false, null);
 	}
 	/**
 	 * Always check that martServiceResult is valid afterwards (if it validates)
 	 */
-	public Document getXmlRegistry(boolean debug, PrintWriter printWriter) throws IOException {
+	public Document getXmlRegistry(boolean debug, PrintWriter printWriter) throws TechnicalException {
 		Document document = createNewResponseXmlDocument(this.responseName);
 		document = createXmlResponse(document);
 		if (debug && printWriter!=null) {
@@ -53,7 +52,7 @@ public abstract class MartServiceResponse extends MartServiceAction {
 		return document;
 	}	
 
-	public JSONObject getJsonRegistry() throws IOException {
+	public JSONObject getJsonRegistry() {
 		return createJsonResponse();	// no pre/post processing
 	}
 	

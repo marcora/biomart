@@ -1,17 +1,12 @@
 package org.biomart.martRemote.objects;
 
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-
-
+import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.MyUtils;
 import org.biomart.martRemote.MartRemoteUtils;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.Namespace;
-import org.jdom.output.Format;
-import org.jdom.output.XMLOutputter;
 
 
 public class MartServiceAction {
@@ -48,7 +43,7 @@ public class MartServiceAction {
 		return new Document(root);
 	}
 
-	protected boolean validateXml(Document document) throws IOException {
+	protected boolean validateXml(Document document) throws TechnicalException {
 		String errorValidation = MartRemoteUtils.validationXml(document);
 		if (null!=errorValidation) {
 			createErrorResponse(document, errorValidation);
@@ -58,9 +53,8 @@ public class MartServiceAction {
 	}
 	
 	// Error response creation
-	protected void createErrorResponse(Document document, String errorValidation) throws IOException {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		new XMLOutputter(Format.getPrettyFormat()).output(document, baos);
-		this.errorMessage.append(MyUtils.LINE_SEPARATOR + baos.toString() + MyUtils.LINE_SEPARATOR + MyUtils.LINE_SEPARATOR + errorValidation);
+	protected void createErrorResponse(Document document, String errorValidation) throws TechnicalException {
+		this.errorMessage.append(MyUtils.LINE_SEPARATOR + MartRemoteUtils.getXmlDocumentString(document) + 
+				MyUtils.LINE_SEPARATOR + MyUtils.LINE_SEPARATOR + errorValidation);
 	}
 }

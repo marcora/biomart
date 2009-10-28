@@ -3,6 +3,7 @@ package org.biomart.martRemote;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -122,17 +123,32 @@ public class MartApi {
 	public MartApi() throws IOException, JDOMException, TechnicalException {
 		this(false, MartRemoteConstants.XSD_FILE_FILE_PATH_AND_NAME, MartRemoteConstants.PORTAL_SERIAL_FILE_PATH_AND_NAME);
 	}
-	public MartApi(boolean webService, String xsdFile, String portalSerialFile) throws IOException, JDOMException, TechnicalException {
+	public MartApi(boolean webService, String xsdFile, String portalSerialFile) throws TechnicalException {
 		this.debug = !webService;
 		this.xsdFile = xsdFile;
 			
 		builder = new SAXBuilder();
-        Document xsd = builder.build(new URL(xsdFile));
+        Document xsd = null;
+        try {
+			xsd = builder.build(new URL(xsdFile));
+		} catch (MalformedURLException e) {
+			throw new TechnicalException(e);
+		} catch (JDOMException e) {
+			throw new TechnicalException(e);
+		} catch (IOException e) {
+			throw new TechnicalException(e);
+		}
         Element xsdRootElement = xsd.getRootElement();
         Namespace xsdMartServiceNamespace = xsdRootElement.getNamespace("tns");
         martServiceNamespace = Namespace.getNamespace("ms", xsdMartServiceNamespace.getURI());	//Namespace.getNamespace("ms", "http://www.mynamespace.com/mynamespace");
         xsiNamespace = Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
-		martRegistry = (MartRegistry)MyUtils.readSerializedObject(new URL(portalSerialFile));
+		URL portalSerialUrl = null;
+		try {
+			portalSerialUrl = new URL(portalSerialFile);
+		} catch (MalformedURLException e) {
+			throw new TechnicalException(e);
+		}
+		martRegistry = (MartRegistry)MyUtils.readSerializedObject(portalSerialUrl);
 	}
 	
 	// Request preparation
@@ -297,34 +313,37 @@ public class MartApi {
 	}*/
 	
 	// Response writing
-	public void processMartServiceResult(MartServiceResponse martServiceResult, PrintWriter printWriter) throws IOException {
-		if (martServiceResult.getMartServiceRequest().getFormat().isXml()) {
-			Document document = martServiceResult.getXmlRegistry(this.debug, printWriter);
-			if (martServiceResult.isValid()) {
-				writeXmlResponse(document, printWriter);					
+	public String processMartServiceResult(MartServiceResponse martServiceResponse, PrintWriter printWriter) throws TechnicalException {
+		if (martServiceResponse.getMartServiceRequest().getFormat().isXml()) {
+			Document document = martServiceResponse.getXmlRegistry(this.debug, printWriter);
+			if (martServiceResponse.isValid()) {
+				return writeXmlResponse(document, printWriter);					
 			}
-		} else if (martServiceResult.getMartServiceRequest().getFormat().isJson()) {
-			JSONObject jsonObject = martServiceResult.getJsonRegistry();
-			if (martServiceResult.isValid()) {					
-				writeJsonResponse(jsonObject, printWriter);
+		} else if (martServiceResponse.getMartServiceRequest().getFormat().isJson()) {
+			JSONObject jsonObject = martServiceResponse.getJsonRegistry();
+			if (martServiceResponse.isValid()) {					
+				return writeJsonResponse(jsonObject, printWriter);
 			}
 		}
-		if (!martServiceResult.isValid()) {		
-			writeError(martServiceResult.getErrorMessage(), printWriter);
-			return;
+		return writeError(martServiceResponse.getErrorMessage(), printWriter);	//	if (!martServiceResult.isValid())
+	}
+	public String writeXmlResponse(Document document, PrintWriter printWriter) throws TechnicalException {
+		XMLOutputter compactFormat = new XMLOutputter(Format.getCompactFormat());
+		try {
+			compactFormat.output(document, printWriter);
+		} catch (IOException e) {
+			throw new TechnicalException(e);
 		}
+		return MartRemoteUtils.getXmlDocumentString(document);
 	}
-	public void writeXmlResponse(Document document, PrintWriter printWriter) throws IOException {
-		XMLOutputter compactFormat = new XMLOutputter(Format.getCompactFormat());	
-		compactFormat.output(document, printWriter);
-	}
-	public void writeJsonResponse(JSONObject root, PrintWriter printWriter) {
+	public String writeJsonResponse(JSONObject root, PrintWriter printWriter) {
 		printWriter.print(root);
-		return;
+		return root.toString();
 	}
-	public void writeError(StringBuffer errorMessage, PrintWriter printWriter) {
-		printWriter.println("ERROR");
-		printWriter.println(errorMessage);
+	public String writeError(StringBuffer errorMessage, PrintWriter printWriter) {
+		String message = "ERROR" + MyUtils.LINE_SEPARATOR + errorMessage;
+		printWriter.println(message);
+		return message;
 	}	
 }
 

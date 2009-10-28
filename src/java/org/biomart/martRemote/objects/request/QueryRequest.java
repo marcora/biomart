@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.StringReader;
 
 
+import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.martRemote.enums.MartServiceFormat;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -35,9 +36,16 @@ public class QueryRequest extends MartServiceRequest {
 	/**
 	 * Always check that queryRequest is valid afterwards (if it validates)
 	 */
-	public boolean rebuildQueryDocument() throws IOException, JDOMException {
+	public boolean rebuildQueryDocument() throws TechnicalException {
 		SAXBuilder builder = new SAXBuilder();
-		Document queryDocumentTmp = builder.build(new StringReader(this.queryString));
+		Document queryDocumentTmp = null;
+		try {
+			queryDocumentTmp = builder.build(new StringReader(this.queryString));
+		} catch (JDOMException e) {
+			throw new TechnicalException(e);
+		} catch (IOException e) {
+			throw new TechnicalException(e);
+		}
 		Element cloneRoot = (Element)queryDocumentTmp.getRootElement().clone();
 		this.queryDocument = createNewResponseXmlDocument(super.actionName);
 		Element rootElement = this.queryDocument.getRootElement();

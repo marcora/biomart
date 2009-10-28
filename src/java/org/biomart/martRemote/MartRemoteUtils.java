@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Properties;
 
+import org.biomart.common.general.exceptions.TechnicalException;
 import org.jdom.Document;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
@@ -16,10 +17,14 @@ import org.jdom.output.XMLOutputter;
 
 public class MartRemoteUtils {
 
-	public static String getXmlDocumentString(Document document) throws IOException {
+	public static String getXmlDocumentString(Document document) throws TechnicalException {
 		XMLOutputter prettyFormat = new XMLOutputter(Format.getPrettyFormat());
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		prettyFormat.output(document, baos);
+		try {
+			prettyFormat.output(document, baos);
+		} catch (IOException e) {
+			throw new TechnicalException(e);
+		}
 		return baos.toString();
 	}
 	

@@ -7,7 +7,7 @@
   
   <servlet>
     <servlet-name>MartService</servlet-name>
-    <servlet-class>martRemote.martService.MartService</servlet-class>
+    <servlet-class>org.biomart.martRemote.martService.MartServiceServlet</servlet-class>
   </servlet>
   <servlet-mapping>
     <servlet-name>MartService</servlet-name>
