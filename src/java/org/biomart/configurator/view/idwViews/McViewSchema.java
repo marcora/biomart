@@ -718,9 +718,7 @@ public class McViewSchema extends McView implements TreeSelectionListener {
 				ds.setMasked(masked);
 				ds.setInvisible(invisible);
 				ds.setHideMasked(hideMasked);
-				//synchronise later
-//				ds.synchronise();
-				mart.getDataSets().put(ds.getOriginalName(), ds);
+				mart.addDataSet(ds);
 			} catch (ValidationException e) {
 				e.printStackTrace();
 			}			
@@ -883,7 +881,7 @@ public class McViewSchema extends McView implements TreeSelectionListener {
 			ds.setHideMasked(hideMasked);
 			//synchronise later
 //			ds.synchronise();
-			mart.getDataSets().put(ds.getOriginalName(), ds);
+			mart.addDataSet(ds);
 			ds.synchronise();
 		} catch (ValidationException e) {
 			e.printStackTrace();

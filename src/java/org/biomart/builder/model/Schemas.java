@@ -147,7 +147,9 @@ public class Schemas {
 				schema);
 
 		// Remember which diagram the schema is connected with.
+		//TODO which name?
 		this.schemasMap.put(schema.getName(), jdbcSchema);
+		//this.schemasMap.put(schema.getOriginalName(), jdbcSchema);
 		jdbcSchema.setSchemaDiagram(schemaDiagram);
 
 		// Set the current context on the diagram to be the same as the

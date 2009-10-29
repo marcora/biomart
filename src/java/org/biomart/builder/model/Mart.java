@@ -62,8 +62,6 @@ import org.biomart.configurator.utils.type.MartType;
  */
 public class Mart {
 
-	private final BeanMap datasets;
-	//TODO should merge with datasets and schemas
 	private Schemas schemasObj;
 	private DataSets datasetsObj;
 	//information of old MB
@@ -107,7 +105,6 @@ public class Mart {
 		this.location = location;
 		this.name = name;
 		this.martType = type;
-		this.datasets = new BeanMap(new TreeMap());
 		this.datasetsObj = new DataSets(this);
 		this.schemasObj = new Schemas(this);
 		
@@ -410,8 +407,11 @@ public class Mart {
 	 * 
 	 * @return a set of dataset objects. Keys are names, values are datasets.
 	 */
-	public BeanMap getDataSets() {
-		return this.datasets;
+	public Map<String,DataSet> getDataSets() {
+		if(this.datasetsObj!=null)
+			return this.datasetsObj.getDataSets();
+		else
+			return new HashMap<String,DataSet>();
 	}
 
 
@@ -494,7 +494,8 @@ public class Mart {
 				// Skip this one.
 				continue;
 			}
-			this.datasets.put(dataset.getOriginalName(), dataset);
+			//this.datasets.put(dataset.getOriginalName(), dataset);
+			this.addDataSet(dataset);
 			// Process it.
 			final Collection tablesIncluded = new HashSet();
 			tablesIncluded.add(rootTable);
@@ -539,7 +540,7 @@ public class Mart {
 			for (final Iterator i = suggestedDataSets.iterator(); i.hasNext();) {
 				final DataSet candidate = (DataSet) i.next();
 				if (!candidate.equals(perfectDS)) {
-					this.datasets.remove(candidate.getOriginalName());
+					this.removeDataSet(candidate);
 					i.remove();
 				}
 			}
@@ -679,8 +680,9 @@ public class Mart {
 					suggestedDataSet = new DataSet(this, dataset
 							.getCentralTable(), dataset.getCentralTable()
 							.getName());
-					this.datasets.put(suggestedDataSet.getOriginalName(),
-							suggestedDataSet);
+				//	this.datasets.put(suggestedDataSet.getOriginalName(),
+					//		suggestedDataSet);
+					this.addDataSet(suggestedDataSet);
 					// Copy subclassed relations from existing dataset.
 					for (final Iterator j = dataset.getIncludedRelations()
 							.iterator(); j.hasNext();)
@@ -808,8 +810,24 @@ public class Mart {
 		for(String item: oldSchs) {
 			this.getSchemasObj().removeSchemaTab(item, true);
 		}
-
-		this.schemasObj.getSchemas().put(newSch.getOriginalName(), (JDBCSchema)newSch);
+	}
+	
+	public void addDataSet(DataSet newDs) {
+		final Set<String> oldDSs = new HashSet<String>(this.datasetsObj.getDataSets()
+				.keySet());
+			if (!oldDSs.remove(newDs.getName())) {
+				// Single-add.
+				if (!newDs.isMasked())
+					this.datasetsObj.addDataSet(newDs);
+				newDs.addPropertyChangeListener("masked",
+						this.datasetsObj.renameListener);
+				newDs.addPropertyChangeListener("name",
+						this.datasetsObj.renameListener);
+			}
+	}
+	
+	public void removeDataSet(DataSet ds) {
+		this.datasetsObj.removeDataSet(ds);
 	}
 	
 }

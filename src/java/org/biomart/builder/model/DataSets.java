@@ -124,7 +124,6 @@ public class DataSets {
 		// so it is held inside a scrollpane.
 		// Populate the map to hold the relation between schemas and the
 		// diagrams representing them.
-		if(mart.getDataSets()!=null)
 		for (final Iterator i = mart.getDataSets().values()
 				.iterator(); i.hasNext();) {
 			final DataSet ds = (DataSet) i.next();
@@ -136,8 +135,8 @@ public class DataSets {
 		}
 		this.mart = mart;
 		// Listen to add/remove/mass change schema events.
-		this.mart.getDataSets().addPropertyChangeListener(
-				this.tabListener);
+//		this.mart.getDataSets().addPropertyChangeListener(
+//				this.tabListener);
 	}
 
 	/**
@@ -147,11 +146,17 @@ public class DataSets {
 		final DataSetDiagram datasetDiagram = new DataSetDiagram(this.mart,dataset);
 
 		// Remember which diagram the dataset is connected with.
+		//TODO which name
 		this.datasetsMap.put(dataset.getName(), dataset);
+	//	this.datasetsMap.put(dataset.getOriginalName(), dataset);
 		dataset.setDataSetDiagram(datasetDiagram);
 		// Set the current context on the diagram to be the same as the
 		// current context on this dataset tabset.
 		datasetDiagram.setDiagramContext(new DataSetContext(this.mart, dataset));
+	}
+	
+	public void removeDataSet(DataSet ds) {
+		this.datasetsMap.remove(ds.getName());
 	}
 
 	private String askUserForName(final String message,
