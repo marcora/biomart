@@ -23,7 +23,7 @@ import java.util.HashSet;
 
 import org.biomart.common.resources.Log;
 import org.biomart.common.resources.Resources;
-import org.biomart.common.utils.BeanCollection;
+import org.biomart.common.utils.McBeanCollection;
 import org.biomart.common.utils.Transaction;
 import org.biomart.common.utils.WeakPropertyChangeSupport;
 import org.biomart.common.utils.Transaction.TransactionEvent;
@@ -49,7 +49,7 @@ public class Column implements Comparable<Column>, TransactionListener {
 
 	private final Table table;
 	
-	private final BeanCollection schemaPartitions = new BeanCollection(new HashSet());
+	private final McBeanCollection schemaPartitions = new McBeanCollection(new HashSet());
 
 	/**
 	 * Some subclasses refer to this directly.
@@ -182,7 +182,7 @@ public class Column implements Comparable<Column>, TransactionListener {
 	 * May be empty, in which case it applies to the default schema only.
 	 * @return the set of schema partition names.
 	 */
-	public BeanCollection getSchemaPartitions() {
+	public McBeanCollection getSchemaPartitions() {
 		return this.schemaPartitions;
 	}
 

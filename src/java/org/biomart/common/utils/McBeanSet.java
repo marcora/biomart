@@ -18,6 +18,7 @@
 package org.biomart.common.utils;
 
 import java.beans.PropertyChangeEvent;
+import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -32,25 +33,19 @@ import java.util.Set;
  * <p>
  * Multiple add/remove events will have both before and after values of null.
  * <p>
- * All events will have a property of {@link BeanSet#propertyName}.
+ * All events will have a property of {@link McBeanSet#propertyName}.
  * 
  * @author Richard Holland <holland@ebi.ac.uk>
  * @version $Revision: 1.2 $, $Date: 2007/10/03 10:41:02 $, modified by 
  * 			$Author: rh4 $
  * @since 0.7
  */
-public class BeanSet extends BeanCollection implements Set {
 
-	private static final long serialVersionUID = 1L;
 
-	/**
-	 * Construct a new instance that wraps the delegate set and produces
-	 * {@link PropertyChangeEvent} events whenever the delegate set changes.
-	 * 
-	 * @param delegate
-	 *            the delegate set.
-	 */
-	public BeanSet(final Set delegate) {
+public class McBeanSet<E> extends McBeanCollection<E> implements Set<E> {
+
+	public McBeanSet(Collection<E> delegate) {
 		super(delegate);
 	}
+	
 }

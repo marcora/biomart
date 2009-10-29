@@ -35,7 +35,7 @@ import org.biomart.common.exceptions.DataModelException;
 import org.biomart.common.exceptions.TransactionException;
 import org.biomart.common.resources.Log;
 import org.biomart.common.resources.Resources;
-import org.biomart.common.utils.BeanCollection;
+import org.biomart.common.utils.McBeanCollection;
 import org.biomart.common.utils.McBeanMap;
 import org.biomart.common.utils.Transaction;
 import org.biomart.common.utils.WeakPropertyChangeSupport;
@@ -90,7 +90,7 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 	protected boolean needsFullSync;
 	private boolean hideMasked = false;
 	private final Collection<Table> tableCache;
-	private final BeanCollection relationCache;
+	private final McBeanCollection relationCache;
 	/**
 	 * Subclasses use this to update synchronisation progress.
 	 */
@@ -172,7 +172,7 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 
 		// Listen to own tables and update key+relation caches.
 		this.tableCache = new HashSet<Table>();
-		this.relationCache = new BeanCollection(new HashSet());
+		this.relationCache = new McBeanCollection(new HashSet());
 		// All changes to us make us modified.
 	}
 
@@ -349,7 +349,7 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 	 * 
 	 * @return the unmodifiable collection of relations.
 	 */
-	public BeanCollection getRelations() {
+	public McBeanCollection getRelations() {
 		return this.relationCache;
 	}
 

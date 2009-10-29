@@ -27,8 +27,8 @@ import java.util.Iterator;
 import java.util.List;
 import org.biomart.common.resources.Log;
 import org.biomart.common.resources.Resources;
-import org.biomart.common.utils.BeanCollection;
-import org.biomart.common.utils.BeanSet;
+import org.biomart.common.utils.McBeanCollection;
+import org.biomart.common.utils.McBeanSet;
 import org.biomart.common.utils.Transaction;
 import org.biomart.common.utils.WeakPropertyChangeSupport;
 import org.biomart.common.utils.Transaction.TransactionEvent;
@@ -62,7 +62,7 @@ public abstract class Key implements Comparable<Key>, TransactionListener {
 
 	private Column[] columns;
 
-	private final BeanCollection relations;
+	private final McBeanCollection relations;
 
 	private ComponentStatus status;
 
@@ -105,7 +105,7 @@ public abstract class Key implements Comparable<Key>, TransactionListener {
 	public Key(final Column[] columns) {
 		Log.debug("Creating key over " + columns);
 		this.status = ComponentStatus.INFERRED;
-		this.relations = new BeanCollection(new HashSet());
+		this.relations = new McBeanCollection(new HashSet());
 		this.setColumns(columns);
 
 		Transaction.addTransactionListener(this);
@@ -201,7 +201,7 @@ public abstract class Key implements Comparable<Key>, TransactionListener {
 	 * 
 	 * @return the set of all relations this key is involved in.
 	 */
-	public BeanCollection getRelations() {
+	public McBeanCollection getRelations() {
 		return this.relations;
 	}
 

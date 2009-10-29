@@ -33,7 +33,7 @@ import java.util.Map;
 import org.biomart.builder.model.Key.PrimaryKey;
 import org.biomart.common.resources.Log;
 import org.biomart.common.resources.Resources;
-import org.biomart.common.utils.BeanCollection;
+import org.biomart.common.utils.McBeanCollection;
 import org.biomart.common.utils.McBeanMap;
 import org.biomart.common.utils.Transaction;
 import org.biomart.common.utils.WeakPropertyChangeSupport;
@@ -68,11 +68,11 @@ public class Table implements Comparable<Table>, TransactionListener {
 
 	private final McBeanMap columns;
 
-	private final BeanCollection foreignKeys;
+	private final McBeanCollection foreignKeys;
 
 	private final String name;
 
-	private final BeanCollection schemaPartitions = new BeanCollection(new HashSet());
+	private final McBeanCollection schemaPartitions = new McBeanCollection(new HashSet());
 
 	private PrimaryKey primaryKey;
 
@@ -80,9 +80,9 @@ public class Table implements Comparable<Table>, TransactionListener {
 
 	private boolean masked = false;
 
-	private final BeanCollection keyCache;
+	private final McBeanCollection keyCache;
 
-	private final BeanCollection relationCache;
+	private final McBeanCollection relationCache;
 
 	private final Collection columnCache;
 
@@ -119,7 +119,7 @@ public class Table implements Comparable<Table>, TransactionListener {
 		this.schema = schema;
 		this.uniqueId = this.schema.getNextUniqueId();
 		this.columns = new McBeanMap(new HashMap());
-		this.foreignKeys = new BeanCollection(new HashSet());
+		this.foreignKeys = new McBeanCollection(new HashSet());
 		// Make the name unique.
 		final String baseName = name;
 		for (int i = 1; schema.getTables().containsKey(name); name = baseName
@@ -131,8 +131,8 @@ public class Table implements Comparable<Table>, TransactionListener {
 		Transaction.addTransactionListener(this);
 
 		// Listen to own PK and FKs and update key+relation caches.
-		this.keyCache = new BeanCollection(new HashSet());
-		this.relationCache = new BeanCollection(new HashSet());
+		this.keyCache = new McBeanCollection(new HashSet());
+		this.relationCache = new McBeanCollection(new HashSet());
 		this.columnCache = new HashSet();
 		this.addPropertyChangeListener("primaryKey", this.relationCacheBuilder);
 		this.getForeignKeys().addPropertyChangeListener(
@@ -349,7 +349,7 @@ public class Table implements Comparable<Table>, TransactionListener {
 	 * 
 	 * @return the unmodifiable collection of keys.
 	 */
-	public BeanCollection getKeys() {
+	public McBeanCollection getKeys() {
 		return this.keyCache;
 	}
 
@@ -358,7 +358,7 @@ public class Table implements Comparable<Table>, TransactionListener {
 	 * 
 	 * @return the unmodifiable collection of relations.
 	 */
-	public BeanCollection getRelations() {
+	public McBeanCollection getRelations() {
 		return this.relationCache;
 	}
 
@@ -380,7 +380,7 @@ public class Table implements Comparable<Table>, TransactionListener {
 	 * 
 	 * @return the set of foreign keys for this table.
 	 */
-	public BeanCollection getForeignKeys() {
+	public McBeanCollection getForeignKeys() {
 		return this.foreignKeys;
 	}
 
@@ -399,7 +399,7 @@ public class Table implements Comparable<Table>, TransactionListener {
 	 * 
 	 * @return the set of schema partition names.
 	 */
-	public BeanCollection getSchemaPartitions() {
+	public McBeanCollection getSchemaPartitions() {
 		return this.schemaPartitions;
 	}
 
