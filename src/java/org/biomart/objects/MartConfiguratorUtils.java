@@ -8,9 +8,11 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 import org.biomart.common.general.utils.MyUtils;
+import org.biomart.objects.helpers.PartitionReference;
 import org.biomart.objects.helpers.Property;
+import org.biomart.objects.objects.Part;
+import org.biomart.objects.objects.PartitionTable;
 import org.jdom.Attribute;
 import org.jdom.Comment;
 import org.jdom.Element;
@@ -196,5 +198,51 @@ public class MartConfiguratorUtils {
 			}
 		}
 		return data;
+	}
+	@Deprecated
+	public static String replaceMainPartitionReferenceByValue(PartitionTable mainPartitionTable, int mainRowNumber, String value) {
+		if (MartConfiguratorUtils.containsPartitionReferences(value)) {
+			StringBuffer stringBuffer = new StringBuffer();
+			List<String> partitionReferences = MartConfiguratorUtils.extractPartitionReferences(value);
+			for (int i = 1; i < partitionReferences.size(); i+=2) {
+				String token = partitionReferences.get(i);
+				if ((i+1)%2==0) {	// see definition of extractPartitionReferences
+					PartitionReference partitionReference = PartitionReference.fromString(token);
+					if (partitionReference.getPartitionTableName().equals(mainPartitionTable.getName())) {
+						String actualValue = mainPartitionTable.getValue(mainRowNumber, partitionReference.getColumn()); 
+						stringBuffer.append(actualValue);
+					} else {
+						stringBuffer.append(token);
+					}
+				} else {
+					stringBuffer.append(token);
+				}
+			}
+			value = stringBuffer.toString();
+		}
+		return value; 
+	}
+	public static String replacePartitionReferencesByValues(String value, Part part) {
+		if (MartConfiguratorUtils.containsPartitionReferences(value) && part!=null) {
+			StringBuffer stringBuffer = new StringBuffer();
+			List<String> partitionReferences = MartConfiguratorUtils.extractPartitionReferences(value);
+			for (int i = 1; i < partitionReferences.size(); i+=2) {
+				String token = partitionReferences.get(i);
+				if ((i+1)%2==0) {	// see definition of extractPartitionReferences
+					PartitionReference partitionReference = PartitionReference.fromString(token);
+					PartitionTable partitionTable = part.getPartitionTableByName(partitionReference.getPartitionTableName());
+					if (null!=partitionTable) {
+						String actualValue = partitionTable.getValue(part.getRowNumber(partitionTable), partitionReference.getColumn()); 
+						stringBuffer.append(actualValue);
+					} else {
+						stringBuffer.append(token);	// not a real partition table reference: shouldn't be allowed though (GUI validation)
+					}
+				} else {
+					stringBuffer.append(token);
+				}
+			}
+			value = stringBuffer.toString();
+		}
+		return value; 
 	}
 }

@@ -32,7 +32,7 @@ public class GetAttributesResponse extends MartServiceResponse {
 	protected Document createXmlResponse(Document document) {
 		Element root = document.getRootElement();
 		for (Attribute attribute : this.attributeList) {
-			root.addContent(attribute.generateXmlForWebService());
+			//root.addContent(attribute.generateXmlForWebService());
 		}
 		return document;
 	}

@@ -30,7 +30,7 @@ public class Portable extends MartConfiguratorObject implements Serializable /*i
 			String xmlElementName) {
 		super(name, displayName, description, visible, xmlElementName);
 		
-		this.range = new Range(false);
+		this.range = new Range(mainPartitionTable, false);
 
 		this.mainPartitionTable = mainPartitionTable;
 		this.otherPartitionTableList = new ArrayList<PartitionTable>();

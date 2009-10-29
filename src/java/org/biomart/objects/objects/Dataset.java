@@ -25,6 +25,9 @@ public class Dataset extends MartConfiguratorObject implements Serializable {
 	private List<Relation> relationList = null;
 	private String centralTable = null;
 
+	// For internal use only
+	private PartitionTable mainPartitionTable = null;
+
 	public Dataset(String name, String displayName, String description, Boolean visible, 
 			Boolean materialized) {
 		super(name, displayName, description, visible, XML_ELEMENT_NAME);
@@ -40,8 +43,16 @@ public class Dataset extends MartConfiguratorObject implements Serializable {
 		this.configList.add(config);
 	}
 	
+	public void addMainPartitionTable(PartitionTable partitionTable) {
+		addPartitionTable(partitionTable);
+		this.mainPartitionTable = partitionTable;
+	}
 	public void addPartitionTable(PartitionTable partitionTable) {
 		this.partitionTableList.add(partitionTable);
+	}
+	
+	public PartitionTable getMainPartitionTable() {
+		return mainPartitionTable;
 	}
 	
 	public void addTable(Table table) {

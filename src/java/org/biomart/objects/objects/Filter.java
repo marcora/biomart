@@ -44,7 +44,7 @@ public class Filter extends Element implements Comparable<Filter>, Comparator<Fi
 				locationName, martName, version, datasetName, configName, tableName, keyName, fieldName, targetRangeList, selectedByDefault, 
 				pointer, pointedElementName, checkForNulls, sourceRangeList);
 	}
-
+	
 	public File getDataFolderPath() {
 		return dataFolderPath;
 	}
@@ -137,6 +137,16 @@ public class Filter extends Element implements Comparable<Filter>, Comparator<Fi
 		MartConfiguratorUtils.addAttribute(element, "dataFolderPath", this.dataFolderPath);
 		return element;
 	}
+	
+	
+	
+	// ===================================== Should be a different class ============================================
+
+	protected Filter(Filter filter, Part part) throws CloneNotSupportedException {	// creates a light clone (temporary solution)
+		super(filter, part);
+		this.qualifier = filter.qualifier;
+	}
+	
 	public org.jdom.Element generateXmlForWebService() {
 		return generateXmlForWebService(null);
 	}

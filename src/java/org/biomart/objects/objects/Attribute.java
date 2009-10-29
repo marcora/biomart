@@ -2,18 +2,16 @@ package org.biomart.objects.objects;
 
 
 import java.io.Serializable;
-import java.util.Comparator;
 import java.util.List;
 
 import net.sf.json.JSONObject;
 
-import org.biomart.common.general.utils.CompareUtils;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.jdom.Namespace;
 
 
-public class Attribute extends Element implements Comparable<Attribute>, Comparator<Attribute>, Serializable {
+public class Attribute extends Element implements /*Comparable<Attribute>, Comparator<Attribute>, */Serializable {
 
 	private static final long serialVersionUID = 3472755898394368045L;
 	
@@ -23,11 +21,11 @@ public class Attribute extends Element implements Comparable<Attribute>, Compara
 
 	private Integer maxLength = null;
 	private String linkURL = null;
-			
+
+	public Attribute() {}
 	public Attribute(Container parentContainer, PartitionTable mainPartitionTable, String name) {
 		this(parentContainer, mainPartitionTable, name, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
 	}
-	
 	public Attribute(Container parentContainer, PartitionTable mainPartitionTable, String name, String displayName, String description, Boolean visible, 
 			String locationName, String martName, Integer version, String datasetName, String configName, String tableName, String keyName, String fieldName, 
 			List<String> targetRangeList, Boolean selectedByDefault, Boolean pointer, String pointedElementName, Boolean checkForNulls, 
@@ -74,9 +72,9 @@ public class Attribute extends Element implements Comparable<Attribute>, Compara
 		}
 		Attribute attribute=(Attribute)object;
 		return (
-				super.equals(attribute)
-			/*(this.maxLength==attribute.maxLength || (this.maxLength!=null && maxLength.equals(attribute.maxLength))) &&
-			(this.linkURL==attribute.linkURL || (this.linkURL!=null && linkURL.equals(attribute.linkURL)))*/
+				super.equals(attribute) &&
+				(this.maxLength==attribute.maxLength || (this.maxLength!=null && maxLength.equals(attribute.maxLength))) &&
+				(this.linkURL==attribute.linkURL || (this.linkURL!=null && linkURL.equals(attribute.linkURL)))
 		);
 	}
 
@@ -84,12 +82,12 @@ public class Attribute extends Element implements Comparable<Attribute>, Compara
 	public int hashCode() {
 		int hash = MartConfiguratorConstants.HASH_SEED1;
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + super.hashCode();
-		/*hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==maxLength? 0 : maxLength.hashCode());
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==linkURL? 0 : linkURL.hashCode());*/
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==maxLength? 0 : maxLength.hashCode());
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==linkURL? 0 : linkURL.hashCode());
 		return hash;
 	}
 
-	public int compare(Attribute attribute1, Attribute attribute2) {
+	/*public int compare(Attribute attribute1, Attribute attribute2) {
 		if (attribute1==null && attribute2!=null) {
 			return -1;
 		} else if (attribute1!=null && attribute2==null) {
@@ -104,7 +102,7 @@ public class Attribute extends Element implements Comparable<Attribute>, Compara
 
 	public int compareTo(Attribute attribute) {
 		return compare(this, attribute);
-	}
+	}*/
 	
 	public org.jdom.Element generateXml() {
 		
@@ -113,6 +111,18 @@ public class Attribute extends Element implements Comparable<Attribute>, Compara
 		MartConfiguratorUtils.addAttribute(element, "linkURL", this.linkURL);
 		return element;
 	}
+	
+	
+	
+	
+	// ===================================== Should be a different class ============================================
+
+	public Attribute(Attribute attribute, Part part) throws CloneNotSupportedException {	// creates a light clone (temporary solution)
+		super(attribute, part);
+		this.maxLength = attribute.maxLength;
+		this.linkURL = MartConfiguratorUtils.replacePartitionReferencesByValues(attribute.linkURL, part);
+	}
+	
 	public org.jdom.Element generateXmlForWebService() {
 		return generateXmlForWebService(null);
 	}
@@ -124,7 +134,6 @@ public class Attribute extends Element implements Comparable<Attribute>, Compara
 		
 		return jdomObject;
 	}
-
 	public JSONObject generateJsonForWebService() {
 		JSONObject jsonObject = super.generateJsonForWebService();
 		
@@ -135,20 +144,4 @@ public class Attribute extends Element implements Comparable<Attribute>, Compara
 		jsonObject.put(super.xmlElementName, object);
 		return jsonObject;
 	}
-
-	/*public boolean sameTemplate(Attribute attribute) {
-		
-		
-		if (this==object) {
-			return true;
-		}
-		if((object==null) || (object.getClass()!= this.getClass())) {
-			return false;
-		}
-		Attribute attribute=(Attribute)object;
-		return (
-			(this.maxLength==attribute.maxLength || (this.maxLength!=null && maxLength.equals(attribute.maxLength))) &&
-			(this.linkURL==attribute.linkURL || (this.linkURL!=null && linkURL.equals(attribute.linkURL)))
-		);
-	}*/
 }

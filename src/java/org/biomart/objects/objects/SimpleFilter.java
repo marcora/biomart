@@ -23,8 +23,8 @@ public class SimpleFilter extends Filter implements Serializable/*implements Com
 	protected String orderBy = null;	// TODO Make <field> an object so we reference it instead of keeping the name?
 	protected Boolean multiValue = null;	// Not sure applicable for trees
 	protected String buttonURL = null;
-	protected HashSet<SimpleFilter> cascadeChildren = null;	//TODO move it to listfilter only?
 	protected Boolean upload = null;
+	protected HashSet<SimpleFilter> cascadeChildren = null;
 	
 	protected String trueValue = null;
 	protected String trueDisplay = null;
@@ -255,30 +255,53 @@ public class SimpleFilter extends Filter implements Serializable/*implements Com
 		
 		return element;
 	}
+	
+	
+	// ===================================== Should be a different class ============================================
+
+	public SimpleFilter(SimpleFilter simpleFilter, Part part) throws CloneNotSupportedException {	// creates a light clone (temporary solution)
+		super(simpleFilter, part);
+		
+		this.displayType = MartConfiguratorUtils.replacePartitionReferencesByValues(simpleFilter.displayType, part);
+		this.orderBy = simpleFilter.orderBy;
+		this.multiValue = simpleFilter.multiValue;
+		this.buttonURL = MartConfiguratorUtils.replacePartitionReferencesByValues(simpleFilter.buttonURL, part);
+		this.upload = simpleFilter.upload;
+		this.trueValue = MartConfiguratorUtils.replacePartitionReferencesByValues(simpleFilter.trueValue, part);
+		this.trueDisplay = MartConfiguratorUtils.replacePartitionReferencesByValues(simpleFilter.trueDisplay, part);
+		this.falseValue = MartConfiguratorUtils.replacePartitionReferencesByValues(simpleFilter.falseValue, part);
+		this.falseDisplay = MartConfiguratorUtils.replacePartitionReferencesByValues(simpleFilter.falseDisplay, part);
+		
+		this.cascadeChildrenNamesList = new HashSet<String>();
+		for (String cascadeChildName : simpleFilter.cascadeChildrenNamesList) {
+			this.cascadeChildrenNamesList.add(MartConfiguratorUtils.replacePartitionReferencesByValues(cascadeChildName, part));
+		}
+	}
+	
 	public org.jdom.Element generateXmlForWebService() {
 		return generateXmlForWebService(null);
 	}
 	public org.jdom.Element generateXmlForWebService(Namespace namespace) {
 		org.jdom.Element jdomObject = super.generateXmlForWebService(namespace);
 		
-		if (!this.pointer) {
+		//if (!this.pointer) {
 			MartConfiguratorUtils.addAttribute(jdomObject, "orderBy", this.orderBy);
 			
 			MartConfiguratorUtils.addAttribute(jdomObject, "displayType", this.displayType);
 			
-			MartConfiguratorUtils.addAttribute(jdomObject, "upload", this.upload);
+			MartConfiguratorUtils.addAttribute(jdomObject, "upload", this.upload);	
 			
-			MartConfiguratorUtils.addAttribute(jdomObject, "multiValue", this.multiValue);
+			MartConfiguratorUtils.addAttribute(jdomObject, "multiValue", this.multiValue);	
 			
 			MartConfiguratorUtils.addAttribute(jdomObject, "cascadeChildren", this.cascadeChildrenNamesList);
 			
-			MartConfiguratorUtils.addAttribute(jdomObject, "buttonURL", this.buttonURL!=null ? this.buttonURL.toString() : null);
+			MartConfiguratorUtils.addAttribute(jdomObject, "buttonURL", this.buttonURL);
 			
 			MartConfiguratorUtils.addAttribute(jdomObject, "trueValue", this.trueValue);
 			MartConfiguratorUtils.addAttribute(jdomObject, "trueDisplay", this.trueDisplay);
 			MartConfiguratorUtils.addAttribute(jdomObject, "falseValue", this.falseValue);
-			MartConfiguratorUtils.addAttribute(jdomObject, "falseDisplay", this.falseDisplay);
-		}
+			MartConfiguratorUtils.addAttribute(jdomObject, "falseDisplay",  this.falseDisplay);
+		//}
 		
 		return jdomObject;
 	}

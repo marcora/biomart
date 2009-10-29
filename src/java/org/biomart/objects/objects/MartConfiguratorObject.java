@@ -25,7 +25,6 @@ public class MartConfiguratorObject implements Serializable /*implements Compara
 	protected String xmlElementName = null;
 
 	public MartConfiguratorObject() {}	// for Serialization
-	
 	public MartConfiguratorObject(String name, String displayName, String description, Boolean visible, String xmlElementName) {
 		super();
 		this.xmlElementName = xmlElementName;
@@ -54,15 +53,6 @@ public class MartConfiguratorObject implements Serializable /*implements Compara
 	public void setVisible(Boolean visible) {
 		this.visible = visible;
 	}
-
-	/*public void setJdomElement(Element jdomElement) {
-		this.jdomElement = jdomElement;
-	}
-
-	public void setJdomComment(String jdomCommentString) {
-		Comment jdomComment = new Comment(jdomCommentString);
-		this.jdomElement.addContent(jdomComment);
-	}*/
 
 	public String getDescription() {
 		return description;
@@ -146,6 +136,25 @@ public class MartConfiguratorObject implements Serializable /*implements Compara
 		return jdomElement;
 	}
 	
+	
+	
+	
+	// ===================================== Should be a different class ============================================
+
+	protected MartConfiguratorObject(MartConfiguratorObject martConfiguratorObject) throws CloneNotSupportedException {
+		this(martConfiguratorObject, null);
+	}
+	protected MartConfiguratorObject(MartConfiguratorObject martConfiguratorObject, Part part) throws CloneNotSupportedException {	// creates a light clone (temporary solution)
+		this(
+				part==null ? martConfiguratorObject.name : 
+					MartConfiguratorUtils.replacePartitionReferencesByValues(martConfiguratorObject.name, part),
+				part==null ? martConfiguratorObject.displayName : 
+					MartConfiguratorUtils.replacePartitionReferencesByValues(martConfiguratorObject.displayName, part),
+				part==null ? martConfiguratorObject.description : 
+					MartConfiguratorUtils.replacePartitionReferencesByValues(martConfiguratorObject.description, part),
+				martConfiguratorObject.visible, martConfiguratorObject.xmlElementName);
+	}
+	
 	protected Element generateXmlForWebService(Namespace namespace) {
 		Element jdomObject = new Element(xmlElementName, namespace);
 		
@@ -156,6 +165,7 @@ public class MartConfiguratorObject implements Serializable /*implements Compara
 		
 		return jdomObject;
 	}
+	
 	protected JSONObject generateJsonForWebService() {
 		JSONObject object = new JSONObject();
 		

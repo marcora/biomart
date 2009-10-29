@@ -147,9 +147,9 @@ public class TransformationMain {
 		if (serialize) {
 			try {
 				MyUtils.writeSerializedObject(martRegistry, "./conf/files/" + 
-						(webServiceTransformation ? "web" : "db") + "_portal.serial");
+						(webServiceTransformation ? "web" : "rdbms") + "_portal.serial");
 				MyUtils.writeXmlFile(newRootElement, "./conf/xml/" + 
-						(webServiceTransformation ? "web" : "db") + "_portal.xml");
+						(webServiceTransformation ? "web" : "rdbms") + "_portal.xml");
 			} catch (TechnicalException e) {
 				e.printStackTrace();
 			}
@@ -157,7 +157,7 @@ public class TransformationMain {
 		return martRegistry;
 	}
 	
-	static boolean webServiceTransformation = true;
+	static boolean webServiceTransformation = false;
 	
 	public static List<MartRegistry> run(String transformationsGeneralOutput, boolean serialize) {
 		List<MartRegistry> martRegistryList = new ArrayList<MartRegistry>();
@@ -174,9 +174,9 @@ public class TransformationMain {
 				//transform(false, "55", "default", "gene_vega");
 				//transform(false, "55", "default", "variation");
 				
-				martRegistryList.add(transform(false, "55", "default", transformationsGeneralOutput, "gene_ensembl").getMartRegistry());
-				martRegistryList.add(transform(false, "55", "default", transformationsGeneralOutput, "gene_vega").getMartRegistry());
-				martRegistryList.add(transform(false, "55", "default", transformationsGeneralOutput, "variation").getMartRegistry());
+				martRegistryList.add(transform(false, "55", transformationsGeneralOutput, "default", "gene_ensembl").getMartRegistry());
+				martRegistryList.add(transform(false, "55", transformationsGeneralOutput, "default", "gene_vega").getMartRegistry());
+				martRegistryList.add(transform(false, "55", transformationsGeneralOutput, "default", "variation").getMartRegistry());
 				
 			} else {
 				MartServiceIdentifier initialHost = new MartServiceIdentifier(
@@ -343,8 +343,6 @@ if (currentMart.martName.equals("ensembl_expressionmart_48") && biomartPortalDat
 		String datasetOrTemplateName = templateName!=null ? templateName : datasetName;
 		String datasetGeneralOutputFolderPathAndName = transformationsGeneralOutput + transformationTypeFolderName + MyUtils.FILE_SEPARATOR + 
 		TransformationUtils.generateIdentifier(webService, version, trueHostIdentifier, virtualSchema, datasetOrTemplateName) + MyUtils.FILE_SEPARATOR;	
-		
-		//Properties properties = getPropertiesFile();
 				
 		TransformationGeneralVariable general = new TransformationGeneralVariable(version,
 				(webService ? webServiceConfigurationMap : null), portalIdentifier,

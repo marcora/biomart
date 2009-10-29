@@ -106,15 +106,15 @@
 	<xs:complexType name="attributeType">
 		<xs:attribute name="name" type="tns:nameType" use="required" />
 		
-		<xs:attribute name="default" type="xs:boolean" use="optional" />		<!-- selection by default -->
-				
 <xs:attribute name="displayName" type="tns:displayNameType" use="optional" />
-<xs:attribute name="visible" type="tns:visibleType" use="optional" />
 <xs:attribute name="description" type="tns:descriptionType" use="optional" />
 				
-		<xs:attribute name="pointer" type="xs:boolean" use="required" />
+		<xs:attribute name="parentContainer" type="tns:nameType" use="required" />		
+		<xs:attribute name="default" type="xs:boolean" use="optional" />		<!-- selection by default -->
+		
+		<!--<xs:attribute name="pointer" type="xs:boolean" use="required" />
 		<xs:attribute name="attribute" type="xs:string" use="optional" />
-		<xs:attribute name="filter" type="xs:string" use="optional" />
+		<xs:attribute name="filter" type="xs:string" use="optional" />-->
 		
 		<xs:attribute name="maxLength" type="xs:integer" use="optional" />
 		<xs:attribute name="linkURL" type="xs:string" use="optional" />
@@ -122,16 +122,16 @@
 	
 	<xs:complexType name="filterType">
 		<xs:attribute name="name" type="tns:nameType" use="required" />
-		
-		<xs:attribute name="default" type="xs:boolean" use="optional" />		<!-- selection by default -->
-				
+						
 <xs:attribute name="displayName" type="tns:displayNameType" use="optional" />
-<xs:attribute name="visible" type="tns:visibleType" use="optional" />
 <xs:attribute name="description" type="tns:descriptionType" use="optional" />
+
+		<xs:attribute name="parentContainer" type="tns:nameType" use="required" />		
+		<xs:attribute name="default" type="xs:boolean" use="optional" />		<!-- selection by default -->
 		
-		<xs:attribute name="pointer" type="xs:boolean" use="required" />
+		<!--<xs:attribute name="pointer" type="xs:boolean" use="required" />
 		<xs:attribute name="attribute" type="xs:string" use="optional" />
-		<xs:attribute name="filter" type="xs:string" use="optional" />
+		<xs:attribute name="filter" type="xs:string" use="optional" />-->
 		
 		<!-- all filters -->
 		<xs:attribute name="qualifier" type="xs:string" use="optional" />
@@ -180,6 +180,8 @@
 		<xs:attribute name="visible" type="tns:visibleType" use="required" />
 		<xs:attribute name="description" type="tns:descriptionType" use="optional" />
 							
+		<xs:attribute name="parentContainer" type="tns:nameType" use="required" />
+		
 		<xs:attribute name="level" type="xs:integer" use="required" />
 		<xs:attribute name="queryRestriction" type="xs:integer" use="optional" />
 	</xs:complexType>

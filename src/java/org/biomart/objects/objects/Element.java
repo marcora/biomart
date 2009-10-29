@@ -14,7 +14,7 @@ import org.biomart.objects.MartConfiguratorUtils;
 import org.jdom.Namespace;
 
 
-public class Element extends Containee implements Serializable/* implements Comparable<Element>, Comparator<Element>*/ {
+public class Element extends Containee implements Serializable {
 
 	private static final long serialVersionUID = -2902852019170342721L;
 
@@ -63,11 +63,21 @@ public class Element extends Containee implements Serializable/* implements Comp
 		this.pointedElementName = pointedElementName;
 		this.checkForNulls = checkForNulls;
 		
-		this.targetRange = new Range(true);		//TODO should automatically add rows of mainpartition table?
-		this.sourceRange = new Range(false);
+		this.targetRange = new Range(mainPartitionTable, true);		//TODO should automatically add rows of mainpartition table?
+		this.sourceRange = new Range(mainPartitionTable, false);
 		
 		this.mainPartitionTable = mainPartitionTable;
 		this.otherPartitionTableList = new ArrayList<PartitionTable>();
+	}
+	protected Containee lightClone(Part part) throws CloneNotSupportedException {
+		if (this.getClass().equals(Attribute.class)) {	// instanceof is not enough to check for subclasses
+			return new Attribute((Attribute)this, part);
+		} else if (this.getClass().equals(SimpleFilter.class)) {
+			return new SimpleFilter((SimpleFilter)this, part);
+		} else if (this.getClass().equals(GroupFilter.class)) {
+			return new GroupFilter((GroupFilter)this, part);
+		}
+		throw new CloneNotSupportedException("class: " + this.getClass());
 	}
 	
 	public Range getTargetRange() {
@@ -76,14 +86,6 @@ public class Element extends Containee implements Serializable/* implements Comp
 	public Range getSourceRange() {
 		return this.sourceRange;
 	}
-	
-	/*public void addTargetRange(String partitionTableName, Integer row, boolean visible) {
-		this.targetRangeList.add(MartConfiguratorUtils.getRange(partitionTableName, row, visible));
-	}
-	
-	public void addSourceRange(String partitionTableName, Integer row) {
-		this.sourceRangeList.add(MartConfiguratorUtils.getRange(partitionTableName, row));
-	}*/
 	
 	public void addOtherPartitionTable(PartitionTable partitionTable) {
 		MyUtils.checkStatusProgram(!this.otherPartitionTableList.contains(partitionTable));
@@ -269,65 +271,6 @@ public class Element extends Containee implements Serializable/* implements Comp
 		return hash;
 	}
 
-	/*@Override
-	public int compare(Element element1, Element element2) {
-		if (element1==null && element2!=null) {
-			return -1;
-		} else if (element1!=null && element2==null) {
-			return 1;
-		}
-		int compare = CompareUtils.compareNull(element1.locationName, element2.locationName);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(element1.martName, element2.martName);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(element1.version, element2.version);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(element1.datasetName, element2.datasetName);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(element1.configName, element2.configName);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(element1.tableName, element2.tableName);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(element1.fieldName, element2.fieldName);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(element1.targetRangeList, element2.targetRangeList);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(element1.selectedByDefault, element2.selectedByDefault);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(element1.pointer, element2.pointer);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(element1.pointedElement, element2.pointedElement);
-		if (compare!=0) {
-			return compare;
-		}
-		return CompareUtils.compareNull(element1.sourceRangeList, element2.sourceRangeList);
-	}
-
-	@Override
-	public int compareTo(Element element) {
-		return compare(this, element);
-	}*/
-
 	public org.jdom.Element generateXml() {
 		if (this instanceof Attribute) {
 			return generateXml(Attribute.XML_ELEMENT_NAME);
@@ -350,20 +293,27 @@ public class Element extends Containee implements Serializable/* implements Comp
 		MartConfiguratorUtils.addAttribute(element, "pointer", this.pointer);
 		MartConfiguratorUtils.addAttribute(element, pointedElementType, this.pointedElementName);
 		MartConfiguratorUtils.addAttribute(element, "checkForNulls", this.checkForNulls);
-		
-	//if (this instanceof Attribute) {//TODO until filter is done
-		if (
-				/*this.pointer!=null &&	//TODO tmp because of genomic sequence*/ 
-				this.pointer
-				&& this.sourceRange!=null	//TODO for now -> when broken pointer, no sourceRange
-		) {
-			this.sourceRange.addXmlAttribute(element, "sourceRange");//TODO until is done
+
+		if (this.pointer
+//				&& this.sourceRange!=null	//TODO for now -> when broken pointer, no sourceRange
+				) {
+			this.sourceRange.addXmlAttribute(element, "sourceRange");
 		}
-			this.targetRange.addXmlAttribute(element, "targetRange");
-	//}
-		/*MartConfiguratorUtils.addAttribute(element, "sourceRangeList", this.sourceRangeList, true);
-		MartConfiguratorUtils.addAttribute(element, "targetRange", this.targetRangeList, false);*/
+		this.targetRange.addXmlAttribute(element, "targetRange");
+		
 		return element;
+	}
+	
+
+	
+	
+	// ===================================== Should be a different class ============================================
+
+	protected Element(Element element, Part part) throws CloneNotSupportedException {	// creates a light clone (temporary solution)
+		super(element, part);
+		this.selectedByDefault = element.selectedByDefault;
+		this.targetRange = new Range(element.mainPartitionTable, true);
+		this.targetRange.addPart(part);	// only one part	
 	}
 	
 	protected org.jdom.Element generateXmlForWebService() {
@@ -379,11 +329,18 @@ public class Element extends Containee implements Serializable/* implements Comp
 	private org.jdom.Element generateXmlForWebService(Namespace namespace, String pointedElementType) {
 		org.jdom.Element jdomObject = super.generateXmlForWebService(namespace);
 		
+		MyUtils.checkStatusProgram(this.targetRange.getPartSet().size()==1);	// there should be only 1 element (it's flattened)
+		
+		jdomObject.removeAttribute("visible");	// not applicable for elements
+
+		// Element attributes
 		MartConfiguratorUtils.addAttribute(jdomObject, "default", this.selectedByDefault);
 		
-		MartConfiguratorUtils.addAttribute(jdomObject, "pointer", this.pointer);
-		MartConfiguratorUtils.addAttribute(jdomObject, pointedElementType, this.pointedElementName);
-		
+		/*MartConfiguratorUtils.addAttribute(jdomObject, "pointer", this.pointer);	// no partition reference: not a string
+		if (this.pointer) {
+			MartConfiguratorUtils.addAttribute(jdomObject, pointedElementType, this.pointedElementName);
+		}*/
+				
 		return jdomObject;
 	}
 	protected JSONObject generateJsonForWebService() {

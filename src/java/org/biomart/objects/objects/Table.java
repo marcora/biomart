@@ -28,14 +28,14 @@ public class Table extends MartConfiguratorObject implements Comparable<Table>, 
 	private Boolean main = null;	// Whether this is the main partition table
 	private TableType type = null;
 
-	public Table(String name, boolean main, TableType type,
+	public Table(String name, PartitionTable mainPartitionTable, boolean main, TableType type,
 			String key, HashSet<String> fields) {
 		super(name, null, null, null, XML_ELEMENT_NAME);	// displayName, description & visible do not apply for that object
 		this.key = key;
 		this.type = type;
 		this.fields = fields;
 		
-		this.range = new Range(false);
+		this.range = new Range(mainPartitionTable, false);
 		
 		this.main = main;
 	}

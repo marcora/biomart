@@ -15,14 +15,14 @@ public class Containee extends MartConfiguratorObject implements Serializable {
 
 	public static void main(String[] args) {}
 	
-	private Container parentContainer = null;	// The parent container if any
+	protected Container parentContainer = null;	// The parent container if any
 
 	public Containee() {} 	// for Serialization
 	public Containee(String name, String displayName, String description, Boolean visible, String xmlElementName, Container parentContainer) {
 		super(name, displayName, description, visible, xmlElementName);
 		this.parentContainer = parentContainer;
 	}
-
+	
 	public Container getParentContainer() {
 		return parentContainer;
 	}
@@ -63,27 +63,20 @@ public class Containee extends MartConfiguratorObject implements Serializable {
 		return hash;
 	}
 	
-//	protected abstract Element generateXml();/* {
-//		return super.generateXml();
-//	}*/
-//	protected abstract Element generateXmlForWebService(boolean recursively);/* {
-//		return generateXmlForWebService(null, recursively);
-//	}*/
-//	protected abstract Element generateXmlForWebService(Namespace namespace, boolean recursively);/*{
-//		return super.generateXmlForWebService(namespace);
-//	}*/
-//	protected abstract Element generateXmlForWebService();/*{
-//		return generateXmlForWebService(null);
-//	}*/
-//	protected abstract Element generateXmlForWebService(Namespace namespace);/* {
-//		//return super.generateXmlForWebService(namespace);
-//	}*/
-//	protected abstract JSONObject generateJsonForWebService();/* {
-//		return super.generateJsonForWebService();
-//	}*/
-
 	protected Element generateXml() {
 		return super.generateXml();
+	}
+	
+
+
+	
+	// ===================================== Should be a different class ============================================
+
+	protected Containee(Containee containee) throws CloneNotSupportedException {
+		this(containee, null);
+	}
+	protected Containee(Containee containee, Part part) throws CloneNotSupportedException {	// creates a light clone (temporary solution)
+		super(containee, part);
 	}
 	protected Element generateXmlForWebService(boolean recursively) {
 		return generateXmlForWebService(null, recursively);
@@ -95,7 +88,11 @@ public class Containee extends MartConfiguratorObject implements Serializable {
 		return generateXmlForWebService(null);
 	}
 	protected Element generateXmlForWebService(Namespace namespace) {
-		return super.generateXmlForWebService(namespace);
+		Element jdomObject = super.generateXmlForWebService(namespace);
+		
+		jdomObject.setAttribute("parentContainer", this.parentContainer!=null ? this.parentContainer.name : "null");	// to comply with XSD
+																														//MartConfiguratorUtils.addAttribute(jdomObject, "parentContainer", this.parentContainer!=null ? this.parentContainer.name : null);
+		return jdomObject;
 	}
 	protected JSONObject generateJsonForWebService() {
 		return super.generateJsonForWebService();

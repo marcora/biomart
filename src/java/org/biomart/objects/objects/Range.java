@@ -27,17 +27,23 @@ public class Range /*implements Comparable<Range>, Comparator<Range>*/implements
 	private Set<PartitionTable> partitionTableSet = null;
 	private Boolean target = null;	// To know whether to show visibility or not
 	
+	private PartitionTable mainPartitionTable = null;
 	private Set<Integer> mainRowsSet = null;
 
-	public Range(Boolean target) {
+	public Range(PartitionTable mainPartitionTable, Boolean target) {
 		super();
 		this.partSet = new TreeSet<Part>();
 		this.partitionTableSet = new HashSet<PartitionTable>();
 		this.target = target;
 		
+		this.mainPartitionTable = mainPartitionTable;
 		this.mainRowsSet = new HashSet<Integer>();
 	}
 	
+	public PartitionTable getMainPartitionTable() {
+		return mainPartitionTable;
+	}
+
 	public Set<Integer> getMainRowsSet() {
 		return this.mainRowsSet;
 	}
@@ -255,7 +261,8 @@ public class Range /*implements Comparable<Range>, Comparator<Range>*/implements
 	}
 	
 	public Range cloneRange() throws TechnicalException {	// can't use clone() because of exception thrown...
-		Range range = new Range(this.target);
+		Range range = new Range(
+				this.mainPartitionTable, this.target);	// the main partition table must not be "cloned" here
 		TreeSet<Part> partSet = new TreeSet<Part>();
 		try {
 			for (Part part : this.partSet) {
@@ -289,9 +296,9 @@ public class Range /*implements Comparable<Range>, Comparator<Range>*/implements
 	}
 	
 	public static Range mainRangesIntersection(
-			PartitionTable maiPartitionTable , Boolean target, List<Range> rangeList) throws FunctionalException, TechnicalException {
+			PartitionTable mainPartitionTable , Boolean target, List<Range> rangeList) throws FunctionalException, TechnicalException {
 		MyUtils.checkStatusProgram(rangeList.size()>=1);
-		Range newRange = new Range(false);
+		Range newRange = new Range(mainPartitionTable, false);
 		List<HashSet<Integer>> allMainRows = new ArrayList<HashSet<Integer>>();
 		
 		// Create set of all the sets 
@@ -311,7 +318,7 @@ public class Range /*implements Comparable<Range>, Comparator<Range>*/implements
 			firstMainRows.retainAll(mainRows);
 		}
 		for (Integer mainRow : firstMainRows) {
-			newRange.addRangePartitionRow(maiPartitionTable, mainRow);			
+			newRange.addRangePartitionRow(mainPartitionTable, mainRow);			
 		}
 		return newRange;
 	}

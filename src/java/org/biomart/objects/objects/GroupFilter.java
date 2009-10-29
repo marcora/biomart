@@ -11,7 +11,7 @@ import org.biomart.objects.MartConfiguratorUtils;
 import org.jdom.Namespace;
 
 
-public class GroupFilter extends Filter implements Serializable/*implements Comparable<GroupFilter>, Comparator<GroupFilter> */{
+public class GroupFilter extends Filter implements Serializable {
 
 	private static final long serialVersionUID = 329028129461650472L;
 
@@ -19,26 +19,25 @@ public class GroupFilter extends Filter implements Serializable/*implements Comp
 
 	private List<SimpleFilter> filterList = null;
 	private String logicalOperator = null;
-	//private Boolean shareValue = null;
 	private String multipleFilter = null;	// 1, N or ALL (TODO create enum?)
 	
 	// For internal use only
 	private List<String> filterNamesList = null;
 
-	public List<String> getFilterNamesList() {
-		return filterNamesList;
-	}
-
+	public GroupFilter() {}
 	public GroupFilter(Container parentContainer, PartitionTable mainPartitionTable, String name) {
 		super(parentContainer, mainPartitionTable, name);
 		this.filterList = new ArrayList<SimpleFilter>();
 		this.filterNamesList = new ArrayList<String>();
-		
 	}
 	
 	public void addSimpleFilter(SimpleFilter simpleFilter) {
 		this.filterList.add(simpleFilter);
 		this.filterNamesList.add(simpleFilter.getName());
+	}
+
+	public List<String> getFilterNamesList() {
+		return filterNamesList;
 	}
 
 	public List<SimpleFilter> getFilterList() {
@@ -88,14 +87,6 @@ public class GroupFilter extends Filter implements Serializable/*implements Comp
 		this.logicalOperator = logicalOperator;
 	}
 
-	/*public Boolean getShareValue() {
-		return shareValue;
-	}
-
-	public void setShareValue(Boolean shareValue) {
-		this.shareValue = shareValue;
-	}*/
-
 	public String getMultipleFilter() {
 		return multipleFilter;
 	}
@@ -103,21 +94,6 @@ public class GroupFilter extends Filter implements Serializable/*implements Comp
 	public void setMultipleFilter(String multipleFilter) {
 		this.multipleFilter = multipleFilter;
 	}
-
-	/*@Override
-	public int compare(GroupFilter groupFilter1, GroupFilter groupFilter2) {
-		if (groupFilter1==null && groupFilter2!=null) {
-			return -1;
-		} else if (groupFilter1!=null && groupFilter2==null) {
-			return 1;
-		}
-		return CompareUtils.compareNull(groupFilter1.filterList, groupFilter2.filterList);
-	}
-
-	@Override
-	public int compareTo(GroupFilter groupFilter) {
-		return compare(this, groupFilter);
-	}*/
 	
 	public org.jdom.Element generateXml() {
 		org.jdom.Element element = super.generateXml();
@@ -128,16 +104,39 @@ public class GroupFilter extends Filter implements Serializable/*implements Comp
 		}
 		return element;
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	// ===================================== Should be a different class ============================================
+
+	public GroupFilter(GroupFilter groupFilter, Part part) throws CloneNotSupportedException {	// creates a light clone (temporary solution)
+		super(groupFilter, part);
+		this.logicalOperator = groupFilter.logicalOperator;
+		this.multipleFilter = groupFilter.multipleFilter;
+		
+		this.filterNamesList = new ArrayList<String>();
+		for (String filterName : groupFilter.filterNamesList) {
+			this.filterNamesList.add(MartConfiguratorUtils.replacePartitionReferencesByValues(filterName, part));
+		}
+	}
+	
 	public org.jdom.Element generateXmlForWebService() {
 		return generateXmlForWebService(null);
 	}
 	public org.jdom.Element generateXmlForWebService(Namespace namespace) {
 		org.jdom.Element jdomObject = super.generateXmlForWebService(namespace);
-		if (!this.pointer) {
+		//if (!this.pointer) {
 			MartConfiguratorUtils.addAttribute(jdomObject, "logicalOperator", this.logicalOperator);
-			MartConfiguratorUtils.addAttribute(jdomObject, "multipleFilter", this.multipleFilter);
+
+			MartConfiguratorUtils.addAttribute(jdomObject, "multipleFilter", this.multipleFilter);	
+			
 			MartConfiguratorUtils.addAttribute(jdomObject, "filterList", this.filterNamesList);
-		}
+		//}
 		return jdomObject;
 	}
 	public JSONObject generateJsonForWebService() {

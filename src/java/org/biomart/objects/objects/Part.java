@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.biomart.common.general.exceptions.TechnicalException;
@@ -105,6 +106,9 @@ public class Part implements Comparable<Part>, Comparator<Part>, Serializable {
 		return getRowNumber(this.mainPartitionTable);
 	}
 
+	public Set<PartitionTable> getPartitionTables() {
+		return this.map.keySet();
+	}
 	public PartitionTable getPartitionTableByName(String partitionTableName) {
 		for (PartitionTable partitionTableTmp : this.map.keySet()) {
 			if (partitionTableTmp.getName().equals(partitionTableName)) {

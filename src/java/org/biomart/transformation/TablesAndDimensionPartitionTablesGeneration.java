@@ -141,7 +141,7 @@ public class TablesAndDimensionPartitionTablesGeneration {
 				TableNameAndKeyName tableNameAndKeyName = new TableNameAndKeyName(newTableName, key);
 				Table table = vars.getTableFromNameAndKey(tableNameAndKeyName);
 				if (null==table) {
-					table = new Table(newTableName, isMain, TableType.TARGET, key, columnSet);
+					table = new Table(newTableName, mainPartitionTable, isMain, TableType.TARGET, key, columnSet);
 					this.tmpTableList.add(table);
 					vars.putNameAndKeyToTableMap(tableNameAndKeyName, table);
 					

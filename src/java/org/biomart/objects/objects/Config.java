@@ -123,14 +123,4 @@ public class Config extends MartConfiguratorObject implements Comparable<Config>
 		return containerList;
 	}
 
-	public List<Container> getVisibleContainerList() {
-		List<Container> containerList = new ArrayList<Container>();
-		for (Container container : this.containerList) {
-			if (container.getVisible()) {
-				containerList.add(container);
-			}
-		}
-		return containerList;
-	}
-
 }

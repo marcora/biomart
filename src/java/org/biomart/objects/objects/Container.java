@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import net.sf.json.JSONObject;
 
@@ -12,7 +13,6 @@ import org.biomart.common.general.utils.CompareUtils;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.jdom.Element;
-import org.jdom.Namespace;
 
 
 public class Container extends Containee implements Comparable<Container>, Comparator<Container>, Serializable {
@@ -31,7 +31,8 @@ public class Container extends Containee implements Comparable<Container>, Compa
 	private List<Attribute> attributeList = null;
 	
 	private List<Containee> containeeList = null;	// Ordered references to above lists of containers, filters & attributes 
-
+	
+	public Container() {}
 	public Container(Container parentContainer, String name, String displayName, String description, Boolean visible,
 			Integer level, Integer queryRestriction) {
 		super(name, displayName, description, visible, XML_ELEMENT_NAME, parentContainer);
@@ -62,6 +63,10 @@ public class Container extends Containee implements Comparable<Container>, Compa
 
 	public Integer getLevel() {
 		return level;
+	}
+
+	public List<Containee> getContaineeList() {
+		return containeeList;
 	}
 
 	public Integer getQueryRestriction() {
@@ -163,48 +168,86 @@ public class Container extends Containee implements Comparable<Container>, Compa
 		MartConfiguratorUtils.addAttribute(element, "level", this.level);
 		MartConfiguratorUtils.addAttribute(element, "queryRestriction", this.queryRestriction);
 		
-		/*for (Attribute attribute : this.attributeList) {
-			element.addContent(attribute.generateXml());
-		}
-		
-		for (Filter filter : this.filterList) {
-			element.addContent(filter.generateXml());
-		}
-
-		for (Container container : this.containerList) {
-			element.addContent(container.generateXml());
-		}*/
 		for (Containee containee : this.containeeList) {
 			element.addContent(containee.generateXml());
 		}
 		
 		return element;
 	}
-	public Element generateXmlForWebService(boolean recursively) {
-		return generateXmlForWebService(null, recursively);
+
+
+	// ===================================== Should be a different class ============================================
+	
+	public Container(Container container, List<Integer> mainRowNumbersWanted) throws CloneNotSupportedException {	// creates a light clone (temporary solution)
+		this(
+				container.parentContainer!=null ? new Container(null, container.parentContainer.name, null, null, null, null, null) : null,	// just to have the name 
+				container.name, container.displayName, container.description, container.visible, 
+				container.level, container.queryRestriction);
+		
+		for (Container subContainer : container.getContainerList()) {	
+			if (subContainer.getVisible()) {	// Only the visible ones
+				Container containerClone = new Container(subContainer, mainRowNumbersWanted); 
+				addContainer(containerClone);	// also handles containeeList
+			}
+		}
+		for (Attribute attribute : container.getAttributeList()) {
+if (attribute.getPointer()) continue;	//TODO for now				
+			
+			Range targetRange = attribute.getTargetRange();
+			Set<Part> partSet = targetRange.getPartSet();
+			for (Part part : partSet) {
+				if (part.getVisible()) {	// Only the visible ones
+					int mainRowNumber = part.getMainRowNumber();
+					if (mainRowNumbersWanted.contains(mainRowNumber)) {
+						Attribute attributeClone = (Attribute)attribute.lightClone(part);
+						if (!this.attributeList.contains(attributeClone)) {	// No repetitions
+							addAttribute(attributeClone);	// also handles containeeList
+						}
+					}
+				}					
+			}
+		}
+		for (Filter filter : container.getFilterList()) {
+if (filter.getPointer()) continue;	//TODO for now			
+			Range targetRange = filter.getTargetRange();
+			Set<Part> partSet = targetRange.getPartSet();
+			for (Part part : partSet) {
+				if (part.getVisible()) {	// Only the visible ones
+					int mainRowNumber = part.getMainRowNumber();
+					if (mainRowNumbersWanted.contains(mainRowNumber)) {
+						Filter filterClone = (Filter)filter.lightClone(part);
+						if (!this.filterList.contains(filterClone)) {	// No repetitions
+							addFilter(filterClone);		// also handles containeeList
+						}
+					}
+				}					
+			}
+		}
 	}
-	public Element generateXmlForWebService(Namespace namespace, boolean recursively) {
+	
+	public Element generateXmlForWebService() {
+		return generateXmlForWebService(null);
+	}
+	public Element generateXmlForWebService(org.jdom.Namespace namespace) {
 		Element jdomObject = super.generateXmlForWebService(namespace);
 		
 		MartConfiguratorUtils.addAttribute(jdomObject, "level", this.level);
 		MartConfiguratorUtils.addAttribute(jdomObject, "queryRestriction", this.queryRestriction);
 		
-		if (recursively) {
-			for (Containee containee : containeeList) {
-				if (containee instanceof Container && containee.getVisible()) {
-					Element containeeElement = containee.generateXmlForWebService(namespace, recursively);
-					jdomObject.addContent(containeeElement);
-				} else if (containee instanceof org.biomart.objects.objects.Element) {
-					org.biomart.objects.objects.Element element = (org.biomart.objects.objects.Element)containee;
-					Element elementElement = element.generateXmlForWebService(namespace);
-					jdomObject.addContent(elementElement);
-				}
+		for (Containee containee : containeeList) {
+			if (containee instanceof Container) {
+				Element containeeElement = containee.generateXmlForWebService(namespace);
+				jdomObject.addContent(containeeElement);
+			} else if (containee instanceof org.biomart.objects.objects.Element) {
+				org.biomart.objects.objects.Element martConfiguratorElement = (org.biomart.objects.objects.Element)containee;
+				Element elementElement = martConfiguratorElement.generateXmlForWebService(namespace);
+				jdomObject.addContent(elementElement);
 			}
 		}
 		
 		return jdomObject;
 	}
-	public JSONObject generateJsonForWebService(boolean recursively) {
+	public JSONObject generateJsonForWebService() {
 		JSONObject jsonObject = super.generateJsonForWebService();
 		
 		JSONObject object = (JSONObject)jsonObject.get(super.xmlElementName);
@@ -214,5 +257,4 @@ public class Container extends Containee implements Comparable<Container>, Compa
 		jsonObject.put(super.xmlElementName, object);
 		return jsonObject;
 	}
-
 }

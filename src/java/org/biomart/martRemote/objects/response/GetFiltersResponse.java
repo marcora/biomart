@@ -32,7 +32,7 @@ public class GetFiltersResponse extends MartServiceResponse {
 	protected Document createXmlResponse(Document document) {
 		Element root = document.getRootElement();
 		for (Filter filter : this.filterList) {
-			root.addContent(filter.generateXmlForWebService());
+			//root.addContent(filter.generateXmlForWebService());
 		}
 		return document;
 	}

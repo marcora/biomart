@@ -411,7 +411,8 @@ public abstract class ElementTransformation {
 		// Create table if doesn't exist yet (can't be for a main)
 		if (null==table) {
 			MyUtils.checkStatusProgram(!mainTable, newTableName + ", " + tableConstraint + ", " + keyName + ", " + fieldName);
-			table = new Table(newTableName, false, TableType.TARGET, keyName, new HashSet<String>(Arrays.asList(new String[] {fieldName, keyName})));
+			table = new Table(newTableName, vars.getMainPartitionTable(), false, TableType.TARGET, 
+					keyName, new HashSet<String>(Arrays.asList(new String[] {fieldName, keyName})));
 			table.getRange().addRangePartitionRow(vars.getDefaultPT(), MartConfiguratorConstants.DEFAULT_PARTITION_TABLE_ROW);
 			dataset.addTable(table);
 		} else {

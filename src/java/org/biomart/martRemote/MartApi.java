@@ -45,7 +45,7 @@ public class MartApi {
 	public static void main(String[] args) throws Exception {
 		
 		PrintWriter printWriter = new PrintWriter(System.out);
-		MartApi martServiceApi = new MartApi();
+		MartApi martApi = new MartApi();
 		System.out.println("Registry loaded");
 		
 		MartServiceRequest martServiceRequest = null;
@@ -53,7 +53,8 @@ public class MartApi {
 		
 		String type = 
 			//"getRegistry";
-			"getDatasets";
+			//"getDatasets";
+			"getRootContainer";
 			//"query";
 		String username = "anonymous";
 		String password = "";
@@ -62,7 +63,7 @@ public class MartApi {
 			//"uniprot_mart";
 		Integer martVersion = -1;
 		String datasetName = 
-			"hsapiens_gene_ensembl";
+			MartRemoteConstants.WEB_PORTAL ? "hsapiens_gene_ensembl" : "(P0C1)_gene_ensembl";
 			//"UNIPROT";
 		String query = "query1";
 		String filterPartitionString = "species.\"hsapiens_gene_ensembl,mmusculus_gene_ensembl\"";
@@ -71,44 +72,44 @@ public class MartApi {
 		MartRemoteEnum remoteAccessEnum = MartRemoteEnum.getEnumFromIdentifier(type);
 		boolean valid = true;
 		if (MartRemoteEnum.GET_REGISTRY.equals(remoteAccessEnum)) {
-			martServiceRequest = martServiceApi.prepareGetRegistry(username, password, format);			
+			martServiceRequest = martApi.prepareGetRegistry(username, password, format);			
 		} else if (MartRemoteEnum.GET_DATASETS.equals(remoteAccessEnum)) {
-			martServiceRequest = martServiceApi.prepareGetDatasets(username, password, format, martName, martVersion);			
+			martServiceRequest = martApi.prepareGetDatasets(username, password, format, martName, martVersion);			
 		} else if (MartRemoteEnum.GET_ROOT_CONTAINER.equals(remoteAccessEnum)) {
-			martServiceRequest = martServiceApi.prepareGetRootContainer(username, password, format, datasetName, filterPartitionString);
+			martServiceRequest = martApi.prepareGetRootContainer(username, password, format, datasetName, filterPartitionString);
 		}/*else if (MartRemoteEnum.GET_ATTRIBUTES.equals(remoteAccessEnum)) {
 			//martServiceRequest = martServiceApi.prepareGetAttributes(username, password, format, datasetName, filterPartition);		
 		} else if (MartRemoteEnum.GET_FILTERS.equals(remoteAccessEnum)) {
 			//martServiceRequest = martServiceApi.prepareGetFilters(username, password, format, datasetName, filterPartition);		
 		} */else if (MartRemoteEnum.GET_LINKS.equals(remoteAccessEnum)) {
-			martServiceRequest = martServiceApi.prepareGetLinks(username, password, format, datasetName);			
+			martServiceRequest = martApi.prepareGetLinks(username, password, format, datasetName);			
 		} else if (MartRemoteEnum.QUERY.equals(remoteAccessEnum)) {
-			martServiceRequest = martServiceApi.prepareQuery(username, password, format, MartRemoteUtils.getProperty(query));			
+			martServiceRequest = martApi.prepareQuery(username, password, format, MartRemoteUtils.getProperty(query));			
 		}
 		
 		if (!martServiceRequest.isValid()) {
-			martServiceApi.writeError(martServiceRequest.getErrorMessage(), printWriter);
+			martApi.writeError(martServiceRequest.getErrorMessage(), printWriter);
 			valid = false;
 		} else {
 			if (MartRemoteEnum.GET_REGISTRY.equals(remoteAccessEnum)) {			
-				martServiceResult = martServiceApi.executeGetRegistry(martServiceRequest);
+				martServiceResult = martApi.executeGetRegistry(martServiceRequest);
 			} else if (MartRemoteEnum.GET_DATASETS.equals(remoteAccessEnum)) {
-				martServiceResult = martServiceApi.executeGetDatasets(martServiceRequest);			
+				martServiceResult = martApi.executeGetDatasets(martServiceRequest);			
 			} else if (MartRemoteEnum.GET_ROOT_CONTAINER.equals(remoteAccessEnum)) {
-				martServiceResult = martServiceApi.executeGetRootContainer(martServiceRequest);
+				martServiceResult = martApi.executeGetRootContainer(martServiceRequest);
 			}/*else if (MartRemoteEnum.GET_ATTRIBUTES.equals(remoteAccessEnum)) {
 				//martServiceResult = martServiceApi.executeGetAttributes(martServiceRequest);		
 			} else if (MartRemoteEnum.GET_FILTERS.equals(remoteAccessEnum)) {
 				//martServiceResult = martServiceApi.executeGetFilters(martServiceRequest);		
 			}*/ else if (MartRemoteEnum.GET_LINKS.equals(remoteAccessEnum)) {
-				martServiceResult = martServiceApi.executeGetLinks(martServiceRequest);			
+				martServiceResult = martApi.executeGetLinks(martServiceRequest);			
 			} else if (MartRemoteEnum.QUERY.equals(remoteAccessEnum)) {
-				martServiceResult = martServiceApi.executeQuery(martServiceRequest);			
+				martServiceResult = martApi.executeQuery(martServiceRequest);			
 			}
 		}
 		
 		if (valid) {
-			martServiceApi.processMartServiceResult(martServiceResult, printWriter);
+			martApi.processMartServiceResult(martServiceResult, printWriter);
 		}
 		printWriter.flush();
 	}
@@ -198,9 +199,12 @@ public class MartApi {
 		getDatasetsResponse.populateObjects();
 		return getDatasetsResponse;
 	}
-	public GetRootContainerResponse executeGetRootContainer(MartServiceRequest martServiceRequest) {
+	public GetRootContainerResponse executeGetRootContainer(MartServiceRequest martServiceRequest) throws FunctionalException{
 		GetRootContainerResponse getRootContainerResponse = new GetRootContainerResponse(
 				MartRemoteEnum.GET_ROOT_CONTAINER.getResponseName(), martServiceNamespace, xsiNamespace, xsdFilePath, martRegistry, martServiceRequest);
+getRootContainerResponse.mainRowNumbersWanted = new ArrayList<Integer>(Arrays.asList(new Integer[] {
+		0, 1, 5 // hsap, mmus, cele
+}));
 		getRootContainerResponse.populateObjects();
 		return getRootContainerResponse;
 	}

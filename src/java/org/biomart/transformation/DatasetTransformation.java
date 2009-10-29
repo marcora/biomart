@@ -110,7 +110,7 @@ MyUtils.pressKeyToContinue();*/
 		vars.getCurrentPath().setDatasetAndConfig(dataset, config);
 		vars.setDataset(this.dataset);
 		
-		dataset.addPartitionTable(mainPartitionTable);
+		dataset.addMainPartitionTable(mainPartitionTable);
 		MyUtils.checkStatusProgram(!vars.getNameToPartitionTableMap().keySet().contains(mainPartitionTable.getName()));
 		vars.getNameToPartitionTableMap().put(mainPartitionTable.getName(), mainPartitionTable);
 		vars.setMainPartitionTable(mainPartitionTable);
@@ -296,10 +296,11 @@ MyUtils.pressKeyToContinue();*/
 		// Update name and key to main table map
 		vars.addKeyNameToMainTableShortNameMap(keyName, nctn.getTableShortName());
 		
-		Range range = new Range(false);
+		Range range = new Range(vars.getMainPartitionTable(), false);
 		range.addRangePartitionRow(vars.getMainPartitionTable(), TransformationConstants.WEBSERVICE_DEFAULT_PARTITION_TABLE_ROW);
 		
-		Table table = new Table(newTableName, true, TableType.TARGET, keyName, new HashSet<String>(Arrays.asList(new String[] {keyName})));
+		Table table = new Table(newTableName, vars.getMainPartitionTable(), true, TableType.TARGET, 
+				keyName, new HashSet<String>(Arrays.asList(new String[] {keyName})));
 		table.setRange(range);
 		
 		return table;
