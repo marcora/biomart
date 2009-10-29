@@ -39,7 +39,7 @@ import org.biomart.builder.model.Relation;
 import org.biomart.builder.view.gui.diagrams.Diagram;
 import org.biomart.builder.view.gui.diagrams.contexts.DiagramContext;
 import org.biomart.common.resources.Resources;
-import org.biomart.common.utils.BeanMap;
+import org.biomart.common.utils.McBeanMap;
 import org.biomart.common.utils.Transaction;
 import org.biomart.common.utils.Transaction.TransactionEvent;
 import org.biomart.common.utils.Transaction.TransactionListener;
@@ -384,9 +384,9 @@ public class RelationComponent extends JComponent implements DiagramComponent,
 		return this.state;
 	}
 
-	public BeanMap getSubComponents() {
+	public McBeanMap getSubComponents() {
 		// We have no sub-components.
-		return new BeanMap(Collections.EMPTY_MAP);
+		return new McBeanMap(Collections.EMPTY_MAP);
 	}
 
 	public void recalculateDiagramComponent() {

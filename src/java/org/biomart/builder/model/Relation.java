@@ -32,7 +32,7 @@ import org.biomart.builder.model.Key.PrimaryKey;
 import org.biomart.common.exceptions.AssociationException;
 import org.biomart.common.resources.Log;
 import org.biomart.common.resources.Resources;
-import org.biomart.common.utils.BeanMap;
+import org.biomart.common.utils.McBeanMap;
 import org.biomart.common.utils.Transaction;
 import org.biomart.common.utils.WeakPropertyChangeSupport;
 import org.biomart.common.utils.Transaction.TransactionEvent;
@@ -1729,9 +1729,9 @@ public class Relation implements Comparable<Relation>, TransactionListener {
 			TransactionListener {
 		private static final long serialVersionUID = 1L;
 
-		private BeanMap leftAliases;
+		private McBeanMap leftAliases;
 
-		private BeanMap rightAliases;
+		private McBeanMap rightAliases;
 
 		private String expr;
 
@@ -1773,8 +1773,8 @@ public class Relation implements Comparable<Relation>, TransactionListener {
 						.get("relRestrictMissingAliases"));
 
 			// Remember the settings.
-			this.leftAliases = new BeanMap(new HashMap(leftAliases));
-			this.rightAliases = new BeanMap(new HashMap(rightAliases));
+			this.leftAliases = new McBeanMap(new HashMap(leftAliases));
+			this.rightAliases = new McBeanMap(new HashMap(rightAliases));
 			this.expr = expr;
 
 			Transaction.addTransactionListener(this);
@@ -1857,7 +1857,7 @@ public class Relation implements Comparable<Relation>, TransactionListener {
 		 * @return the aliases map. Keys must be {@link Column} instances, and
 		 *         values are aliases used in the expression.
 		 */
-		public BeanMap getLeftAliases() {
+		public McBeanMap getLeftAliases() {
 			return this.leftAliases;
 		}
 
@@ -1867,7 +1867,7 @@ public class Relation implements Comparable<Relation>, TransactionListener {
 		 * @return the aliases map. Keys must be {@link Column} instances, and
 		 *         values are aliases used in the expression.
 		 */
-		public BeanMap getRightAliases() {
+		public McBeanMap getRightAliases() {
 			return this.rightAliases;
 		}
 

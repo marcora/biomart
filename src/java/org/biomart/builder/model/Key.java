@@ -76,20 +76,6 @@ public abstract class Key implements Comparable<Key>, TransactionListener {
 		}
 	};
 
-	private final PropertyChangeListener dropListener = new PropertyChangeListener() {
-		public void propertyChange(final PropertyChangeEvent evt) {
-			if (!Key.this.getTable().getSchema().getTables().containsValue(
-					Key.this.getTable())) {
-				final List relations = new ArrayList(Key.this.getRelations());
-				for (final Iterator i = relations.iterator(); i.hasNext();) {
-					final Relation rel = (Relation) i.next();
-					rel.getFirstKey().getRelations().remove(rel);
-					rel.getSecondKey().getRelations().remove(rel);
-				}
-			}
-		}
-	};
-
 	private final PropertyChangeListener relationCacheBuilder = new PropertyChangeListener() {
 		public void propertyChange(final PropertyChangeEvent evt) {
 			Key.this.setDirectModified(true);
@@ -126,10 +112,6 @@ public abstract class Key implements Comparable<Key>, TransactionListener {
 
 		// All changes to us make us modified.
 		this.addPropertyChangeListener(this.listener);
-
-		// Check to see if our table goes AWOL.
-		this.getTable().getSchema().getTables().addPropertyChangeListener(
-				this.dropListener);
 
 		// Changes on relations.
 		this.relationCache = new HashSet();

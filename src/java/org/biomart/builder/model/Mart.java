@@ -409,7 +409,7 @@ public class Mart {
 		if(this.schemasObj!=null)
 			return this.schemasObj.getSchemas();
 		else 
-			return null;
+			return new HashMap<String,JDBCSchema>();
 	}
 
 	/**

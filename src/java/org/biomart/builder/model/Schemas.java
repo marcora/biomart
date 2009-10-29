@@ -70,7 +70,6 @@ import org.biomart.common.view.gui.dialogs.StackTrace;
  */
 public class Schemas {
 	
-	private static final long serialVersionUID = 1;
 	private DiagramContext diagramContext;
 	private Mart mart;
 	private final Map<String, JDBCSchema> schemasMap = new HashMap<String, JDBCSchema>();

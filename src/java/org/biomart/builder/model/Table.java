@@ -34,7 +34,7 @@ import org.biomart.builder.model.Key.PrimaryKey;
 import org.biomart.common.resources.Log;
 import org.biomart.common.resources.Resources;
 import org.biomart.common.utils.BeanCollection;
-import org.biomart.common.utils.BeanMap;
+import org.biomart.common.utils.McBeanMap;
 import org.biomart.common.utils.Transaction;
 import org.biomart.common.utils.WeakPropertyChangeSupport;
 import org.biomart.common.utils.Transaction.TransactionEvent;
@@ -66,7 +66,7 @@ public class Table implements Comparable<Table>, TransactionListener {
 
 	private int uniqueId;
 
-	private final BeanMap columns;
+	private final McBeanMap columns;
 
 	private final BeanCollection foreignKeys;
 
@@ -118,7 +118,7 @@ public class Table implements Comparable<Table>, TransactionListener {
 		Log.debug("Creating table " + name + " in " + schema);
 		this.schema = schema;
 		this.uniqueId = this.schema.getNextUniqueId();
-		this.columns = new BeanMap(new HashMap());
+		this.columns = new McBeanMap(new HashMap());
 		this.foreignKeys = new BeanCollection(new HashSet());
 		// Make the name unique.
 		final String baseName = name;
@@ -369,7 +369,7 @@ public class Table implements Comparable<Table>, TransactionListener {
 	 * 
 	 * @return the set of columns for this table.
 	 */
-	public BeanMap getColumns() {
+	public McBeanMap getColumns() {
 		return this.columns;
 	}
 
@@ -654,7 +654,7 @@ public class Table implements Comparable<Table>, TransactionListener {
 			TransactionListener {
 		private static final long serialVersionUID = 1L;
 
-		private BeanMap aliases;
+		private McBeanMap aliases;
 
 		private String expr;
 
@@ -689,7 +689,7 @@ public class Table implements Comparable<Table>, TransactionListener {
 						.get("tblRestrictMissingAliases"));
 
 			// Remember the settings.
-			this.aliases = new BeanMap(new HashMap(aliases));
+			this.aliases = new McBeanMap(new HashMap(aliases));
 			this.expr = expr;
 
 			Transaction.addTransactionListener(this);
@@ -773,7 +773,7 @@ public class Table implements Comparable<Table>, TransactionListener {
 		 * @return the aliases map. Keys must be {@link Column} instances, and
 		 *         values are aliases used in the expression.
 		 */
-		public BeanMap getAliases() {
+		public McBeanMap getAliases() {
 			return this.aliases;
 		}
 

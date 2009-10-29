@@ -24,7 +24,7 @@ import javax.swing.JPopupMenu;
 
 import org.biomart.builder.view.gui.diagrams.Diagram;
 import org.biomart.builder.view.gui.diagrams.contexts.DiagramContext;
-import org.biomart.common.utils.BeanMap;
+import org.biomart.common.utils.McBeanMap;
 import org.biomart.common.utils.Transaction.TransactionListener;
 
 
@@ -98,7 +98,7 @@ public interface DiagramComponent {
 	 * 
 	 * @return the map of inner components.
 	 */
-	public BeanMap getSubComponents();
+	public McBeanMap getSubComponents();
 
 	/**
 	 * This method is called when the component needs to rethink its contents

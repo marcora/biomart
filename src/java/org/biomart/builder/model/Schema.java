@@ -21,6 +21,7 @@ package org.biomart.builder.model;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,7 +36,7 @@ import org.biomart.common.exceptions.TransactionException;
 import org.biomart.common.resources.Log;
 import org.biomart.common.resources.Resources;
 import org.biomart.common.utils.BeanCollection;
-import org.biomart.common.utils.BeanMap;
+import org.biomart.common.utils.McBeanMap;
 import org.biomart.common.utils.Transaction;
 import org.biomart.common.utils.WeakPropertyChangeSupport;
 import org.biomart.common.utils.Transaction.TransactionEvent;
@@ -78,7 +79,7 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 	private boolean masked;
 	private String dataLinkSchema;
 	private String dataLinkDatabase;
-	private BeanMap tables;
+	private McBeanMap tables;
 	private String partitionRegex;
 	private String partitionNameExpression;
 	private final Map<String,String> partitionCache = new TreeMap<String,String>();
@@ -164,7 +165,7 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 		this.setDataLinkDatabase(dataLinkDatabase);
 		this.setMasked(false);
 		// TreeMap keeps the partition cache in alphabetical order by name.
-		this.tables = new BeanMap(new HashMap());
+		this.tables = new McBeanMap(new HashMap());
 		this.needsFullSync = false;
 
 		Transaction.addTransactionListener(this);
@@ -382,7 +383,7 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 	 *         {@link Table#getName()}. The values are the table objects
 	 *         themselves.
 	 */
-	public BeanMap getTables() {
+	public McBeanMap getTables() {
 		return this.tables;
 	}
 
@@ -753,6 +754,16 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 			this.relationCache.clear();
 			this.relationCache.addAll(newRels);
 		}
+		//if a table removed, all relations of the key in this table will be removed
+		for(final Iterator i = t.getKeys().iterator(); i.hasNext(); ) {
+			final Key key = (Key)i.next();
+			final List relations = new ArrayList(key.getRelations());
+			for (final Iterator j = relations.iterator(); j.hasNext();) {
+				final Relation rel = (Relation) j.next();
+				rel.getFirstKey().getRelations().remove(rel);
+				rel.getSecondKey().getRelations().remove(rel);
+			}
 
+		}
 	}
 }

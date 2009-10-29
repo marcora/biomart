@@ -47,7 +47,7 @@ import javax.swing.SwingUtilities;
 
 import org.biomart.builder.view.gui.diagrams.Diagram;
 import org.biomart.builder.view.gui.diagrams.contexts.DiagramContext;
-import org.biomart.common.utils.BeanMap;
+import org.biomart.common.utils.McBeanMap;
 import org.biomart.common.utils.Transaction;
 import org.biomart.common.utils.Transaction.TransactionEvent;
 import org.biomart.common.utils.Transaction.TransactionListener;
@@ -166,7 +166,7 @@ public abstract class BoxShapedComponent extends JPanel implements
 	private RenderingHints renderHints;
 
 	// OK to use map, as the components are recreated, not changed.
-	private final BeanMap subComponents = new BeanMap(new HashMap());
+	private final McBeanMap subComponents = new McBeanMap(new HashMap());
 
 	/**
 	 * Constructs a box-shaped component around the given database object to be
@@ -377,7 +377,7 @@ public abstract class BoxShapedComponent extends JPanel implements
 		return this.state;
 	}
 
-	public BeanMap getSubComponents() {
+	public McBeanMap getSubComponents() {
 		return this.subComponents;
 	}
 
