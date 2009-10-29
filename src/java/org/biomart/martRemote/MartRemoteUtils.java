@@ -24,7 +24,7 @@ public class MartRemoteUtils {
 		String xmlDocumentString = null;
 		try {
 			prettyFormat.output(document, baos);
-			xmlDocumentString = baos.toString("UTF-8");
+			xmlDocumentString = baos.toString("UTF-8");//"iso-8859-1");//
 		} catch (UnsupportedEncodingException e) {
 			throw new TechnicalException(e);
 		} catch (IOException e) {

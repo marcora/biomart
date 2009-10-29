@@ -4,12 +4,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.sf.json.JSONObject;
-
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.jdom.Element;
-import org.jdom.Namespace;
 
 
 public class Dataset extends MartConfiguratorObject implements Serializable {
@@ -140,28 +137,5 @@ public class Dataset extends MartConfiguratorObject implements Serializable {
 		}
 		
 		return element;
-	}
-	
-	public Element generateXmlForWebService() {
-		return generateXmlForWebService(null);
-	}
-	public Element generateXmlForWebService(Namespace namespace) {
-		Element jdomObject = super.generateXmlForWebService(namespace);
-		
-		MartConfiguratorUtils.addAttribute(jdomObject, "materialized", this.materialized);
-		MartConfiguratorUtils.addAttribute(jdomObject, "centralTable", this.centralTable);
-		
-		return jdomObject;
-	}
-
-	public JSONObject generateJsonForWebService() {
-		JSONObject jsonObject = super.generateJsonForWebService();
-		
-		JSONObject object = (JSONObject)jsonObject.get(super.xmlElementName);
-		object.put("materialized", this.materialized);
-		object.put("centralTable", this.centralTable);
-		
-		jsonObject.put(super.xmlElementName, object);
-		return jsonObject;
 	}
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
+import org.biomart.martRemote.objects.request.GetRootContainerRequest;
 import org.biomart.martRemote.objects.request.MartServiceRequest;
 import org.biomart.objects.objects.Config;
 import org.biomart.objects.objects.Container;
@@ -32,10 +33,10 @@ public class GetRootContainerResponse extends MartServiceResponse {
 	}
 
 	public void populateObjects() {
-		/*Dataset dataset = fetchDatasetByName(username, datasetName);
-		List<Container> containerList = fetchContainerList(dataset);*/
-		
-		
+		GetRootContainerRequest getRootContainerRequest = (GetRootContainerRequest)super.martServiceRequest;
+		Dataset dataset = fetchDatasetByName(
+				getRootContainerRequest.getUsername(), getRootContainerRequest.getDatasetName());
+		this.containerList = fetchContainerList(dataset);
 	}
 	private Dataset fetchDatasetByName(String username, String datasetName) {
 		Dataset dataset = null;

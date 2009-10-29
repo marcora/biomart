@@ -30,7 +30,6 @@ import org.biomart.martRemote.objects.response.GetRootContainerResponse;
 import org.biomart.martRemote.objects.response.MartServiceResponse;
 import org.biomart.martRemote.objects.response.QueryResponse;
 import org.biomart.objects.objects.MartRegistry;
-import org.biomart.transformation.helpers.TransformationYongPrototype;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -54,26 +53,27 @@ public class MartApi {
 		
 		String type = 
 			//"getRegistry";
-			"query";
+			"getDatasets";
+			//"query";
 		String username = "anonymous";
 		String password = "";
 		String martName = 
 			"ensembl";
 			//"uniprot_mart";
-		String martVersionString = "-1";
+		Integer martVersion = -1;
 		String datasetName = 
 			"hsapiens_gene_ensembl";
 			//"UNIPROT";
 		String query = "query1";
 		String filterPartitionString = "species.\"hsapiens_gene_ensembl,mmusculus_gene_ensembl\"";
-		MartServiceFormat format = MartServiceFormat.JSON;
+		MartServiceFormat format = MartServiceFormat.XML;
 		
 		MartRemoteEnum remoteAccessEnum = MartRemoteEnum.getEnumFromIdentifier(type);
 		boolean valid = true;
 		if (MartRemoteEnum.GET_REGISTRY.equals(remoteAccessEnum)) {
 			martServiceRequest = martServiceApi.prepareGetRegistry(username, password, format);			
 		} else if (MartRemoteEnum.GET_DATASETS.equals(remoteAccessEnum)) {
-			martServiceRequest = martServiceApi.prepareGetDatasets(username, password, format, martName, martVersionString);			
+			martServiceRequest = martServiceApi.prepareGetDatasets(username, password, format, martName, martVersion);			
 		} else if (MartRemoteEnum.GET_ROOT_CONTAINER.equals(remoteAccessEnum)) {
 			martServiceRequest = martServiceApi.prepareGetRootContainer(username, password, format, datasetName, filterPartitionString);
 		}/*else if (MartRemoteEnum.GET_ATTRIBUTES.equals(remoteAccessEnum)) {
@@ -124,7 +124,8 @@ public class MartApi {
 	private Namespace xsiNamespace = null;
 	
 	public MartApi() throws IOException, JDOMException, TechnicalException {
-		this(false, null, MartRemoteConstants.XSD_FILE_FILE_PATH_AND_NAME, null, MartRemoteConstants.PORTAL_SERIAL_FILE_PATH_AND_NAME);
+		this(false, MartRemoteConstants.XSD_FILE_FILE_PATH_AND_NAME, MartRemoteConstants.XSD_FILE_FILE_PATH_AND_NAME, 
+				MartRemoteConstants.PORTAL_SERIAL_FILE_PATH_AND_NAME, MartRemoteConstants.PORTAL_SERIAL_FILE_PATH_AND_NAME);
 	}
 	public MartApi(boolean webService, String xsdFilePath, String xsdFileUrl, String portalSerialPath, String portalSerialFileUrl) throws TechnicalException {
 		this.debug = !webService;
@@ -136,7 +137,7 @@ public class MartApi {
         try {
 			xsd = builder.build(new URL(xsdFileUrl));
 		} catch (MalformedURLException e) {
-			throw new TechnicalException(e);
+			throw new TechnicalException(e.getMessage() + ": " + xsdFileUrl);
 		} catch (JDOMException e) {
 			throw new TechnicalException(e);
 		} catch (IOException e) {
@@ -150,10 +151,9 @@ public class MartApi {
 		try {
 			portalSerialUrl = new URL(portalSerialFileUrl);
 		} catch (MalformedURLException e) {
-			throw new TechnicalException(e);
+			throw new TechnicalException(e.getMessage() + ": " + portalSerialFileUrl);
 		}
-		martRegistry = (MartRegistry)MyUtils.readSerializedObject(portalSerialUrl);
-		//martRegistry = TransformationYongPrototype.wrappedRebuildCentralPortalRegistry();
+		martRegistry = (MartRegistry)MyUtils.readSerializedObject(portalSerialUrl);//martRegistry = TransformationYongPrototype.wrappedRebuildCentralPortalRegistry();		
 	}
 	
 	// Request preparation
@@ -162,8 +162,7 @@ public class MartApi {
 		return getRegistryRequest;
 	}
 	public GetDatasetsRequest prepareGetDatasets(String username, String password, MartServiceFormat format, 
-			String martName, String martVersionString) {
-		Integer martVersion = Integer.valueOf(martVersionString);
+			String martName, Integer martVersion) {
 		GetDatasetsRequest getDatasetsRequest = new GetDatasetsRequest(username, password, format, martName, martVersion);
 		return getDatasetsRequest;
 	}
@@ -264,8 +263,7 @@ public class MartApi {
 		return getLinksResponse;
 	}
 	
-	public QueryRequest prepareQuery(String username, String password, MartServiceFormat format, String queryString) 
-	throws JDOMException, IOException, TechnicalException, FunctionalException {
+	public QueryRequest prepareQuery(String username, String password, MartServiceFormat format, String queryString) throws TechnicalException, FunctionalException {
 		QueryRequest queryRequest = new QueryRequest(MartRemoteEnum.QUERY.getRequestName(), martServiceNamespace, xsiNamespace, xsdFilePath, 
 				username, password, format, queryString) ;
 		queryRequest.rebuildQueryDocument();	// adding proper namespaces and wrapper
@@ -275,8 +273,7 @@ public class MartApi {
 		
 		return queryRequest;
 	}	
-	public QueryResponse executeQuery(MartServiceRequest martServiceRequest) 
-	throws JDOMException, IOException, TechnicalException, FunctionalException {			
+	public QueryResponse executeQuery(MartServiceRequest martServiceRequest) throws TechnicalException, FunctionalException {			
 		QueryResponse queryResponse = new QueryResponse(
 				MartRemoteEnum.QUERY.getResponseName(), martServiceNamespace, xsiNamespace, xsdFilePath, martRegistry, martServiceRequest);
 		queryResponse.populateObjects();
@@ -295,28 +292,6 @@ public class MartApi {
 		
 		<query processor="CSV" header="true" uniqueRows="false" count="false" datasetConfigVersion="0.8"><dataset name="hsapiens_gene_ensembl"><attribute name="ensembl_gene_id" /><attribute name="ensembl_transcript_id" /><filter name="chromosome_name" value="1" /></dataset></query>
 	 */
-
-	/*public QueryRequest prepareQuery(String username, String password, MartServiceFormat format, String queryString) throws JDOMException, IOException {
-		
-		QueryRequest queryRequest = new QueryRequest(
-				MartRemoteEnum.QUERY.getRequestName(), martServiceNamespace, xsiNamespace, xsdFile, username, password, format, queryString);
-		queryRequest.rebuildQueryDocument();	// adding proper namespaces and wrapper
-					// update errorMessage if not validation fails
-		if (this.debug) System.out.println(MartRemoteUtils.getXmlDocumentString(queryRequest.getQueryDocument()));
-		return queryRequest;
-	}
-	public QueryResponse query(String username, String password, QueryRequest queryRequest) throws FunctionalException, TechnicalException {
-		return query(username, password, null, queryRequest);
-	}
-	public QueryResponse query(String username, String password, String formerVirtualSchema, QueryRequest queryRequest) throws FunctionalException, TechnicalException {
-		Query query = queryRequest.buildQueryObject();
-        List<List<String>> data = fetchData(username, password, query);
-		List<String> headers = fetchHeaders(query);
-		QueryResponse queryResult = new QueryResponse(
-				MartRemoteEnum.QUERY.getResponseName(), martServiceNamespace, xsiNamespace, xsdFile, martRegistry, queryRequest, data, headers);
-		return queryResult;
-	}*/
-	
 	// Response writing
 	public String processMartServiceResult(MartServiceResponse martServiceResponse, Writer writer) throws TechnicalException {
 		if (martServiceResponse.getMartServiceRequest().getFormat().isXml()) {

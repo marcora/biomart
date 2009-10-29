@@ -62,17 +62,11 @@ public class GetRegistryResponse extends MartServiceResponse {
 			// Mart info
 			MartConfiguratorUtils.addAttribute(jdomObject, "name", mart.getName());
 			MartConfiguratorUtils.addAttribute(jdomObject, "displayName", mart.getDisplayName());
-			MartConfiguratorUtils.addAttribute(jdomObject, "description", mart.getDescription());
 			MartConfiguratorUtils.addAttribute(jdomObject, "visible", mart.getVisible());		
 			
 			MartConfiguratorUtils.addAttribute(jdomObject, "version", mart.getVersion());
 			
 			// Location info
-			MartConfiguratorUtils.addAttribute(jdomObject, "locationName", location.getName());
-			MartConfiguratorUtils.addAttribute(jdomObject, "locationDisplayName", location.getDisplayName());
-			MartConfiguratorUtils.addAttribute(jdomObject, "locationDescription", location.getDescription());
-			MartConfiguratorUtils.addAttribute(jdomObject, "locationVisible", location.getVisible());
-			
 			MartConfiguratorUtils.addAttribute(jdomObject, "host", location.getHost());
 			MartConfiguratorUtils.addAttribute(jdomObject, "type", (location.getType()!=null ? location.getType().getXmlValue() : null));
 			MartConfiguratorUtils.addAttribute(jdomObject, "user", location.getUser());
@@ -92,16 +86,11 @@ public class GetRegistryResponse extends MartServiceResponse {
 			// Mart info
 			object.put("name", mart.getName());
 			object.put("displayName", mart.getDisplayName());
-			object.put("description", mart.getDescription());
 			object.put("visible", mart.getVisible());		
 			
 			object.put("version", mart.getVersion());
 			
 			// Location info
-			object.put("locationName", location.getName());
-			object.put("locationDisplayName", location.getDisplayName());
-			object.put("locationDescription", location.getDescription());
-			object.put("locationVisible", location.getVisible());
 			
 			object.put("host", location.getHost());
 			object.put("type", (location.getType()!=null ? location.getType().getXmlValue() : null));

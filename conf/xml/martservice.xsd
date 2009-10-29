@@ -50,14 +50,8 @@
 		<xs:attribute name="name" type="tns:nameType" use="required" />
 		<xs:attribute name="displayName" type="tns:displayNameType" use="required" />
 		<xs:attribute name="visible" type="tns:visibleType" use="required" />
-		<xs:attribute name="description" type="tns:descriptionType" use="required" />
 							
 		<xs:attribute name="version" type="tns:martVersionType" use="required" />
-		
-		<xs:attribute name="locationName" type="tns:nameType" use="required" />
-		<xs:attribute name="locationDisplayName" type="tns:displayNameType" use="required" />
-		<xs:attribute name="locationVisible" type="tns:visibleType" use="required" />
-		<xs:attribute name="locationDescription" type="tns:descriptionType" use="required" />
 		
 		<xs:attribute name="host" type="xs:anyURI" use="required" />
 		<xs:attribute name="type" type="tns:locationTypeType" use="required" />
@@ -74,8 +68,8 @@
 			<xs:attribute name="password" type="xs:string" use="optional" default=""/>
 			<xs:attribute name="format" type="tns:formatType" use="optional" default="xml"/>
 			
-			<xs:attribute name="martName" type="tns:nameType" use="required" />
-			<xs:attribute name="martVersion" type="tns:martVersionType" use="required" />
+			<xs:attribute name="mart" type="tns:nameType" use="required" />
+			<xs:attribute name="version" type="tns:martVersionType" use="required" />
 		</xs:complexType>
 	</xs:element>
 	
@@ -91,9 +85,7 @@
 	
 	<xs:complexType name="datasetType">
 		<xs:attribute name="name" type="tns:nameType" use="required" />
-		<xs:attribute name="displayName" type="tns:displayNameType" use="required" />
 		<xs:attribute name="visible" type="tns:visibleType" use="required" />
-		<xs:attribute name="description" type="tns:descriptionType" use="optional" />
 							
 		<xs:attribute name="materialized" type="xs:boolean" use="required" />
 		<xs:attribute name="centralTable" type="xs:string" use="required" />

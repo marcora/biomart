@@ -114,7 +114,7 @@ public class MartServiceServlet extends HttpServlet {
 			String type = req.getParameter("type");
 			String martName = req.getParameter("martName");
 			String martVersionString = req.getParameter("martVersion");		
-			//Integer martVersion = martVersionString!=null ? Integer.valueOf(martVersionString) : null;
+			Integer martVersion = martVersionString!=null ? Integer.valueOf(martVersionString) : null;
 			String datasetName = req.getParameter("datasetName");
 			String query = req.getParameter("query");
 			String partitionFilter = req.getParameter("partitionFilter");
@@ -129,7 +129,7 @@ public class MartServiceServlet extends HttpServlet {
 				martServiceRequest = this.martServiceApi.prepareGetRegistry(username, password, format);
 				martServiceResult = this.martServiceApi.executeGetRegistry(martServiceRequest);
 			} else if (MartRemoteEnum.GET_DATASETS.equals(remoteAccessEnum)) {
-				martServiceRequest = this.martServiceApi.prepareGetDatasets(username, password, format, martName, martVersionString);
+				martServiceRequest = this.martServiceApi.prepareGetDatasets(username, password, format, martName, martVersion);
 				martServiceResult = this.martServiceApi.executeGetDatasets(martServiceRequest);
 			} else if (MartRemoteEnum.GET_ROOT_CONTAINER.equals(remoteAccessEnum)) {
 				martServiceRequest = this.martServiceApi.prepareGetRootContainer(username, password, format, datasetName, partitionFilter);
@@ -159,9 +159,6 @@ public class MartServiceServlet extends HttpServlet {
 			}
 			this.martServiceApi.processMartServiceResult(martServiceResult, printWriter);
 		} catch (NumberFormatException e) {
-			e.printStackTrace();
-			exception(e);
-		} catch (JDOMException e) {
 			e.printStackTrace();
 			exception(e);
 		} catch (IOException e) {

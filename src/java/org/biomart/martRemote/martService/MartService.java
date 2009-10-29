@@ -1,16 +1,14 @@
 package org.biomart.martRemote.martService;
 
 import java.io.File;
-import java.io.StringWriter;
 
+import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.MyUtils;
 import org.biomart.martRemote.MartApi;
 import org.biomart.martRemote.MartRemoteConstants;
 import org.biomart.martRemote.enums.MartServiceFormat;
 import org.biomart.martRemote.objects.request.MartServiceRequest;
-import org.biomart.martRemote.objects.response.MartServiceResponse;
-import org.jdom.Document;
 
 
 /**
@@ -42,60 +40,55 @@ public class MartService {
 		//MyConstants.FILE_SYSTEM_PROTOCOL + "/var/lib/tomcat5.5/webapps/MartService" + MyUtils.FILE_SEPARATOR + MartRemoteConstants.ADDITIONAL_FILES_FOLDER_NAME + MyUtils.FILE_SEPARATOR + MartRemoteConstants.PORTAL_SERIAL_FILE_NAME;
 		
 	public static MartApi martServiceApi = null;
+		
+	public String getRegistry(String username, String password, String format) {
+		MartServiceHelper.initialize();
+		MartServiceRequest martServiceRequest = MartService.martServiceApi.prepareGetRegistry(
+				username, password, MartServiceFormat.getFormat(format));
+		return martServiceRequest.isValid() ?
+				MartServiceHelper.executeRequest(martServiceRequest) : "invalid request";
+	}
+
+	public String getDatasets(String username, String password, String format, String mart, Integer version) {
+		MartServiceHelper.initialize();
+		MartServiceRequest martServiceRequest = MartService.martServiceApi.prepareGetDatasets(
+				username, password, MartServiceFormat.getFormat(format), mart, version);
+		return martServiceRequest.isValid() ?
+				MartServiceHelper.executeRequest(martServiceRequest) : "invalid request";
+	}
+	
+	public String query(String username, String password, String format, String query) {
+		MartServiceHelper.initialize();
+		MartServiceRequest martServiceRequest = null;
+		try {
+			martServiceRequest = MartService.martServiceApi.prepareQuery(
+					username, password, MartServiceFormat.getFormat(format), query);
+		} catch (TechnicalException e) {
+			e.printStackTrace();
+			return e.getMessage();
+		} catch (FunctionalException e) {
+			e.printStackTrace();
+			return e.getMessage();
+		}
+		return martServiceRequest.isValid() ?
+			MartServiceHelper.executeRequest(martServiceRequest) : "invalid request";
+	}
+	
+	public String getRootContainer(String username, String password, String format, String dataset, String partitionFilter) {
+		MartServiceHelper.initialize();
+		MartServiceRequest martServiceRequest = MartService.martServiceApi.prepareGetRootContainer(
+				username, password, MartServiceFormat.getFormat(format), dataset, partitionFilter);
+		return martServiceRequest.isValid() ?
+				MartServiceHelper.executeRequest(martServiceRequest) : "invalid request";
+	}
+	
+	
+	
+	
+	
+	
 	
 	public String test(String arg1, String arg2) {
 		return "ok: " + arg1 + " " + arg2;
-	}
-	
-	public String getRegistry(String username, String password, String format) {
-		String result = null;
-		
-		if (null==MartService.martServiceApi) {	// should happen only once
-			String initializeError = MartServiceHelper.initialize();
-			if (null!=initializeError) {
-				return "initializeError = " + initializeError;
-			}
-		}
-		
-		MartServiceFormat martServiceFormat = MartServiceFormat.getFormat(format);
-		MartServiceRequest martServiceRequest = MartService.martServiceApi.prepareGetRegistry(username, password, martServiceFormat);
-		MartServiceResponse martServiceResponse = MartService.martServiceApi.executeGetRegistry(martServiceRequest);
-		try {
-			StringWriter sw = new StringWriter();
-			MartService.martServiceApi.processMartServiceResult(martServiceResponse, sw);
-			result = sw.toString();
-		} catch (TechnicalException e) {
-			result = e.getMessage();
-			e.printStackTrace();
-		}
-		
-		return result;
-	}
-	
-	public Document getRegistry2(String username, String password, String format) {
-		String result = null;
-		
-		if (null==MartService.martServiceApi) {	// should happen only once
-			String initializeError = MartServiceHelper.initialize();
-			if (null!=initializeError) {
-				return null;
-			}
-		}
-		
-		MartServiceFormat martServiceFormat = MartServiceFormat.getFormat(format);
-		MartServiceRequest martServiceRequest = MartService.martServiceApi.prepareGetRegistry(username, password, martServiceFormat);
-		MartServiceResponse martServiceResponse = MartService.martServiceApi.executeGetRegistry(martServiceRequest);
-		Document d = null;
-		try {
-			StringWriter sw = new StringWriter();
-			MartService.martServiceApi.processMartServiceResult(martServiceResponse, sw);
-			result = sw.toString();
-			d = martServiceResponse.getXmlDocument();
-		} catch (TechnicalException e) {
-			result = e.getMessage();
-			e.printStackTrace();
-		}
-		
-		return d;
 	}
 }

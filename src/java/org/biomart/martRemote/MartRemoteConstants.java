@@ -9,8 +9,8 @@ import org.biomart.common.general.utils.MyUtils;
 public class MartRemoteConstants {
 	
 	public static final String XSD_FILE_NAME = "martservice.xsd";
-	public static final String XML_FILES_FOLDER_NAME = "xml";
-	public static final String ADDITIONAL_FILES_FOLDER_NAME = "files";
+	public static final String XML_FILES_FOLDER_NAME = "conf/xml";
+	public static final String ADDITIONAL_FILES_FOLDER_NAME = "conf/files";
 	public static final String PORTAL_SERIAL_FILE_NAME = "portal.serial";
 	public static final String QUERY_TEST_PROPERTIES_FILE_NAME = "queries.properties";
 	
