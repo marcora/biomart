@@ -352,9 +352,9 @@ public class JDomNodeAdapter extends DefaultMutableTreeNode {
 				String guiType = McGuiUtils.INSTANCE.getGuiType().toString();
 
 
-				for (final Iterator<DataSetTable> i = ds.getTables().values().iterator(); i.hasNext();) {
+				for (final Iterator<Table> i = ds.getTables().values().iterator(); i.hasNext();) {
 
-					final DataSetTable dsTable = i.next();
+					final DataSetTable dsTable = (DataSetTable)i.next();
 					Log.debug("Writing modifications for " + dsTable);
 					final Element dstElement = new Element(Resources.get("DSTABLE"));
 
@@ -500,9 +500,9 @@ public class JDomNodeAdapter extends DefaultMutableTreeNode {
 
     	List<DataSetTable> dmList = new ArrayList<DataSetTable>();
 
-    	for(Iterator<DataSetTable> it = ds.getTables().values().iterator(); it.hasNext(); ) {
+    	for(Iterator<Table> it = ds.getTables().values().iterator(); it.hasNext(); ) {
 
-    		DataSetTable dsTable = it.next();
+    		DataSetTable dsTable = (DataSetTable)it.next();
 
     		if(dsTable.getType().equals(DataSetTableType.MAIN))
 

@@ -79,7 +79,7 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 	private boolean masked;
 	private String dataLinkSchema;
 	private String dataLinkDatabase;
-	private McBeanMap tables;
+	private McBeanMap<String,Table> tables;
 	private String partitionRegex;
 	private String partitionNameExpression;
 	private final Map<String,String> partitionCache = new TreeMap<String,String>();
@@ -173,7 +173,7 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 		// Listen to own tables and update key+relation caches.
 		this.tableCache = new HashSet<Table>();
 		this.relationCache = new McBeanCollection(new HashSet());
-		// All changes to us make us modified.
+		this.tables.addPropertyChangeListener(this.relationCacheBuilder);
 	}
 
 	/**
@@ -383,7 +383,7 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 	 *         {@link Table#getName()}. The values are the table objects
 	 *         themselves.
 	 */
-	public McBeanMap getTables() {
+	public McBeanMap<String,Table> getTables() {
 		return this.tables;
 	}
 
@@ -723,47 +723,6 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 	 */
 	public void init(List<String> tablesInDb) throws DataModelException, SQLException {
 		
-	}
-
-	public void addTable(Table newTable) {
-		this.tableCache.add(newTable);
-		this.tables.put(newTable.getName(), newTable);
-		newTable.getRelations().addPropertyChangeListener(
-				this.relationCacheBuilder);
-		final Collection newRels = new HashSet();
-		for (final Iterator<Table> i = this.tableCache.iterator(); i.hasNext();) {
-			final Table table = i.next();
-			newRels.addAll(table.getRelations());
-		}
-		if (!newRels.equals(this.relationCache)) {
-			this.relationCache.clear();
-			this.relationCache.addAll(newRels);
-		}
-	}
+}
 	
-	public void removeTable(Table t) {
-		this.tableDropped(t);
-		this.tableCache.remove(t);
-		this.tables.remove(t.getName());
-		final Collection newRels = new HashSet();
-		for (final Iterator<Table> i = this.tableCache.iterator(); i.hasNext();) {
-			final Table table = i.next();
-			newRels.addAll(table.getRelations());
-		}
-		if (!newRels.equals(this.relationCache)) {
-			this.relationCache.clear();
-			this.relationCache.addAll(newRels);
-		}
-		//if a table removed, all relations of the key in this table will be removed
-		for(final Iterator i = t.getKeys().iterator(); i.hasNext(); ) {
-			final Key key = (Key)i.next();
-			final List relations = new ArrayList(key.getRelations());
-			for (final Iterator j = relations.iterator(); j.hasNext();) {
-				final Relation rel = (Relation) j.next();
-				rel.getFirstKey().getRelations().remove(rel);
-				rel.getSecondKey().getRelations().remove(rel);
-			}
-
-		}
-	}
 }

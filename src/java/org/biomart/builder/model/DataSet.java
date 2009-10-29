@@ -399,7 +399,7 @@ public class DataSet extends Schema {
 		if (dsTable == null) {
 			dsTable = new DataSetTable(fullName, this, type, realTable,
 					sourceRelation, relationIteration);
-			this.addTable(dsTable);
+			this.getTables().put(dsTable.getName(), dsTable);
 			// Listen to this table to modify ourselves.
 			// As it happens, nothing can happen to a dstable yet that
 			// requires this.
@@ -1710,8 +1710,7 @@ public class DataSet extends Schema {
 			}
 			deadTbl.setPrimaryKey(null);
 			deadTbl.getForeignKeys().clear();
-			//this.getTables().remove(deadTbl.getName());
-			this.removeTable(deadTbl);
+			this.getTables().remove(deadTbl.getName());
 			this.mods.remove(deadTbl.getName());
 		}
 

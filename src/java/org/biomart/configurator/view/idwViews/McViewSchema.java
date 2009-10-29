@@ -591,8 +591,7 @@ public class McViewSchema extends McView implements TreeSelectionListener {
 				Table table = new Table(schema, te.getAttributeValue(Resources
 						.get("NAME")));
 				tableMap.put(table.getName(), table);
-				//schema.getTables().put(table.getName(), table);
-				schema.addTable(table);
+				schema.getTables().put(table.getName(), table);
 				// construct column
 				List<Element> ceList = JDomUtils.searchElementList(te,
 						Resources.get("COLUMN"), null);
@@ -759,8 +758,7 @@ public class McViewSchema extends McView implements TreeSelectionListener {
 		for (Element te : teList) {
 			Table table = new Table(schema, te.getAttributeValue(Resources.get("NAME")));
 			tableMap.put(table.getName(), table);
-			//schema.getTables().put(table.getName(), table);
-			schema.addTable(table);
+			schema.getTables().put(table.getName(), table);
 			// construct column
 			List<Element> ceList = te.getChildren(Resources.get("COLUMN"));
 			for (Element cd : ceList) {
