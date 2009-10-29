@@ -5,7 +5,7 @@ package org.biomart.configurator.utils.type;
 	/**
 	 * This class defines the various different types of DataSetTable there are.
 	 */
-	public  class DataSetTableType implements Comparable {		
+	public  class DataSetTableType implements Comparable<DataSetTableType> {		
 		private static final long serialVersionUID = 1L;
 
 		/**
@@ -38,9 +38,8 @@ package org.biomart.configurator.utils.type;
 			this.name = name;
 		}
 
-		public int compareTo(final Object o) throws ClassCastException {
-			final DataSetTableType c = (DataSetTableType) o;
-			return this.toString().compareTo(c.toString());
+		public int compareTo(final DataSetTableType o) throws ClassCastException {
+			return this.toString().compareTo(o.toString());
 		}
 
 		public boolean equals(final Object o) {

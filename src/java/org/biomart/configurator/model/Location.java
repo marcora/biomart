@@ -13,7 +13,6 @@ import org.biomart.builder.model.Schema;
 import org.biomart.builder.model.Table;
 import org.biomart.common.resources.Settings;
 import org.biomart.configurator.utils.DbInfoObject;
-import org.biomart.configurator.utils.McUtils;
 
 /**
  * needs to handle new location or a location from XML
@@ -129,7 +128,7 @@ public class Location {
 			List<String> stStrings = selectedTables.get(mart.getMartName());
 			if(stStrings == null || stStrings.size()==0) 
 				continue;
-			this.requestLoadMart(mart, false,this.dbtablesMap.get(mart.getMartName()));
+			this.requestLoadSchemaInMart(mart, false,this.dbtablesMap.get(mart.getMartName()));
 		}
 		
 		
@@ -168,7 +167,7 @@ public class Location {
 			if(stStrings == null || stStrings.size()==0)
 				continue;
 			mart.setMainTableList(selectedTables.get(mart.getMartName()));
-			this.requestLoadMart(mart, true,this.dbtablesMap.get(mart.getMartName()));
+			this.requestLoadSchemaInMart(mart, true,this.dbtablesMap.get(mart.getMartName()));
 		}
 		
 		
@@ -209,7 +208,10 @@ public class Location {
 		return this.isSourceSchema;
 	}
 
-	public boolean requestLoadMart(Mart mart, boolean isTarget, List<String> tablesInDb) {
+	/*
+	 * this function should go in Mart 
+	 */
+	public boolean requestLoadSchemaInMart(Mart mart, boolean isTarget, List<String> tablesInDb) {
 		for(Iterator<JDBCSchema> i=mart.getSchemasObj().getSchemas().values().iterator(); i.hasNext();) {
 			JDBCSchema schema = i.next();
 			schema.setIsMart(isTarget);

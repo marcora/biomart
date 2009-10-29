@@ -15,7 +15,6 @@ import org.biomart.builder.model.Key.ForeignKey;
 import org.biomart.builder.model.Relation.CompoundRelationDefinition;
 import org.biomart.builder.model.TransformationUnit.JoinTable;
 import org.biomart.builder.model.TransformationUnit.SelectFromTable;
-import org.biomart.common.exceptions.DataModelException;
 import org.biomart.common.resources.Log;
 import org.biomart.common.resources.Resources;
 import org.biomart.configurator.utils.type.DataSetTableType;
@@ -31,7 +30,7 @@ import org.biomart.configurator.utils.type.DataSetTableType;
 	public class DataSetTable extends Table {
 		private static final long serialVersionUID = 1L;
 
-		private final List transformationUnits;
+		private final List<TransformationUnit> transformationUnits;
 
 		private DataSetTableType type;
 
@@ -78,7 +77,7 @@ import org.biomart.configurator.utils.type.DataSetTableType;
 			this.focusTable = focusTable;
 			this.focusRelation = focusRelation;
 			this.focusRelationIteration = focusRelationIteration;
-			this.transformationUnits = new ArrayList();
+			this.transformationUnits = new ArrayList<TransformationUnit>();
 			this.includedRelations = new LinkedHashSet();
 			this.includedTables = new LinkedHashSet();
 			this.includedSchemas = new LinkedHashSet();
@@ -359,9 +358,9 @@ import org.biomart.configurator.utils.type.DataSetTableType;
 				name = this.getName();
 			// UC/LC/Mixed?
 			switch (((DataSet) this.getSchema()).getMart().getCase()) {
-			case Mart.USE_LOWER_CASE:
+			case LOWER:
 				return name.toLowerCase();
-			case Mart.USE_UPPER_CASE:
+			case UPPER:
 				return name.toUpperCase();
 			default:
 				return name;
@@ -412,7 +411,7 @@ import org.biomart.configurator.utils.type.DataSetTableType;
 		 * 
 		 * @return the list of units.
 		 */
-		public List getTransformationUnits() {
+		public List<TransformationUnit> getTransformationUnits() {
 			return this.transformationUnits;
 		}
 

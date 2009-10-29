@@ -737,7 +737,8 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 				if (dbTable == null)
 					try {
 						dbTable = new Table(this, dbTableName);
-						this.getTables().put(dbTableName, dbTable);
+						//this.getTables().put(dbTableName, dbTable);
+						this.addTable(dbTable);
 					} catch (final Throwable t) {
 						throw new BioMartError(t);
 					}
@@ -864,7 +865,8 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 				}
 				existingTable.setPrimaryKey(null);
 				existingTable.getForeignKeys().clear();
-				this.getTables().remove(tableName);
+			//	this.getTables().remove(tableName);
+				this.removeTable(existingTable);
 			}
 			// Get and create primary keys.
 			// Work out a list of all foreign keys currently existing.
@@ -1842,7 +1844,8 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 
 				try {
 						dbTable = new Table(this, tableStr);
-						this.getTables().put(tableStr, dbTable);
+						//this.getTables().put(tableStr, dbTable);
+						this.addTable(dbTable);
 					} catch (final Throwable t) {
 						throw new BioMartError(t);
 					}

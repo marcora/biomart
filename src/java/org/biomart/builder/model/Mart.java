@@ -20,8 +20,6 @@ package org.biomart.builder.model;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
@@ -31,25 +29,22 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
-
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
-
 import org.biomart.builder.exceptions.ConstructorException;
 import org.biomart.builder.exceptions.ValidationException;
 import org.biomart.common.exceptions.DataModelException;
 import org.biomart.common.resources.Log;
 import org.biomart.common.resources.Resources;
-import org.biomart.common.utils.BeanMap;
 import org.biomart.common.view.gui.SwingWorker;
 import org.biomart.common.view.gui.dialogs.ProgressDialog;
 import org.biomart.common.view.gui.dialogs.StackTrace;
 import org.biomart.configurator.controller.MartConstructor.ConstructorRunnable;
 import org.biomart.configurator.model.Location;
 import org.biomart.configurator.utils.type.MartType;
+import org.biomart.configurator.utils.type.CaseType;
 
 /**
  * The mart contains the set of all schemas that are providing data to this
@@ -75,19 +70,7 @@ public class Mart {
 	private boolean hideMaskedSchemas = false;
 	//hack for marteditor, should be in the dataset
 	private List<String> mainTableList;
-	/**
-	 * Constant referring to table and column name conversion.
-	 */
-	public static final int USE_MIXED_CASE = 0;
-	/**
-	 * Constant referring to table and column name conversion.
-	 */
-	public static final int USE_UPPER_CASE = 1;
-	/**
-	 * Constant referring to table and column name conversion.
-	 */
-	public static final int USE_LOWER_CASE = 2;
-	private int nameCase = Mart.USE_MIXED_CASE;
+	private CaseType nameCase = CaseType.MIXED;
 	// For use in hash code and equals to prevent dups in prop change.
 	private static int ID_SERIES = 0;
 	private final int uniqueID = Mart.ID_SERIES++;
@@ -220,7 +203,7 @@ public class Mart {
 	 * @return one of {@link #USE_LOWER_CASE}, {@link #USE_UPPER_CASE}, or
 	 *         {@link #USE_MIXED_CASE}.
 	 */
-	public int getCase() {
+	public CaseType getCase() {
 		return this.nameCase;
 	}
 
@@ -231,9 +214,9 @@ public class Mart {
 	 *            one of {@link #USE_LOWER_CASE}, {@link #USE_UPPER_CASE}, or
 	 *            {@link #USE_MIXED_CASE}.
 	 */
-	public void setCase(final int nameCase) {
+	public void setCase(final CaseType nameCase) {
 		Log.debug("Changing case for " + this + " to " + nameCase);
-		final int oldValue = this.nameCase;
+		final CaseType oldValue = this.nameCase;
 		if (this.nameCase == nameCase)
 			return;
 		// Make the change.
@@ -457,7 +440,7 @@ public class Mart {
 	 * @throws DataModelException
 	 *             if synchronisation fails.
 	 */
-	public Collection suggestDataSets(final Collection includeTables)
+	public Collection<DataSet> suggestDataSets(final Collection<Table> includeTables)
 			throws SQLException, DataModelException {
 		Log.debug("Suggesting datasets for " + includeTables);
 		// The root tables are all those which do not have a M:1 relation
@@ -466,9 +449,9 @@ public class Mart {
 		// 1:M:1 relation, so that any further tables past it will still
 		// be included.
 		Log.debug("Finding root tables");
-		final Collection rootTables = new HashSet(includeTables);
-		for (final Iterator i = includeTables.iterator(); i.hasNext();) {
-			final Table candidate = (Table) i.next();
+		final Collection<Table> rootTables = new HashSet<Table>(includeTables);
+		for (final Iterator<Table> i = includeTables.iterator(); i.hasNext();) {
+			final Table candidate = i.next();
 			for (final Iterator j = candidate.getRelations().iterator(); j
 					.hasNext();) {
 				final Relation rel = (Relation) j.next();
@@ -483,9 +466,9 @@ public class Mart {
 			}
 		}
 		// We construct one dataset per root table.
-		final Set suggestedDataSets = new TreeSet();
-		for (final Iterator i = rootTables.iterator(); i.hasNext();) {
-			final Table rootTable = (Table) i.next();
+		final Set<DataSet> suggestedDataSets = new TreeSet<DataSet>();
+		for (final Iterator<Table> i = rootTables.iterator(); i.hasNext();) {
+			final Table rootTable = i.next();
 			Log.debug("Constructing dataset for root table " + rootTable);
 			final DataSet dataset;
 			try {
@@ -497,7 +480,7 @@ public class Mart {
 			//this.datasets.put(dataset.getOriginalName(), dataset);
 			this.addDataSet(dataset);
 			// Process it.
-			final Collection tablesIncluded = new HashSet();
+			final Collection<Table> tablesIncluded = new HashSet<Table>();
 			tablesIncluded.add(rootTable);
 			Log.debug("Attempting to find subclass datasets");
 			suggestedDataSets.addAll(this.continueSubclassing(includeTables,
@@ -506,17 +489,17 @@ public class Mart {
 
 		// Synchronise them all.
 		Log.debug("Synchronising constructed datasets");
-		for (final Iterator i = suggestedDataSets.iterator(); i.hasNext();)
-			((DataSet) i.next()).synchronise();
+		for (DataSet ds: suggestedDataSets)
+			ds.synchronise();
 
 		// Do any of the resulting datasets contain all the tables
 		// exactly with subclass relations between each?
 		// If so, just use that one dataset and forget the rest.
 		Log.debug("Finding perfect candidate");
 		DataSet perfectDS = null;
-		for (final Iterator i = suggestedDataSets.iterator(); i.hasNext()
+		for (final Iterator<DataSet> i = suggestedDataSets.iterator(); i.hasNext()
 				&& perfectDS == null;) {
-			final DataSet candidate = (DataSet) i.next();
+			final DataSet candidate = i.next();
 
 			// A candidate is a perfect match if the set of tables
 			// covered by the subclass relations is the same as the
@@ -537,8 +520,8 @@ public class Mart {
 		if (perfectDS != null) {
 			Log.debug("Perfect candidate found - dropping others");
 			// Drop the others.
-			for (final Iterator i = suggestedDataSets.iterator(); i.hasNext();) {
-				final DataSet candidate = (DataSet) i.next();
+			for (final Iterator<DataSet> i = suggestedDataSets.iterator(); i.hasNext();) {
+				final DataSet candidate = i.next();
 				if (!candidate.equals(perfectDS)) {
 					this.removeDataSet(candidate);
 					i.remove();
@@ -577,15 +560,15 @@ public class Mart {
 	 *         were none, then a singleton collection containing the dataset
 	 *         originally passed in.
 	 */
-	private Collection continueSubclassing(final Collection includeTables,
-			final Collection tablesIncluded, final DataSet dataset,
+	private Collection<DataSet> continueSubclassing(final Collection<Table> includeTables,
+			final Collection<Table> tablesIncluded, final DataSet dataset,
 			final Table table) {
 		// Check table has a primary key.
 		final Key pk = table.getPrimaryKey();
 
 		// Make a unique set to hold all the resulting datasets. It
 		// is initially empty.
-		final Collection suggestedDataSets = new HashSet();
+		final Collection<DataSet> suggestedDataSets = new HashSet<DataSet>();
 		// Make a set to contain relations to subclass.
 		final Collection subclassedRelations = new HashSet();
 		// Make a map to hold tables included for each relation.

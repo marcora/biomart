@@ -1434,9 +1434,9 @@ public interface MartConstructor {
 			final String name = finalName.toString().replaceAll("\\W+", "");
 			// UC/LC/Mixed?
 			switch (((DataSet) dsTable.getSchema()).getMart().getCase()) {
-			case Mart.USE_LOWER_CASE:
+			case LOWER:
 				return name.toLowerCase();
-			case Mart.USE_UPPER_CASE:
+			case UPPER:
 				return name.toUpperCase();
 			default:
 				return name;
@@ -1489,10 +1489,10 @@ public interface MartConstructor {
 			name = name.replaceAll("\\W+", "");
 			// UC/LC/Mixed?
 			switch (dsTable.getDataSet().getMart().getCase()) {
-			case Mart.USE_LOWER_CASE:
+			case LOWER:
 				name = name.toLowerCase();
 				break;
-			case Mart.USE_UPPER_CASE:
+			case UPPER:
 				name = name.toUpperCase();
 				break;
 			}
@@ -1534,10 +1534,10 @@ public interface MartConstructor {
 			String name = finalName.toString().replaceAll("\\W+", "");
 			// UC/LC/Mixed?
 			switch (dsTable.getDataSet().getMart().getCase()) {
-			case Mart.USE_LOWER_CASE:
+			case LOWER:
 				name = name.toLowerCase();
 				break;
-			case Mart.USE_UPPER_CASE:
+			case UPPER:
 				name = name.toUpperCase();
 				break;
 			default:

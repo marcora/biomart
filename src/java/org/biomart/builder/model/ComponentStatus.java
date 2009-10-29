@@ -30,7 +30,7 @@ import java.util.Map;
  *          $Author: rh4 $
  * @since 0.5
  */
-public class ComponentStatus implements Comparable {
+public class ComponentStatus implements Comparable<ComponentStatus> {
 	private static final long serialVersionUID = 1L;
 
 	private static final Map<String, ComponentStatus> singletons = new HashMap<String, ComponentStatus>();
@@ -91,9 +91,8 @@ public class ComponentStatus implements Comparable {
 		this.name = name;
 	}
 
-	public int compareTo(final Object o) throws ClassCastException {
-		final ComponentStatus c = (ComponentStatus) o;
-		return this.toString().compareTo(c.toString());
+	public int compareTo(final ComponentStatus o) throws ClassCastException {
+		return this.toString().compareTo(o.toString());
 	}
 
 	public boolean equals(final Object o) {

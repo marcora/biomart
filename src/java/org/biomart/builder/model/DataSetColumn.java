@@ -209,9 +209,9 @@ import org.biomart.configurator.view.idwViews.McViews;
 				name = this.getName();
 			// UC/LC/Mixed?
 			switch (this.getDataSet().getMart().getCase()) {
-			case Mart.USE_LOWER_CASE:
+			case LOWER:
 				return name.toLowerCase();
-			case Mart.USE_UPPER_CASE:
+			case UPPER:
 				return name.toUpperCase();
 			default:
 				return name;

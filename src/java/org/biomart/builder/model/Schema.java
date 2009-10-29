@@ -172,8 +172,6 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 		// Listen to own tables and update key+relation caches.
 		this.tableCache = new HashSet<Table>();
 		this.relationCache = new BeanCollection(new HashSet());
-		this.getTables().addPropertyChangeListener(this.relationCacheBuilder);
-
 		// All changes to us make us modified.
 	}
 
@@ -724,5 +722,37 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 	 */
 	public void init(List<String> tablesInDb) throws DataModelException, SQLException {
 		
+	}
+
+	public void addTable(Table newTable) {
+		this.tableCache.add(newTable);
+		this.tables.put(newTable.getName(), newTable);
+		newTable.getRelations().addPropertyChangeListener(
+				this.relationCacheBuilder);
+		final Collection newRels = new HashSet();
+		for (final Iterator<Table> i = this.tableCache.iterator(); i.hasNext();) {
+			final Table table = i.next();
+			newRels.addAll(table.getRelations());
+		}
+		if (!newRels.equals(this.relationCache)) {
+			this.relationCache.clear();
+			this.relationCache.addAll(newRels);
+		}
+	}
+	
+	public void removeTable(Table t) {
+		this.tableDropped(t);
+		this.tableCache.remove(t);
+		this.tables.remove(t.getName());
+		final Collection newRels = new HashSet();
+		for (final Iterator<Table> i = this.tableCache.iterator(); i.hasNext();) {
+			final Table table = i.next();
+			newRels.addAll(table.getRelations());
+		}
+		if (!newRels.equals(this.relationCache)) {
+			this.relationCache.clear();
+			this.relationCache.addAll(newRels);
+		}
+
 	}
 }
