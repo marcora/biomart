@@ -43,17 +43,13 @@ import org.biomart.builder.model.DataSetColumn;
 import org.biomart.builder.model.DataSetTable;
 import org.biomart.builder.model.InheritedColumn;
 import org.biomart.builder.model.Key;
-import org.biomart.builder.model.Mart;
 import org.biomart.builder.model.MartConstructorAction;
-
 import org.biomart.builder.model.Relation;
 import org.biomart.builder.model.Schema;
 import org.biomart.builder.model.SplitOptimiserColumnDef;
 import org.biomart.builder.model.Table;
 import org.biomart.builder.model.TransformationUnit;
-import org.biomart.builder.model.WrappedColumn;
 import org.biomart.builder.model.DataLink.JDBCDataLink;
-import org.biomart.builder.model.MartConstructorAction.AddExpression;
 import org.biomart.builder.model.MartConstructorAction.CopyOptimiser;
 import org.biomart.builder.model.MartConstructorAction.CreateOptimiser;
 import org.biomart.builder.model.MartConstructorAction.Distinct;
@@ -67,10 +63,8 @@ import org.biomart.builder.model.MartConstructorAction.LeftJoin;
 import org.biomart.builder.model.MartConstructorAction.Rename;
 import org.biomart.builder.model.MartConstructorAction.Select;
 import org.biomart.builder.model.MartConstructorAction.UpdateOptimiser;
-
 import org.biomart.builder.model.Relation.RestrictedRelationDefinition;
 import org.biomart.builder.model.Relation.UnrolledRelationDefinition;
-import org.biomart.builder.model.Table.RestrictedTableDefinition;
 import org.biomart.builder.model.TransformationUnit.JoinTable;
 import org.biomart.builder.model.TransformationUnit.SelectFromTable;
 import org.biomart.builder.model.TransformationUnit.SkipTable;
@@ -78,7 +72,6 @@ import org.biomart.builder.model.TransformationUnit.UnrollTable;
 import org.biomart.common.exceptions.BioMartError;
 import org.biomart.common.resources.Log;
 import org.biomart.common.resources.Resources;
-import org.biomart.common.utils.InverseMap;
 import org.biomart.configurator.controller.dialects.DatabaseDialect;
 import org.biomart.configurator.utils.type.DataSetOptimiserType;
 import org.biomart.configurator.utils.type.DataSetTableType;
@@ -534,8 +527,7 @@ public interface MartConstructor {
 			for (final Iterator x = dsTable.getColumns().values().iterator(); x
 					.hasNext();) {
 				final DataSetColumn col = (DataSetColumn) x.next();
-				if (col.existsForPartition(schemaPrefix)
-						&& !droppedCols.contains(col.getPartitionedName()))
+				if (!droppedCols.contains(col.getPartitionedName()))
 					if (col.isRequiredInterim() && !col.isRequiredFinal())
 						dropCols.add(col.getPartitionedName());
 					else if (col.isRequiredFinal())
@@ -647,8 +639,7 @@ public interface MartConstructor {
 			for (final Iterator x = dsTable.getColumns().values().iterator(); x
 					.hasNext();) {
 				final DataSetColumn col = (DataSetColumn) x.next();
-				if (col.existsForPartition(schemaPrefix)
-						&& col.isRequiredInterim())
+				if (col.isRequiredInterim())
 					rightSelectCols.add(col.getPartitionedName());
 			}
 			rightSelectCols.removeAll(rightJoinCols);
@@ -771,8 +762,7 @@ public interface MartConstructor {
 					// We won't select masked cols as they won't be in
 					// the final table, and we won't select expression
 					// columns as they can genuinely be null.
-					if (col.existsForPartition(schemaPrefix)
-							&& col.isRequiredFinal() && !col.isColumnMasked()
+					if (col.isRequiredFinal() && !col.isColumnMasked()
 							)
 						nonNullCols.add(col.getPartitionedName());
 				}
@@ -808,19 +798,6 @@ public interface MartConstructor {
 						while (restrictCol instanceof InheritedColumn)
 							restrictCol = ((InheritedColumn) restrictCol)
 									.getInheritedColumn();
-						// Can only restrict on wrapped columns.
-						if (restrictCol instanceof WrappedColumn) {
-							// Populate restrict values.
-							final Column dataCol = ((WrappedColumn) restrictCol)
-									.getWrappedColumn();
-							try {
-								restrictValues.addAll(dataCol.getTable()
-										.getSchema().getUniqueValues(
-												schemaPrefix, dataCol));
-							} catch (final SQLException e) {
-								throw new PartitionException(e);
-							}
-						}
 					} else
 						restrictValues.add(null);
 					for (final Iterator j = restrictValues.iterator(); j
@@ -966,8 +943,7 @@ public interface MartConstructor {
 					.iterator(); k.hasNext();) {
 				final Map.Entry entry = (Map.Entry) k.next();
 				final DataSetColumn col = (DataSetColumn) entry.getValue();
-				if (col.existsForPartition(schemaPrefix)
-						&& col.isRequiredInterim())
+				if (col.isRequiredInterim())
 					selectCols
 							.put(
 									sourceTable instanceof DataSetTable ? ((DataSetColumn) entry
@@ -1090,8 +1066,7 @@ public interface MartConstructor {
 				final Map.Entry entry = (Map.Entry) k.next();
 				final DataSetColumn col = (DataSetColumn) entry.getValue();
 
-				if (col.existsForPartition(schemaPrefix)
-						&& col.isRequiredInterim()) {
+				if (col.isRequiredInterim()) {
 					if (entry.getKey() instanceof DataSetColumn)
 						selectCols.put(((DataSetColumn) entry.getKey())
 								.getModifiedName(), col.getPartitionedName());
@@ -1319,8 +1294,7 @@ public interface MartConstructor {
 				for (final Iterator i = tu.getNewColumnNameMap().values()
 						.iterator(); i.hasNext();) {
 					final DataSetColumn dsCol = (DataSetColumn) i.next();
-					if (dsCol.existsForPartition(schemaPrefix)
-							&& dsCol.isRequiredInterim())
+					if (dsCol.isRequiredInterim())
 						parentCols.add(dsCol.getPartitionedName());
 				}
 			parentCols.removeAll(droppedCols);

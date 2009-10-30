@@ -31,6 +31,7 @@ import javax.swing.filechooser.FileFilter;
 
 import org.biomart.common.resources.Resources;
 import org.biomart.common.resources.Settings;
+import org.biomart.configurator.utils.McUtils;
 
 /**
  * Ask the user to save the orphan key relations before proceed
@@ -149,8 +150,8 @@ public class SaveOrphanKeyDialog extends JDialog {
 		});
 
 		// Make the save button as an image.
-		final JButton saverButton = new JButton(new ImageIcon(Resources
-				.getResourceAsURL("save.gif")));
+		final JButton saverButton = new JButton(McUtils.createImageIcon(Resources
+				.get("SAVEIMAGE")));
 		saverButton.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent e) {
 				if (saver.showSaveDialog(SaveOrphanKeyDialog.this) == JFileChooser.APPROVE_OPTION) {

@@ -18,10 +18,7 @@
 
 package org.biomart.common.resources;
 
-import java.io.InputStream;
-import java.net.URL;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
+
 import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -48,8 +45,6 @@ public class Resources {
 	 */
 	public static String BIOMART_VERSION = "0.8";
 
-	private static String location = null;
-
 	private static ResourceBundle bundle = null;
 
 	private final static ResourceBundle commonBundle = ResourceBundle
@@ -65,7 +60,6 @@ public class Resources {
 	 *            from now on will be found in this location.
 	 */
 	public static void setResourceLocation(final String location) {
-		Resources.location = location;
 		final String resourcesFileName = location + "/messages";
 		Log.info("Loading resources from " + resourcesFileName);
 		Resources.bundle = ResourceBundle.getBundle(resourcesFileName);
@@ -141,74 +135,6 @@ public class Resources {
 	public static String get(final String key, final String[] values) {
 		return MessageFormat.format(Resources.getValue(key), values);
 	}
-
-	/**
-	 * Given a resource name (a file inside some package somewhere), return a
-	 * stream that will read the contents of that file.
-	 * 
-	 * @param resource
-	 *            the classpath of the resource to lookup, e.g. "myfile.txt".
-	 * @return a stream that will read that file.
-	 */
-	public static InputStream getResourceAsStream(final String resource) {
-		final String commonResource = "org/biomart/common/resources/"
-				+ resource;
-		final String locationResource = Resources.location == null ? commonResource
-				: Resources.location + "/" + resource;
-		final ClassLoader cl = Resources.class.getClassLoader();
-		return (InputStream) AccessController
-				.doPrivileged(new PrivilegedAction() {
-					public Object run() {
-						InputStream resource;
-						if (cl != null) {
-							resource = cl.getResourceAsStream(locationResource);
-							if (resource == null)
-								resource = cl
-										.getResourceAsStream(commonResource);
-						} else {
-							resource = ClassLoader
-									.getSystemResourceAsStream(locationResource);
-							if (resource == null)
-								resource = ClassLoader
-										.getSystemResourceAsStream(commonResource);
-						}
-						return resource;
-					}
-				});
-	}
-
-	/**
-	 * Given a resource name (a file inside some package somewhere), return a
-	 * URL pointing to it.
-	 * 
-	 * @param resource
-	 *            the classpath of the resource to lookup, e.g. "myfile.txt".
-	 * @return a URL pointing to that file.
-	 */
-	public static URL getResourceAsURL(final String resource) {
-		final String commonResource = "org/biomart/common/resources/"
-				+ resource;
-		final String locationResource = Resources.location == null ? commonResource
-				: Resources.location + "/" + resource;
-		final ClassLoader cl = Resources.class.getClassLoader();
-		return (URL) AccessController.doPrivileged(new PrivilegedAction() {
-			public Object run() {
-				URL resource;
-				if (cl != null) {
-					resource = cl.getResource(locationResource);
-					if (resource == null)
-						resource = cl.getResource(commonResource);
-				} else {
-					resource = ClassLoader.getSystemResource(locationResource);
-					if (resource == null)
-						resource = ClassLoader
-								.getSystemResource(commonResource);
-				}
-				return resource;
-			}
-		});
-	}
-
 	// Private means that this class is a static singleton.
 	private Resources() {
 	}

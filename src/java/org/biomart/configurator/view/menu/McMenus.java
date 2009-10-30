@@ -29,6 +29,7 @@ import org.biomart.configurator.jdomUtils.JDomUtils;
 import org.biomart.configurator.jdomUtils.XMLTreeCellRenderer;
 import org.biomart.configurator.model.User;
 import org.biomart.configurator.utils.McGuiUtils;
+import org.biomart.configurator.utils.McUtils;
 import org.biomart.configurator.utils.type.IdwViewType;
 import org.biomart.configurator.utils.type.McGuiType;
 import org.biomart.configurator.utils.type.McNewUserType;
@@ -124,8 +125,8 @@ public class McMenus {
 
   	private JToolBar createButtonBar() {
   		JToolBar buttonBar = new JToolBar();
-  		ImageIcon adddsImage = this.createImageIcon(Resources.get("ADDDSIMAGE"));
-  		ImageIcon adduserImage = this.createImageIcon(Resources.get("ADDUSERIMAGE"));
+  		ImageIcon adddsImage = McUtils.createImageIcon(Resources.get("ADDDSIMAGE"));
+  		ImageIcon adduserImage = McUtils.createImageIcon(Resources.get("ADDUSERIMAGE"));
   		
   		addDatasetButton = new JButton(adddsImage);
   		addUserButton = new JButton(adduserImage);
@@ -365,11 +366,6 @@ public class McMenus {
 		}
 	}
 	
-    /** Returns an ImageIcon, or null if the path was invalid. */
-    private ImageIcon createImageIcon(String path) {
-         return new ImageIcon(path);
-    }
-
     public void newPortal() {
     	if(this.newPortal!=null)
     		this.newPortal.doClick();

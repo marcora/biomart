@@ -748,10 +748,6 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 				final Collection colsToBeDropped = new HashSet(dbTable
 						.getColumns().values());
 
-				// Clear out the existing schema partition info on all cols.
-				for (final Iterator j = dbTable.getColumns().values()
-						.iterator(); j.hasNext();)
-					((Column) j.next()).getSchemaPartitions().clear();
 
 				// Load the table columns from the database, then loop over
 				// them.
@@ -808,8 +804,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 					// Column exists, so remove it from our list of columns to
 					// be dropped at the end of the loop.
 					colsToBeDropped.remove(dbTblCol);
-					if (schemaPrefix != null)
-						dbTblCol.getSchemaPartitions().add(schemaPrefix);
+
 				}
 				dbTblCols.close();
 

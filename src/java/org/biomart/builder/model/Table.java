@@ -507,62 +507,16 @@ public class Table implements Comparable<Table>, TransactionListener {
 	/**
 	 * Defines the restriction on a table, ie. a where-clause.
 	 */
-	public static class RestrictedTableDefinition implements
-			TransactionListener {
+	//TODO remove
+	public static class RestrictedTableDefinition {
 		private static final long serialVersionUID = 1L;
 
 		private McBeanMap aliases;
 
 		private String expr;
 
-		private boolean directModified = false;
-
 		private final WeakPropertyChangeSupport pcs = new WeakPropertyChangeSupport(
 				this);
-
-		private final PropertyChangeListener listener = new PropertyChangeListener() {
-			public void propertyChange(final PropertyChangeEvent e) {
-				RestrictedTableDefinition.this.setDirectModified(true);
-			}
-		};
-
-		/**
-		 * This constructor gives the restriction an initial expression and a
-		 * set of aliases. The expression may not be empty, and neither can the
-		 * alias map.
-		 * 
-		 * @param expr
-		 *            the expression to define for this restriction.
-		 * @param aliases
-		 *            the aliases to use for columns.
-		 */
-		public RestrictedTableDefinition(final String expr, final Map aliases) {
-			// Test for good arguments.
-			if (expr == null || expr.trim().length() == 0)
-				throw new IllegalArgumentException(Resources
-						.get("tblRestrictMissingExpression"));
-			if (aliases == null || aliases.isEmpty())
-				throw new IllegalArgumentException(Resources
-						.get("tblRestrictMissingAliases"));
-
-			// Remember the settings.
-			this.aliases = new McBeanMap(new HashMap(aliases));
-			this.expr = expr;
-
-			Transaction.addTransactionListener(this);
-
-			this.addPropertyChangeListener(this.listener);
-			this.aliases.addPropertyChangeListener(this.listener);
-		}
-
-		/**
-		 * Replicate ourselves.
-		 * 
-		 * @return the copy.
-		 */
-		public RestrictedTableDefinition replicate() {
-			return new RestrictedTableDefinition(this.expr, this.aliases);
-		}
 
 		/**
 		 * Adds a property change listener.
@@ -588,41 +542,6 @@ public class Table implements Comparable<Table>, TransactionListener {
 			this.pcs.addPropertyChangeListener(property, listener);
 		}
 
-		public boolean isDirectModified() {
-			return this.directModified;
-		}
-
-		public void setDirectModified(final boolean modified) {
-			if (modified == this.directModified)
-				return;
-			final boolean oldValue = this.directModified;
-			this.directModified = modified;
-			this.pcs.firePropertyChange(Resources.get("PCDIRECTMODIFIED"), oldValue, modified);
-		}
-
-		public boolean isVisibleModified() {
-			return false;
-		}
-
-		public void setVisibleModified(final boolean modified) {
-			// Ignore for now.
-		}
-
-		public void transactionResetVisibleModified() {
-			// Ignore for now.
-		}
-
-		public void transactionResetDirectModified() {
-			this.directModified = false;
-		}
-
-		public void transactionStarted(final TransactionEvent evt) {
-			// Don't really care for now.
-		}
-
-		public void transactionEnded(final TransactionEvent evt) {
-			// Don't really care for now.
-		}
 
 		/**
 		 * Retrieves the map used for setting up aliases.

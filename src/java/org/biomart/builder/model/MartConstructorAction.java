@@ -679,9 +679,6 @@ public abstract class MartConstructorAction {
 		private Map selectColumns;
 
 		private String resultTable;
-
-		private RestrictedTableDefinition tableRestriction;
-
 		private RestrictedRelationDefinition relationRestriction;
 
 		private boolean relationRestrictionLeftIsFirst;
@@ -830,21 +827,7 @@ public abstract class MartConstructorAction {
 			this.selectColumns = selectColumns;
 		}
 
-		/**
-		 * @return the tableRestriction
-		 */
-		public RestrictedTableDefinition getTableRestriction() {
-			return this.tableRestriction;
-		}
 
-		/**
-		 * @param tableRestriction
-		 *            the tableRestriction to set
-		 */
-		public void setTableRestriction(
-				final RestrictedTableDefinition tableRestriction) {
-			this.tableRestriction = tableRestriction;
-		}
 
 		/**
 		 * @return the relationRestriction

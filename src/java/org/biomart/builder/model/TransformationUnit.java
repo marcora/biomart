@@ -222,13 +222,6 @@ public abstract class TransformationUnit {
 		}
 
 		public boolean appliesToPartition(final String schemaPrefix) {
-			for (final Iterator i = this.sourceDataSetColumns.iterator(); i
-					.hasNext();) {
-				final DataSetColumn dsCol = (DataSetColumn) i.next();
-				if (!dsCol.existsForPartition(schemaPrefix)) {
-					return false;
-				}
-			}
 			return super.appliesToPartition(schemaPrefix);
 		}
 

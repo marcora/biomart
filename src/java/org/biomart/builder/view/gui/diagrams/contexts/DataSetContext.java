@@ -391,8 +391,7 @@ public class DataSetContext extends SchemaContext {
 		// Is it a column?
 		else if (object instanceof DataSetColumn) {
 			final DataSetColumn dsCol = (DataSetColumn) object;
-			if (dsCol.isColumnMasked()
-					|| !dsCol.existsForPartition(schemaPrefix))
+			if (dsCol.isColumnMasked())
 				return true;
 		}
 

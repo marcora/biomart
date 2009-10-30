@@ -508,12 +508,6 @@ public class OracleDialect extends DatabaseDialect {
 					!action.isRelationRestrictionLeftIsFirst(),
 					action.getRelationRestrictionPreviousUnit()));
 		}
-		if (action.getTableRestriction() != null) {
-			sb.append(" and (");
-			sb.append(action.getTableRestriction().getSubstitutedExpression(
-					action.getSchemaPrefix(), "b"));
-			sb.append(')');
-		}
 		for (final Iterator i = action.getPartitionRestrictions().entrySet()
 				.iterator(); i.hasNext();) {
 			final Map.Entry entry = (Map.Entry) i.next();

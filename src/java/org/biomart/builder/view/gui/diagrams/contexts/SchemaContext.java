@@ -45,6 +45,7 @@ import org.biomart.builder.view.gui.diagrams.components.KeyComponent;
 import org.biomart.builder.view.gui.diagrams.components.RelationComponent;
 import org.biomart.builder.view.gui.diagrams.components.TableComponent;
 import org.biomart.common.resources.Resources;
+import org.biomart.configurator.utils.McUtils;
 import org.biomart.configurator.utils.type.Cardinality;
 
 /**
@@ -246,8 +247,7 @@ public class SchemaContext implements DiagramContext {
 
 		// Columns get masked.
 		else if (object instanceof Column) {
-			final Column col = (Column) object;
-			return !col.existsForPartition(schemaPrefix);
+			return false;
 		}
 
 		return false;
@@ -472,8 +472,8 @@ public class SchemaContext implements DiagramContext {
 
 			// Remove the relation from the schema, but only if handmade.
 			final JMenuItem remove = new JMenuItem(Resources
-					.get("removeRelationTitle"), new ImageIcon(Resources
-					.getResourceAsURL("cut.gif")));
+					.get("removeRelationTitle"), McUtils.createImageIcon(Resources
+					.get("CUTIMAGE")));
 			remove.setMnemonic(Resources.get("removeRelationMnemonic")
 					.charAt(0));
 			remove.addActionListener(new ActionListener() {
@@ -510,8 +510,8 @@ public class SchemaContext implements DiagramContext {
 
 			// Remove the key from the table, but only if handmade.
 			final JMenuItem remove = new JMenuItem(Resources
-					.get("removeKeyTitle"), new ImageIcon(Resources
-					.getResourceAsURL("cut.gif")));
+					.get("removeKeyTitle"), McUtils.createImageIcon(Resources
+					.get("CUTIMAGE")));
 			remove.setMnemonic(Resources.get("removeKeyMnemonic").charAt(0));
 			remove.addActionListener(new ActionListener() {
 				public void actionPerformed(final ActionEvent evt) {

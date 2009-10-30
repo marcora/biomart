@@ -52,6 +52,7 @@ import javax.swing.text.DefaultEditorKit;
 import org.biomart.common.resources.Resources;
 import org.biomart.common.resources.Settings;
 import org.biomart.common.view.gui.LongProcess;
+import org.biomart.configurator.utils.McUtils;
 
 /**
  * A dialog which allows the user to view some text, and optionally print,
@@ -189,8 +190,8 @@ public class ViewTextDialog extends JFrame {
 		});
 
 		// Make the save button as an image.
-		final JButton saverButton = new JButton(new ImageIcon(Resources
-				.getResourceAsURL("save.gif")));
+		final JButton saverButton = new JButton(McUtils.createImageIcon(Resources
+				.get("SAVEIMAGE")));
 		saverButton.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent e) {
 				if (saver.showSaveDialog(ViewTextDialog.this) == JFileChooser.APPROVE_OPTION) {
@@ -224,8 +225,8 @@ public class ViewTextDialog extends JFrame {
 		toolBarPane.add(saverButton);
 
 		// Make a print button.
-		final JButton printButton = new JButton(new ImageIcon(Resources
-				.getResourceAsURL("print.gif")));
+		final JButton printButton = new JButton(McUtils.createImageIcon(Resources
+				.get("PRINTIMAGE")));
 		printButton.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent e) {
 				new LongProcess() {

@@ -185,9 +185,6 @@ public class JDomNodeAdapter extends DefaultMutableTreeNode {
 						colElement.setAttribute("name",col.getName());
 
 						colElement.setAttribute("visibleModified",Boolean.toString(col.isVisibleModified()));
-
-						colElement.setAttribute("inSchemaPartition",col.getSchemaPartitions().toString());
-
 					}
 
 					//foreign key

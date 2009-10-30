@@ -82,6 +82,7 @@ import org.biomart.common.utils.Transaction.TransactionListener;
 import org.biomart.common.view.gui.LongProcess;
 import org.biomart.common.view.gui.dialogs.ComponentImageSaver;
 import org.biomart.common.view.gui.dialogs.ComponentPrinter;
+import org.biomart.configurator.utils.McUtils;
 
 
 /**
@@ -572,7 +573,7 @@ public abstract class Diagram extends JLayeredPane implements Scrollable,
 
 		// Add an item that allows the user to save this diagram as an image.
 		final JMenuItem save = new JMenuItem(Resources.get("saveDiagramTitle"),
-				new ImageIcon(Resources.getResourceAsURL("save.gif")));
+				McUtils.createImageIcon(Resources.get("SAVEIMAGE")));
 		save.setMnemonic(Resources.get("saveDiagramMnemonic").charAt(0));
 		save.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent e) {
@@ -583,8 +584,8 @@ public abstract class Diagram extends JLayeredPane implements Scrollable,
 
 		// Add an item that allows the user to print this diagram.
 		final JMenuItem print = new JMenuItem(Resources
-				.get("printDiagramTitle"), new ImageIcon(Resources
-				.getResourceAsURL("print.gif")));
+				.get("printDiagramTitle"), McUtils.createImageIcon(Resources
+				.get("PRINTIMAGE")));
 		print.setMnemonic(Resources.get("printDiagramMnemonic").charAt(0));
 		print.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent e) {

@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
+import javax.swing.ImageIcon;
+
 import org.biomart.common.resources.Resources;
 
 public class McUtils {
@@ -35,4 +37,10 @@ public class McUtils {
 		Calendar cal = new GregorianCalendar();
 		return cal.getTimeInMillis();
 	}
+
+    /** Returns an ImageIcon, or null if the path was invalid. */
+    public static ImageIcon createImageIcon(String path) {
+         return new ImageIcon(path);
+    }
+
 }

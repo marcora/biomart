@@ -52,6 +52,6 @@ import org.biomart.common.exceptions.DataModelException;
 			}
 
 			public boolean existsForPartition(final String schemaPrefix) {
-				return this.column.existsForPartition(schemaPrefix);
+				return true;
 			}
 		}

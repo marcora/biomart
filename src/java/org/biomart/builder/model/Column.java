@@ -43,14 +43,9 @@ import org.biomart.common.utils.Transaction.TransactionListener;
  * @since 0.5
  */
 public class Column implements Comparable<Column>, TransactionListener {
-	private static final long serialVersionUID = 1L;
 
 	private final String name;
-
 	private final Table table;
-	
-	private final McBeanCollection schemaPartitions = new McBeanCollection(new HashSet());
-
 	/**
 	 * Some subclasses refer to this directly.
 	 */
@@ -105,7 +100,7 @@ public class Column implements Comparable<Column>, TransactionListener {
 	 * @return <tt>true</tt> if it does.
 	 */
 	public boolean existsForPartition(final String schemaPrefix) {
-		return schemaPrefix==null || this.getSchemaPartitions().isEmpty() || this.getSchemaPartitions().contains(schemaPrefix);
+		return true;
 	}
 
 
@@ -177,14 +172,6 @@ public class Column implements Comparable<Column>, TransactionListener {
 		return this.table;
 	}
 	
-	/**
-	 * Retrieve the set of schema partition names this column applies to.
-	 * May be empty, in which case it applies to the default schema only.
-	 * @return the set of schema partition names.
-	 */
-	public McBeanCollection getSchemaPartitions() {
-		return this.schemaPartitions;
-	}
 
 	public int compareTo(final Column o) {
 		return (this.getTable().getSchema().getMart().getUniqueId() + "_" + this

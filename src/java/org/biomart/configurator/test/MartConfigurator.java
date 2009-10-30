@@ -36,24 +36,17 @@ import net.infonode.docking.SplitWindow;
 import net.infonode.docking.TabWindow;
 import net.infonode.docking.View;
 import net.infonode.docking.ViewSerializer;
-
 import net.infonode.docking.mouse.DockingWindowActionMouseButtonListener;
 import net.infonode.docking.properties.RootWindowProperties;
 import net.infonode.docking.theme.*;
 import net.infonode.docking.util.DockingUtil;
 import net.infonode.docking.util.MixedViewHandler;
-
-
-
 import javax.swing.*;
-
 import java.util.Map;
-
 import org.biomart.common.resources.Log;
 import org.biomart.common.resources.Resources;
 import org.biomart.common.resources.Settings;
 import org.biomart.common.view.gui.LongProcess;
-import org.biomart.common.view.gui.dialogs.AboutDialog;
 import org.biomart.configurator.model.McModel;
 import org.biomart.configurator.utils.McIcon;
 import org.biomart.configurator.utils.type.IdwViewType;
@@ -63,16 +56,10 @@ import org.biomart.configurator.view.idwViews.McViewSchema;
 import org.biomart.configurator.view.idwViews.McViewTree;
 import org.biomart.configurator.view.idwViews.McViews;
 import org.biomart.configurator.view.menu.McMenus;
-
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
 import java.io.*;
 import java.util.HashMap;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
+
 
 /**
  * A small example on how to use InfoNode Docking Windows. This example shows how to handle both static and
@@ -84,7 +71,6 @@ import java.lang.reflect.Proxy;
 public class MartConfigurator {
   
 	private String resourcesLocation = "org/biomart/builder/resources";
-	private boolean reallyIsMac = false;
 	private McModel model;
 	
   
@@ -92,13 +78,6 @@ public class MartConfigurator {
    	* The one and only root window
    	*/
   	private RootWindow rootWindow;
-
-
-  	/**
-  	 * The view menu items
-  	 */
-  	//hardcode for 8 now
-  	private JMenuItem[] viewItems;
 
   	/**
    	* Contains the dynamic views that has been added to the root window
@@ -198,9 +177,6 @@ public class MartConfigurator {
 	  mcViews.addView(new McViewSchema("Content", McIcon.VIEW_ICON, createViewComponent(true),model,IdwViewType.SCHEMA));
 	  mcViews.addView(new McViewTree("MC Tree", McIcon.VIEW_ICON, createViewComponent(true),model,IdwViewType.MCTREE));
 	  mcViews.addView(new McViewAttTable("Attribute Table", McIcon.VIEW_ICON, createViewComponent(true),model,IdwViewType.ATTRIBUTETABLE));
-
-	  viewItems = new JMenuItem[mcViews.getAllViews().size()];
-
     // The mixed view map makes it easy to mix static and dynamic views inside the same root window
     MixedViewHandler handler = new MixedViewHandler(mcViews.getViewMap(), new ViewSerializer() {
       public void writeView(View view, ObjectOutputStream out) throws IOException {
@@ -260,13 +236,7 @@ public class MartConfigurator {
         else
           dynamicViews.remove(new Integer(((DynamicView) window).getId()));
       }
-      else {
-    	  
-        for (int i = 0; i < McViews.getInstance().getAllViews().size(); i++) ;
- //         if (McViews.getInstance().getView(i) == window && viewItems[i] != null)
- //           viewItems[i].setEnabled(!added);
-      }
-    }
+   }
     else {
       for (int i = 0; i < window.getChildWindowCount(); i++)
         updateViews(window.getChildWindow(i), added);
@@ -307,108 +277,13 @@ public class MartConfigurator {
 	    frame.setVisible(true);
 	}
 
- 
-	private boolean isMac() {
-		return this.reallyIsMac
-				&& System.getProperty("mrj.version") != null;
-	}
 
-	private void doMacSetting() {
-		if (this.isMac()) {
-			try {
-				// Set up a listener proxy.
-				final Class listenerClass = Class
-						.forName("com.apple.eawt.ApplicationListener");
-				final Class eventClass = Class
-						.forName("com.apple.eawt.ApplicationEvent");
-				final Method eventHandled = eventClass.getMethod("setHandled",
-						new Class[] { Boolean.TYPE });
-				final Method handleAbout = listenerClass.getMethod(
-						"handleAbout", new Class[] { eventClass });
-				final Method handleQuit = listenerClass.getMethod("handleQuit",
-						new Class[] { eventClass });
-				final Object proxy = Proxy.newProxyInstance(listenerClass
-					.getClassLoader(), new Class[] { listenerClass },
-					new InvocationHandler() {
-						public Object invoke(Object proxy, Method method,
-								Object[] args) throws Throwable {
-							if (method.equals(handleAbout)) {
-								// Handle TRUE otherwise it overrides us.
-								eventHandled.invoke(args[0],
-										new Object[] { Boolean.TRUE });
-								MartConfigurator.this.requestShowAbout();
-							} else if (method.equals(handleQuit)) {
-								// Handle FALSE otherwise it preempts us.
-								eventHandled.invoke(args[0],
-										new Object[] { Boolean.FALSE });
-								MartConfigurator.this.requestExitApp();
-							} else
-								eventHandled.invoke(args[0],
-										new Object[] { Boolean.FALSE });
-							// All methods return null.
-							return null;
-						}
-					});
-
-			// Set up application wrapper to include handler methods.
-				final Object app = Class.forName("com.apple.eawt.Application")
-						.newInstance();
-				app.getClass().getMethod("addAboutMenuItem", null).invoke(app,
-						null);
-				app.getClass().getMethod("addPreferencesMenuItem", null)
-						.invoke(app, null);
-				app.getClass().getMethod("setEnabledAboutMenu",
-						new Class[] { Boolean.TYPE }).invoke(app,
-						new Object[] { Boolean.TRUE });
-				app.getClass().getMethod("setEnabledPreferencesMenu",
-						new Class[] { Boolean.TYPE }).invoke(app,
-						new Object[] { Boolean.FALSE });
-				app
-						.getClass()
-						.getMethod(
-								"addApplicationListener",
-								new Class[] { Class
-										.forName("com.apple.eawt.ApplicationListener") })
-						.invoke(app, new Object[] { proxy });
-			} catch (final Throwable t) {
-				Log.warn(t);
-				this.reallyIsMac = false;
-			}
-			// Set up properties.
-			System.setProperty("com.apple.macos.useScreenMenuBar", "true");
-			System.setProperty("com.apple.macos.use-file-dialog-packages",
-					"false");
-			System.setProperty("com.apple.macos.smallTabs", "true");
-			System.setProperty(
-					"com.apple.mrj.application.apple.menu.about.name",
-					Resources.get("plainGUITitle"));
-			System.setProperty("com.apple.mrj.application.growbox.intrudes",
-					"false");
-			System.setProperty("com.apple.mrj.application.live-resize", "true");
-			System.setProperty("apple.laf.useScreenMenuBar", "true");
-			System.setProperty("apple.awt.brushMetalRounded", "true");
-			System.setProperty("apple.awt.showGrowBox", "true");
-			System.setProperty("apple.awt.antialiasing", "on");
-			System.setProperty("apple.awt.textantialiasing", "on");
-			System.setProperty("apple.awt.rendering", "VALUE_RENDER_QUALITY");
-			System.setProperty("apple.awt.interpolation",
-					"VALUE_INTERPOLATION_BICUBIC");
-			System.setProperty("apple.awt.fractionalmetrics", "on");
-			System.setProperty("apple.awt.graphics.EnableQ2DX", "true");
-			System.setProperty("apple.awt.window.position.forceSafeCreation",
-					"true");
-			System.setProperty(
-							"apple.awt.window.position.forceSafeProgrammaticPositioning",
-							"true");
-		}		
-	}
 
 	private void initSettings() {
 		System.out.println("..." + Settings.getApplication() + " started.");
 		Settings.setApplication(Settings.MARTCONFIGURATOR);
 		Resources.setResourceLocation(resourcesLocation);
-		// Set some nice Mac stuff.
-		this.doMacSetting();
+
 		// Attach ourselves as the main window for hourglass use.
 		LongProcess.setMainWindow(this.frame);
 
@@ -437,44 +312,8 @@ public class MartConfigurator {
 				Log.warn("Bad look-and-feel: " + lookAndFeelClass, e2);
 			}
 		}
-
-		// Set up window listener and use it to handle windows closing.
-//		Log.info("Creating main GUI window");
-//		final BioMartGUI mb = this;
-/*		this.addWindowListener(new WindowAdapter() {
-			public void windowClosing(final WindowEvent e) {
-				if (e.getWindow() == mb)
-					Log.debug("Main window closing");
-				BioMartGUI.this.requestExitApp();
-			}
-		});
-		*/
-//		this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-
-		// Set up our GUI components.
-//		Log.debug("Initialising main window components");
-
-		// Pack the window.
-//		this.pack();
-
-		// Set a sensible size.
-//		final Dimension size = this.getToolkit().getScreenSize();
-//		this.setSize(2*size.width/3, 2*size.height/3);	  
   }
-  
-	public void requestShowAbout() {
-		AboutDialog.displayAbout();
-	}
-	
-	/**
-	 * Requests the application to exit, allowing it to ask for permission from
-	 * the user first if necessary.
-	 */
-	public void requestExitApp() {
-		Log.info("Normal exit requested");
-		System.exit(0);
-	}
-
+  	
 	public static void main(String[] args) throws Exception {
     // Docking windwos should be run in the Swing thread
     SwingUtilities.invokeLater(new Runnable() {
