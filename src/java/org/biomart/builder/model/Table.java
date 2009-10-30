@@ -30,6 +30,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
+
 import org.biomart.builder.model.Key.PrimaryKey;
 import org.biomart.common.resources.Log;
 import org.biomart.common.resources.Resources;
@@ -68,7 +70,7 @@ public class Table implements Comparable<Table>, TransactionListener {
 
 	private final McBeanMap<String, Column> columns;
 
-	private final McBeanCollection foreignKeys;
+	private final McBeanCollection<Key> foreignKeys;
 
 	private final String name;
 
@@ -79,13 +81,7 @@ public class Table implements Comparable<Table>, TransactionListener {
 	private final Schema schema;
 
 	private boolean masked = false;
-
-	private final McBeanCollection<Key> keyCache;
-
 	private final McBeanCollection<Relation> relationCache;
-
-	private final Collection columnCache;
-
 	private boolean directModified = false;
 
 	private final Map<DataSet,Map<String,Map>> mods = new HashMap<DataSet,Map<String,Map>>();
@@ -94,7 +90,7 @@ public class Table implements Comparable<Table>, TransactionListener {
 
 	private final PropertyChangeListener relationCacheBuilder = new PropertyChangeListener() {
 		public void propertyChange(final PropertyChangeEvent evt) {
-			Table.this.recalculateCaches();
+			Table.this.recalculateCaches(evt);
 		}
 	};
 
@@ -119,7 +115,7 @@ public class Table implements Comparable<Table>, TransactionListener {
 		this.schema = schema;
 		this.uniqueId = this.schema.getNextUniqueId();
 		this.columns = new McBeanMap<String, Column>(new HashMap<String,Column>());
-		this.foreignKeys = new McBeanCollection(new HashSet());
+		this.foreignKeys = new McBeanCollection<Key>(new HashSet<Key>());
 		// Make the name unique.
 		final String baseName = name;
 		for (int i = 1; schema.getTables().containsKey(name); name = baseName
@@ -131,9 +127,8 @@ public class Table implements Comparable<Table>, TransactionListener {
 		Transaction.addTransactionListener(this);
 
 		// Listen to own PK and FKs and update key+relation caches.
-		this.keyCache = new McBeanCollection(new HashSet());
-		this.relationCache = new McBeanCollection(new HashSet());
-		this.columnCache = new HashSet();
+
+		this.relationCache = new McBeanCollection<Relation>(new HashSet<Relation>());
 		this.addPropertyChangeListener("primaryKey", this.relationCacheBuilder);
 		this.getForeignKeys().addPropertyChangeListener(
 				this.relationCacheBuilder);
@@ -214,10 +209,10 @@ public class Table implements Comparable<Table>, TransactionListener {
 	public boolean isVisibleModified() {
 		// Compute this from all rels and cols - if any are vis
 		// modified then we are too.
-		for (final Iterator i = this.getRelations().iterator(); i.hasNext();)
+		for (final Iterator<Relation> i = this.getRelations().iterator(); i.hasNext();)
 			if (((Relation) i.next()).isVisibleModified())
 				return true;
-		for (final Iterator i = this.getColumns().values().iterator(); i
+		for (final Iterator<Column> i = this.getColumns().values().iterator(); i
 				.hasNext();)
 			if (((Column) i.next()).isVisibleModified())
 				return true;
@@ -283,57 +278,48 @@ public class Table implements Comparable<Table>, TransactionListener {
 		return (Map) dsMap.get(tableKey);
 	}
 
-	private synchronized void recalculateCaches() {
-		final Collection newCols = new HashSet(this.getColumns().values());
-		if (!newCols.equals(this.columnCache)) {
+	/*
+	 * pce source can be a PK, FK, Column, Relation
+	 * propertyName can be primaryKey, McBeanMap.*, McCollection.*
+	 */
+	private synchronized void recalculateCaches(PropertyChangeEvent pce) {
+		String pName = pce.getPropertyName();
+		if(pName.equals("primaryKey")) {
 			this.setDirectModified(true);
-			// Identify dropped ones.
-			final Collection dropped = new HashSet(this.columnCache);
-			dropped.removeAll(newCols);
-			// Identify new ones.
-			newCols.removeAll(this.columnCache);
-			// Drop dropped ones.
-			for (final Iterator i = dropped.iterator(); i.hasNext();)
-				this.columnCache.remove(i.next());
-			// Add added ones.
-			for (final Iterator i = newCols.iterator(); i.hasNext();) {
-				final Column column = (Column) i.next();
-				column.addPropertyChangeListener(Resources.get("PCDIRECTMODIFIED"),
-						this.listener);
-			}
-			this.columnCache.clear();
-			this.columnCache.addAll(this.getColumns().values());
-		}
-		final Collection newKeys = new HashSet();
-		if (this.primaryKey != null)
-			newKeys.add(this.primaryKey);
-		newKeys.addAll(this.foreignKeys);
-		if (!newKeys.equals(this.keyCache)) {
-			this.setDirectModified(true);
-			// Identify dropped ones.
-			final Collection dropped = new HashSet(this.keyCache);
-			dropped.removeAll(newKeys);
-			// Identify new ones.
-			newKeys.removeAll(this.keyCache);
-			// Drop dropped ones.
-			for (final Iterator i = dropped.iterator(); i.hasNext();)
-				this.keyCache.remove(i.next());
-			// Add added ones.
-			for (final Iterator i = newKeys.iterator(); i.hasNext();) {
-				final Key key = (Key) i.next();
+			if(pce.getNewValue()!=null) {
+				Key key = (Key)pce.getNewValue();
 				key.getRelations().addPropertyChangeListener(
 						this.relationCacheBuilder);
 				key.addPropertyChangeListener(Resources.get("PCDIRECTMODIFIED"),
 						this.relationCacheBuilder);
 				key.addPropertyChangeListener(Resources.get("PCDIRECTMODIFIED"), this.listener);
+			}		
+		}else if(pName.equals(McBeanMap.property_AddItem)) { 
+			//handle column add/remove
+			Column col = (Column)pce.getNewValue();
+			col.addPropertyChangeListener(Resources.get("PCDIRECTMODIFIED"),this.listener);
+			this.setDirectModified(true);
+		}else if(pName.equals(McBeanMap.property_RemoveItem)) {
+			this.setDirectModified(true);
+		}else if(pName.equals(McBeanCollection.property_AddItem)) {		
+			if(pce.getNewValue() instanceof Key) {
+				this.setDirectModified(true);
+				Key key = (Key)pce.getNewValue();
+				key.getRelations().addPropertyChangeListener(
+						this.relationCacheBuilder);
+				key.addPropertyChangeListener(Resources.get("PCDIRECTMODIFIED"),
+						this.relationCacheBuilder);
+				key.addPropertyChangeListener(Resources.get("PCDIRECTMODIFIED"), this.listener);		
 			}
-			this.keyCache.clear();
-			if (this.primaryKey != null)
-				this.keyCache.add(this.primaryKey);
-			this.keyCache.addAll(this.foreignKeys);
+		}else if(pName.equals(McBeanCollection.property_RemoveItem)) {
+
+		}else {
+			System.err.println("propertyName  = "+pName + " not handled");
+			System.err.println("source = "+pce.getSource());
 		}
-		final Collection newRels = new HashSet();
-		for (final Iterator i = this.keyCache.iterator(); i.hasNext();) {
+			
+		final Collection<Relation> newRels = new HashSet<Relation>();
+		for (final Iterator<Key> i = this.getKeys().iterator(); i.hasNext();) {
 			final Key key = (Key) i.next();
 			newRels.addAll(key.getRelations());
 		}
@@ -349,8 +335,12 @@ public class Table implements Comparable<Table>, TransactionListener {
 	 * 
 	 * @return the unmodifiable collection of keys.
 	 */
-	public McBeanCollection<Key> getKeys() {
-		return this.keyCache;
+	public Set<Key> getKeys() {
+		Set<Key> keySet = new HashSet<Key>();
+		if(this.primaryKey!=null)
+			keySet.add(this.primaryKey);
+		keySet.addAll(this.foreignKeys);
+		return keySet;
 	}
 
 	/**

@@ -177,7 +177,9 @@ public class TableComponent extends BoxShapedComponent {
 
 		// Recalc events.
 		table.addPropertyChangeListener("tableRename", this.recalcListener);
-		table.getKeys().addPropertyChangeListener(this.recalcListener);
+		table.getForeignKeys().addPropertyChangeListener(this.recalcListener);
+		if(table.getPrimaryKey()!=null)
+			table.getPrimaryKey().addPropertyChangeListener(this.recalcListener);
 		table.getColumns().addPropertyChangeListener(this.recalcListener);
 	}
 

@@ -218,7 +218,7 @@ public abstract class Key implements Comparable<Key>, TransactionListener {
 	 * 
 	 * @return the set of all relations this key is involved in.
 	 */
-	public McBeanCollection getRelations() {
+	public McBeanCollection<Relation> getRelations() {
 		return this.relations;
 	}
 
