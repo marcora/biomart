@@ -72,7 +72,7 @@ public class Schemas {
 	
 	private DiagramContext diagramContext;
 	private Mart mart;
-	private final Map<String, JDBCSchema> schemasMap = new HashMap<String, JDBCSchema>();
+	private final Map<String,Schema> schemasMap = new HashMap<String,Schema>();
 
 	// Make a listener which knows how to handle masking and
 	// renaming.
@@ -225,11 +225,11 @@ public class Schemas {
 	}
 
 
-	public JDBCSchema getSchema(String name) {
+	public Schema getSchema(String name) {
 		return this.schemasMap.get(name);
 	}
 	
-	public Map<String, JDBCSchema> getSchemas() {
+	public Map<String,Schema> getSchemas() {
 		return this.schemasMap;
 	}
 	
@@ -503,8 +503,8 @@ public class Schemas {
 				progressMonitor.setVisible(false);
 				progressMonitor.dispose();
 				// This is to ensure that any modified flags get cleared.
-				((SchemaDiagram) Schemas.this.schemasMap.get(schema
-						.getName()).getSchemaDiagram()).repaintDiagram();
+				((SchemaDiagram) ((JDBCSchema)(Schemas.this.schemasMap.get(schema
+						.getName()))).getSchemaDiagram()).repaintDiagram();
 			}
 		};
 
@@ -696,8 +696,8 @@ public class Schemas {
 				}
 				Transaction.end();
 				// This is to ensure that any modified flags get cleared.
-				((SchemaDiagram) Schemas.this.schemasMap.get(schema
-						.getName()).getSchemaDiagram()).repaintDiagram();
+				JDBCSchema sch = (JDBCSchema) Schemas.this.schemasMap.get(schema.getName());
+				((SchemaDiagram) sch.getSchemaDiagram()).repaintDiagram();
 	}
 	
 	/**
@@ -723,8 +723,8 @@ public class Schemas {
 				}
 				Transaction.end();
 				// This is to ensure that any modified flags get cleared.
-				((SchemaDiagram) Schemas.this.schemasMap.get(schema
-						.getName()).getSchemaDiagram()).repaintDiagram();
+				JDBCSchema sch = (JDBCSchema) Schemas.this.schemasMap.get(schema.getName());
+				((SchemaDiagram) sch.getSchemaDiagram()).repaintDiagram();
 	}
 
 
@@ -817,9 +817,9 @@ public class Schemas {
 	 */
 	public void setDiagramContext(final DiagramContext diagramContext) {
 		this.diagramContext = diagramContext;
-		for (final Iterator<JDBCSchema> i = this.schemasMap.values().iterator(); i
+		for (final Iterator<Schema> i = this.schemasMap.values().iterator(); i
 				.hasNext();)
-			i.next().getSchemaDiagram().setDiagramContext(diagramContext);
+			((JDBCSchema)i.next()).getSchemaDiagram().setDiagramContext(diagramContext);
 	}
 
 }

@@ -659,9 +659,9 @@ public class DataSet extends Schema {
 
 		// How many times are allowed to iterate over each relation?
 		final Map relationCount = new HashMap();
-		for (final Iterator<JDBCSchema> i = this.getMart().getSchemasObj().getSchemas().values().iterator(); i
+		for (final Iterator<Schema> i = this.getMart().getSchemasObj().getSchemas().values().iterator(); i
 				.hasNext();) {
-			final JDBCSchema schema =  i.next();
+			final Schema schema =  i.next();
 			final Set relations = new HashSet();
 			for (final Iterator j = schema.getTables().values().iterator(); j
 					.hasNext();) {

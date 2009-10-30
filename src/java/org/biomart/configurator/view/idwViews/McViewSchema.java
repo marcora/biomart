@@ -425,7 +425,7 @@ public class McViewSchema extends McView implements TreeSelectionListener {
 				this.createMartFromXML(loc, mart);
 			}
 			Schemas sts = loc.getMart(martName).getSchemasObj();
-			SchemaDiagram sd = sts.getSchema(schemaName).getSchemaDiagram();
+			SchemaDiagram sd = ((JDBCSchema)sts.getSchema(schemaName)).getSchemaDiagram();
 			JScrollPane sch = new JScrollPane(sd);
 			sch.getViewport().setBackground(sd.getBackground());
 			sch.getHorizontalScrollBar().addAdjustmentListener(sd);
@@ -464,7 +464,7 @@ public class McViewSchema extends McView implements TreeSelectionListener {
 				this.createMartFromXML(loc, mart);
 			}
 			Schemas sts = loc.getMart(martName).getSchemasObj();
-			SchemaDiagram sd = sts.getSchema(schemaName).getSchemaDiagram();
+			SchemaDiagram sd = ((JDBCSchema)sts.getSchema(schemaName)).getSchemaDiagram();
 			JScrollPane sch = new JScrollPane(sd);
 			sch.getViewport().setBackground(sd.getBackground());
 			sch.getHorizontalScrollBar().addAdjustmentListener(sd);

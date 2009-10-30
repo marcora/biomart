@@ -405,11 +405,11 @@ public class Mart {
 	 * @return a set of schema objects. Keys are names, values are actual
 	 *         schemas.
 	 */
-	public Map<String,JDBCSchema> getSchemas() {
+	public Map<String,Schema> getSchemas() {
 		if(this.schemasObj!=null)
 			return this.schemasObj.getSchemas();
 		else 
-			return new HashMap<String,JDBCSchema>();
+			return new HashMap<String,Schema>();
 	}
 
 	/**

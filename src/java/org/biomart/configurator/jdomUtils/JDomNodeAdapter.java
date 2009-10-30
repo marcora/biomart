@@ -135,7 +135,7 @@ public class JDomNodeAdapter extends DefaultMutableTreeNode {
 
 
     	List<JDomNodeAdapter> newNodes = new ArrayList<JDomNodeAdapter>();
-		for (final Iterator<JDBCSchema> i = mart.getSchemas().values().iterator(); i.hasNext();) {
+		for (final Iterator<Schema> i = mart.getSchemas().values().iterator(); i.hasNext();) {
 			final Schema schema = i.next();
 		
 				Log.debug("Writing JDBC schema");
@@ -570,9 +570,9 @@ public class JDomNodeAdapter extends DefaultMutableTreeNode {
 
     		//columns
 
-    		for(final Iterator<DataSetColumn> ci=dsTable.getColumns().values().iterator(); ci.hasNext();) {
+    		for(final Iterator<Column> ci=dsTable.getColumns().values().iterator(); ci.hasNext();) {
 
-    			DataSetColumn col = ci.next();
+    			DataSetColumn col =(DataSetColumn) ci.next();
 
     			Element attributeElement = new Element(Resources.get("ATTRIBUTEPOINTER"));
 

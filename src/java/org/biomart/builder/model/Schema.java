@@ -21,7 +21,6 @@ package org.biomart.builder.model;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -89,16 +88,17 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 	 */
 	protected boolean needsFullSync;
 	private boolean hideMasked = false;
-	private final Collection<Table> tableCache;
-	private final McBeanCollection relationCache;
+	private final McBeanCollection<Relation> relationCache;
 	/**
 	 * Subclasses use this to update synchronisation progress.
 	 */
 	protected double progress = 0.0;
-	
+	/*
+	 * add/remove table (McBeanMap); add/remove relation (McBeanCollection) will trigger it.
+	 */
 	private final PropertyChangeListener relationCacheBuilder = new PropertyChangeListener() {
 		public void propertyChange(final PropertyChangeEvent evt) {
-			Schema.this.recalculateCaches();
+			Schema.this.recalculateCaches(evt);
 		}
 	};
 
@@ -165,15 +165,16 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 		this.setDataLinkDatabase(dataLinkDatabase);
 		this.setMasked(false);
 		// TreeMap keeps the partition cache in alphabetical order by name.
-		this.tables = new McBeanMap(new HashMap());
+		this.tables = new McBeanMap<String,Table>(new HashMap<String,Table>());
 		this.needsFullSync = false;
 
 		Transaction.addTransactionListener(this);
 
 		// Listen to own tables and update key+relation caches.
-		this.tableCache = new HashSet<Table>();
-		this.relationCache = new McBeanCollection(new HashSet());
-		this.tables.addPropertyChangeListener(this.relationCacheBuilder);
+		this.relationCache = new McBeanCollection<Relation>(new HashSet<Relation>());
+		//only listen for add/remove item
+		this.tables.addPropertyChangeListener(McBeanMap.property_AddItem,this.relationCacheBuilder);
+		this.tables.addPropertyChangeListener(McBeanMap.property_RemoveItem,this.relationCacheBuilder);
 	}
 
 	/**
@@ -219,7 +220,7 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 	 */
 	public int getNextUniqueId() {
 		int x = 0;
-		for (final Iterator<Table> i = this.tableCache.iterator(); i.hasNext();)
+		for (final Iterator<Table> i = this.tables.values().iterator(); i.hasNext();)
 			x = Math.max(x, (i.next()).getUniqueId());
 		return x + 1;
 	}
@@ -284,31 +285,35 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 		// Do nothing here.
 	}
 
-	private synchronized void recalculateCaches() {
-		final Collection<Table> newTables = new HashSet<Table>(this.tables.values());
-		newTables.addAll(this.tables.values());
-		if (!newTables.equals(this.tableCache)) {
-			// Identify dropped ones.
-			final Collection<Table> dropped = new HashSet<Table>(this.tableCache);
-			dropped.removeAll(newTables);
-			// Identify new ones.
-			newTables.removeAll(this.tableCache);
-			// Drop dropped ones.
-			for (final Iterator<Table> i = dropped.iterator(); i.hasNext();) {
-				final Table table = (Table) i.next();
-				this.tableDropped(table);
-				this.tableCache.remove(table);
-			}
-			// Add added ones.
-			for (final Iterator<Table> i = newTables.iterator(); i.hasNext();) {
-				final Table table = (Table) i.next();
-				this.tableCache.add(table);
-				table.getRelations().addPropertyChangeListener(
-						this.relationCacheBuilder);
-			}
+	/*
+	 * propertyName can be McBeanMap.* and McCollection.*
+	 */
+	private synchronized void recalculateCaches(PropertyChangeEvent pce) {
+		String propertyName = pce.getPropertyName();
+		//new table added
+		if(propertyName.equals(McBeanMap.property_AddItem)) {
+			Table table = (Table)pce.getNewValue();
+			//only listen for add/remove relation
+			table.getRelations().addPropertyChangeListener(McBeanCollection.property_AddItem,this.relationCacheBuilder);
+			table.getRelations().addPropertyChangeListener(McBeanCollection.property_RemoveItem,this.relationCacheBuilder);
+		} //table dropped
+		else if(propertyName.equals(McBeanMap.property_RemoveItem)) {
+			Table table = (Table) pce.getOldValue();
+			this.tableDropped(table);
+		}else if(propertyName.equals(McBeanCollection.property_AddItem)) {
+			
+		}else if(propertyName.equals(McBeanCollection.property_RemoveItem)) {
+			
 		}
-		final Collection newRels = new HashSet();
-		for (final Iterator<Table> i = this.tableCache.iterator(); i.hasNext();) {
+		else {
+			//TODO testing
+			System.err.println("source = "+pce.getSource());
+			System.err.println("property message not handled");
+		}
+		
+		//TODO 
+		final Collection<Relation> newRels = new HashSet<Relation>();
+		for (final Iterator<Table> i = this.tables.values().iterator(); i.hasNext();) {
 			final Table table = i.next();
 			newRels.addAll(table.getRelations());
 		}
@@ -349,7 +354,7 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 	 * 
 	 * @return the unmodifiable collection of relations.
 	 */
-	public McBeanCollection getRelations() {
+	public McBeanCollection<Relation> getRelations() {
 		return this.relationCache;
 	}
 

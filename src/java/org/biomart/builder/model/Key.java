@@ -62,13 +62,13 @@ public abstract class Key implements Comparable<Key>, TransactionListener {
 
 	private Column[] columns;
 
-	private final McBeanCollection relations;
+	private final McBeanCollection<Relation> relations;
 
 	private ComponentStatus status;
 
 	private boolean directModified = false;
 
-	private Collection relationCache;
+	private Collection<Relation> relationCache;
 
 	private final PropertyChangeListener listener = new PropertyChangeListener() {
 		public void propertyChange(final PropertyChangeEvent evt) {
@@ -94,10 +94,10 @@ public abstract class Key implements Comparable<Key>, TransactionListener {
 		public void propertyChange(final PropertyChangeEvent evt) {
 			Key.this.setDirectModified(true);
 			// Mass change.
-			final Collection addedRels = new HashSet(Key.this.relations);
+			final Collection<Relation> addedRels = new HashSet<Relation>(Key.this.relations);
 			addedRels.removeAll(Key.this.relationCache);
-			for (final Iterator i = addedRels.iterator(); i.hasNext();) {
-				final Relation rel = (Relation) i.next();
+			for (final Iterator<Relation> i = addedRels.iterator(); i.hasNext();) {
+				final Relation rel = i.next();
 				rel.addPropertyChangeListener(Resources.get("PCDIRECTMODIFIED"),
 						Key.this.listener);
 			}
@@ -119,7 +119,7 @@ public abstract class Key implements Comparable<Key>, TransactionListener {
 	public Key(final Column[] columns) {
 		Log.debug("Creating key over " + columns);
 		this.status = ComponentStatus.INFERRED;
-		this.relations = new McBeanCollection(new HashSet());
+		this.relations = new McBeanCollection<Relation>(new HashSet<Relation>());
 		this.setColumns(columns);
 
 		Transaction.addTransactionListener(this);

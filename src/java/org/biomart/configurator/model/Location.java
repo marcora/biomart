@@ -139,9 +139,9 @@ public class Location {
 			if(stStrings == null || stStrings.size()==0) 
 				continue;
 			List<Table> suggestTables = new ArrayList<Table>();
-			Map<String, JDBCSchema> schemas = mart.getSchemasObj().getSchemas();
-			for (final Iterator<JDBCSchema> s = schemas.values().iterator(); s.hasNext();) {
-				JDBCSchema schema = s.next();
+			Map<String, Schema> schemas = mart.getSchemasObj().getSchemas();
+			for (final Iterator<Schema> s = schemas.values().iterator(); s.hasNext();) {
+				JDBCSchema schema = (JDBCSchema)s.next();
 				Map tables = schema.getTables();
 				
 				for(String st:stStrings) {
@@ -212,8 +212,8 @@ public class Location {
 	 * this function should go in Mart 
 	 */
 	public boolean requestLoadSchemaInMart(Mart mart, boolean isTarget, List<String> tablesInDb) {
-		for(Iterator<JDBCSchema> i=mart.getSchemasObj().getSchemas().values().iterator(); i.hasNext();) {
-			JDBCSchema schema = i.next();
+		for(Iterator<Schema> i=mart.getSchemasObj().getSchemas().values().iterator(); i.hasNext();) {
+			JDBCSchema schema = (JDBCSchema)i.next();
 			schema.setIsMart(isTarget);
 			this.marts.get(mart.getMartName()).getSchemasObj().requestInitSchema(schema, false, tablesInDb);
 		}

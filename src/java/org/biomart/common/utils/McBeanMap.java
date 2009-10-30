@@ -79,7 +79,7 @@ public class McBeanMap<K,V> extends WeakPropertyChangeSupport implements Map<K,V
 
 	public V remove(Object key) {
 		final V result = this.delegate.remove(key);
-		this.firePropertyChange(McBeanMap.property_RemoveItem, key, null);
+		this.firePropertyChange(McBeanMap.property_RemoveItem, result, null);
 		return result;
 	}
 

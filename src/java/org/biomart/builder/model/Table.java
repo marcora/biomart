@@ -66,7 +66,7 @@ public class Table implements Comparable<Table>, TransactionListener {
 
 	private int uniqueId;
 
-	private final McBeanMap columns;
+	private final McBeanMap<String, Column> columns;
 
 	private final McBeanCollection foreignKeys;
 
@@ -80,9 +80,9 @@ public class Table implements Comparable<Table>, TransactionListener {
 
 	private boolean masked = false;
 
-	private final McBeanCollection keyCache;
+	private final McBeanCollection<Key> keyCache;
 
-	private final McBeanCollection relationCache;
+	private final McBeanCollection<Relation> relationCache;
 
 	private final Collection columnCache;
 
@@ -118,7 +118,7 @@ public class Table implements Comparable<Table>, TransactionListener {
 		Log.debug("Creating table " + name + " in " + schema);
 		this.schema = schema;
 		this.uniqueId = this.schema.getNextUniqueId();
-		this.columns = new McBeanMap(new HashMap());
+		this.columns = new McBeanMap<String, Column>(new HashMap<String,Column>());
 		this.foreignKeys = new McBeanCollection(new HashSet());
 		// Make the name unique.
 		final String baseName = name;
@@ -349,7 +349,7 @@ public class Table implements Comparable<Table>, TransactionListener {
 	 * 
 	 * @return the unmodifiable collection of keys.
 	 */
-	public McBeanCollection getKeys() {
+	public McBeanCollection<Key> getKeys() {
 		return this.keyCache;
 	}
 
@@ -358,7 +358,7 @@ public class Table implements Comparable<Table>, TransactionListener {
 	 * 
 	 * @return the unmodifiable collection of relations.
 	 */
-	public McBeanCollection getRelations() {
+	public McBeanCollection<Relation> getRelations() {
 		return this.relationCache;
 	}
 
@@ -369,7 +369,7 @@ public class Table implements Comparable<Table>, TransactionListener {
 	 * 
 	 * @return the set of columns for this table.
 	 */
-	public McBeanMap getColumns() {
+	public McBeanMap<String,Column> getColumns() {
 		return this.columns;
 	}
 
