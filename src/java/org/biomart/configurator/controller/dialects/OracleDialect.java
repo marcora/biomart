@@ -793,16 +793,7 @@ public class OracleDialect extends DatabaseDialect {
 		sql.append(parentRel.getOneKey().getColumns()[0].getName());
 		sql.append("=child.");
 		sql.append(childRel.getManyKey().getColumns()[0].getName());
-		if (parentTable.getRestrictTable(dataset, dsTable.getName()) != null) {
-			sql.append(" and ");
-			sql.append(parentTable.getRestrictTable(dataset, dsTable.getName())
-					.getSubstitutedExpression(schemaPrefix, "parent"));
-		}
-		if (childTable.getRestrictTable(dataset, dsTable.getName()) != null) {
-			sql.append(" and ");
-			sql.append(childTable.getRestrictTable(dataset, dsTable.getName())
-					.getSubstitutedExpression(schemaPrefix, "child"));
-		}
+
 		if (childRel.getRestrictRelation(dataset, dsTable.getName(), 0) != null) {
 			sql.append(" and ");
 			sql

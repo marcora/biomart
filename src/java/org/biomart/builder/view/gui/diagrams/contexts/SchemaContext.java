@@ -40,12 +40,12 @@ import org.biomart.builder.model.Mart;
 import org.biomart.builder.model.Relation;
 import org.biomart.builder.model.Schema;
 import org.biomart.builder.model.Table;
-import org.biomart.builder.model.Relation.Cardinality;
 import org.biomart.builder.view.gui.diagrams.components.ColumnComponent;
 import org.biomart.builder.view.gui.diagrams.components.KeyComponent;
 import org.biomart.builder.view.gui.diagrams.components.RelationComponent;
 import org.biomart.builder.view.gui.diagrams.components.TableComponent;
 import org.biomart.common.resources.Resources;
+import org.biomart.configurator.utils.type.Cardinality;
 
 /**
  * Provides the context menus and colour schemes to use when viewing a schema in
@@ -191,8 +191,8 @@ public class SchemaContext implements DiagramContext {
 					extTbls.add(r.getKeyForSchema(schema).getTable());
 			}
 			for (final Iterator i = extTbls.iterator(); i.hasNext();)
-				if (((Table) i.next()).existsForPartition(schemaPrefix))
 					return false;
+			
 			return !extTbls.isEmpty();
 		}
 
@@ -201,7 +201,7 @@ public class SchemaContext implements DiagramContext {
 			final Table table = (Table) object;
 
 			// Fade out all ignored and/or unreachable tables.
-			if (table.isMasked() || !table.existsForPartition(schemaPrefix))
+			if (table.isMasked())
 				return true;
 			else {
 				for (final Iterator i = table.getRelations().iterator(); i

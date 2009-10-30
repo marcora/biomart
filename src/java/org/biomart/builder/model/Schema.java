@@ -287,6 +287,7 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 
 	/*
 	 * propertyName can be McBeanMap.* and McCollection.*
+	 * source: table or relation
 	 */
 	private synchronized void recalculateCaches(PropertyChangeEvent pce) {
 		String propertyName = pce.getPropertyName();

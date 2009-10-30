@@ -138,8 +138,7 @@ public abstract class TransformationUnit {
 		}
 
 		public boolean appliesToPartition(final String schemaPrefix) {
-			return this.table.existsForPartition(schemaPrefix)
-					&& super.appliesToPartition(schemaPrefix);
+			return super.appliesToPartition(schemaPrefix);
 		}
 
 		/**

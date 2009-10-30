@@ -442,13 +442,6 @@ public interface MartConstructor {
 					: ((Integer) bigParents.get(dsTable.getParent()))
 							.intValue();
 
-			// Skip immediately if not applicable to current schema partition.
-			if (!(schemaPartition == null
-					|| dsTable.getFocusTable().getSchemaPartitions().isEmpty() || dsTable
-					.getFocusTable().getSchemaPartitions().contains(
-							schemaPrefix)))
-				return false;
-
 			// Use the transformation units to create the basic table.
 			// FIXME
 			final Collection units = dsTable.getTransformationUnits();
@@ -956,14 +949,7 @@ public interface MartConstructor {
 			else if (stu.getTable().getSchema() == templateSchema)
 				schema = schemaPartition;
 			else {
-				final Collection schemaParts = stu.getTable()
-						.getSchemaPartitions();
-				if (!schemaParts.isEmpty()) {
-					if (schemaParts.contains(schemaPrefix))
-						schema = (String) new InverseMap(stu.getTable()
-								.getSchema().getPartitions()).get(schemaPrefix);
-				} else
-					schema = stu.getTable().getSchema().getDataLinkSchema();
+				schema = stu.getTable().getSchema().getDataLinkSchema();
 			}
 			if (schema == null) // Can never happen.
 				throw new BioMartError();
@@ -1022,11 +1008,6 @@ public interface MartConstructor {
 			action.setSelectColumns(selectCols);
 			action.setResultTable(tempTable);
 
-			// Table restriction.
-			final RestrictedTableDefinition def = stu.getTable()
-					.getRestrictTable(dataset, dsTable.getName());
-			if (def != null)
-				action.setTableRestriction(def);
 			this.issueAction(action);
 		}
 
@@ -1066,16 +1047,8 @@ public interface MartConstructor {
 				if (ljtu.getTable().getSchema() == templateSchema)
 					rightSchema = schemaPartition;
 				else {
-					final Collection rightSchemaParts = ljtu.getTable()
-							.getSchemaPartitions();
-					if (!rightSchemaParts.isEmpty()) {
-						if (rightSchemaParts.contains(schemaPrefix))
-							rightSchema = (String) new InverseMap(ljtu
-									.getTable().getSchema().getPartitions())
-									.get(schemaPrefix);
-					} else
-						rightSchema = ljtu.getTable().getSchema()
-								.getDataLinkSchema();
+					rightSchema = ljtu.getTable().getSchema()
+							.getDataLinkSchema();
 				}
 			}
 			if (rightSchema == null) {
@@ -1141,12 +1114,6 @@ public interface MartConstructor {
 			action.setRightJoinColumns(rightJoinCols);
 			action.setSelectColumns(selectCols);
 			action.setResultTable(tempTable);
-
-			// Table restriction.
-			final RestrictedTableDefinition rdef = ljtu.getTable()
-					.getRestrictTable(dataset, dsTable.getName());
-			if (rdef != null)
-				action.setTableRestriction(rdef);
 
 			// Don't add restriction if loopback relation from M end.
 			final boolean loopbackManyEnd = ljtu.getSchemaRelation()

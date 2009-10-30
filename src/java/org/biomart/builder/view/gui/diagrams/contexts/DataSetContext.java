@@ -384,8 +384,7 @@ public class DataSetContext extends SchemaContext {
 		else if (object instanceof DataSetTable) {
 			final DataSetTable dsTable = (DataSetTable) object;
 			// Fade MASKED DIMENSION relations.
-			if (dsTable.isDimensionMasked()
-					|| !dsTable.existsForPartition(schemaPrefix))
+			if (dsTable.isDimensionMasked())
 				return true;
 		}
 

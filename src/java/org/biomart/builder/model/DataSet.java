@@ -35,7 +35,6 @@ import java.util.Set;
 import org.biomart.builder.exceptions.ValidationException;
 import org.biomart.builder.model.Key.ForeignKey;
 import org.biomart.builder.model.Key.PrimaryKey;
-import org.biomart.builder.model.Relation.Cardinality;
 import org.biomart.builder.model.Relation.CompoundRelationDefinition;
 import org.biomart.builder.model.Relation.RestrictedRelationDefinition;
 import org.biomart.builder.model.TransformationUnit.JoinTable;
@@ -52,6 +51,7 @@ import org.biomart.common.resources.Resources;
 import org.biomart.common.utils.Transaction.TransactionEvent;
 
 import org.biomart.configurator.utils.McEventObject;
+import org.biomart.configurator.utils.type.Cardinality;
 import org.biomart.configurator.utils.type.DataSetOptimiserType;
 import org.biomart.configurator.utils.type.DataSetTableType;
 import org.biomart.configurator.utils.type.EventType;

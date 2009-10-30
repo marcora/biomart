@@ -21,14 +21,13 @@ package org.biomart.builder.model;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import org.biomart.common.resources.Log;
 import org.biomart.common.resources.Resources;
 import org.biomart.common.utils.McBeanCollection;
-import org.biomart.common.utils.McBeanSet;
+import org.biomart.common.utils.McBeanMap;
 import org.biomart.common.utils.Transaction;
 import org.biomart.common.utils.WeakPropertyChangeSupport;
 import org.biomart.common.utils.Transaction.TransactionEvent;
@@ -68,20 +67,21 @@ public abstract class Key implements Comparable<Key>, TransactionListener {
 
 	private boolean directModified = false;
 
-	private Collection<Relation> relationCache;
-
 	private final PropertyChangeListener listener = new PropertyChangeListener() {
 		public void propertyChange(final PropertyChangeEvent evt) {
 			Key.this.setDirectModified(true);
 		}
 	};
 
+	/*
+	 * triggered by a table drop McBeanMap.property_RemoveItem
+	 */
 	private final PropertyChangeListener dropListener = new PropertyChangeListener() {
 		public void propertyChange(final PropertyChangeEvent evt) {
 			if (!Key.this.getTable().getSchema().getTables().containsValue(
 					Key.this.getTable())) {
-				final List relations = new ArrayList(Key.this.getRelations());
-				for (final Iterator i = relations.iterator(); i.hasNext();) {
+				final List<Relation> relations = new ArrayList<Relation>(Key.this.getRelations());
+				for (final Iterator<Relation> i = relations.iterator(); i.hasNext();) {
 					final Relation rel = (Relation) i.next();
 					rel.getFirstKey().getRelations().remove(rel);
 					rel.getSecondKey().getRelations().remove(rel);
@@ -89,20 +89,22 @@ public abstract class Key implements Comparable<Key>, TransactionListener {
 			}
 		}
 	};
-
+	/*
+	 * triggered when a relation add/remove
+	 */
 	private final PropertyChangeListener relationCacheBuilder = new PropertyChangeListener() {
 		public void propertyChange(final PropertyChangeEvent evt) {
 			Key.this.setDirectModified(true);
-			// Mass change.
-			final Collection<Relation> addedRels = new HashSet<Relation>(Key.this.relations);
-			addedRels.removeAll(Key.this.relationCache);
-			for (final Iterator<Relation> i = addedRels.iterator(); i.hasNext();) {
-				final Relation rel = i.next();
+			String pName = evt.getPropertyName();
+			if(pName.equals(McBeanCollection.property_AddItem)) {
+				Relation rel = (Relation)evt.getNewValue();
 				rel.addPropertyChangeListener(Resources.get("PCDIRECTMODIFIED"),
 						Key.this.listener);
-			}
-			Key.this.relationCache.clear();
-			Key.this.relationCache.addAll(Key.this.relations);
+			}else if(pName.equals(McBeanCollection.property_RemoveItem)) {
+//TODO remove later
+			}else {
+				System.err.println("property message not handled "+pName);
+			}			
 		}
 	};
 
@@ -127,12 +129,11 @@ public abstract class Key implements Comparable<Key>, TransactionListener {
 		// All changes to us make us modified.
 		this.addPropertyChangeListener(this.listener);
 		// Check to see if our table goes AWOL.
-		this.getTable().getSchema().getTables().addPropertyChangeListener(
-				this.dropListener);
+		this.getTable().getSchema().getTables().addPropertyChangeListener(McBeanMap.property_RemoveItem,this.dropListener);
 
-		// Changes on relations.
-		this.relationCache = new HashSet();
-		this.relations.addPropertyChangeListener(this.relationCacheBuilder);
+		//only add/remove
+		this.relations.addPropertyChangeListener(McBeanCollection.property_AddItem,this.relationCacheBuilder);
+		this.relations.addPropertyChangeListener(McBeanCollection.property_RemoveItem,this.relationCacheBuilder);
 	}
 
 

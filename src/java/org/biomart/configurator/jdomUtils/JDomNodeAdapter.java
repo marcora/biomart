@@ -168,8 +168,6 @@ public class JDomNodeAdapter extends DefaultMutableTreeNode {
 
 					tableElement.setAttribute("ignore", Boolean.toString(table.isMasked()));
 
-					tableElement.setAttribute("inSchemaPartition", table.getSchemaPartitions().toString());
-
 					
 
 					for (final Iterator<Column> ci = table.getColumns().values().iterator(); ci.hasNext();) {

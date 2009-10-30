@@ -32,6 +32,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.biomart.builder.model.Key.ForeignKey;
 import org.biomart.builder.model.Key.PrimaryKey;
 import org.biomart.common.resources.Log;
 import org.biomart.common.resources.Resources;
@@ -70,12 +71,9 @@ public class Table implements Comparable<Table>, TransactionListener {
 
 	private final McBeanMap<String, Column> columns;
 
-	private final McBeanCollection<Key> foreignKeys;
+	private final McBeanCollection<ForeignKey> foreignKeys;
 
 	private final String name;
-
-	private final McBeanCollection schemaPartitions = new McBeanCollection(new HashSet());
-
 	private PrimaryKey primaryKey;
 
 	private final Schema schema;
@@ -115,7 +113,7 @@ public class Table implements Comparable<Table>, TransactionListener {
 		this.schema = schema;
 		this.uniqueId = this.schema.getNextUniqueId();
 		this.columns = new McBeanMap<String, Column>(new HashMap<String,Column>());
-		this.foreignKeys = new McBeanCollection<Key>(new HashSet<Key>());
+		this.foreignKeys = new McBeanCollection<ForeignKey>(new HashSet<ForeignKey>());
 		// Make the name unique.
 		final String baseName = name;
 		for (int i = 1; schema.getTables().containsKey(name); name = baseName
@@ -182,17 +180,6 @@ public class Table implements Comparable<Table>, TransactionListener {
 		this.pcs.addPropertyChangeListener(property, listener);
 	}
 
-	/**
-	 * Does this exist for the given schema prefix?
-	 * 
-	 * @param schemaPrefix
-	 *            the prefix.
-	 * @return <tt>true</tt> if it does.
-	 */
-	public boolean existsForPartition(final String schemaPrefix) {
-		return schemaPrefix == null || this.getSchemaPartitions().isEmpty()
-				|| this.getSchemaPartitions().contains(schemaPrefix);
-	}
 
 	public boolean isDirectModified() {
 		return this.directModified;
@@ -370,7 +357,7 @@ public class Table implements Comparable<Table>, TransactionListener {
 	 * 
 	 * @return the set of foreign keys for this table.
 	 */
-	public McBeanCollection getForeignKeys() {
+	public McBeanCollection<ForeignKey> getForeignKeys() {
 		return this.foreignKeys;
 	}
 
@@ -383,15 +370,6 @@ public class Table implements Comparable<Table>, TransactionListener {
 		return this.name;
 	}
 
-	/**
-	 * Retrieve the set of schema partition names this column applies to. May be
-	 * empty, in which case it applies to the default schema only.
-	 * 
-	 * @return the set of schema partition names.
-	 */
-	public McBeanCollection getSchemaPartitions() {
-		return this.schemaPartitions;
-	}
 
 	/**
 	 * Checks whether this table is masked or not.
@@ -453,48 +431,6 @@ public class Table implements Comparable<Table>, TransactionListener {
 		return this.schema;
 	}
 
-	/**
-	 * Is this table restricted?
-	 * 
-	 * @param dataset
-	 *            the dataset to check for.
-	 * @param tableKey
-	 *            the table to check for.
-	 * @return the def to use if it is, null otherwise.
-	 */
-	public RestrictedTableDefinition getRestrictTable(final DataSet dataset,
-			final String tableKey) {
-		return (RestrictedTableDefinition) this.getMods(dataset, tableKey).get(
-				"restrictTable");
-	}
-
-	/**
-	 * Restrict this table.
-	 * 
-	 * @param dataset
-	 *            the dataset to set for.
-	 * @param tableKey
-	 *            the dataset table to set for.
-	 * @param def
-	 *            the definition to set - if null, it undoes it.
-	 */
-	public void setRestrictTable(final DataSet dataset, final String tableKey,
-			final RestrictedTableDefinition def) {
-		final RestrictedTableDefinition oldValue = this.getRestrictTable(
-				dataset, tableKey);
-		if (def == oldValue || oldValue != null && oldValue.equals(def))
-			return;
-
-		if (def != null) {
-			this.getMods(dataset, tableKey).put("restrictTable", def);
-			def.addPropertyChangeListener(Resources.get("PCDIRECTMODIFIED"), this.listener);
-			this.pcs.firePropertyChange("restrictTable", null, tableKey);
-		} else {
-			this.getMods(dataset, tableKey).remove("restrictTable");
-			this.pcs.firePropertyChange("restrictTable", tableKey, null);
-		}
-
-	}
 
 	/**
 	 * Is this table big?
@@ -527,52 +463,6 @@ public class Table implements Comparable<Table>, TransactionListener {
 	}
 
 	/**
-	 * Big-up this table.
-	 * 
-	 * @param dataset
-	 *            the dataset to set for.
-	 * @param bigness
-	 *            the bigness to set - if 0, it undoes it.
-	 */
-	public void setBigTable(final DataSet dataset, final int bigness) {
-		final int oldValue = this.getBigTable(dataset);
-		if (bigness == oldValue)
-			return;
-		if (bigness > 0) {
-			this.getMods(dataset, null).put("bigTable", new Integer(bigness));
-			this.pcs.firePropertyChange("bigTable", null, dataset);
-		} else {
-			this.getMods(dataset, null).remove("bigTable");
-			this.pcs.firePropertyChange("bigTable", dataset, null);
-		}
-	}
-
-	/**
-	 * Big-up this table.
-	 * 
-	 * @param dataset
-	 *            the dataset to set for.
-	 * @param tableKey
-	 *            the dataset table to set for.
-	 * @param bigness
-	 *            the bigness to set - if 0, it undoes it.
-	 */
-	public void setBigTable(final DataSet dataset, final String tableKey,
-			final int bigness) {
-		final int oldValue = this.getBigTable(dataset, tableKey);
-		if (bigness == oldValue)
-			return;
-		if (bigness > 0) {
-			this.getMods(dataset, tableKey).put("bigTable",
-					new Integer(bigness));
-			this.pcs.firePropertyChange("bigTable", null, tableKey);
-		} else {
-			this.getMods(dataset, tableKey).remove("bigTable");
-			this.pcs.firePropertyChange("bigTable", tableKey, null);
-		}
-	}
-
-	/**
 	 * Is this table a transform start?
 	 * 
 	 * @param dataset
@@ -585,29 +475,6 @@ public class Table implements Comparable<Table>, TransactionListener {
 		return this.getMods(dataset, tableKey).containsKey("transformStart");
 	}
 
-	/**
-	 * Transform-start this table.
-	 * 
-	 * @param dataset
-	 *            the dataset to set for.
-	 * @param tableKey
-	 *            the dataset table to set for.
-	 * @param doIt
-	 *            if false, it undoes it.
-	 */
-	public void setTransformStart(final DataSet dataset, final String tableKey,
-			final boolean doIt) {
-		final boolean oldValue = this.isTransformStart(dataset, tableKey);
-		if (doIt == oldValue)
-			return;
-		if (doIt) {
-			this.getMods(dataset, tableKey).put("transformStart", null);
-			this.pcs.firePropertyChange("transformStart", null, tableKey);
-		} else {
-			this.getMods(dataset, tableKey).remove("transformStart");
-			this.pcs.firePropertyChange("transformStart", tableKey, null);
-		}
-	}
 
 	public int compareTo(final Table table) throws ClassCastException {
 		return (this.schema.getMart().getUniqueId() + "_" + this.toString())

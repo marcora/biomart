@@ -24,7 +24,6 @@ import javax.swing.JOptionPane;
 import org.biomart.builder.model.DataLink.JDBCDataLink;
 import org.biomart.builder.model.Key.ForeignKey;
 import org.biomart.builder.model.Key.PrimaryKey;
-import org.biomart.builder.model.Relation.Cardinality;
 import org.biomart.builder.view.gui.diagrams.SchemaDiagram;
 import org.biomart.builder.view.gui.dialogs.SaveOrphanKeyDialog;
 import org.biomart.common.exceptions.AssociationException;
@@ -37,6 +36,7 @@ import org.biomart.common.utils.InverseMap;
 import org.biomart.common.view.gui.dialogs.ProgressDialog2;
 import org.biomart.configurator.controller.dialects.DatabaseDialect;
 import org.biomart.configurator.utils.DbInfoObject;
+import org.biomart.configurator.utils.type.Cardinality;
 
 
 	/**
@@ -448,18 +448,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 				Log.debug("Loading table primary keys");
 				String searchCatalog = catalog;
 				String searchSchema = this.realSchemaName;
-				if (!t.getSchemaPartitions().isEmpty()) {
-					// Locate partition with first prefix.
-					final String prefix = (String) t.getSchemaPartitions()
-							.iterator().next();
-					String schemaName = (String) new InverseMap(this
-							.getPartitions()).get(prefix);
-					if (schemaName == null) // Should never happen.
-						throw new BioMartError();
-					if ("".equals(dmd.getSchemaTerm()))
-						searchCatalog = schemaName;
-					searchSchema = schemaName;
-				}
+
 				final ResultSet dbTblPKCols = dmd.getPrimaryKeys(searchCatalog,
 						searchSchema, t.getName());
 
@@ -686,11 +675,6 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 			final Collection tablesToBeDropped = new HashSet(this.getTables()
 					.values());
 
-			// Clear the existing schema partition information.
-			for (final Iterator i = this.getTables().values().iterator(); i
-					.hasNext();)
-				((Table) i.next()).getSchemaPartitions().clear();
-
 			// Load tables and views from database, then loop over them.
 			ResultSet dbTables;
 			if (this.getPartitions().isEmpty())
@@ -741,9 +725,6 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 					} catch (final Throwable t) {
 						throw new BioMartError(t);
 					}
-				// Add schema prefix to list.
-				if (schemaPrefix != null)
-					dbTable.getSchemaPartitions().add(schemaPrefix);
 
 				// Table exists, so remove it from our list of tables to be
 				// dropped at the end of the method.
@@ -1094,18 +1075,6 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 				Log.debug("Finding referring foreign keys");
 				String searchCatalog = catalog;
 				String searchSchema = this.realSchemaName;
-				if (!pkTable.getSchemaPartitions().isEmpty()) {
-					// Locate partition with first prefix.
-					final String prefix = (String) pkTable
-							.getSchemaPartitions().iterator().next();
-					String schemaName = (String) new InverseMap(this
-							.getPartitions()).get(prefix);
-					if (schemaName == null) // Should never happen.
-						throw new BioMartError();
-					if ("".equals(dmd.getSchemaTerm()))
-						searchCatalog = schemaName;
-					searchSchema = schemaName;
-				}
 				final ResultSet dbTblFKCols = dmd.getExportedKeys(
 						searchCatalog, searchSchema, pkTable.getName());
 

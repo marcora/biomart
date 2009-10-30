@@ -39,7 +39,6 @@ import javax.swing.Timer;
 import javax.swing.table.DefaultTableModel;
 import org.biomart.builder.model.Key.ForeignKey;
 import org.biomart.builder.model.Key.PrimaryKey;
-import org.biomart.builder.model.Relation.Cardinality;
 import org.biomart.builder.view.gui.diagrams.Diagram;
 import org.biomart.builder.view.gui.diagrams.SchemaDiagram;
 import org.biomart.builder.view.gui.diagrams.contexts.DiagramContext;
@@ -51,6 +50,7 @@ import org.biomart.common.view.gui.LongProcess;
 import org.biomart.common.view.gui.SwingWorker;
 import org.biomart.common.view.gui.dialogs.ProgressDialog;
 import org.biomart.common.view.gui.dialogs.StackTrace;
+import org.biomart.configurator.utils.type.Cardinality;
 
 
 /**
