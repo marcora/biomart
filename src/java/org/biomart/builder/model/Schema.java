@@ -27,9 +27,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import org.biomart.common.exceptions.DataModelException;
 import org.biomart.common.exceptions.TransactionException;
 import org.biomart.common.resources.Log;
@@ -78,10 +76,8 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 	private boolean masked;
 	private String dataLinkSchema;
 	private String dataLinkDatabase;
+	//add/remove table will trigger relationCacheBuilder
 	private McBeanMap<String,Table> tables;
-	private String partitionRegex;
-	private String partitionNameExpression;
-	private final Map<String,String> partitionCache = new TreeMap<String,String>();
 
 	/**
 	 * Subclasses use this to notify update requirements.
@@ -353,7 +349,7 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 	/**
 	 * Obtain all relations on this schema.
 	 * 
-	 * @return the unmodifiable collection of relations.
+	 * @return the unmodifiable collection of relations?
 	 */
 	public McBeanCollection<Relation> getRelations() {
 		return this.relationCache;
@@ -600,7 +596,6 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 	 *             if there was any other kind of logical problem.
 	 */
 	public void synchronise() throws SQLException, DataModelException {
-		this.clearPartitionCache();
 		this.needsFullSync = false;
 		this.progress = 0.0;
 		// Extend as required.
@@ -617,60 +612,7 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 		return true;
 	}
 
-	/**
-	 * If this schema is identical across multiple source schemas, and the user
-	 * wants to process each of those sequentially using the same schema
-	 * settings, then the map returned by this call should be used to set up
-	 * those partitions.
-	 * <p>
-	 * Note that the schema itself does not necessarily have to appear in the
-	 * partition map - it is only a template by which each partition will be
-	 * created.
-	 * <p>
-	 * The keys of the maps are strings - they can mean different things
-	 * according to whether this is a JDBC schema, an XML schema, etc. The
-	 * values are the prefix to stick on table names in datasets generated from
-	 * this schema.
-	 * <p>
-	 * The entries in the map are the result of applying a combination of
-	 *  to
-	 * the list of available schemas in the database, as determined by the
-	 * appropriate database driver.
-	 * <p>
-	 * This is NOT a bean. The contents are NOT mutable. If you want to change
-	 * them, use  and
-	 * to alter the matching and
-	 * transformation regexes to change the content of the map.
-	 * 
-	 * @return the map of partitions. If empty, then partitioning is not
-	 *         required. It will never be <tt>null</tt>.
-	 * @throws SQLException
-	 *             if the partitions could not be retrieved.
-	 */
-	public Map getPartitions() throws SQLException {
-		if (this.partitionCache.isEmpty() && (this.partitionRegex != null && !this.partitionRegex.equals(""))
-				&& (this.partitionNameExpression != null && !this.partitionNameExpression.equals("")))
-			this.populatePartitionCache(this.partitionCache);
-		return Collections.unmodifiableMap(this.partitionCache);
-	}
 
-	/**
-	 * This method is for subclasses to use  and
-	 * , both of which are guaranteed to
-	 * be non-null when this method is called, to recalculate the set of
-	 * partition values available. The map should have keys which are actual
-	 * database schema names, and the values should be prefixes to use for those
-	 * schemas when modifying table names to be unique to each partition.
-	 * 
-	 * @param partitionCache
-	 *            the cache to populate. It will already be empty.
-	 * @throws SQLException
-	 *             if the population went wrong.
-	 */
-	protected void populatePartitionCache(final Map<String, String> partitionCache)
-			throws SQLException {
-		// Do nothing.
-	}
 
 	/**
 	 * Return the first n rows for a table.
@@ -686,41 +628,13 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 	 * @throws SQLException
 	 *             if anything goes wrong.
 	 */
-	public List getRows(final String schemaPrefix, final Table table,
+	public List<Object> getRows(final String schemaPrefix, final Table table,
 			final int count) throws SQLException {
 		// Default implementation does nothing.
-		return Collections.EMPTY_LIST;
-	}
-
-	/**
-	 * Retrieve the regex used to work out schema partitions. If this regex is
-	 * <tt>null</tt> then no partitioning will be done.
-	 * 
-	 * @return the regex used. Groups from this regex will be used to populate
-	 *         values in the name expression. See
-	 *         .
-	 */
-	public String getPartitionRegex() {
-		return this.partitionRegex;
-	}
-
-	/**
-	 * Retrieve the expression used to reformat groups from the partition regex
-	 * into schema partition names.
-	 * 
-	 * @return the expression used. .
-	 */
-	public String getPartitionNameExpression() {
-		return this.partitionNameExpression;
+		return Collections.emptyList();
 	}
 
 
-	/**
-	 * Clears the partition cache.
-	 */
-	public void clearPartitionCache() {
-		this.partitionCache.clear();
-	}
 
 	/**
 	 * replace synchronise if the schema is first time created. To create a schema fast. 

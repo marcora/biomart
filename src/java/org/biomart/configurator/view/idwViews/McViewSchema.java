@@ -907,11 +907,11 @@ public class McViewSchema extends McView implements TreeSelectionListener {
 			Iterator<Mart> mi = loc.getMarts().values().iterator();
 			while(mi.hasNext()) {
 				Mart mart = mi.next();
-				for(Iterator si = mart.getSchemas().values().iterator(); si.hasNext();) {
+				for(Iterator<Schema> si = mart.getSchemas().values().iterator(); si.hasNext();) {
 					Schema schema = (Schema)si.next();
-					for (final Iterator ri = schema.getRelations().iterator(); ri.hasNext();) {
+					for (final Iterator<Relation> ri = schema.getRelations().iterator(); ri.hasNext();) {
 						Relation relation = (Relation)ri.next();
-						for(Iterator dsi = mart.getDataSets().values().iterator(); dsi.hasNext();) {
+						for(Iterator<DataSet> dsi = mart.getDataSets().values().iterator(); dsi.hasNext();) {
 							DataSet dataset = (DataSet)dsi.next();
 							if(relation.isSubclassRelation(dataset)) {
 								Element locElement = JDomUtils.searchElement(root.getNode(), Resources.get("LOCATION"), loc.getName());
@@ -972,9 +972,9 @@ public class McViewSchema extends McView implements TreeSelectionListener {
 	}
 	
 	private Relation findRelation(Mart mart, Key firstKey, Key secondKey) {
-		for(Iterator si = mart.getSchemas().values().iterator(); si.hasNext(); ) {
+		for(Iterator<Schema> si = mart.getSchemas().values().iterator(); si.hasNext(); ) {
 			Schema schema = (Schema)si.next();
-			for(Iterator ri = schema.getRelations().iterator(); ri.hasNext();){
+			for(Iterator<Relation> ri = schema.getRelations().iterator(); ri.hasNext();){
 				Relation relation = (Relation)ri.next();
 				if((relation.getFirstKey().equals(firstKey) && relation.getSecondKey().equals(secondKey)) || 
 						(relation.getSecondKey().equals(firstKey) && relation.getFirstKey().equals(secondKey)))

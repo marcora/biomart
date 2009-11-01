@@ -175,8 +175,6 @@ public class SchemaContext implements DiagramContext {
 
 	public boolean isMasked(final Object object) {
 
-		final String schemaPrefix = null;
-
 		if (object instanceof Schema) {
 			final Schema schema = (Schema) object;
 
@@ -184,16 +182,16 @@ public class SchemaContext implements DiagramContext {
 				return true;
 
 			// Fade out if has external tables and all are inapplicable.
-			final Set extTbls = new HashSet();
-			for (final Iterator i = schema.getRelations().iterator(); i
+			final Set<Table> extTbls = new HashSet<Table>();
+			for (final Iterator<Relation> i = schema.getRelations().iterator(); i
 					.hasNext();) {
-				final Relation r = (Relation) i.next();
+				final Relation r = i.next();
 				if (r.isExternal())
 					extTbls.add(r.getKeyForSchema(schema).getTable());
 			}
-			for (final Iterator i = extTbls.iterator(); i.hasNext();)
+			for (final Iterator<Table> i = extTbls.iterator(); i.hasNext();)
 					return false;
-			
+			//TODO check
 			return !extTbls.isEmpty();
 		}
 
@@ -205,7 +203,7 @@ public class SchemaContext implements DiagramContext {
 			if (table.isMasked())
 				return true;
 			else {
-				for (final Iterator i = table.getRelations().iterator(); i
+				for (final Iterator<Relation> i = table.getRelations().iterator(); i
 						.hasNext();)
 					if (!((Relation) i.next()).getStatus().equals(
 							ComponentStatus.INFERRED_INCORRECT))

@@ -79,9 +79,6 @@ import org.biomart.configurator.view.idwViews.McViews;
  *          $Author: rh4 $
  * @since 0.5
  */
-/*
- * a dataset should includes 0..* jdbcSchema
- */
 public class DataSet extends Schema {
 	private static final long serialVersionUID = 1L;
 
@@ -188,14 +185,14 @@ public class DataSet extends Schema {
 	protected void tableDropped(final Table table) {
 		final DataSetTable dsTable = (DataSetTable) table;
 		// Remove all mods.
-		for (final Iterator j = this.getMart().getSchemasObj().getSchemas().values().iterator(); j
+		for (final Iterator<Schema> j = this.getMart().getSchemasObj().getSchemas().values().iterator(); j
 				.hasNext();) {
-			final Schema sch = (Schema) j.next();
-			for (final Iterator k = sch.getTables().values().iterator(); k
+			final Schema sch = j.next();
+			for (final Iterator<Table> k = sch.getTables().values().iterator(); k
 					.hasNext();)
-				((Table) k.next()).dropMods(dsTable.getDataSet(), dsTable
+				( k.next()).dropMods(dsTable.getDataSet(), dsTable
 						.getName());
-			for (final Iterator k = sch.getRelations().iterator(); k.hasNext();)
+			for (final Iterator<Relation> k = sch.getRelations().iterator(); k.hasNext();)
 				((Relation) k.next()).dropMods(dsTable.getDataSet(), dsTable
 						.getName());
 		}

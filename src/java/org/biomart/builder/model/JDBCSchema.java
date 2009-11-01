@@ -17,9 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 import javax.swing.JOptionPane;
 import org.biomart.builder.model.DataLink.JDBCDataLink;
 import org.biomart.builder.model.Key.ForeignKey;
@@ -32,7 +29,6 @@ import org.biomart.common.exceptions.DataModelException;
 import org.biomart.common.resources.Log;
 import org.biomart.common.resources.Resources;
 import org.biomart.common.resources.Settings;
-import org.biomart.common.utils.InverseMap;
 import org.biomart.common.view.gui.dialogs.ProgressDialog2;
 import org.biomart.configurator.controller.dialects.DatabaseDialect;
 import org.biomart.configurator.utils.DbInfoObject;
@@ -136,11 +132,8 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 				final Column column) throws SQLException {
 			// Do the select.
 			final List results = new ArrayList();
-			final String schemaName = schemaPrefix == null ? this
-					.getDataLinkSchema() : (!this.getPartitions()
-					.containsValue(schemaPrefix) ? this.getDataLinkSchema()
-					: (String) new InverseMap(this.getPartitions())
-							.get(schemaPrefix));
+			final String schemaName = this
+					.getDataLinkSchema();
 			final Connection conn = this.getConnection(null);
 			final String sql = DatabaseDialect.getDialect(this)
 					.getUniqueValuesSQL(schemaName, column);
@@ -154,13 +147,11 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 			return results;
 		}
 
-		public List getRows(final String schemaPrefix, final Table table,
+		public List<Object> getRows(final String schemaPrefix, final Table table,
 				final int count) throws SQLException {
 			// Do the select.
-			final List results = new ArrayList();
-			final String schemaName = schemaPrefix == null ? this
-					.getDataLinkSchema() : (String) new InverseMap(this
-					.getPartitions()).get(schemaPrefix);
+			final List<Object> results = new ArrayList<Object>();
+			final String schemaName = this.getDataLinkSchema();
 			final Connection conn = this.getConnection(null);
 			final String sql = DatabaseDialect.getDialect(this)
 					.getSimpleRowsSQL(schemaName, table);
@@ -168,7 +159,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 			final ResultSet rs = conn.prepareStatement(sql).executeQuery();
 			int rowCount = 0;
 			while (rs.next() && rowCount++ < count) {
-				final List values = new ArrayList();
+				final List<Object> values = new ArrayList<Object>();
 				for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++)
 					values.add(rs.getObject(i));
 				results.add(values);
@@ -179,44 +170,6 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 			return results;
 		}
 
-		public void populatePartitionCache(final Map<String, String> partitions)
-				throws SQLException {
-			Log.debug("Populating partition columns on " + this);
-			// Valid regex?
-			Pattern p;
-			try {
-				p = Pattern.compile(this.getPartitionRegex());
-			} catch (final PatternSyntaxException e) {
-				// Ignore and return if invalid.
-				return;
-			}
-			// Use regex and friends to work out partitions.
-			final Connection conn = this.getConnection(null);
-			// List out all catalogs available.
-			Log.debug("Looking up JDBC catalogs");
-			final DatabaseMetaData dmd = conn.getMetaData();
-			final ResultSet rs = "".equals(dmd.getSchemaTerm()) ? dmd
-					.getCatalogs() : dmd.getSchemas();
-			try {
-				while (rs.next()) {
-					final String schema = rs.getString(1);
-					// Match them against the regex, retaining those
-					// that match and using the name expression to name them.
-					final Matcher m = p.matcher(schema);
-					if (m.matches())
-						try {
-							partitions.put(schema, m.replaceAll(this
-									.getPartitionNameExpression()));
-						} catch (final IndexOutOfBoundsException e) {
-							// We don't care if the expression is invalid.
-						}
-				}
-			} catch (final SQLException e) {
-				throw e;
-			} finally {
-				rs.close();
-			}
-		}
 
 		/**
 		 * {@inheritDoc}
@@ -677,13 +630,9 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 
 			// Load tables and views from database, then loop over them.
 			ResultSet dbTables;
-			if (this.getPartitions().isEmpty())
+			
 				dbTables = dmd.getTables(catalog, this.realSchemaName, "%",
 						new String[] { "TABLE", "VIEW", "ALIAS", "SYNONYM" });
-			else
-				dbTables = dmd.getTables("".equals(dmd.getSchemaTerm()) ? null
-						: catalog, null, "%", new String[] { "TABLE", "VIEW",
-						"ALIAS", "SYNONYM" });
 
 			// Do the loop.
 			final Collection tablesToBeKept = new HashSet();
@@ -692,20 +641,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 				final String catalogName = dbTables.getString("TABLE_CAT");
 				final String schemaName = dbTables.getString("TABLE_SCHEM");
 				String schemaPrefix = null;
-				// No prefix if partitions are empty;
-				if (!this.getPartitions().isEmpty()) {
-					if ("".equals(dmd.getSchemaTerm()))
-						// Use catalog name to get prefix.
-						schemaPrefix = (String) this.getPartitions().get(
-								catalogName);
-					else
-						// Use schema name to get prefix.
-						schemaPrefix = (String) this.getPartitions().get(
-								schemaName);
-					// Don't want to include if prefix is still null.
-					if (schemaPrefix == null)
-						continue;
-				}
+				
 				
 				// What is the table called?
 				final String dbTableName = dbTables.getString("TABLE_NAME");
@@ -753,13 +689,9 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 				// them.
 				Log.debug("Loading table column list for " + dbTableName);
 				ResultSet dbTblCols;
-				if (this.getPartitions().isEmpty())
+				
 					dbTblCols = dmd.getColumns(catalog, this.realSchemaName,
 							dbTableName, "%");
-				else
-					dbTblCols = dmd.getColumns(
-							"".equals(dmd.getSchemaTerm()) ? null : catalog,
-							null, dbTableName, "%");
 				// FIXME: When using Oracle, if the table is a synonym then the
 				// above call returns no results.
 				while (dbTblCols.next()) {
@@ -768,20 +700,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 					final String schemaName = dbTblCols
 							.getString("TABLE_SCHEM");
 					String schemaPrefix = null;
-					// No prefix if partitions are empty;
-					if (!this.getPartitions().isEmpty()) {
-						if ("".equals(dmd.getSchemaTerm()))
-							// Use catalog name to get prefix.
-							schemaPrefix = (String) this.getPartitions().get(
-									catalogName);
-						else
-							// Use schema name to get prefix.
-							schemaPrefix = (String) this.getPartitions().get(
-									schemaName);
-						// Don't want to include if prefix is still null.
-						if (schemaPrefix == null)
-							continue;
-					}
+					
 
 					// What is the column called, and is it nullable?
 					final String dbTblColName = dbTblCols
@@ -860,13 +779,8 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 
 			// Load tables and views from database, then loop over them.
 			ResultSet dbTables = null;
-			if (this.getPartitions().isEmpty())
-				dbTables = dmd.getTables(catalog, this.realSchemaName, "%",
+			dbTables = dmd.getTables(catalog, this.realSchemaName, "%",
 						new String[] { "TABLE", "VIEW", "ALIAS", "SYNONYM" });
-			else
-				dbTables = dmd.getTables("".equals(dmd.getSchemaTerm()) ? null
-						: catalog, null, "%", new String[] { "TABLE", "VIEW",
-						"ALIAS", "SYNONYM" });
 
 			return dbTables;
 
@@ -880,12 +794,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 			final String catalog = this.getConnection(null).getCatalog();
 
 			ResultSet dbTblCols;
-			if (this.getPartitions().isEmpty())
-				dbTblCols = dmd.getColumns(catalog, this.realSchemaName,
-						dbTableName, "%");
-			else
-				dbTblCols = dmd.getColumns(
-						"".equals(dmd.getSchemaTerm()) ? null : catalog, null,
+			dbTblCols = dmd.getColumns(catalog, this.realSchemaName,
 						dbTableName, "%");
 
 			return dbTblCols;

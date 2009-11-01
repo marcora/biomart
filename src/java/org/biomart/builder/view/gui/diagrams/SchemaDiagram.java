@@ -91,7 +91,7 @@ public class SchemaDiagram extends Diagram {
 		// If any change, whole diagram needs redoing from scratch,
 		// and new listeners need setting up.
 		schema.getTables().addPropertyChangeListener(this.listener);
-		schema.getRelations().addPropertyChangeListener(this.listener);
+	//	schema.getRelations().addPropertyChangeListener(this.listener);
 
 		// Listen to when hide masked gets changed or gets renamed.
 		schema.addPropertyChangeListener("hideMasked", this.repaintListener);
@@ -121,13 +121,13 @@ public class SchemaDiagram extends Diagram {
 		boolean mouseEnabled = this.schema.getMart().getMartType().equals(MartType.SOURCE)? true: false;
 		// Add a TableComponent for each table in the schema.
 		final Set<Relation> usedRels = new HashSet<Relation>();
-		for (final Iterator i = this.getSchema().getTables().values()
+		for (final Iterator<Table> i = this.getSchema().getTables().values()
 				.iterator(); i.hasNext();) {
-			final Table t = (Table) i.next();
-			final Collection tRels = new HashSet();
+			final Table t = i.next();
+			final Collection<Relation> tRels = new HashSet<Relation>();
 			int indent = 0;
-			for (final Iterator j = t.getRelations().iterator(); j.hasNext();) {
-				final Relation rel = (Relation) j.next();
+			for (final Iterator<Relation> j = t.getRelations().iterator(); j.hasNext();) {
+				final Relation rel = j.next();
 				if (!rel.isExternal() && !usedRels.contains(rel)) {
 					tRels.add(rel);
 					RelationComponent rc = new RelationComponent(rel, this);

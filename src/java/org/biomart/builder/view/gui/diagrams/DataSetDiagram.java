@@ -85,7 +85,7 @@ public class DataSetDiagram extends Diagram {
 		// If any tables or relations change, whole diagram needs
 		// redoing from scratch, and new listeners need setting up.
 		dataset.getTables().addPropertyChangeListener(this.listener);
-		dataset.getRelations().addPropertyChangeListener(this.listener);
+//		dataset.getRelations().addPropertyChangeListener(this.listener);
 
 		// Listen to when hide masked gets changed.
 		dataset.addPropertyChangeListener("hideMasked", this.repaintListener);
