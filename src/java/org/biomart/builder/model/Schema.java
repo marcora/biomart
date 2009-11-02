@@ -84,7 +84,7 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 	 */
 	protected boolean needsFullSync;
 	private boolean hideMasked = false;
-	private final McBeanCollection<Relation> relationCache;
+	private final Set<Relation> relations;
 	/**
 	 * Subclasses use this to update synchronisation progress.
 	 */
@@ -166,8 +166,7 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 
 		Transaction.addTransactionListener(this);
 
-		// Listen to own tables and update key+relation caches.
-		this.relationCache = new McBeanCollection<Relation>(new HashSet<Relation>());
+		this.relations = new HashSet<Relation>();
 		//only listen for add/remove item
 		this.tables.addPropertyChangeListener(McBeanMap.property_AddItem,this.relationCacheBuilder);
 		this.tables.addPropertyChangeListener(McBeanMap.property_RemoveItem,this.relationCacheBuilder);
@@ -293,14 +292,18 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 			//only listen for add/remove relation
 			table.getRelations().addPropertyChangeListener(McBeanCollection.property_AddItem,this.relationCacheBuilder);
 			table.getRelations().addPropertyChangeListener(McBeanCollection.property_RemoveItem,this.relationCacheBuilder);
+			this.relations.addAll(table.getRelations());
 		} //table dropped
 		else if(propertyName.equals(McBeanMap.property_RemoveItem)) {
 			Table table = (Table) pce.getOldValue();
+			this.relations.removeAll(table.getRelations());
 			this.tableDropped(table);
 		}else if(propertyName.equals(McBeanCollection.property_AddItem)) {
-			
+			Relation relation = (Relation) pce.getNewValue();
+			this.relations.add(relation);
 		}else if(propertyName.equals(McBeanCollection.property_RemoveItem)) {
-			
+			Relation relation = (Relation) pce.getOldValue();
+			this.relations.remove(relation);
 		}
 		else {
 			//TODO testing
@@ -309,15 +312,15 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 		}
 		
 		//TODO 
-		final Collection<Relation> newRels = new HashSet<Relation>();
+/*		final Collection<Relation> newRels = new HashSet<Relation>();
 		for (final Iterator<Table> i = this.tables.values().iterator(); i.hasNext();) {
 			final Table table = i.next();
 			newRels.addAll(table.getRelations());
 		}
-		if (!newRels.equals(this.relationCache)) {
-			this.relationCache.clear();
-			this.relationCache.addAll(newRels);
-		}
+		if (!newRels.equals(this.relations)) {
+			this.relations.clear();
+			this.relations.addAll(newRels);
+		}*/
 	}
 
 	/**
@@ -351,8 +354,8 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 	 * 
 	 * @return the unmodifiable collection of relations?
 	 */
-	public McBeanCollection<Relation> getRelations() {
-		return this.relationCache;
+	public Set<Relation> getRelations() {
+		return this.relations;
 	}
 
 	/**
