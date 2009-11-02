@@ -133,7 +133,9 @@
 		<xs:attribute name="attribute" type="xs:string" use="optional" />
 		<xs:attribute name="filter" type="xs:string" use="optional" />-->
 		
-		<!-- all filters -->
+		<xs:attribute name="partition" type="xs:boolean" use="optional" />
+		
+		<!-- all non-partition filters -->
 		<xs:attribute name="qualifier" type="xs:string" use="optional" />
 		<xs:attribute name="caseSensitive" type="xs:boolean" use="optional" />
 		
