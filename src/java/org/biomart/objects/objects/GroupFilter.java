@@ -69,7 +69,10 @@ public class GroupFilter extends Filter implements Serializable {
 		}
 		GroupFilter groupFilter=(GroupFilter)object;
 		return (
-		(super.equals(groupFilter))
+				(super.equals(groupFilter)) &&
+				(this.logicalOperator==groupFilter.logicalOperator || (this.logicalOperator!=null && logicalOperator.equals(groupFilter.logicalOperator))) &&
+				(this.multipleFilter==groupFilter.multipleFilter || (this.multipleFilter!=null && multipleFilter.equals(groupFilter.multipleFilter))) &&
+				(this.filterNamesList==groupFilter.filterNamesList || (this.filterNamesList!=null && filterNamesList.equals(groupFilter.filterNamesList)))
 		);
 	}
 
@@ -77,6 +80,9 @@ public class GroupFilter extends Filter implements Serializable {
 	public int hashCode() {
 		int hash = MartConfiguratorConstants.HASH_SEED1;
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + super.hashCode();
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==logicalOperator? 0 : logicalOperator.hashCode());
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==multipleFilter? 0 : multipleFilter.hashCode());
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==filterNamesList? 0 : filterNamesList.hashCode());
 		return hash;
 	}
 

@@ -81,7 +81,24 @@ public class SimpleFilter extends Filter implements Serializable/*implements Com
 		}
 		SimpleFilter simpleFilter=(SimpleFilter)object;
 		return (
-				super.equals(simpleFilter)
+				super.equals(simpleFilter) &&
+				(this.displayType==simpleFilter.displayType || (this.displayType!=null && displayType.equals(simpleFilter.displayType))) &&
+				(this.orderBy==simpleFilter.orderBy || (this.orderBy!=null && orderBy.equals(simpleFilter.orderBy))) &&
+				(this.multiValue==simpleFilter.multiValue || (this.multiValue!=null && multiValue.equals(simpleFilter.multiValue))) &&
+				(this.buttonURL==simpleFilter.buttonURL || (this.buttonURL!=null && buttonURL.equals(simpleFilter.buttonURL))) &&
+				(this.upload==simpleFilter.upload || (this.upload!=null && upload.equals(simpleFilter.upload))) &&
+				
+				(this.cascadeChildrenNamesList==simpleFilter.cascadeChildrenNamesList || (this.cascadeChildrenNamesList!=null && cascadeChildrenNamesList.equals(simpleFilter.cascadeChildrenNamesList))) &&
+				
+				(this.trueValue==simpleFilter.trueValue || (this.trueValue!=null && trueValue.equals(simpleFilter.trueValue))) &&
+				(this.trueDisplay==simpleFilter.trueDisplay || (this.trueDisplay!=null && trueDisplay.equals(simpleFilter.trueDisplay))) &&
+				(this.falseValue==simpleFilter.falseValue || (this.falseValue!=null && falseValue.equals(simpleFilter.falseValue))) &&
+				(this.falseDisplay==simpleFilter.falseDisplay || (this.falseDisplay!=null && falseDisplay.equals(simpleFilter.falseDisplay))) &&
+				
+				(this.partition==simpleFilter.partition || (this.partition!=null && partition.equals(simpleFilter.partition))) &&
+				
+				(this.tree==simpleFilter.tree || (this.tree!=null && tree.equals(simpleFilter.tree)))
+				//(this.treeFilterData==simpleFilter.treeFilterData || (this.treeFilterData!=null && treeFilterData.equals(simpleFilter.treeFilterData)))				
 		);
 	}
 
@@ -89,6 +106,24 @@ public class SimpleFilter extends Filter implements Serializable/*implements Com
 	public int hashCode() {
 		int hash = MartConfiguratorConstants.HASH_SEED1;
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + super.hashCode();
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==displayType? 0 : displayType.hashCode());
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==orderBy? 0 : orderBy.hashCode());
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==multiValue? 0 : multiValue.hashCode());
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==buttonURL? 0 : buttonURL.hashCode());
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==upload? 0 : upload.hashCode());
+		
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==trueValue? 0 : trueValue.hashCode());
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==trueDisplay? 0 : trueDisplay.hashCode());
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==falseValue? 0 : falseValue.hashCode());
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==falseDisplay? 0 : falseDisplay.hashCode());
+		
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==partition? 0 : partition.hashCode());
+		
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==tree? 0 : tree.hashCode());
+		
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==cascadeChildrenNamesList? 0 : cascadeChildrenNamesList.hashCode());
+		//hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==treeFilterData? 0 : treeFilterData.hashCode());
+
 		return hash;
 	}
 
@@ -119,18 +154,6 @@ public class SimpleFilter extends Filter implements Serializable/*implements Com
 	public TreeFilterData setTreeFilterData(TreeFilterData treeFilterData) {
 		return this.treeFilterData = treeFilterData;
 	}
-	/*public void copyTreeDataRelatedInformation(TreeFilter treeFilter) throws FunctionalException {
-		this.dataFolderPath = treeFilter.getDataFolderPath();
-		this.treeFilterData = treeFilter.getTreeFilterData();
-	}*/
-	/*public void setTreeDataFolderPath(String stringDataFolderPath) throws FunctionalException {
-		this.dataFolderPath = new File(stringDataFolderPath);
-		if (!this.dataFolderPath.exists()) {
-			throw new FunctionalException("dataFolderPath does not exist: " + this.dataFolderPath.getAbsolutePath());
-		}
-		this.treeFilterData = new TreeFilterData(this);
-		//TODO consider setting (boolean)tree here...
-	}*/
 
 	// Other
 	public String getDisplayType() {

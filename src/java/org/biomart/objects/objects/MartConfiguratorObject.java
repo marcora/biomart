@@ -23,7 +23,9 @@ public class MartConfiguratorObject implements Serializable /*implements Compara
 	protected String displayName = null;
 	protected String description = null;
 	protected Boolean visible = null;
+	
 	protected String xmlElementName = null;
+	
 	public MartConfiguratorObject() {}	// for Serialization
 	public MartConfiguratorObject(String name, String displayName, String description, Boolean visible, String xmlElementName) {
 		super();
@@ -93,9 +95,9 @@ public class MartConfiguratorObject implements Serializable /*implements Compara
 		return (
 			(this.name==martConfiguratorObject.name || (this.name!=null && name.equals(martConfiguratorObject.name))) &&
 			(this.displayName==martConfiguratorObject.displayName || (this.displayName!=null && displayName.equals(martConfiguratorObject.displayName))) &&
-			(this.description==martConfiguratorObject.description || (this.description!=null && description.equals(martConfiguratorObject.description)))
-			/*(this.visible==martConfiguratorObject.visible || (this.visible!=null && visible.equals(martConfiguratorObject.visible))) &&
-			(this.jdomElement==martConfiguratorObject.jdomElement || (this.jdomElement!=null && jdomElement.equals(martConfiguratorObject.jdomElement)))*/
+			(this.description==martConfiguratorObject.description || (this.description!=null && description.equals(martConfiguratorObject.description))) &&
+			(this.visible==martConfiguratorObject.visible || (this.visible!=null && visible.equals(martConfiguratorObject.visible))) &&
+			(this.xmlElementName==martConfiguratorObject.xmlElementName || (this.xmlElementName!=null && xmlElementName.equals(martConfiguratorObject.xmlElementName)))
 		);
 	}
 
@@ -106,7 +108,7 @@ public class MartConfiguratorObject implements Serializable /*implements Compara
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==displayName? 0 : displayName.hashCode());
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==description? 0 : description.hashCode());
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==visible? 0 : visible.hashCode());
-		/*hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==jdomElement? 0 : jdomElement.hashCode());*/
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==xmlElementName? 0 : xmlElementName.hashCode());
 		return hash;
 	}
 

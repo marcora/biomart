@@ -2,14 +2,12 @@ package org.biomart.objects.objects;
 
 
 import java.io.Serializable;
-import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
 import org.biomart.common.general.exceptions.TechnicalException;
-import org.biomart.common.general.utils.CompareUtils;
 import org.biomart.common.general.utils.MyUtils;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
@@ -17,7 +15,7 @@ import org.biomart.transformation.helpers.PartitionTableAndRow;
 
 
 
-public class Part implements Comparable<Part>, Comparator<Part>, Serializable {
+public class Part implements /*Comparable<Part>, Comparator<Part>, */Serializable {
 
 	private static final long serialVersionUID = 2721818632834760378L;
 
@@ -33,7 +31,7 @@ public class Part implements Comparable<Part>, Comparator<Part>, Serializable {
 	public Part(Boolean target, Boolean visible, Element partSpecificElement, PartitionTableAndRow... partitionTableAndRows) {
 		super();
 		this.target = target;
-		this.map = new TreeMap<PartitionTable, Integer>();
+		this.map = new LinkedHashMap<PartitionTable, Integer>();
 		if (null!=partitionTableAndRows) {
 			for (int i = 0; i < partitionTableAndRows.length; i++) {
 				addPartitionRow(partitionTableAndRows[i].getPartitionTable(), partitionTableAndRows[i].getRow());
@@ -82,22 +80,6 @@ public class Part implements Comparable<Part>, Comparator<Part>, Serializable {
 	}
 	
 	public boolean containsPartition(PartitionTable partitionTable) {
-		/*System.out.println(MyUtils.DASH_LINE);
-		System.out.println(partitionTable.getName());
-		
-		for (Iterator<PartitionTable> it = map.keySet().iterator(); it.hasNext();) {
-			PartitionTable partitionTable2 = it.next();
-			Integer row = map.get(partitionTable2);
-			System.out.println("\t" + partitionTable2.getName() + "\t" + row + 
-					"\t" + partitionTable2.equals(partitionTable) + "\t" + partitionTable2.compareTo(partitionTable) + 
-					 "\t" + partitionTable2.compareSuper(partitionTable2, partitionTable) + "\t" + 
-					 CompareUtils.compareNull(partitionTable2.getName(), partitionTable.getName()) + "\t" +
-					 CompareUtils.compareNull("go", "m") + "\t" +
-					 partitionTable2.getName() + ", " + partitionTable.getName());
-		}
-		
-		System.out.println(this.map.keySet().contains(partitionTable));
-		System.out.println(MyUtils.DASH_LINE);*/
 		return this.map.keySet().contains(partitionTable);
 	}
 
@@ -146,8 +128,7 @@ public class Part implements Comparable<Part>, Comparator<Part>, Serializable {
 
 	@Override
 	public String toString() {
-		return 
-			/*super.toString() + ", " + */
+		return
 			"target = " + target + ", " +
 			"map = " + map + ", " +
 			"visible = " + visible/* + ", " +
@@ -166,8 +147,9 @@ public class Part implements Comparable<Part>, Comparator<Part>, Serializable {
 		return (
 			(this.target==part.target || (this.target!=null && target.equals(part.target))) &&
 			(this.map==part.map || (this.map!=null && map.equals(part.map))) &&
-			(this.visible==part.visible || (this.visible!=null && visible.equals(part.visible))) &&
-			(this.partSpecificElement==part.partSpecificElement || (this.partSpecificElement!=null && partSpecificElement.equals(part.partSpecificElement)))
+			(this.visible==part.visible || (this.visible!=null && visible.equals(part.visible)))
+			//(this.partSpecificElement==part.partSpecificElement || (this.partSpecificElement!=null && partSpecificElement.equals(part.partSpecificElement)))
+			//TODO partSpecificElement
 		);
 	}
 
@@ -178,10 +160,11 @@ public class Part implements Comparable<Part>, Comparator<Part>, Serializable {
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==map? 0 : map.hashCode());
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==visible? 0 : visible.hashCode());
 		//hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==partSpecificElement? 0 : partSpecificElement.hashCode());
+		//TODO partSpecificElement
 		return hash;
 	}
 
-	public int compare(Part part1, Part part2) {
+	/*public int compare(Part part1, Part part2) {
 		if (part1==null && part2!=null) {
 			return -1;
 		} else if (part1!=null && part2==null) {
@@ -209,13 +192,6 @@ public class Part implements Comparable<Part>, Comparator<Part>, Serializable {
 			PartitionTable partitionTable1 = it.next();
 			PartitionTable partitionTable2 = it2.next();
 			
-			// Make main partition table the 1st element	TODO : slows it down a lot...
-			/*if (partitionTable1.getMain()) {
-				return -1;
-			} else if (partitionTable2.getMain()) {
-				return 1;
-			}*/
-			
 			compare = partitionTable1.compareTo(partitionTable2);
 			if (compare!=0) {
 				return compare;
@@ -234,7 +210,7 @@ public class Part implements Comparable<Part>, Comparator<Part>, Serializable {
 
 	public int compareTo(Part part) {
 		return compare(this, part);
-	}
+	}*/
 	
 	public String getXmlValue() {
 		StringBuffer stringBuffer = new StringBuffer();
@@ -258,6 +234,8 @@ public class Part implements Comparable<Part>, Comparator<Part>, Serializable {
 			PartitionTable partitionTable = it.next();
 			if (!partitionTable.getMain()) {
 				Integer row = map.get(partitionTable);
+				MyUtils.checkStatusProgram(null!=row, 
+						"map = " + map + ", partitionTable = " + partitionTable +  " --- " + displayMapHashCodes(partitionTable));
 				stringBuffer.append(MartConfiguratorConstants.RANGE_INTRA_SEPARATOR +
 						MartConfiguratorConstants.RANGE_PARTITION_TABLE_PREFIX + partitionTable.getName() + 
 						MartConfiguratorConstants.RANGE_ROW_PREFIX + displayRow(row));
@@ -278,8 +256,18 @@ public class Part implements Comparable<Part>, Comparator<Part>, Serializable {
 		stringBuffer.append(MartConfiguratorConstants.RANGE_RANGE_END);
 		return stringBuffer.toString();
 	}
+	
+	private String displayMapHashCodes(PartitionTable partitionTable) {
+		String s = "";
+		for (Iterator<PartitionTable> it = map.keySet().iterator(); it.hasNext();) {
+			PartitionTable partitionTableTmp = it.next();
+			s +=partitionTableTmp.getName() + ": " + partitionTableTmp.hashCode() + " (" + partitionTableTmp.equals(partitionTable) + ")" + ", ";
+		}
+		s += " / " + partitionTable.hashCode();
+		return s;
+	}
 
-	private String displayRow(Integer row) {
+	private String displayRow(int row) {
 		return row==-1 ? MartConfiguratorConstants.PARTITION_TABLE_ROW_WILDCARD : String.valueOf(row);
 	}
 

@@ -4,10 +4,9 @@ package org.biomart.objects.objects;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
-
 
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
@@ -17,7 +16,7 @@ import org.biomart.transformation.helpers.PartitionTableAndRow;
 import org.jdom.Element;
 
 
-public class Range /*implements Comparable<Range>, Comparator<Range>*/implements Serializable {
+public class Range implements Serializable {
 
 	private static final long serialVersionUID = -5456292603227275941L;
 
@@ -32,7 +31,7 @@ public class Range /*implements Comparable<Range>, Comparator<Range>*/implements
 
 	public Range(PartitionTable mainPartitionTable, Boolean target) {
 		super();
-		this.partSet = new TreeSet<Part>();
+		this.partSet = new LinkedHashSet<Part>();
 		this.partitionTableSet = new HashSet<PartitionTable>();
 		this.target = target;
 		
@@ -83,13 +82,13 @@ public class Range /*implements Comparable<Range>, Comparator<Range>*/implements
 				} else {
 					for (Part part : this.partSet) {
 						MyUtils.checkStatusProgram(!part.containsPartition(partitionTable), 
-								"part = " + part.getXmlValue() + ", partitionTableSet = " + getPartitionTableSetToShortString() + 
+								"part = " + part.getXmlValue() + ", partitionTableSet = {" + getPartitionTableSetToShortString() + "}" + 
 								", partitionTable = " + partitionTable.getName() + ", row = " + row);
 						part.addPartitionRow(partitionTable, row);
 					}
 				}
 			} else {
-				Set<Part> partSetTmp = new TreeSet<Part>();					
+				Set<Part> partSetTmp = new LinkedHashSet<Part>();					
 				for (Part part : this.partSet) {
 					Part newPart = (Part)part.clone(); 	// clone existing one
 					newPart.modifyPartitionRow(partitionTable, row);	// replace it's value
@@ -118,7 +117,7 @@ public class Range /*implements Comparable<Range>, Comparator<Range>*/implements
 	public void removePartition(PartitionTable partitionTable) throws TechnicalException, FunctionalException {
 		try {
 			if (this.partitionTableSet.contains(partitionTable)) {
-				Set<Part> partSetTmp = new TreeSet<Part>();					
+				Set<Part> partSetTmp = new LinkedHashSet<Part>();					
 				for (Part part : this.partSet) {
 					Part newPart = (Part)part.clone(); 	// clone existing one
 					int row = newPart.removePartition(partitionTable);
@@ -167,8 +166,7 @@ public class Range /*implements Comparable<Range>, Comparator<Range>*/implements
 
 	@Override
 	public String toString() {
-		return 
-			/*super.toString() + ", " +*/ 
+		return
 			"partSet = " + partSet + ", " +
 			"partitionTableSet = " + partitionTableSet + ", " +
 			"target = " + target;
@@ -184,7 +182,6 @@ public class Range /*implements Comparable<Range>, Comparator<Range>*/implements
 		}
 		Range range=(Range)object;
 		return (
-			/*super.equals();*/
 			(this.partSet==range.partSet || (this.partSet!=null && partSet.equals(range.partSet))) &&
 			(this.partitionTableSet==range.partitionTableSet || (this.partitionTableSet!=null && partitionTableSet.equals(range.partitionTableSet))) &&
 			(this.target==range.target || (this.target!=null && target.equals(range.target)))
@@ -263,7 +260,7 @@ public class Range /*implements Comparable<Range>, Comparator<Range>*/implements
 	public Range cloneRange() throws TechnicalException {	// can't use clone() because of exception thrown...
 		Range range = new Range(
 				this.mainPartitionTable, this.target);	// the main partition table must not be "cloned" here
-		TreeSet<Part> partSet = new TreeSet<Part>();
+		LinkedHashSet<Part> partSet = new LinkedHashSet<Part>();
 		try {
 			for (Part part : this.partSet) {
 				Part clone = (Part)part.clone();

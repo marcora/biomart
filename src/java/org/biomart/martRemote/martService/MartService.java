@@ -40,6 +40,7 @@ public class MartService {
 		//MyConstants.FILE_SYSTEM_PROTOCOL + "/var/lib/tomcat5.5/webapps/MartService" + MyUtils.FILE_SEPARATOR + MartRemoteConstants.ADDITIONAL_FILES_FOLDER_NAME + MyUtils.FILE_SEPARATOR + MartRemoteConstants.PORTAL_SERIAL_FILE_NAME;
 		
 	public static MartApi martServiceApi = null;
+	public static boolean loadedProperly = false;
 		
 	public String getRegistry(String username, String password, String format) throws FunctionalException, TechnicalException {
 		MartServiceHelper.initialize();
@@ -83,12 +84,24 @@ public class MartService {
 	}
 	
 	
+
+	public String testXsd() {
+		return "" + MartService.martServiceApi.getXsd();
+	}
 	
+	public String testPortal() {
+		return "" + MartService.martServiceApi.getMartRegistry();
+	}
 	
+	public String testServer() {
+		return "" + MartService.loadedProperly;
+	}
 	
-	
+	public String debug(String param) {
+		return "param = " + param;
+	}
 	
 	public String test(String arg1, String arg2) {
-		return "ok: " + arg1 + " " + arg2;
+		return "ok2: " + arg1 + " " + arg2;
 	}
 }

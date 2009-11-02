@@ -113,9 +113,11 @@ public class MartConfiguratorUtils {
 	public static<T> String collectionToString(Collection<? extends T> c, String separator) {
 		StringBuffer stringBuffer = new StringBuffer();
 		int i=0;
-		for (T t : c) {
-			stringBuffer.append((i==0 ? "" : separator) + t);
-			i++;
+		if (c!=null) {
+			for (T t : c) {
+				stringBuffer.append((i==0 ? "" : separator) + t);
+				i++;
+			}
 		}
 		return stringBuffer.toString();
 	}

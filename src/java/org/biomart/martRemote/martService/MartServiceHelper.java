@@ -20,6 +20,7 @@ public class MartServiceHelper {
 				MartService.martServiceApi = new MartApi(true, 
 						MartService.XSD_FILE_PATH, MartService.XSD_FILE_URL, 
 						MartService.PORTAL_SERIAL_FILE_PATH, MartService.PORTAL_SERIAL_FILE_URL);
+				MartService.loadedProperly = true;
 			} catch (TechnicalException e) {
 				e.printStackTrace();
 				return e.getMessage();

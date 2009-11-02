@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.utils.MyUtils;
 import org.biomart.objects.MartConfiguratorConstants;
@@ -19,7 +18,7 @@ import org.biomart.transformation.helpers.TransformationUtils;
 import org.jdom.Element;
 
 
-public class OldDatasetConfig extends OldNode /*implements Comparable<OldDatasetConfig>, Comparator<OldDatasetConfig> */{
+public class OldDatasetConfig extends OldNode {
 
 	public static void main(String[] args) {}
 
@@ -74,7 +73,7 @@ public class OldDatasetConfig extends OldNode /*implements Comparable<OldDataset
 				jdomElement.getAttributeValue("template"),
 				jdomElement.getAttributeValue("type"),
 				jdomElement.getAttributeValue("version"),
-				Boolean.valueOf(jdomElement.getAttributeValue("visible"))
+				MartConfiguratorUtils.binaryDigitToBoolean(jdomElement.getAttributeValue("visible"))
 		);
 	}
 	
@@ -438,97 +437,6 @@ public class OldDatasetConfig extends OldNode /*implements Comparable<OldDataset
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==oldFilterPageList? 0 : oldFilterPageList.hashCode());
 		return hash;
 	}
-
-	/*@Override
-	public int compare(OldDatasetConfig oldDatasetConfig1, OldDatasetConfig oldDatasetConfig2) {
-		if (oldDatasetConfig1==null && oldDatasetConfig2!=null) {
-			return -1;
-		} else if (oldDatasetConfig1!=null && oldDatasetConfig2==null) {
-			return 1;
-		}
-		int compare = CompareUtils.compareNull(oldDatasetConfig1.dataset, oldDatasetConfig2.dataset);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(oldDatasetConfig1.datasetID, oldDatasetConfig2.datasetID);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(oldDatasetConfig1.defaultDataset, oldDatasetConfig2.defaultDataset);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(oldDatasetConfig1.displayName, oldDatasetConfig2.displayName);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(oldDatasetConfig1.description, oldDatasetConfig2.description);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(oldDatasetConfig1.entryLabel, oldDatasetConfig2.entryLabel);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(oldDatasetConfig1.interfaces, oldDatasetConfig2.interfaces);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(oldDatasetConfig1.internalName, oldDatasetConfig2.internalName);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(oldDatasetConfig1.martUsers, oldDatasetConfig2.martUsers);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(oldDatasetConfig1.modified, oldDatasetConfig2.modified);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(oldDatasetConfig1.softwareVersion, oldDatasetConfig2.softwareVersion);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(oldDatasetConfig1.template, oldDatasetConfig2.template);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(oldDatasetConfig1.type, oldDatasetConfig2.type);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(oldDatasetConfig1.version, oldDatasetConfig2.version);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(oldDatasetConfig1.visible, oldDatasetConfig2.visible);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(oldDatasetConfig1.oldDynamicDatasetList, oldDatasetConfig2.oldDynamicDatasetList);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(oldDatasetConfig1.oldImportableList, oldDatasetConfig2.oldImportableList);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(oldDatasetConfig1.oldExportableList, oldDatasetConfig2.oldExportableList);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(oldDatasetConfig1.oldAttributePageList, oldDatasetConfig2.oldAttributePageList);
-		if (compare!=0) {
-			return compare;
-		}
-		return CompareUtils.compareNull(oldDatasetConfig1.oldFilterPageList, oldDatasetConfig2.oldFilterPageList);
-	}
-
-	@Override
-	public int compareTo(OldDatasetConfig oldDatasetConfig) {
-		return compare(this, oldDatasetConfig);
-	}*/
 	
 	public Dataset transformToDataset(String newDatasetName, TransformationHelper help) throws FunctionalException {
 		String displayName = help.replaceAliases(this.displayName);

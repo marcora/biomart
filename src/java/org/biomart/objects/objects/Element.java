@@ -224,6 +224,9 @@ public class Element extends Containee implements Serializable {
 		Element element=(Element)object;
 		return (
 			(super.equals(element)) &&
+			(this.selectedByDefault==element.selectedByDefault || (this.selectedByDefault!=null && selectedByDefault.equals(element.selectedByDefault))) &&
+			(this.pointer==element.pointer || (this.pointer!=null && pointer.equals(element.pointer))) &&
+			
 			(this.locationName==element.locationName || (this.locationName!=null && locationName.equals(element.locationName))) &&
 			(this.martName==element.martName || (this.martName!=null && martName.equals(element.martName))) &&
 			(this.version==element.version || (this.version!=null && version.equals(element.version))) &&
@@ -232,12 +235,14 @@ public class Element extends Containee implements Serializable {
 			(this.tableName==element.tableName || (this.tableName!=null && tableName.equals(element.tableName))) &&
 			(this.keyName==element.keyName || (this.keyName!=null && keyName.equals(element.keyName))) &&
 			(this.fieldName==element.fieldName || (this.fieldName!=null && fieldName.equals(element.fieldName))) &&
+			
+			(this.checkForNulls==element.checkForNulls || (this.checkForNulls!=null && checkForNulls.equals(element.checkForNulls))) &&
+			
+			(this.pointedElementName==element.pointedElementName || (this.pointedElementName!=null && pointedElementName.equals(element.pointedElementName))) &&
+			
 			(this.targetRange==element.targetRange || (this.targetRange!=null && targetRange.equals(element.targetRange))) &&
-			/*(this.selectedByDefault==element.selectedByDefault || (this.selectedByDefault!=null && selectedByDefault.equals(element.selectedByDefault))) &&*/
-			(this.pointer==element.pointer || (this.pointer!=null && pointer.equals(element.pointer))) &&
-			(this.pointedElementName==element.pointedElementName || (this.pointedElementName!=null && pointedElementName.equals(element.pointedElementName)))
-			/*(this.checkForNulls==element.checkForNulls || (this.checkForNulls!=null && checkForNulls.equals(element.checkForNulls))) &&
-			(this.sourceRange==element.sourceRange || (this.sourceRange!=null && sourceRange.equals(element.sourceRange)))*/
+			(this.sourceRange==element.sourceRange || (this.sourceRange!=null && sourceRange.equals(element.sourceRange)))
+			//TODO add partition tables & pointedElement?
 		);
 	}
 
@@ -343,7 +348,7 @@ public class Element extends Containee implements Serializable {
 		}
 	}
 	protected JSONObject generateJsonForWebService(String pointedElementType) {
-		MyUtils.checkStatusProgram(this.targetRange.getPartSet().size()==1);	// there should be only 1 element (it's flattened)
+		//MyUtils.checkStatusProgram(this.targetRange.getPartSet().size()==1);	// there should be only 1 element (it's flattened)
 		
 		JSONObject object = super.generateJsonForWebService();
 		object.remove("visible");	// doesn't apply for Elements

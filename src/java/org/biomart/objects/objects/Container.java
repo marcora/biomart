@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import org.biomart.common.general.exceptions.FunctionalException;
@@ -323,15 +324,22 @@ public class Container extends Containee implements Comparable<Container>, Compa
 		object.put("level", this.level);
 		object.put("queryRestriction", this.queryRestriction);
 		
+		JSONArray array = new JSONArray();
+		boolean atLeastOne = false;
 		for (Containee containee : containeeList) {
 			if (containee instanceof Container) {
 				JSONObject containeeJSONObject = containee.generateJsonForWebService();
-				object.put(containee.getXmlElementName(), containeeJSONObject);
+				array.add(containeeJSONObject);
+				atLeastOne = true;
 			} else if (containee instanceof org.biomart.objects.objects.Element) {
 				org.biomart.objects.objects.Element martConfiguratorElement = (org.biomart.objects.objects.Element)containee;
 				JSONObject elementJSONObject = martConfiguratorElement.generateJsonForWebService();
-				object.put(martConfiguratorElement.getXmlElementName(), elementJSONObject);
+				array.add(elementJSONObject);
+				atLeastOne = true;
 			}
+		}
+		if (atLeastOne) {
+			object.put("containees", array);
 		}
 		
 		jsonObject.put(super.xmlElementName, object);

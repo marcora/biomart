@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 import org.biomart.common.general.utils.CompareUtils;
 import org.biomart.common.general.utils.MyUtils;
 import org.biomart.objects.MartConfiguratorConstants;
@@ -148,22 +147,30 @@ public class PartitionTable extends MartConfiguratorObject implements Comparable
 		}
 		PartitionTable partitionTable=(PartitionTable)object;
 		return (
-			super.name.equals(partitionTable.name)
-			/*(super.equals(partitionTable))*//* &&
+			super.equals(partitionTable) &&
+			
 			(this.main==partitionTable.main || (this.main!=null && main.equals(partitionTable.main))) &&
+			(this.flatten==partitionTable.flatten || (this.flatten!=null && flatten.equals(partitionTable.flatten))) &&
+			
 			(this.totalRows==partitionTable.totalRows || (this.totalRows!=null && totalRows.equals(partitionTable.totalRows))) &&
-			(this.totalColumns==partitionTable.totalColumns || (this.totalColumns!=null && totalColumns.equals(partitionTable.totalColumns)))*//* &&
-			(this.table==partitionTable.table || (this.table!=null && table.equals(partitionTable.table)))*/
+			(this.totalColumns==partitionTable.totalColumns || (this.totalColumns!=null && totalColumns.equals(partitionTable.totalColumns))) &&
+			
+			(this.table==partitionTable.table || (this.table!=null && table.equals(partitionTable.table)))
 		);
 	}
 
 	@Override
 	public int hashCode() {
-		/*int hash = MartConfiguratorConstants.HASH_SEED1;
+		int hash = MartConfiguratorConstants.HASH_SEED1;
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + super.hashCode();
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==super.name? 0 : super.name.hashCode());
-		return hash;*/
-		return 0;
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==main? 0 : main.hashCode());
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==flatten? 0 : flatten.hashCode());
+		
+		/*hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==totalRows? 0 : totalRows.hashCode());
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==totalColumns? 0 : totalColumns.hashCode());
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==table? 0 : table.hashCode());*/		//FIXME don't understand that makes it crash
+		
+		return hash;
 	}
 
 	public int compare(PartitionTable partitionTable1, PartitionTable partitionTable2) {
@@ -172,27 +179,7 @@ public class PartitionTable extends MartConfiguratorObject implements Comparable
 		} else if (partitionTable1!=null && partitionTable2==null) {
 			return 1;
 		}
-		int compare = CompareUtils.compareString(partitionTable1.name, partitionTable2.name);
-		if (compare!=0) {
-			return compare;
-		}
-		/*int compare = partitionTable1.compareSuper(partitionTable1, partitionTable2);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareBoolean(partitionTable1.main, partitionTable2.main);
-		if (compare!=0) {
-			return compare;
-		}*/
-		compare = CompareUtils.compareInteger(partitionTable1.totalRows, partitionTable2.totalRows);
-		if (compare!=0) {
-			return compare;
-		}
-		return CompareUtils.compareInteger(partitionTable1.totalColumns, partitionTable2.totalColumns);
-		/*if (compare!=0) {
-			return compare;
-		}
-		return CompareUtils.compareListStringList(partitionTable1.table, partitionTable2.table);*/
+		return CompareUtils.compareString(partitionTable1.name, partitionTable2.name);
 	}
 
 	public int compareTo(PartitionTable partitionTable) {

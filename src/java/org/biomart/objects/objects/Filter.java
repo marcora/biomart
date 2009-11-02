@@ -106,8 +106,11 @@ public class Filter extends Element implements Comparable<Filter>, Comparator<Fi
 		}
 		Filter filter=(Filter)object;
 		return (
-			super.equals(filter)
-			/*(this.displayType==filter.displayType || (this.displayType!=null && displayType.equals(filter.displayType)))*/
+			super.equals(filter) &&
+			(this.qualifier==filter.qualifier || (this.qualifier!=null && qualifier.equals(filter.qualifier))) &&
+			(this.caseSensitive==filter.caseSensitive || (this.caseSensitive!=null && caseSensitive.equals(filter.caseSensitive))) &&
+			(this.dataFolderPath==filter.dataFolderPath || (this.dataFolderPath!=null && dataFolderPath.equals(filter.dataFolderPath)))
+			//(this.filterData==filter.filterData || (this.filterData!=null && filterData.equals(filter.filterData)))
 		);
 	}
 
@@ -115,7 +118,10 @@ public class Filter extends Element implements Comparable<Filter>, Comparator<Fi
 	public int hashCode() {
 		int hash = MartConfiguratorConstants.HASH_SEED1;
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + super.hashCode();
-		/*hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==displayType? 0 : displayType.hashCode());*/
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==qualifier? 0 : qualifier.hashCode());
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==caseSensitive? 0 : caseSensitive.hashCode());
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==dataFolderPath? 0 : dataFolderPath.hashCode());
+		//hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==filterData? 0 : filterData.hashCode());
 		return hash;
 	}
 

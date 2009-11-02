@@ -54,6 +54,7 @@ public class Containee extends MartConfiguratorObject implements Serializable {
 		Containee containee=(Containee)object;
 		return (
 				super.equals(containee)
+				//TODO parentContainer?
 		);	
 	}
 
@@ -61,6 +62,7 @@ public class Containee extends MartConfiguratorObject implements Serializable {
 	public int hashCode() {
 		int hash = MartConfiguratorConstants.HASH_SEED1;
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + super.hashCode();
+		//TODO parentContainer?
 		return hash;
 	}
 	
@@ -95,8 +97,8 @@ public class Containee extends MartConfiguratorObject implements Serializable {
 	}
 	protected Element generateXmlForWebService(Namespace namespace) throws FunctionalException {
 		Element jdomObject = super.generateXmlForWebService(namespace);
-		jdomObject.setAttribute("parentContainer", this.parentContainer!=null ? this.parentContainer.name : "null");	// to comply with XSD
-																														//MartConfiguratorUtils.addAttribute(jdomObject, "parentContainer", this.parentContainer!=null ? this.parentContainer.name : null);
+		/*jdomObject.setAttribute("parentContainer", this.parentContainer!=null ? this.parentContainer.name : "null");	// to comply with XSD
+																														//MartConfiguratorUtils.addAttribute(jdomObject, "parentContainer", this.parentContainer!=null ? this.parentContainer.name : null);*/
 		return jdomObject;
 	}
 	protected JSONObject generateJsonForWebService() {

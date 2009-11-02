@@ -87,23 +87,6 @@ public class Attribute extends Element implements /*Comparable<Attribute>, Compa
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==linkURL? 0 : linkURL.hashCode());
 		return hash;
 	}
-
-	/*public int compare(Attribute attribute1, Attribute attribute2) {
-		if (attribute1==null && attribute2!=null) {
-			return -1;
-		} else if (attribute1!=null && attribute2==null) {
-			return 1;
-		}
-		int compare = CompareUtils.compareNull(attribute1.maxLength, attribute2.maxLength);
-		if (compare!=0) {
-			return compare;
-		}
-		return CompareUtils.compareNull(attribute1.linkURL, attribute2.linkURL);
-	}
-
-	public int compareTo(Attribute attribute) {
-		return compare(this, attribute);
-	}*/
 	
 	public org.jdom.Element generateXml() {
 		

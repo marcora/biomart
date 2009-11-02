@@ -49,6 +49,7 @@ public class GetDatasetsResponse extends MartServiceResponse {
 				if (getDatasetsRequest.getUsername().equals(location.getUser())) {
 					List<Mart> martList = location.getMartList();
 					for (Mart mart : martList) {
+System.out.println(mart.getName() + ", " + mart.getVersion() + ", " + getDatasetsRequest.getMartName() + ", " + getDatasetsRequest.getMartVersion());						
 						if (getDatasetsRequest.getMartName().equals(mart.getName()) && 
 								getDatasetsRequest.getMartVersion().intValue()==mart.getVersion().intValue()) {
 							//Mart cloneMart = new Mart(mart);
@@ -81,7 +82,6 @@ public class GetDatasetsResponse extends MartServiceResponse {
 			
 			// Dataset info
 			MartConfiguratorUtils.addAttribute(jdomObject, "materialized", dataset.getMaterialized());
-			MartConfiguratorUtils.addAttribute(jdomObject, "centralTable", dataset.getCentralTable());
 			
 			// Config info
 			MartConfiguratorUtils.addAttribute(jdomObject, "name", dataset.getName());
@@ -102,7 +102,6 @@ public class GetDatasetsResponse extends MartServiceResponse {
 			
 			// Dataset info
 			object.put("materialized", dataset.getMaterialized());
-			object.put("centralTable", dataset.getCentralTable());
 			
 			// Config info
 			object.put("name", dataset.getName());

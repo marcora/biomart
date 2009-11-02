@@ -76,7 +76,10 @@ public class Location extends MartConfiguratorObject implements Comparable<Locat
 		Location location=(Location)object;
 		return (
 			super.equals(location) &&
-			(this.host==location.host || (this.host!=null && host.equals(location.host)))
+			(this.host==location.host || (this.host!=null && host.equals(location.host))) &&
+			(this.user==location.user || (this.user!=null && user.equals(location.user))) &&
+			(this.type==location.type || (this.type!=null && type.equals(location.type)))
+			//TODO martList?
 		);
 	}
 
@@ -85,6 +88,9 @@ public class Location extends MartConfiguratorObject implements Comparable<Locat
 		int hash = MartConfiguratorConstants.HASH_SEED1;
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + super.hashCode();
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==host? 0 : host.hashCode());
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==user? 0 : user.hashCode());
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==type? 0 : type.hashCode());
+		//TODO martList?
 		return hash;
 	}
 

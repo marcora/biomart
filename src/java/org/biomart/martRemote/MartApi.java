@@ -8,8 +8,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import org.biomart.common.general.exceptions.FunctionalException;
@@ -59,17 +61,19 @@ public class MartApi {
 			//"query";
 		String username = "anonymous";
 		String password = "";
-		String martName = 
-			"ensembl";
-			//"uniprot_mart";
-		Integer martVersion = -1;
+		String martName = MartRemoteConstants.WEB_PORTAL ? 
+				"ensembl"
+				//"uniprot_mart";
+				:
+				"ensembl_mart_55";
+		Integer martVersion = MartRemoteConstants.WEB_PORTAL ? -1 : 55;
 		String datasetName = 
 			MartRemoteConstants.WEB_PORTAL ? "hsapiens_gene_ensembl" : "(P0C1)_gene_ensembl";
 			//"UNIPROT";
 		String query = "query1";
 		String filterPartitionString = TransformationConstants.MAIN_PARTITION_FILTER_NAME + 
 			".\"hsapiens_gene_ensembl,mmusculus_gene_ensembl,celegans_gene_ensembl\"";
-		MartServiceFormat format = MartServiceFormat.XML;
+		MartServiceFormat format = MartServiceFormat.JSON;
 		
 		MartRemoteEnum remoteAccessEnum = MartRemoteEnum.getEnumFromIdentifier(type);
 		boolean valid = true;
@@ -96,7 +100,7 @@ public class MartApi {
 			if (MartRemoteEnum.GET_REGISTRY.equals(remoteAccessEnum)) {			
 				martServiceResult = martApi.executeGetRegistry(martServiceRequest);
 			} else if (MartRemoteEnum.GET_DATASETS.equals(remoteAccessEnum)) {
-				martServiceResult = martApi.executeGetDatasets(martServiceRequest);			
+				martServiceResult = martApi.executeGetDatasets(martServiceRequest);		
 			} else if (MartRemoteEnum.GET_ROOT_CONTAINER.equals(remoteAccessEnum)) {
 				martServiceResult = martApi.executeGetRootContainer(martServiceRequest);
 			}/*else if (MartRemoteEnum.GET_ATTRIBUTES.equals(remoteAccessEnum)) {
@@ -121,6 +125,7 @@ public class MartApi {
 	private String xsdFilePath = null;
 	//private String xsdFileUrl = null;
 	
+	private Document xsd = null;
 	private MartRegistry martRegistry = null;
 	private SAXBuilder builder = null;
 	private Namespace martServiceNamespace = null;
@@ -136,7 +141,7 @@ public class MartApi {
 		//this.xsdFileUrl = xsdFileUrl;
 			
 		builder = new SAXBuilder();
-        Document xsd = null;
+        xsd = null;
         try {
 			xsd = builder.build(new URL(xsdFileUrl));
 		} catch (MalformedURLException e) {
@@ -157,6 +162,13 @@ public class MartApi {
 			throw new TechnicalException(e.getMessage() + ": " + portalSerialFileUrl);
 		}
 		martRegistry = (MartRegistry)MyUtils.readSerializedObject(portalSerialUrl);//martRegistry = TransformationYongPrototype.wrappedRebuildCentralPortalRegistry();		
+	}
+	
+	public Document getXsd() {
+		return xsd;
+	}
+	public MartRegistry getMartRegistry() {
+		return martRegistry;
 	}
 	
 	// Request preparation
@@ -327,13 +339,14 @@ public class MartApi {
 	public String writeJsonResponse(JSONObject root, Writer writer) throws TechnicalException {
 		if (null!=writer) {
 			try {
-				writer.append(root + MyUtils.LINE_SEPARATOR);
+				writer.append(MartRemoteUtils.getJSONObjectNiceString(root) + MyUtils.LINE_SEPARATOR);
 			} catch (IOException e) {
 				throw new TechnicalException(e);
 			}
 		}
 		return root.toString();
 	}
+	
 	public String writeError(StringBuffer errorMessage, Writer writer) throws TechnicalException {
 		String message = "ERROR" + MyUtils.LINE_SEPARATOR + errorMessage;
 		if (null!=writer) {
