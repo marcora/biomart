@@ -30,6 +30,7 @@ import org.biomart.martRemote.objects.response.GetRootContainerResponse;
 import org.biomart.martRemote.objects.response.MartServiceResponse;
 import org.biomart.martRemote.objects.response.QueryResponse;
 import org.biomart.objects.objects.MartRegistry;
+import org.biomart.transformation.helpers.TransformationConstants;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -66,7 +67,8 @@ public class MartApi {
 			MartRemoteConstants.WEB_PORTAL ? "hsapiens_gene_ensembl" : "(P0C1)_gene_ensembl";
 			//"UNIPROT";
 		String query = "query1";
-		String filterPartitionString = "species.\"hsapiens_gene_ensembl,mmusculus_gene_ensembl\"";
+		String filterPartitionString = TransformationConstants.MAIN_PARTITION_FILTER_NAME + 
+			".\"hsapiens_gene_ensembl,mmusculus_gene_ensembl,celegans_gene_ensembl\"";
 		MartServiceFormat format = MartServiceFormat.XML;
 		
 		MartRemoteEnum remoteAccessEnum = MartRemoteEnum.getEnumFromIdentifier(type);
@@ -168,11 +170,14 @@ public class MartApi {
 		return getDatasetsRequest;
 	}
 	public GetRootContainerRequest prepareGetRootContainer(String username, String password, MartServiceFormat format, 
-			String datasetName, String partitionFilterString) {
+			String datasetName, String partitionFilterString) throws FunctionalException {
 		String partitionFilter = null;
 		List<String> partitionFilterValues = null;
 		if (null!=partitionFilterString) {
 			String[] split = partitionFilterString.split("[.]");
+			if (split.length!=2) {
+				throw new FunctionalException("Invalid partitionFilterString specified: " + partitionFilterString);
+			}
 			partitionFilter = split[0];
 			partitionFilterValues = new ArrayList<String>(Arrays.asList(split[1].replace("\"", "").split(",")));
 		}
@@ -186,14 +191,14 @@ public class MartApi {
 	}
 	
 	// Request exectution
-	public GetRegistryResponse executeGetRegistry(MartServiceRequest martServiceRequest) {
+	public GetRegistryResponse executeGetRegistry(MartServiceRequest martServiceRequest) throws FunctionalException {
 		GetRegistryResponse getRegistryResponse = new GetRegistryResponse(
 				MartRemoteEnum.GET_REGISTRY.getResponseName(), martServiceNamespace, xsiNamespace, xsdFilePath, 
 				martRegistry, martServiceRequest);
 		getRegistryResponse.populateObjects();
 		return getRegistryResponse;
 	}
-	public GetDatasetsResponse executeGetDatasets(MartServiceRequest martServiceRequest) {
+	public GetDatasetsResponse executeGetDatasets(MartServiceRequest martServiceRequest) throws FunctionalException {
 		GetDatasetsResponse getDatasetsResponse = new GetDatasetsResponse(
 				MartRemoteEnum.GET_DATASETS.getResponseName(), martServiceNamespace, xsiNamespace, xsdFilePath, martRegistry, martServiceRequest);
 		getDatasetsResponse.populateObjects();
@@ -202,9 +207,6 @@ public class MartApi {
 	public GetRootContainerResponse executeGetRootContainer(MartServiceRequest martServiceRequest) throws FunctionalException{
 		GetRootContainerResponse getRootContainerResponse = new GetRootContainerResponse(
 				MartRemoteEnum.GET_ROOT_CONTAINER.getResponseName(), martServiceNamespace, xsiNamespace, xsdFilePath, martRegistry, martServiceRequest);
-getRootContainerResponse.mainRowNumbersWanted = new ArrayList<Integer>(Arrays.asList(new Integer[] {
-		0, 1, 5 // hsap, mmus, cele
-}));
 		getRootContainerResponse.populateObjects();
 		return getRootContainerResponse;
 	}
@@ -297,7 +299,7 @@ getRootContainerResponse.mainRowNumbersWanted = new ArrayList<Integer>(Arrays.as
 		<query processor="CSV" header="true" uniqueRows="false" count="false" datasetConfigVersion="0.8"><dataset name="hsapiens_gene_ensembl"><attribute name="ensembl_gene_id" /><attribute name="ensembl_transcript_id" /><filter name="chromosome_name" value="1" /></dataset></query>
 	 */
 	// Response writing
-	public String processMartServiceResult(MartServiceResponse martServiceResponse, Writer writer) throws TechnicalException {
+	public String processMartServiceResult(MartServiceResponse martServiceResponse, Writer writer) throws TechnicalException, FunctionalException {
 		if (martServiceResponse.getMartServiceRequest().getFormat().isXml()) {
 			Document document = martServiceResponse.getXmlDocument(this.debug, writer);
 			if (martServiceResponse.isValid()) {

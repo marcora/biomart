@@ -8,6 +8,7 @@ import java.util.List;
 
 import net.sf.json.JSONObject;
 
+import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.utils.MyUtils;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
@@ -68,16 +69,6 @@ public class Element extends Containee implements Serializable {
 		
 		this.mainPartitionTable = mainPartitionTable;
 		this.otherPartitionTableList = new ArrayList<PartitionTable>();
-	}
-	protected Containee lightClone(Part part) throws CloneNotSupportedException {
-		if (this.getClass().equals(Attribute.class)) {	// instanceof is not enough to check for subclasses
-			return new Attribute((Attribute)this, part);
-		} else if (this.getClass().equals(SimpleFilter.class)) {
-			return new SimpleFilter((SimpleFilter)this, part);
-		} else if (this.getClass().equals(GroupFilter.class)) {
-			return new GroupFilter((GroupFilter)this, part);
-		}
-		throw new CloneNotSupportedException("class: " + this.getClass());
 	}
 	
 	public Range getTargetRange() {
@@ -310,42 +301,53 @@ public class Element extends Containee implements Serializable {
 	// ===================================== Should be a different class ============================================
 
 	protected Element(Element element, Part part) throws CloneNotSupportedException {	// creates a light clone (temporary solution)
-		super(element, part);
+		super(element, part);		
+		
+		super.visible = null;	// irrelevant for elements
 		this.selectedByDefault = element.selectedByDefault;
-		this.targetRange = new Range(element.mainPartitionTable, true);
-		this.targetRange.addPart(part);	// only one part	
+		/*this.targetRange = new Range(element.mainPartitionTable, true);
+		this.targetRange.addPart(part);	// only one part*/
+	}
+	protected void updatePointerClone(org.biomart.objects.objects.Element pointingElement) {
+		super.updatePointerClone(pointingElement);
+		this.selectedByDefault = pointingElement.selectedByDefault;
 	}
 	
-	protected org.jdom.Element generateXmlForWebService() {
+	protected org.jdom.Element generateXmlForWebService() throws FunctionalException {
 		return generateXmlForWebService(null);
 	}
-	protected org.jdom.Element generateXmlForWebService(Namespace namespace) {
+	protected org.jdom.Element generateXmlForWebService(Namespace namespace) throws FunctionalException {
 		if (this instanceof Attribute) {
 			return generateXmlForWebService(namespace, Attribute.XML_ELEMENT_NAME);
 		} else {
 			return generateXmlForWebService(namespace, Filter.XML_ELEMENT_NAME);
 		}
 	}
-	private org.jdom.Element generateXmlForWebService(Namespace namespace, String pointedElementType) {
+	private org.jdom.Element generateXmlForWebService(Namespace namespace, String pointedElementType) throws FunctionalException {
+		
+		//MyUtils.checkStatusProgram(this.targetRange.getPartSet().size()==1);	// there should be only 1 element (it's flattened)
+		
 		org.jdom.Element jdomObject = super.generateXmlForWebService(namespace);
-		
-		MyUtils.checkStatusProgram(this.targetRange.getPartSet().size()==1);	// there should be only 1 element (it's flattened)
-		
 		jdomObject.removeAttribute("visible");	// not applicable for elements
-
+		
 		// Element attributes
 		MartConfiguratorUtils.addAttribute(jdomObject, "default", this.selectedByDefault);
-		
-		/*MartConfiguratorUtils.addAttribute(jdomObject, "pointer", this.pointer);	// no partition reference: not a string
-		if (this.pointer) {
-			MartConfiguratorUtils.addAttribute(jdomObject, pointedElementType, this.pointedElementName);
-		}*/
 				
 		return jdomObject;
 	}
 	protected JSONObject generateJsonForWebService() {
+		if (this instanceof Attribute) {
+			return generateJsonForWebService(Attribute.XML_ELEMENT_NAME);
+		} else {
+			return generateJsonForWebService(Filter.XML_ELEMENT_NAME);
+		}
+	}
+	protected JSONObject generateJsonForWebService(String pointedElementType) {
+		MyUtils.checkStatusProgram(this.targetRange.getPartSet().size()==1);	// there should be only 1 element (it's flattened)
+		
 		JSONObject object = super.generateJsonForWebService();
 		object.remove("visible");	// doesn't apply for Elements
+		object.put("default", this.selectedByDefault);
 		return object;
 	}
 }

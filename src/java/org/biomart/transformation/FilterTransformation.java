@@ -19,6 +19,7 @@ import org.biomart.objects.data.TreeFilterData;
 import org.biomart.objects.data.TreeFilterDataRow;
 import org.biomart.objects.data.filterDataRow;
 import org.biomart.objects.objects.Attribute;
+import org.biomart.objects.objects.Config;
 import org.biomart.objects.objects.Container;
 import org.biomart.objects.objects.Filter;
 import org.biomart.objects.objects.FilterDisplayType;
@@ -66,8 +67,6 @@ public class FilterTransformation extends ElementTransformation {
 		MyUtils.errorProgram("Shouldn't be here");
 		return null;
 	}
-
-	Map<Filter, Map<Class, Filter>> m = new HashMap<Filter, Map<Class,Filter>>();
 	
 	@Override
 	protected Filter transformFilter(Container container, OldFilter oldFilter, Filter groupTemplateFilter, Filter nonSpecificTemplateFilter,
@@ -118,9 +117,7 @@ public class FilterTransformation extends ElementTransformation {
 		Filter filter = (Filter)updateTemplateElement(
 				container, nonSpecificTemplateFilter, currentMainRowNumber, firstSpecific, dimensionPartitionTemplateFilter, 
 				filterName, pushActionTemplateFilter, independentFilter);
-/*System.out.println("@1" + MartConfiguratorUtils.displayJdomElement(independentFilter.generateXml()));
-System.out.println("@2" + MartConfiguratorUtils.displayJdomElement(filter.generateXml()));*/
-		
+
 		// Process with children
 		if (oldFilter.hasChildren()) {
 			List<SimpleFilter> simpleFilterList = new ArrayList<SimpleFilter>();
@@ -452,7 +449,7 @@ System.out.println("@2" + MartConfiguratorUtils.displayJdomElement(filter.genera
 
 		// When not partition specific: row=-1..?
 		if (currentMainRow==null) {
-			currentMainRow = -1;
+			currentMainRow = MartConfiguratorConstants.PARTITION_TABLE_ROW_WIDLCARD_NUMBER;
 		}
 
 		// Sufficient for the transformation
@@ -606,36 +603,18 @@ System.out.println("@2" + MartConfiguratorUtils.displayJdomElement(filter.genera
 		
 		// Unlike attribute, filter are divided in subtypes
 		
-		// Temporary solution: only if filter defined after the PushActions
-		SimpleFilter pushActionFilter = this.pushActionMap.get(filterName);
-		boolean isPushAction = pushActionFilter!=null;
-		
 		Filter newFilter = null;
 		if (!oldFilter.getHasFilterList()) {
 			if (pointer || null!=filterType) {
 				boolean tree = FilterDisplayType.TREE.equals(filterType);
 				newFilter = new SimpleFilter(parentContainer, mainPartitionTable, filterName, tree);
 					
-			}/* else if (pointer && isPushAction) {
-				newFilter = new ListFilter(parentContainer, mainPartitionTable, filterName);
-			} else if (FilterDisplayType.BOOLEAN.equals(filterType)) {
-				newFilter = new BooleanFilter(parentContainer, mainPartitionTable, filterName);
-			} else if (FilterDisplayType.LIST.equals(filterType)) {
-				newFilter = new ListFilter(parentContainer, mainPartitionTable, filterName);
-			} else if (FilterDisplayType.TREE.equals(filterType)) {
-				newFilter = new TreeFilter(parentContainer, mainPartitionTable, filterName);
-			} else if (FilterDisplayType.TEXTFIELD.equals(filterType)) {
-				newFilter = new TextfieldFilter(parentContainer, mainPartitionTable, filterName);
-			}*/ else {	// groupFilter
+			} else {	// groupFilter
 				MyUtils.checkStatusProgram(null==filterType);
 				newFilter = new GroupFilter(parentContainer, mainPartitionTable, filterName);
 			}
 		} else {
-			MyUtils.checkStatusProgram(
-					
-					/*"chromosome_region".equals(oldFilter.getInternalName()) || 	// very TMP TODO !!*/
-					
-					FilterDisplayType.TEXTFIELD.equals(filterType) || FilterDisplayType.LIST.equals(filterType), 
+			MyUtils.checkStatusProgram(FilterDisplayType.TEXTFIELD.equals(filterType) || FilterDisplayType.LIST.equals(filterType), 
 					filterType + ", " + MartConfiguratorUtils.displayJdomElement(oldFilter.getJdomElement()));		// case like "chromosome_region"
 			newFilter = new GroupFilter(parentContainer, mainPartitionTable, filterName);
 		}
@@ -666,14 +645,6 @@ System.out.println("@2" + MartConfiguratorUtils.displayJdomElement(filter.genera
 		}
 
 		assignSimpleProperties(oldFilter, newFilter, tableName);
-		
-
-		
-		/*MyUtils.checkStatusProgram(oldFilter.getMultipleValues()==null || !oldFilter.getMultipleValues() || 
-			newFilter instanceof TextfieldFilter || newFilter instanceof ListFilter || oldFilter.getHasFilterList() ||
-			FilterOldType.BOOLEAN_LIST.equals(oldFilter.getType()),	// see "gse952_copy" from "rnorvegicus_expr_gene_ensembl"
-			newFilter.getClass() + ", " + oldFilter.getHasFilterList() + ", " + MartConfiguratorUtils.displayJdomElement(oldFilter.getJdomElement()));
-										// happens in textfields, list and groups (only like "chromosome_region")*/
 		
 		// For filters only
 		if (!pointer) {
@@ -1037,6 +1008,37 @@ System.out.println("#2" + MartConfiguratorUtils.displayJdomElement(newFilter.gen
 				groupFilter.addSimpleFilter(simpleFilter);
 			}
 		}
+	}
+
+	public void createMainPartitionFilter(Config config, PartitionTable mainPartitionTable) throws FunctionalException {
+		Container partitionFilterContainer = new Container(
+				null, TransformationConstants.PARTITION_FILTERS_CONTAINER_NAME, TransformationConstants.PARTITION_FILTERS_CONTAINER_DISPLAY_NAME,
+				null, true, 0, null);
+		SimpleFilter mainPartitionFilter = new SimpleFilter(
+				partitionFilterContainer, mainPartitionTable, TransformationConstants.MAIN_PARTITION_FILTER_NAME);
+		mainPartitionFilter.setDisplayName(TransformationConstants.MAIN_PARTITION_FILTER_DISPLAY_NAME);
+		mainPartitionFilter.setVisible(true);
+		mainPartitionFilter.setSelectedByDefault(false);
+		mainPartitionFilter.setPointer(false);
+		mainPartitionFilter.setPartition(true);
+		
+		mainPartitionFilter.setDataFolderPath(params.getDefaultDataFolderPath());
+		FilterData filterData = mainPartitionFilter.getFilterData();
+		
+		Part part = new Part(false, null, null, 
+				new PartitionTableAndRow(mainPartitionTable, MartConfiguratorConstants.PARTITION_TABLE_ROW_WIDLCARD_NUMBER));
+		filterData.addPart(part);
+		
+		for (int rowNumber = 0; rowNumber < mainPartitionTable.getRowNamesList().size(); rowNumber++) {
+			String rowName = mainPartitionTable.getRowNamesList().get(rowNumber);
+			filterDataRow dataRow = new filterDataRow(
+					mainPartitionFilter, rowName, rowName, rowNumber==0);	// first row is the default one
+			filterData.addRowForPart(part, dataRow);			
+		}
+		
+		partitionFilterContainer.addFilter(mainPartitionFilter);
+		vars.getFilterMap().put(mainPartitionFilter.getName(), mainPartitionFilter);
+		config.addContainer(partitionFilterContainer);
 	}
 }
 

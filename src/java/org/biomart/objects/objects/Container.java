@@ -9,6 +9,7 @@ import java.util.Set;
 
 import net.sf.json.JSONObject;
 
+import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.utils.CompareUtils;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
@@ -184,21 +185,89 @@ public class Container extends Containee implements Comparable<Container>, Compa
 				container.name, container.displayName, container.description, container.visible, 
 				container.level, container.queryRestriction);
 		
-		for (Container subContainer : container.getContainerList()) {	
-			if (subContainer.getVisible()) {	// Only the visible ones
-				Container containerClone = new Container(subContainer, mainRowNumbersWanted); 
-				addContainer(containerClone);	// also handles containeeList
-			}
-		}
-		for (Attribute attribute : container.getAttributeList()) {
-if (attribute.getPointer()) continue;	//TODO for now				
+		for (Containee containee : container.containeeList) {
+			if (containee instanceof Container) {
+				if (containee.getVisible()) {	// Only the visible ones
+					Container containerClone = new Container((Container)containee, mainRowNumbersWanted); 
+					addContainer(containerClone);	// also handles containeeList
+				}
+			} else if (containee instanceof org.biomart.objects.objects.Element) {
 			
+				org.biomart.objects.objects.Element element = (org.biomart.objects.objects.Element)containee;
+				Range targetRange = element.getTargetRange();
+				Set<Part> partSet = targetRange.getPartSet();
+				for (Part part : partSet) {
+					if (part.getVisible()) {	// Only the visible ones
+						if (element.getPointer() && null==element.getPointedElement()) continue;	// broken pointers (from transformation for instance)
+						int mainRowNumber = part.getMainRowNumber();
+						if (mainRowNumbersWanted.contains(mainRowNumber)) {
+							if (element.getPointer()) {	// FIXME not adequate if pointers of pointers...
+								org.biomart.objects.objects.Element pointedElement = element.getPointedElement();
+								if (pointedElement instanceof Attribute) {
+									Attribute pointedAttributeClone = new Attribute((Attribute)pointedElement, part);
+									pointedAttributeClone.updatePointerClone(element);
+									if (!this.attributeList.contains(pointedAttributeClone)) {	// No repetitions
+										addAttribute(pointedAttributeClone);	// also handles containeeList
+									}
+								} else if (pointedElement instanceof Filter) {
+									Filter pointedFilterClone = null;
+									if (pointedElement instanceof SimpleFilter) {
+										SimpleFilter pointedSimpleFilterClone = new SimpleFilter((SimpleFilter)pointedElement, part);
+										pointedSimpleFilterClone.updatePointerClone(element);
+										pointedFilterClone = pointedSimpleFilterClone;
+									} else if (pointedElement instanceof GroupFilter) {
+										GroupFilter pointedGroupFilterClone = new GroupFilter((GroupFilter)pointedElement, part);
+										pointedGroupFilterClone.updatePointerClone(element);
+										pointedFilterClone = pointedGroupFilterClone;
+									}
+									if (!this.filterList.contains(pointedFilterClone)) {	// No repetitions
+										addFilter(pointedFilterClone);	// also handles containeeList
+									}
+								}
+							} else {
+								if (element instanceof Attribute) {
+									Attribute attributeClone = new Attribute((Attribute)element, part);
+									if (!this.attributeList.contains(attributeClone)) {	// No repetitions
+										addAttribute(attributeClone);	// also handles containeeList
+									}
+								} else if (element instanceof Filter) {
+									Filter filterClone = null;
+									if (element instanceof SimpleFilter) {
+										filterClone = new SimpleFilter((SimpleFilter)element, part);
+									} else if (element instanceof GroupFilter) {
+										filterClone = new GroupFilter((GroupFilter)element, part);
+									}
+									if (!this.filterList.contains(filterClone)) {	// No repetitions
+										addFilter(filterClone);	// also handles containeeList
+									}
+								}
+							}
+						}
+					}	
+				}
+			} 
+		}
+		
+		/*for (Attribute attribute : container.getAttributeList()) {
 			Range targetRange = attribute.getTargetRange();
 			Set<Part> partSet = targetRange.getPartSet();
 			for (Part part : partSet) {
 				if (part.getVisible()) {	// Only the visible ones
+					if (attribute.getPointer() && null==attribute.getPointedElement()) continue;	// broken pointers (from transformation for instance)
 					int mainRowNumber = part.getMainRowNumber();
 					if (mainRowNumbersWanted.contains(mainRowNumber)) {
+						
+						if (attribute.getPointer()) {
+							org.biomart.objects.objects.Element pointedElement = attribute.getPointedElement();
+							if (pointedElement instanceof Attribute) {
+								Attribute pointedAttributeClone = (Attribute)pointedElement.lightClone(part);
+							} else if (pointedElement instanceof SimpleFilter) {
+								SimpleFilter pointedSimpleFilterClone = (SimpleFilter)pointedElement.lightClone(part);
+							} else if (pointedElement instanceof GroupFilter) {
+								GroupFilter pointedGroupFilterClone = (GroupFilter)pointedElement.lightClone(part);
+							}
+						}
+						
 						Attribute attributeClone = (Attribute)attribute.lightClone(part);
 						if (!this.attributeList.contains(attributeClone)) {	// No repetitions
 							addAttribute(attributeClone);	// also handles containeeList
@@ -207,12 +276,12 @@ if (attribute.getPointer()) continue;	//TODO for now
 				}					
 			}
 		}
-		for (Filter filter : container.getFilterList()) {
-if (filter.getPointer()) continue;	//TODO for now			
+		for (Filter filter : container.getFilterList()) {	
 			Range targetRange = filter.getTargetRange();
 			Set<Part> partSet = targetRange.getPartSet();
 			for (Part part : partSet) {
 				if (part.getVisible()) {	// Only the visible ones
+					if (filter.getPointer() && null==filter.getPointedElement()) continue;	// broken pointers (from transformation for instance)
 					int mainRowNumber = part.getMainRowNumber();
 					if (mainRowNumbersWanted.contains(mainRowNumber)) {
 						Filter filterClone = (Filter)filter.lightClone(part);
@@ -222,13 +291,13 @@ if (filter.getPointer()) continue;	//TODO for now
 					}
 				}					
 			}
-		}
+		}*/
 	}
 	
-	public Element generateXmlForWebService() {
+	public Element generateXmlForWebService() throws FunctionalException {
 		return generateXmlForWebService(null);
 	}
-	public Element generateXmlForWebService(org.jdom.Namespace namespace) {
+	public Element generateXmlForWebService(org.jdom.Namespace namespace) throws FunctionalException {
 		Element jdomObject = super.generateXmlForWebService(namespace);
 		
 		MartConfiguratorUtils.addAttribute(jdomObject, "level", this.level);
@@ -253,6 +322,17 @@ if (filter.getPointer()) continue;	//TODO for now
 		JSONObject object = (JSONObject)jsonObject.get(super.xmlElementName);
 		object.put("level", this.level);
 		object.put("queryRestriction", this.queryRestriction);
+		
+		for (Containee containee : containeeList) {
+			if (containee instanceof Container) {
+				JSONObject containeeJSONObject = containee.generateJsonForWebService();
+				object.put(containee.getXmlElementName(), containeeJSONObject);
+			} else if (containee instanceof org.biomart.objects.objects.Element) {
+				org.biomart.objects.objects.Element martConfiguratorElement = (org.biomart.objects.objects.Element)containee;
+				JSONObject elementJSONObject = martConfiguratorElement.generateJsonForWebService();
+				object.put(martConfiguratorElement.getXmlElementName(), elementJSONObject);
+			}
+		}
 		
 		jsonObject.put(super.xmlElementName, object);
 		return jsonObject;

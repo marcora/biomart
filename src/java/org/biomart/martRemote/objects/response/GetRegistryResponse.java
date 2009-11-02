@@ -6,6 +6,7 @@ import java.util.List;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
+import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.martRemote.objects.request.MartServiceRequest;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.objects.objects.Location;
@@ -35,19 +36,24 @@ public class GetRegistryResponse extends MartServiceResponse {
 		return locationList;
 	}
 
-	public void populateObjects() {
+	public void populateObjects() throws FunctionalException {
 		this.martList = new ArrayList<Mart>();
 		this.locationList = new ArrayList<Location>();
 		
 		List<Location> locationListTmp = martRegistry.getLocationList();
-		for (Location location : locationListTmp) {
-			if (super.martServiceRequest.getUsername().equals(location.getUser())) {
-				List<Mart> martListTmp = location.getMartList();
-				martList.addAll(martListTmp);
-				for (int i = 0; i < martListTmp.size(); i++) {
-					this.locationList.add(location);
+		try {
+			for (Location location : locationListTmp) {
+				if (super.martServiceRequest.getUsername().equals(location.getUser())) {
+					Location locationClone = new Location(location);
+					List<Mart> martListTmp = location.getMartList();
+						for (Mart mart : martListTmp) {
+							this.martList.add(new Mart(mart));
+							this.locationList.add(locationClone);
+						}
 				}
 			}
+		} catch (CloneNotSupportedException e) {
+			throw new FunctionalException(e);
 		}
 	}
 	

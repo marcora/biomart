@@ -99,21 +99,21 @@ public class DatasetTransformation {
 					new PartitionReference(mainPartitionTable, TransformationConstants.WEBSERVICE_DEFAULT_PARTITION_TABLE_ROW));
 			newDatasetName = datasetOriginalName;	// non-template: dataset name remains the same
 		}
-/*for (int i = 0; i < mainPartitionTable.getTotalRows(); i++) {
-	System.out.println(mainPartitionTable.getRowName(i));
-}
-MyUtils.pressKeyToContinue();*/
-		
+				
 		// Transform DatasetConfig node and create a default config based on it
 		this.dataset = oldDatasetConfig.transformToDataset(newDatasetName, help);
 		Config config = oldDatasetConfig.transformToConfig();
 		vars.getCurrentPath().setDatasetAndConfig(dataset, config);
 		vars.setDataset(this.dataset);
-		
+
+		// Add main partition table
 		dataset.addMainPartitionTable(mainPartitionTable);
 		MyUtils.checkStatusProgram(!vars.getNameToPartitionTableMap().keySet().contains(mainPartitionTable.getName()));
 		vars.getNameToPartitionTableMap().put(mainPartitionTable.getName(), mainPartitionTable);
 		vars.setMainPartitionTable(mainPartitionTable);
+		
+		// Create and add main partition filter
+		filterTransformation.createMainPartitionFilter(config, mainPartitionTable);
 		
 		// If template, generate database info from database, accounting for main partition
 		if (vars.isTemplate()) {

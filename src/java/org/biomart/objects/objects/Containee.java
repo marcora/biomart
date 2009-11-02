@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import net.sf.json.JSONObject;
 
+import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.jdom.Element;
 import org.jdom.Namespace;
@@ -78,18 +79,22 @@ public class Containee extends MartConfiguratorObject implements Serializable {
 	protected Containee(Containee containee, Part part) throws CloneNotSupportedException {	// creates a light clone (temporary solution)
 		super(containee, part);
 	}
-	protected Element generateXmlForWebService(boolean recursively) {
+	protected void updatePointerClone(org.biomart.objects.objects.Element pointingElement) {
+		super.updatePointerClone(pointingElement);
+		this.parentContainer = pointingElement.parentContainer;
+	}
+	
+	protected Element generateXmlForWebService(boolean recursively) throws FunctionalException {
 		return generateXmlForWebService(null, recursively);
 	}
-	protected Element generateXmlForWebService(Namespace namespace, boolean recursively) {
+	protected Element generateXmlForWebService(Namespace namespace, boolean recursively) throws FunctionalException {
 		return super.generateXmlForWebService(namespace);
 	}
-	protected Element generateXmlForWebService() {
+	protected Element generateXmlForWebService() throws FunctionalException {
 		return generateXmlForWebService(null);
 	}
-	protected Element generateXmlForWebService(Namespace namespace) {
+	protected Element generateXmlForWebService(Namespace namespace) throws FunctionalException {
 		Element jdomObject = super.generateXmlForWebService(namespace);
-		
 		jdomObject.setAttribute("parentContainer", this.parentContainer!=null ? this.parentContainer.name : "null");	// to comply with XSD
 																														//MartConfiguratorUtils.addAttribute(jdomObject, "parentContainer", this.parentContainer!=null ? this.parentContainer.name : null);
 		return jdomObject;

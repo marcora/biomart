@@ -7,8 +7,6 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import org.biomart.common.general.exceptions.FunctionalException;
-import org.biomart.common.general.exceptions.TechnicalException;
-import org.biomart.martRemote.MartRemoteUtils;
 import org.biomart.martRemote.objects.request.GetRootContainerRequest;
 import org.biomart.martRemote.objects.request.MartServiceRequest;
 import org.biomart.objects.objects.Config;
@@ -61,7 +59,7 @@ public class GetRootContainerResponse extends MartServiceResponse {
 		}
 		return dataset;
 	}
-public List<Integer> mainRowNumbersWanted = new ArrayList<Integer>();	//TODO
+	
 	private List<Container> fetchContainerList(Dataset dataset, String partitionFilter, List<String> partitionFilterValues) throws FunctionalException {
 		this.containerList = new ArrayList<Container>();
 		if (dataset!=null) {
@@ -69,15 +67,19 @@ public List<Integer> mainRowNumbersWanted = new ArrayList<Integer>();	//TODO
 			Config config = configList.get(0);	// For now always just 1 config per dataset
 
 			// Filter the invisible containers & the invisible attribute/filters and the ones not-wanted based on the partitionFilter choice (if any)
+			List<Integer> mainRowNumbersWanted = new ArrayList<Integer>();
+			PartitionTable mainPartitionTable = dataset.getMainPartitionTable();
 			if (null==partitionFilter) {	// add all main rows
-				PartitionTable mainPartitionTable = dataset.getMainPartitionTable();
 				for (int rowNumber = 0; rowNumber < mainPartitionTable.getTotalRows(); rowNumber++) {
 					mainRowNumbersWanted.add(rowNumber);					
 				}
+			} else {
+				for (String partitionFilterValue : partitionFilterValues) {
+					mainRowNumbersWanted.add(mainPartitionTable.getRowNumber(partitionFilterValue));
+				}
 			}
-			
 
-System.out.println(mainRowNumbersWanted);
+			System.out.println("mainRowNumbersWanted = " + mainRowNumbersWanted);
 
 			try {
 				for (Container container : config.getContainerList()) {
@@ -93,7 +95,7 @@ System.out.println(mainRowNumbersWanted);
 		return containerList;
 	}
 	
-	protected Document createXmlResponse(Document document) {
+	protected Document createXmlResponse(Document document) throws FunctionalException {
 		Element root = document.getRootElement();
 		for (Container container : this.containerList) {
 			if (container.getVisible()) {	// filtering should take place here but in populate objects TODO

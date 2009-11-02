@@ -149,4 +149,16 @@ public class Dataset extends MartConfiguratorObject implements Serializable {
 		
 		return element;
 	}
+	
+	
+	// ===================================== Should be a different class ============================================
+
+	public Dataset(Dataset dataset, String datasetName) throws CloneNotSupportedException {	// creates a light clone (temporary solution)
+		this(datasetName, null, null, dataset.visible, dataset.materialized);
+		
+		/*this.configList = new ArrayList<Config>();
+		for (Config config : dataset.configList) {
+			this.configList.add(new Config(config));
+		}*/
+	}
 }

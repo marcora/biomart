@@ -107,6 +107,16 @@ public class Mart extends MartConfiguratorObject implements Comparable<Mart>, Co
 	}
 
 	
+	// ===================================== Should be a different class ============================================
+
+	public Mart(Mart mart) throws CloneNotSupportedException {	// creates a light clone (temporary solution)
+		this(mart.name, mart.displayName, null, mart.visible, mart.version);
+		/*this.datasetList = new ArrayList<Dataset>();
+		for (Dataset dataset : mart.datasetList) {
+			this.datasetList.add(new Dataset(dataset));
+		}*/
+	}
+	
 	/*public Element generateXmlForWebService() {
 		return generateXmlForWebService(null);
 	}

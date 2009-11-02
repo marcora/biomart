@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-
 import org.biomart.common.general.utils.CompareUtils;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
@@ -118,4 +117,17 @@ public class Location extends MartConfiguratorObject implements Comparable<Locat
 		return element;
 	}
 
+	
+	
+	// ===================================== Should be a different class ============================================
+
+	public Location(Location location) throws CloneNotSupportedException {	// creates a light clone (temporary solution)
+		this(null, null, null, null,	// irrelevant here 
+				location.getHost(), location.getUser(), location.getType());
+		
+		this.martList = new ArrayList<Mart>();
+		for (Mart mart : location.martList) {
+			this.martList.add(new Mart(mart));
+		}
+	}
 }

@@ -147,10 +147,10 @@ public class Filter extends Element implements Comparable<Filter>, Comparator<Fi
 		this.qualifier = filter.qualifier;
 	}
 	
-	public org.jdom.Element generateXmlForWebService() {
+	public org.jdom.Element generateXmlForWebService() throws FunctionalException {
 		return generateXmlForWebService(null);
 	}
-	public org.jdom.Element generateXmlForWebService(Namespace namespace) {
+	public org.jdom.Element generateXmlForWebService(Namespace namespace) throws FunctionalException {
 		org.jdom.Element jdomObject = super.generateXmlForWebService(namespace);
 		
 		MartConfiguratorUtils.addAttribute(jdomObject, "qualifier", this.qualifier);

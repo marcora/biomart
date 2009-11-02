@@ -41,7 +41,7 @@ public class MartService {
 		
 	public static MartApi martServiceApi = null;
 		
-	public String getRegistry(String username, String password, String format) {
+	public String getRegistry(String username, String password, String format) throws FunctionalException, TechnicalException {
 		MartServiceHelper.initialize();
 		MartServiceRequest martServiceRequest = MartService.martServiceApi.prepareGetRegistry(
 				username, password, MartServiceFormat.getFormat(format));
@@ -49,7 +49,7 @@ public class MartService {
 				MartServiceHelper.executeRequest(martServiceRequest) : "invalid request";
 	}
 
-	public String getDatasets(String username, String password, String format, String mart, Integer version) {
+	public String getDatasets(String username, String password, String format, String mart, Integer version) throws FunctionalException, TechnicalException {
 		MartServiceHelper.initialize();
 		MartServiceRequest martServiceRequest = MartService.martServiceApi.prepareGetDatasets(
 				username, password, MartServiceFormat.getFormat(format), mart, version);
@@ -57,7 +57,7 @@ public class MartService {
 				MartServiceHelper.executeRequest(martServiceRequest) : "invalid request";
 	}
 	
-	public String query(String username, String password, String format, String query) {
+	public String query(String username, String password, String format, String query) throws FunctionalException, TechnicalException {
 		MartServiceHelper.initialize();
 		MartServiceRequest martServiceRequest = null;
 		try {
@@ -74,7 +74,7 @@ public class MartService {
 			MartServiceHelper.executeRequest(martServiceRequest) : "invalid request";
 	}
 	
-	public String getRootContainer(String username, String password, String format, String dataset, String partitionFilter) {
+	public String getRootContainer(String username, String password, String format, String dataset, String partitionFilter) throws FunctionalException, TechnicalException {
 		MartServiceHelper.initialize();
 		MartServiceRequest martServiceRequest = MartService.martServiceApi.prepareGetRootContainer(
 				username, password, MartServiceFormat.getFormat(format), dataset, partitionFilter);

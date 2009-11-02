@@ -35,13 +35,13 @@ public abstract class MartServiceResponse extends MartServiceAction {
 		return martServiceRequest;
 	}
 	
-	public Document getXmlDocument() throws TechnicalException {
+	public Document getXmlDocument() throws TechnicalException, FunctionalException {
 		return getXmlDocument(false, null);
 	}
 	/**
 	 * Always check that martServiceResult is valid afterwards (if it validates)
 	 */
-	public Document getXmlDocument(boolean debug, Writer printWriter) throws TechnicalException {
+	public Document getXmlDocument(boolean debug, Writer printWriter) throws TechnicalException, FunctionalException {
 		Document document = createNewResponseXmlDocument(this.responseName);
 		document = createXmlResponse(document);
 		if (debug && printWriter!=null) {
@@ -63,6 +63,6 @@ public abstract class MartServiceResponse extends MartServiceAction {
 	}
 	
 	protected abstract void populateObjects() throws TechnicalException, FunctionalException;
-	protected abstract Document createXmlResponse(Document document);
+	protected abstract Document createXmlResponse(Document document) throws FunctionalException;
 	protected abstract JSONObject createJsonResponse();
 }

@@ -6,6 +6,7 @@ import java.util.List;
 
 import net.sf.json.JSONObject;
 
+import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.jdom.Namespace;
@@ -125,28 +126,24 @@ public class GroupFilter extends Filter implements Serializable {
 		}
 	}
 	
-	public org.jdom.Element generateXmlForWebService() {
+	public org.jdom.Element generateXmlForWebService() throws FunctionalException {
 		return generateXmlForWebService(null);
 	}
-	public org.jdom.Element generateXmlForWebService(Namespace namespace) {
+	public org.jdom.Element generateXmlForWebService(Namespace namespace) throws FunctionalException {
 		org.jdom.Element jdomObject = super.generateXmlForWebService(namespace);
-		//if (!this.pointer) {
-			MartConfiguratorUtils.addAttribute(jdomObject, "logicalOperator", this.logicalOperator);
+		MartConfiguratorUtils.addAttribute(jdomObject, "logicalOperator", this.logicalOperator);
 
-			MartConfiguratorUtils.addAttribute(jdomObject, "multipleFilter", this.multipleFilter);	
-			
-			MartConfiguratorUtils.addAttribute(jdomObject, "filterList", this.filterNamesList);
-		//}
+		MartConfiguratorUtils.addAttribute(jdomObject, "multipleFilter", this.multipleFilter);	
+		
+		MartConfiguratorUtils.addAttribute(jdomObject, "filterList", this.filterNamesList);
 		return jdomObject;
 	}
 	public JSONObject generateJsonForWebService() {
 		JSONObject jsonObject = super.generateJsonForWebService();
 		JSONObject object = (JSONObject)jsonObject.get(super.xmlElementName);
-		if (!this.pointer) {
-			object.put("logicalOperator", this.logicalOperator);
-			object.put("multipleFilter", this.multipleFilter);
-			object.put("filterList", this.filterList);
-		}
+		object.put("logicalOperator", this.logicalOperator);
+		object.put("multipleFilter", this.multipleFilter);
+		object.put("filterList", MartConfiguratorUtils.collectionToCommaSeparatedString(this.filterList));
 		
 		jsonObject.put(super.xmlElementName, object);
 		return jsonObject;

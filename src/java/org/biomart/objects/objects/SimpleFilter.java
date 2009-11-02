@@ -6,6 +6,7 @@ import java.util.HashSet;
 
 import net.sf.json.JSONObject;
 
+import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.utils.MyUtils;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
@@ -31,6 +32,8 @@ public class SimpleFilter extends Filter implements Serializable/*implements Com
 	protected String falseValue = null;
 	protected String falseDisplay = null;
 	
+	protected Boolean partition = null;
+	
 	// For internal use only
 	protected HashSet<String> cascadeChildrenNamesList = null;
 	protected Boolean tree = null;
@@ -45,6 +48,7 @@ public class SimpleFilter extends Filter implements Serializable/*implements Com
 		this.cascadeChildren = new HashSet<SimpleFilter>();
 		this.cascadeChildrenNamesList = new HashSet<String>();
 		this.tree = tree;
+		this.partition = false;	// unless changed later
 	}
 	
 	@Override
@@ -53,6 +57,7 @@ public class SimpleFilter extends Filter implements Serializable/*implements Com
 			super.toString() + ", " +
 			"displayType = " + displayType + ", " + 
 			"multiValue = " + multiValue + ", " +
+			"partition = " + partition + ", " +
 			
 			"trueValue = " + trueValue + ", " +
 			"trueDisplay = " + trueDisplay + ", " +
@@ -176,6 +181,14 @@ public class SimpleFilter extends Filter implements Serializable/*implements Com
 		this.multiValue = multiValue;
 	}
 
+	public Boolean getPartition() {
+		return partition;
+	}
+	
+	public void setPartition(Boolean partition) {
+		this.partition = partition;
+	}
+	
 	public String getTrueDisplay() {
 		return trueDisplay;
 	}
@@ -207,33 +220,13 @@ public class SimpleFilter extends Filter implements Serializable/*implements Com
 	public void setTree(Boolean tree) {
 		this.tree = tree;
 	}
-
-	/*@Override
-	public int compare(SimpleFilter simpleFilter1, SimpleFilter simpleFilter2) {
-		if (simpleFilter1==null && simpleFilter2!=null) {
-			return -1;
-		} else if (simpleFilter1!=null && simpleFilter2==null) {
-			return 1;
-		}
-		return 0;
-	}
-
-	@Override
-	public int compareTo(SimpleFilter simpleFilter) {
-		return compare(this, simpleFilter);
-	}*/
 	
 	public org.jdom.Element generateXml() {
 		org.jdom.Element element = super.generateXml();
 		
-		/*MyUtils.checkStatusProgram(this.pointer || (null!=this.displayType && 
-				this.displayType.getValue()!=null && !MyUtils.isEmpty(this.displayType.getValue())), this.name + ", " + this.displayType);
-		if (!this.pointer) {
-			element.setAttribute("displayType", this.displayType.getValue());
-		}*/
-		MyUtils.checkStatusProgram(this.pointer || (null!=this.displayType && 
+		MyUtils.checkStatusProgram(this.partition || this.pointer || (null!=this.displayType && 
 				this.displayType!=null && !MyUtils.isEmpty(this.displayType)), this.name + ", " + this.displayType);
-		if (!this.pointer) {
+		if (!this.pointer && !this.partition) {
 			MartConfiguratorUtils.addAttribute(element, "orderBy", this.orderBy);
 			
 			MartConfiguratorUtils.addAttribute(element, "displayType", this.displayType);
@@ -251,6 +244,8 @@ public class SimpleFilter extends Filter implements Serializable/*implements Com
 			MartConfiguratorUtils.addAttribute(element, "trueDisplay", this.trueDisplay);
 			MartConfiguratorUtils.addAttribute(element, "falseValue", this.falseValue);
 			MartConfiguratorUtils.addAttribute(element, "falseDisplay", this.falseDisplay);
+		} else if (!this.pointer && this.partition) {
+			MartConfiguratorUtils.addAttribute(element, "partition", this.partition);
 		}
 		
 		return element;
@@ -265,6 +260,7 @@ public class SimpleFilter extends Filter implements Serializable/*implements Com
 		this.displayType = MartConfiguratorUtils.replacePartitionReferencesByValues(simpleFilter.displayType, part);
 		this.orderBy = simpleFilter.orderBy;
 		this.multiValue = simpleFilter.multiValue;
+		this.partition = simpleFilter.partition;
 		this.buttonURL = MartConfiguratorUtils.replacePartitionReferencesByValues(simpleFilter.buttonURL, part);
 		this.upload = simpleFilter.upload;
 		this.trueValue = MartConfiguratorUtils.replacePartitionReferencesByValues(simpleFilter.trueValue, part);
@@ -278,55 +274,55 @@ public class SimpleFilter extends Filter implements Serializable/*implements Com
 		}
 	}
 	
-	public org.jdom.Element generateXmlForWebService() {
+	public org.jdom.Element generateXmlForWebService() throws FunctionalException {
 		return generateXmlForWebService(null);
 	}
-	public org.jdom.Element generateXmlForWebService(Namespace namespace) {
+	public org.jdom.Element generateXmlForWebService(Namespace namespace) throws FunctionalException {
 		org.jdom.Element jdomObject = super.generateXmlForWebService(namespace);
 		
-		//if (!this.pointer) {
-			MartConfiguratorUtils.addAttribute(jdomObject, "orderBy", this.orderBy);
-			
-			MartConfiguratorUtils.addAttribute(jdomObject, "displayType", this.displayType);
-			
-			MartConfiguratorUtils.addAttribute(jdomObject, "upload", this.upload);	
-			
-			MartConfiguratorUtils.addAttribute(jdomObject, "multiValue", this.multiValue);	
-			
-			MartConfiguratorUtils.addAttribute(jdomObject, "cascadeChildren", this.cascadeChildrenNamesList);
-			
-			MartConfiguratorUtils.addAttribute(jdomObject, "buttonURL", this.buttonURL);
-			
-			MartConfiguratorUtils.addAttribute(jdomObject, "trueValue", this.trueValue);
-			MartConfiguratorUtils.addAttribute(jdomObject, "trueDisplay", this.trueDisplay);
-			MartConfiguratorUtils.addAttribute(jdomObject, "falseValue", this.falseValue);
-			MartConfiguratorUtils.addAttribute(jdomObject, "falseDisplay",  this.falseDisplay);
-		//}
+		MartConfiguratorUtils.addAttribute(jdomObject, "orderBy", this.orderBy);
 		
+		MartConfiguratorUtils.addAttribute(jdomObject, "displayType", this.displayType);
+		
+		MartConfiguratorUtils.addAttribute(jdomObject, "upload", this.upload);	
+		
+		MartConfiguratorUtils.addAttribute(jdomObject, "multiValue", this.multiValue);	
+		
+		MartConfiguratorUtils.addAttribute(jdomObject, "partition", this.partition);	
+		
+		MartConfiguratorUtils.addAttribute(jdomObject, "cascadeChildren", this.cascadeChildrenNamesList);
+		
+		MartConfiguratorUtils.addAttribute(jdomObject, "buttonURL", this.buttonURL);
+		
+		MartConfiguratorUtils.addAttribute(jdomObject, "trueValue", this.trueValue);
+		MartConfiguratorUtils.addAttribute(jdomObject, "trueDisplay", this.trueDisplay);
+		MartConfiguratorUtils.addAttribute(jdomObject, "falseValue", this.falseValue);
+		MartConfiguratorUtils.addAttribute(jdomObject, "falseDisplay",  this.falseDisplay);
+
 		return jdomObject;
 	}
 	public JSONObject generateJsonForWebService() {
 		JSONObject jsonObject = super.generateJsonForWebService();
 		
 		JSONObject object = (JSONObject)jsonObject.get(super.xmlElementName);
-		if (!this.pointer) {
-			object.put("orderBy", this.orderBy);
-			
-			object.put("displayType", this.displayType);
-						
-			object.put("upload", this.upload);
-						
-			object.put("multiValue", this.multiValue);
-						
-			object.put("cascadeChildren", this.cascadeChildrenNamesList);
-						
-			object.put("buttonURL", this.buttonURL!=null ? this.buttonURL.toString() : null);
-						
-			object.put("trueValue", this.trueValue);
-			object.put("trueDisplay", this.trueDisplay);
-			object.put("falseValue", this.falseValue);
-			object.put("falseDisplay", this.falseDisplay);
-		}
+		object.put("orderBy", this.orderBy);
+		
+		object.put("displayType", this.displayType);
+					
+		object.put("upload", this.upload);
+					
+		object.put("multiValue", this.multiValue);
+		
+		object.put("partition", this.partition);
+					
+		object.put("cascadeChildren", MartConfiguratorUtils.collectionToCommaSeparatedString(this.cascadeChildrenNamesList));
+					
+		object.put("buttonURL", this.buttonURL);
+					
+		object.put("trueValue", this.trueValue);
+		object.put("trueDisplay", this.trueDisplay);
+		object.put("falseValue", this.falseValue);
+		object.put("falseDisplay", this.falseDisplay);
 		
 		jsonObject.put(super.xmlElementName, object);
 		return jsonObject;

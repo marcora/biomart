@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-
 import org.biomart.common.general.utils.CompareUtils;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
@@ -122,5 +121,4 @@ public class Config extends MartConfiguratorObject implements Comparable<Config>
 	public List<Container> getContainerList() {
 		return containerList;
 	}
-
 }

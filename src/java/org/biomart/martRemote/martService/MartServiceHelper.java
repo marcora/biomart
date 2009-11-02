@@ -28,7 +28,7 @@ public class MartServiceHelper {
 		return null;
 	}
 	
-	public static String executeRequest(MartServiceRequest martServiceRequest) {
+	public static String executeRequest(MartServiceRequest martServiceRequest) throws FunctionalException {
 
 		MartServiceResponse martServiceResponse = null;
 		try {

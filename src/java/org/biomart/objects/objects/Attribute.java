@@ -6,6 +6,7 @@ import java.util.List;
 
 import net.sf.json.JSONObject;
 
+import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.jdom.Namespace;
@@ -123,10 +124,10 @@ public class Attribute extends Element implements /*Comparable<Attribute>, Compa
 		this.linkURL = MartConfiguratorUtils.replacePartitionReferencesByValues(attribute.linkURL, part);
 	}
 	
-	public org.jdom.Element generateXmlForWebService() {
+	public org.jdom.Element generateXmlForWebService() throws FunctionalException {
 		return generateXmlForWebService(null);
 	}
-	public org.jdom.Element generateXmlForWebService(Namespace namespace) {
+	public org.jdom.Element generateXmlForWebService(Namespace namespace) throws FunctionalException {
 		org.jdom.Element jdomObject = super.generateXmlForWebService(namespace);
 		
 		MartConfiguratorUtils.addAttribute(jdomObject, "maxLength", this.maxLength);

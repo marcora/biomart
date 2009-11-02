@@ -5,6 +5,7 @@ import java.io.Serializable;
 
 import net.sf.json.JSONObject;
 
+import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.utils.CompareUtils;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
@@ -23,7 +24,6 @@ public class MartConfiguratorObject implements Serializable /*implements Compara
 	protected String description = null;
 	protected Boolean visible = null;
 	protected String xmlElementName = null;
-
 	public MartConfiguratorObject() {}	// for Serialization
 	public MartConfiguratorObject(String name, String displayName, String description, Boolean visible, String xmlElementName) {
 		super();
@@ -32,6 +32,10 @@ public class MartConfiguratorObject implements Serializable /*implements Compara
 		this.displayName = displayName;
 		this.description = description;
 		this.visible = visible;
+	}
+
+	public String getXmlElementName() {
+		return xmlElementName;
 	}
 
 	public String getName() {
@@ -155,7 +159,7 @@ public class MartConfiguratorObject implements Serializable /*implements Compara
 				martConfiguratorObject.visible, martConfiguratorObject.xmlElementName);
 	}
 	
-	protected Element generateXmlForWebService(Namespace namespace) {
+	protected Element generateXmlForWebService(Namespace namespace) throws FunctionalException {
 		Element jdomObject = new Element(xmlElementName, namespace);
 		
 		MartConfiguratorUtils.addAttribute(jdomObject, "name", this.name);
@@ -165,7 +169,11 @@ public class MartConfiguratorObject implements Serializable /*implements Compara
 		
 		return jdomObject;
 	}
-	
+	protected void updatePointerClone(org.biomart.objects.objects.Element pointingElement) {
+		this.name = pointingElement.name;
+		this.displayName = pointingElement.displayName;
+		this.description = pointingElement.description;
+	}
 	protected JSONObject generateJsonForWebService() {
 		JSONObject object = new JSONObject();
 		
