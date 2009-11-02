@@ -117,5 +117,11 @@ public class TransformationConstants {
 	//public static final String RDBMS_CONFIGURATION_SERIAL_FILE_NAME = "RdbmsConfiguration";
 	
 	public static final String DEFAULT_USER = "anonymous";
+	
+	public static final String PARTITION_FILTERS_CONTAINER_NAME = "partition_filters";
+	public static final String PARTITION_FILTERS_CONTAINER_DISPLAY_NAME = "Partition Filters";
+	public static final String MAIN_PARTITION_FILTER_NAME = "main_partition_filter";
+	public static final String MAIN_PARTITION_FILTER_DISPLAY_NAME = "Main partition filter";
+	
 }
 
