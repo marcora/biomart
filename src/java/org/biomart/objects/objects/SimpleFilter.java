@@ -14,7 +14,7 @@ import org.biomart.objects.data.TreeFilterData;
 import org.jdom.Namespace;
 
 
-public class SimpleFilter extends Filter implements Serializable/*implements Comparable<SimpleFilter>, Comparator<SimpleFilter> */{
+public class SimpleFilter extends Filter implements Serializable {
 
 	private static final long serialVersionUID = -5644886498979459891L;
 
@@ -276,14 +276,17 @@ public class SimpleFilter extends Filter implements Serializable/*implements Com
 	
 	
 	// ===================================== Should be a different class ============================================
-
+	
+	private org.jdom.Element treeFilterDataElement = null;	// easier to handle than the big map
+	public org.jdom.Element getTreeFilterDataElement() {
+		return treeFilterDataElement;
+	}
 	public SimpleFilter(SimpleFilter simpleFilter, Part part) throws CloneNotSupportedException {	// creates a light clone (temporary solution)
 		super(simpleFilter, part);
 		
 		this.displayType = MartConfiguratorUtils.replacePartitionReferencesByValues(simpleFilter.displayType, part);
 		this.orderBy = simpleFilter.orderBy;
 		this.multiValue = simpleFilter.multiValue;
-		this.partition = simpleFilter.partition;
 		this.buttonURL = MartConfiguratorUtils.replacePartitionReferencesByValues(simpleFilter.buttonURL, part);
 		this.upload = simpleFilter.upload;
 		this.trueValue = MartConfiguratorUtils.replacePartitionReferencesByValues(simpleFilter.trueValue, part);
@@ -295,6 +298,8 @@ public class SimpleFilter extends Filter implements Serializable/*implements Com
 		for (String cascadeChildName : simpleFilter.cascadeChildrenNamesList) {
 			this.cascadeChildrenNamesList.add(MartConfiguratorUtils.replacePartitionReferencesByValues(cascadeChildName, part));
 		}
+		
+		this.treeFilterDataElement = simpleFilter.treeFilterData!=null ? simpleFilter.treeFilterData.generateXml(true) : null;
 	}
 	
 	public org.jdom.Element generateXmlForWebService() throws FunctionalException {
@@ -322,6 +327,10 @@ public class SimpleFilter extends Filter implements Serializable/*implements Com
 		MartConfiguratorUtils.addAttribute(jdomObject, "falseValue", this.falseValue);
 		MartConfiguratorUtils.addAttribute(jdomObject, "falseDisplay",  this.falseDisplay);
 
+		if (this.treeFilterDataElement!=null) {
+			jdomObject.addContent(this.treeFilterDataElement);
+		}
+		
 		return jdomObject;
 	}
 	public JSONObject generateJsonForWebService() {

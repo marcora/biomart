@@ -105,8 +105,8 @@
 	<xs:complexType name="attributeType">
 		<xs:attribute name="name" type="tns:nameType" use="required" />
 		
-<xs:attribute name="displayName" type="tns:displayNameType" use="optional" />
-<xs:attribute name="description" type="tns:descriptionType" use="optional" />
+		<xs:attribute name="displayName" type="tns:displayNameType" use="optional" />
+		<xs:attribute name="description" type="tns:descriptionType" use="optional" />
 						
 		<xs:attribute name="default" type="xs:boolean" use="optional" />		<!-- selection by default -->
 		
@@ -119,10 +119,15 @@
 	</xs:complexType>
 	
 	<xs:complexType name="filterType">
+		<xs:sequence>
+			<xs:element name="data" type="tns:filterDataType" minOccurs="0" maxOccurs="1" />
+			<xs:element name="treeData" type="tns:treeFilterDataType" minOccurs="0" maxOccurs="1" />
+		</xs:sequence>
+		
 		<xs:attribute name="name" type="tns:nameType" use="required" />
 						
-<xs:attribute name="displayName" type="tns:displayNameType" use="optional" />
-<xs:attribute name="description" type="tns:descriptionType" use="optional" />
+		<xs:attribute name="displayName" type="tns:displayNameType" use="optional" />
+		<xs:attribute name="description" type="tns:descriptionType" use="optional" />
 	
 		<xs:attribute name="default" type="xs:boolean" use="optional" />		<!-- selection by default -->
 		
@@ -152,6 +157,43 @@
 		<xs:attribute name="logicalOperator" type="xs:string" use="optional" />
 		<xs:attribute name="multipleFilter" type="xs:string" use="optional" />
 		<xs:attribute name="filterList" type="xs:string" use="optional" />	<!-- comma separated list -->
+	</xs:complexType>
+	
+	<!-- filter data & tree filter data -->
+	<xs:complexType name="filterDataType">
+		<xs:sequence>
+			<xs:element name="part" type="tns:partType" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="treeFilterDataType">
+		<xs:sequence>
+			<xs:element name="part" type="tns:partType" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="partType">
+		<xs:sequence>
+			<xs:element name="row" type="tns:filterDataRowType" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+		<xs:attribute name="name" type="tns:nameType" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="filterDataRowType">
+		<xs:sequence>
+			<xs:element name="cascadeChild" type="tns:cascadeChildType" minOccurs="0" maxOccurs="unbounded" />		<!-- for cascade -->
+			<xs:element name="row" type="tns:filterDataRowType" minOccurs="0" maxOccurs="unbounded" />		<!-- for trees -->
+		</xs:sequence>
+		<xs:attribute name="value" type="xs:string" use="required" />
+		<xs:attribute name="displayName" type="xs:string" use="required" />
+		<xs:attribute name="default" type="xs:boolean" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="cascadeChildType">
+		<xs:sequence>
+			<xs:element name="row" type="tns:filterDataRowType" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+		<xs:attribute name="name" type="tns:nameType" use="required" />
 	</xs:complexType>
 	
 	<!-- ================================================================================================================== -->

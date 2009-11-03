@@ -213,19 +213,20 @@ public class Part implements /*Comparable<Part>, Comparator<Part>, */Serializabl
 	}*/
 	
 	public String getXmlValue() {
+		return getXmlValue(false);
+	}
+	public String getXmlValue(boolean flatten) {
 		StringBuffer stringBuffer = new StringBuffer();
 		stringBuffer.append(MartConfiguratorConstants.RANGE_RANGE_START);
 		int partition = 0;
-		
+			
 		// FIXME to be done in a more efficient manner
 		// Display Main first
 		for (Iterator<PartitionTable> it = map.keySet().iterator(); it.hasNext();) {
 			PartitionTable partitionTable = it.next();
 			if (partitionTable.getMain()) {
 				Integer row = map.get(partitionTable);
-				stringBuffer.append(
-						MartConfiguratorConstants.RANGE_PARTITION_TABLE_PREFIX + partitionTable.getName() + 
-						MartConfiguratorConstants.RANGE_ROW_PREFIX + displayRow(row));
+				stringBuffer.append(getPartName(partitionTable, row, flatten));
 			}
 		}
 		
@@ -237,8 +238,7 @@ public class Part implements /*Comparable<Part>, Comparator<Part>, */Serializabl
 				MyUtils.checkStatusProgram(null!=row, 
 						"map = " + map + ", partitionTable = " + partitionTable +  " --- " + displayMapHashCodes(partitionTable));
 				stringBuffer.append(MartConfiguratorConstants.RANGE_INTRA_SEPARATOR +
-						MartConfiguratorConstants.RANGE_PARTITION_TABLE_PREFIX + partitionTable.getName() + 
-						MartConfiguratorConstants.RANGE_ROW_PREFIX + displayRow(row));
+						getPartName(partitionTable, row, flatten));
 			}
 			partition++;
 		}
@@ -256,6 +256,16 @@ public class Part implements /*Comparable<Part>, Comparator<Part>, */Serializabl
 		stringBuffer.append(MartConfiguratorConstants.RANGE_RANGE_END);
 		return stringBuffer.toString();
 	}
+
+	private String getPartName(PartitionTable partitionTable, Integer row, boolean flatten) {
+		if (flatten) {
+			return row==MartConfiguratorConstants.PARTITION_TABLE_ROW_WILDCARD_NUMBER ? 
+					MartConfiguratorConstants.PARTITION_TABLE_ROW_WILDCARD : partitionTable.getRowName(row);
+		} else {			
+			return MartConfiguratorConstants.RANGE_PARTITION_TABLE_PREFIX + partitionTable.getName() + 
+				MartConfiguratorConstants.RANGE_ROW_PREFIX + displayRow(row);
+		}
+	}
 	
 	private String displayMapHashCodes(PartitionTable partitionTable) {
 		String s = "";
@@ -263,12 +273,17 @@ public class Part implements /*Comparable<Part>, Comparator<Part>, */Serializabl
 			PartitionTable partitionTableTmp = it.next();
 			s +=partitionTableTmp.getName() + ": " + partitionTableTmp.hashCode() + " (" + partitionTableTmp.equals(partitionTable) + ")" + ", ";
 		}
-		s += " / " + partitionTable.hashCode();
+		s += " / " + partitionTable.hashCode() + "." ;
+		for (Iterator<Integer> it2 = map.values().iterator(); it2.hasNext();) {
+			Integer value = it2.next();
+			s += value + ", ";
+		}
 		return s;
 	}
 
 	private String displayRow(int row) {
-		return row==-1 ? MartConfiguratorConstants.PARTITION_TABLE_ROW_WILDCARD : String.valueOf(row);
+		return row==MartConfiguratorConstants.PARTITION_TABLE_ROW_WILDCARD_NUMBER ? 
+				MartConfiguratorConstants.PARTITION_TABLE_ROW_WILDCARD : String.valueOf(row);
 	}
 
 	private String getSuperPropertyString(String parameterName) {

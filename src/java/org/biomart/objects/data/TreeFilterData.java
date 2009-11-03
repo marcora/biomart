@@ -95,19 +95,19 @@ public class TreeFilterData implements Serializable {	//TODO merge with ListFilt
 	public void writeFile() throws TechnicalException {
 		
 		// Generate the elements
-		Element rootElement = generateXml();
+		Element rootElement = generateXml(false);
 		
 		// Write the file
 		MyUtils.writeXmlFile(rootElement, this.dataFile.getAbsolutePath());
 	}
 	
-	public Element generateXml() {
-		Element rootElement = new Element("root");
+	public Element generateXml(boolean flatten) {
+		Element rootElement = new Element("treeData");
 		for (Iterator<Part> it = this.map.keySet().iterator(); it.hasNext();) {
 			Part part = it.next();
 			
 			Element partElement = new Element("part");
-			partElement.setAttribute("name", part.getXmlValue());
+			partElement.setAttribute("name", part.getXmlValue(flatten));
 			rootElement.addContent(partElement);
 			
 			ArrayList<TreeFilterDataRow> children = this.map.get(part);
@@ -118,20 +118,4 @@ public class TreeFilterData implements Serializable {	//TODO merge with ListFilt
 		}
 		return rootElement;
 	}
-
-	/*@Override
-	public int compare(DataFile dataFile1, DataFile dataFile2) {
-		if (dataFile1==null && dataFile2!=null) {
-			return -1;
-		} else if (dataFile1!=null && dataFile2==null) {
-			return 1;
-		}
-		return CompareUtils.compareNull(dataFile1.listFilter, dataFile2.listFilter);
-	}
-
-	@Override
-	public int compareTo(DataFile dataFile) {
-		return compare(this, dataFile);
-	}*/
-
 }

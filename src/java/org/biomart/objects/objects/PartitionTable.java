@@ -133,7 +133,8 @@ public class PartitionTable extends MartConfiguratorObject implements Comparable
 			"totalRows = " + totalRows + ", " +
 			"totalColumns = " + totalColumns + ", " +
 			"flatten = " + flatten + ", " +
-			"table.length = " + table.size();
+			"table.length = " + table.size()
+			+ ", " + this.hashCode();
 	}
 
 	@Override
@@ -162,6 +163,7 @@ public class PartitionTable extends MartConfiguratorObject implements Comparable
 	@Override
 	public int hashCode() {
 		int hash = MartConfiguratorConstants.HASH_SEED1;
+		
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + super.hashCode();
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==main? 0 : main.hashCode());
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==flatten? 0 : flatten.hashCode());

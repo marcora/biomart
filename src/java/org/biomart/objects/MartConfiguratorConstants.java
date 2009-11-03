@@ -75,5 +75,5 @@ public class MartConfiguratorConstants {
 	public static final String MULTIPLE_FILTER_VALUE_N = "N";
 	public static final String MULTIPLE_FILTER_VALUE_ALL = "ALL";
 	public static final String PARTITION_TABLE_ROW_WILDCARD = "*";
-	public static final int PARTITION_TABLE_ROW_WIDLCARD_NUMBER = -1;
+	public static final int PARTITION_TABLE_ROW_WILDCARD_NUMBER = -1;
 }

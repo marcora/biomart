@@ -7,11 +7,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 
-
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.MyUtils;
 import org.biomart.objects.MartConfiguratorConstants;
+import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.objects.objects.Filter;
 import org.biomart.objects.objects.Part;
 import org.jdom.Element;
@@ -61,8 +61,8 @@ public class FilterData implements Serializable {
 	public LinkedHashMap<Filter,ArrayList<filterDataRow>> addRowForPart(Part part, filterDataRow dataRow) throws FunctionalException {
 		LinkedHashMap<Filter,ArrayList<filterDataRow>> rowForPartValue = getRowForPartValue(part, dataRow);
 		if (rowForPartValue!=null) {
-			/*throw new FunctionalException("Row " + MartConfiguratorUtils.displayJdomElement(dataRow.generateXml()) + 
-					" for part " + part.getXmlValue() + " is already in the data");*/
+			throw new FunctionalException("Row " + MartConfiguratorUtils.displayJdomElement(dataRow.generateXml()) + 
+					" for part " + part.getXmlValue() + " is already in the data");
 		}
 		rowForPartValue = new LinkedHashMap<Filter, ArrayList<filterDataRow>>();
 		
@@ -185,19 +185,20 @@ public class FilterData implements Serializable {
 	public void writeFile(String dataFilePathAndName) throws TechnicalException {
 	
 		// Generate the elements
-		Element rootElement = generateXml();
+		Element rootElement = generateXml(false);
 				
 		// Write the file
 		MyUtils.writeXmlFile(rootElement, dataFilePathAndName);
 	}
-
-	public Element generateXml() {
-		Element rootElement = new Element("root");
+	
+	public Element generateXml(boolean flatten) {
+		Element rootElement = new Element("data");
 		for (Iterator<Part> it = this.map.keySet().iterator(); it.hasNext();) {
 			Part part = it.next();
 			
 			Element partElement = new Element("part");
-			partElement.setAttribute("name", part.getXmlValue());
+			String partName = part.getXmlValue(flatten);
+			partElement.setAttribute("name", partName);
 			rootElement.addContent(partElement);
 			
 			LinkedHashMap<filterDataRow, LinkedHashMap<Filter, ArrayList<filterDataRow>>> subMap = this.map.get(part);
@@ -226,20 +227,4 @@ public class FilterData implements Serializable {
 		}
 		return rootElement;
 	}
-
-	/*@Override
-	public int compare(DataFile dataFile1, DataFile dataFile2) {
-		if (dataFile1==null && dataFile2!=null) {
-			return -1;
-		} else if (dataFile1!=null && dataFile2==null) {
-			return 1;
-		}
-		return CompareUtils.compareNull(dataFile1.filter, dataFile2.filter);
-	}
-
-	@Override
-	public int compareTo(DataFile dataFile) {
-		return compare(this, dataFile);
-	}*/
-
 }

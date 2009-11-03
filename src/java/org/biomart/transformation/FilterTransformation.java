@@ -449,7 +449,7 @@ public class FilterTransformation extends ElementTransformation {
 
 		// When not partition specific: row=-1..?
 		if (currentMainRow==null) {
-			currentMainRow = MartConfiguratorConstants.PARTITION_TABLE_ROW_WIDLCARD_NUMBER;
+			currentMainRow = MartConfiguratorConstants.PARTITION_TABLE_ROW_WILDCARD_NUMBER;
 		}
 
 		// Sufficient for the transformation
@@ -1026,7 +1026,7 @@ System.out.println("#2" + MartConfiguratorUtils.displayJdomElement(newFilter.gen
 		FilterData filterData = mainPartitionFilter.getFilterData();
 		
 		Part part = new Part(false, null, null, 
-				new PartitionTableAndRow(mainPartitionTable, MartConfiguratorConstants.PARTITION_TABLE_ROW_WIDLCARD_NUMBER));
+				new PartitionTableAndRow(mainPartitionTable, MartConfiguratorConstants.PARTITION_TABLE_ROW_WILDCARD_NUMBER));
 		filterData.addPart(part);
 		
 		for (int rowNumber = 0; rowNumber < mainPartitionTable.getRowNamesList().size(); rowNumber++) {

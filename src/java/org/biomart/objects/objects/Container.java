@@ -195,56 +195,61 @@ public class Container extends Containee implements Comparable<Container>, Compa
 			} else if (containee instanceof org.biomart.objects.objects.Element) {
 			
 				org.biomart.objects.objects.Element element = (org.biomart.objects.objects.Element)containee;
-				Range targetRange = element.getTargetRange();
-				Set<Part> partSet = targetRange.getPartSet();
-				for (Part part : partSet) {
-					if (part.getVisible()) {	// Only the visible ones
-						if (element.getPointer() && null==element.getPointedElement()) continue;	// broken pointers (from transformation for instance)
-						int mainRowNumber = part.getMainRowNumber();
-						if (mainRowNumbersWanted.contains(mainRowNumber)) {
-							if (element.getPointer()) {	// FIXME not adequate if pointers of pointers...
-								org.biomart.objects.objects.Element pointedElement = element.getPointedElement();
-								if (pointedElement instanceof Attribute) {
-									Attribute pointedAttributeClone = new Attribute((Attribute)pointedElement, part);
-									pointedAttributeClone.updatePointerClone(element);
-									if (!this.attributeList.contains(pointedAttributeClone)) {	// No repetitions
-										addAttribute(pointedAttributeClone);	// also handles containeeList
+				if (element instanceof SimpleFilter && ((SimpleFilter)element).partition) {
+					SimpleFilter filterPartitionClone = new SimpleFilter((SimpleFilter)element, null);
+					addFilter(filterPartitionClone);
+				} else {
+					Range targetRange = element.getTargetRange();
+					Set<Part> partSet = targetRange.getPartSet();
+					for (Part part : partSet) {
+						if (part.getVisible()) {	// Only the visible ones
+							if (element.getPointer() && null==element.getPointedElement()) continue;	// broken pointers (from transformation for instance)
+							int mainRowNumber = part.getMainRowNumber();
+							if (mainRowNumbersWanted.contains(mainRowNumber)) {
+								if (element.getPointer()) {	// FIXME not adequate if pointers of pointers...
+									org.biomart.objects.objects.Element pointedElement = element.getPointedElement();
+									if (pointedElement instanceof Attribute) {
+										Attribute pointedAttributeClone = new Attribute((Attribute)pointedElement, part);
+										pointedAttributeClone.updatePointerClone(element);
+										if (!this.attributeList.contains(pointedAttributeClone)) {	// No repetitions
+											addAttribute(pointedAttributeClone);	// also handles containeeList
+										}
+									} else if (pointedElement instanceof Filter) {
+										Filter pointedFilterClone = null;
+										if (pointedElement instanceof SimpleFilter) {
+											SimpleFilter pointedSimpleFilterClone = new SimpleFilter((SimpleFilter)pointedElement, part);
+											pointedSimpleFilterClone.updatePointerClone(element);
+											pointedFilterClone = pointedSimpleFilterClone;
+										} else if (pointedElement instanceof GroupFilter) {
+											GroupFilter pointedGroupFilterClone = new GroupFilter((GroupFilter)pointedElement, part);
+											pointedGroupFilterClone.updatePointerClone(element);
+											pointedFilterClone = pointedGroupFilterClone;
+										}
+										if (!this.filterList.contains(pointedFilterClone)) {	// No repetitions
+											addFilter(pointedFilterClone);	// also handles containeeList
+										}
 									}
-								} else if (pointedElement instanceof Filter) {
-									Filter pointedFilterClone = null;
-									if (pointedElement instanceof SimpleFilter) {
-										SimpleFilter pointedSimpleFilterClone = new SimpleFilter((SimpleFilter)pointedElement, part);
-										pointedSimpleFilterClone.updatePointerClone(element);
-										pointedFilterClone = pointedSimpleFilterClone;
-									} else if (pointedElement instanceof GroupFilter) {
-										GroupFilter pointedGroupFilterClone = new GroupFilter((GroupFilter)pointedElement, part);
-										pointedGroupFilterClone.updatePointerClone(element);
-										pointedFilterClone = pointedGroupFilterClone;
-									}
-									if (!this.filterList.contains(pointedFilterClone)) {	// No repetitions
-										addFilter(pointedFilterClone);	// also handles containeeList
-									}
-								}
-							} else {
-								if (element instanceof Attribute) {
-									Attribute attributeClone = new Attribute((Attribute)element, part);
-									if (!this.attributeList.contains(attributeClone)) {	// No repetitions
-										addAttribute(attributeClone);	// also handles containeeList
-									}
-								} else if (element instanceof Filter) {
-									Filter filterClone = null;
-									if (element instanceof SimpleFilter) {
-										filterClone = new SimpleFilter((SimpleFilter)element, part);
-									} else if (element instanceof GroupFilter) {
-										filterClone = new GroupFilter((GroupFilter)element, part);
-									}
-									if (!this.filterList.contains(filterClone)) {	// No repetitions
-										addFilter(filterClone);	// also handles containeeList
+								} else {
+									if (element instanceof Attribute) {
+										Attribute attributeClone = new Attribute((Attribute)element, part);
+										if (!this.attributeList.contains(attributeClone)) {	// No repetitions
+											addAttribute(attributeClone);	// also handles containeeList
+										}
+									} else if (element instanceof Filter) {
+										Filter filterClone = null;
+										if (element instanceof SimpleFilter) {
+											filterClone = new SimpleFilter((SimpleFilter)element, part);
+										} else if (element instanceof GroupFilter) {
+											filterClone = new GroupFilter((GroupFilter)element, part);
+										}
+										if (!this.filterList.contains(filterClone)) {	// No repetitions
+											addFilter(filterClone);	// also handles containeeList
+										}
 									}
 								}
 							}
-						}
-					}	
+						}	
+					}
 				}
 			} 
 		}

@@ -3,6 +3,7 @@ package org.biomart.martRemote;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -47,7 +48,7 @@ public class MartApi {
 	@SuppressWarnings("all")
 	public static void main(String[] args) throws Exception {
 		
-		PrintWriter printWriter = new PrintWriter(System.out);
+		StringWriter stringWriter = new StringWriter();
 		MartApi martApi = new MartApi();
 		System.out.println("Registry loaded");
 		
@@ -73,7 +74,7 @@ public class MartApi {
 		String query = "query1";
 		String filterPartitionString = TransformationConstants.MAIN_PARTITION_FILTER_NAME + 
 			".\"hsapiens_gene_ensembl,mmusculus_gene_ensembl,celegans_gene_ensembl\"";
-		MartServiceFormat format = MartServiceFormat.JSON;
+		MartServiceFormat format = MartServiceFormat.XML;
 		
 		MartRemoteEnum remoteAccessEnum = MartRemoteEnum.getEnumFromIdentifier(type);
 		boolean valid = true;
@@ -94,7 +95,7 @@ public class MartApi {
 		}
 		
 		if (!martServiceRequest.isValid()) {
-			martApi.writeError(martServiceRequest.getErrorMessage(), printWriter);
+			martApi.writeError(martServiceRequest.getErrorMessage(), stringWriter);
 			valid = false;
 		} else {
 			if (MartRemoteEnum.GET_REGISTRY.equals(remoteAccessEnum)) {			
@@ -115,9 +116,12 @@ public class MartApi {
 		}
 		
 		if (valid) {
-			martApi.processMartServiceResult(martServiceResult, printWriter);
+			martApi.processMartServiceResult(martServiceResult, stringWriter);
 		}
-		printWriter.flush();
+		stringWriter.flush();
+		String string = stringWriter.toString();
+		System.out.println(string);
+		MyUtils.writeFile("/home/anthony/Desktop/MartApi", string);
 	}
 	
 	private Boolean debug = null;

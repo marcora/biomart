@@ -77,11 +77,12 @@ public class Filter extends Element implements Comparable<Filter>, Comparator<Fi
 	
 	public void copyDataRelatedInformation(Filter filter) throws FunctionalException {
 		this.dataFolderPath = filter.getDataFolderPath();
-		this.filterData = filter.getFilterData();
-		if (this instanceof SimpleFilter && filter instanceof SimpleFilter) {
+		if (this instanceof SimpleFilter && filter instanceof SimpleFilter && ((SimpleFilter)filter).tree) {
 			SimpleFilter simpleFilter = (SimpleFilter)this;
 			SimpleFilter simpleFilter2 = (SimpleFilter)filter;
 			simpleFilter.setTreeFilterData(simpleFilter2.getTreeFilterData());
+		} else {			
+			this.filterData = filter.getFilterData();
 		}
 	}
 	public void setDataFolderPath(String stringDataFolderPath) throws FunctionalException {
@@ -89,10 +90,11 @@ public class Filter extends Element implements Comparable<Filter>, Comparator<Fi
 		if (!this.dataFolderPath.exists()) {
 			throw new FunctionalException("dataFolderPath does not exist: " + this.dataFolderPath.getAbsolutePath());
 		}
-		this.filterData = new FilterData(this);
-		if (this instanceof SimpleFilter) {
+		if (this instanceof SimpleFilter && ((SimpleFilter)this).tree) {
 			SimpleFilter simpleFilter = (SimpleFilter)this;
 			simpleFilter.setTreeFilterData(new TreeFilterData(this));
+		} else {
+			this.filterData = new FilterData(this);			
 		}
 	}
 
@@ -148,9 +150,15 @@ public class Filter extends Element implements Comparable<Filter>, Comparator<Fi
 	
 	// ===================================== Should be a different class ============================================
 
+	private org.jdom.Element filterDataElement = null;	// easier to handle than the big map
+	public org.jdom.Element getFilterDataElement() {
+		return filterDataElement;
+	}
 	protected Filter(Filter filter, Part part) throws CloneNotSupportedException {	// creates a light clone (temporary solution)
 		super(filter, part);
 		this.qualifier = filter.qualifier;
+		this.caseSensitive = filter.caseSensitive;
+		this.filterDataElement = filter.filterData!=null ? filter.filterData.generateXml(true) : null;
 	}
 	
 	public org.jdom.Element generateXmlForWebService() throws FunctionalException {
@@ -161,6 +169,9 @@ public class Filter extends Element implements Comparable<Filter>, Comparator<Fi
 		
 		MartConfiguratorUtils.addAttribute(jdomObject, "qualifier", this.qualifier);
 		MartConfiguratorUtils.addAttribute(jdomObject, "caseSensitive", this.caseSensitive);
+		if (this.filterDataElement!=null) {
+			jdomObject.addContent(this.filterDataElement);
+		}
 		
 		return jdomObject;
 	}
