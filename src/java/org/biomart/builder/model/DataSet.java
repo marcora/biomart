@@ -83,7 +83,7 @@ public class DataSet extends Schema {
 	private static final long serialVersionUID = 1L;
 
 	final PropertyChangeListener rebuildListener = new PropertyChangeListener() {
-		public void propertyChange(PropertyChangeEvent evt) {			
+		public void propertyChange(PropertyChangeEvent evt) {	
 			final Object src = evt.getSource();
 			Object val = evt.getNewValue();
 			if (val == null)
@@ -228,10 +228,10 @@ public class DataSet extends Schema {
 		if (this.name == name || this.name != null && this.name.equals(name))
 			return;
 		// Work out all used names.
-		final Set usedNames = new HashSet();
-		for (final Iterator i = this.getMart().getDataSets().values()
+		final Set<String> usedNames = new HashSet<String>();
+		for (final Iterator<DataSet> i = this.getMart().getDataSets().values()
 				.iterator(); i.hasNext();)
-			usedNames.add(((DataSet) i.next()).getName());
+			usedNames.add(( i.next()).getName());
 		// Make new name unique.
 		final String baseName = name;
 		for (int i = 1; usedNames.contains(name); name = baseName + "_" + i++)
@@ -250,8 +250,8 @@ public class DataSet extends Schema {
 	protected void setOriginalName(String name) {
 		Log.debug("Renaming original dataset " + this + " to " + name);
 		// Work out all used names.
-		final Set usedNames = new HashSet();
-		for (final Iterator i = this.getMart().getDataSets().values()
+		final Set<String> usedNames = new HashSet<String>();
+		for (final Iterator<DataSet> i = this.getMart().getDataSets().values()
 				.iterator(); i.hasNext();)
 			usedNames.add(((DataSet) i.next()).getOriginalName());
 		// Make new name unique.
@@ -321,7 +321,7 @@ public class DataSet extends Schema {
 	 * 
 	 * @return all relations.
 	 */
-	public Collection getIncludedRelations() {
+	public Collection<Relation> getIncludedRelations() {
 		return this.includedRelations;
 	}
 
@@ -352,9 +352,9 @@ public class DataSet extends Schema {
 	 */
 	private void generateDataSetTable(final DataSetTableType type,
 			final DataSetTable parentDSTable, final Table realTable,
-			final Collection skippedMainTables, final List sourceDSCols,
+			final Collection<Table> skippedMainTables, final List<Column> sourceDSCols,
 			Relation sourceRelation, final Map subclassCount,
-			final int relationIteration, final Collection unusedTables) {
+			final int relationIteration, final Collection<Table> unusedTables) {
 		Log.debug("Creating dataset table for " + realTable
 				+ " with parent relation " + sourceRelation + " as a " + type);
 		// Create the empty dataset table. Use a unique prefix
@@ -371,10 +371,10 @@ public class DataSet extends Schema {
 					+ relationIteration;
 		// Loop over all tables with similar names to check for reuse.
 		DataSetTable dsTable = null;
-		for (final Iterator i = this.getTables().entrySet().iterator(); i
+		for (final Iterator<Map.Entry<String, Table>> i = this.getTables().entrySet().iterator(); i
 				.hasNext()
 				&& dsTable == null;) {
-			final Map.Entry entry = (Map.Entry) i.next();
+			final Map.Entry<String, Table> entry = i.next();
 			final String testName = (String) entry.getKey();
 			final DataSetTable testTable = (DataSetTable) entry.getValue();
 			// If find table starting with same letters, check to see
@@ -409,15 +409,15 @@ public class DataSet extends Schema {
 
 		// Identify secondStartTable and mergeTheseRelations.
 		Table secondStartTable = null;
-		final Set mergeTheseRelations = new HashSet();
+		final Set<Relation> mergeTheseRelations = new HashSet<Relation>();
 		if (dsTable.getType().equals(DataSetTableType.DIMENSION)) {
 			// A crude walk will tell us which relations we
 			// would have included if we had done a normal transform.
-			final List mergeTheseTables = new ArrayList();
+			final List<Table> mergeTheseTables = new ArrayList<Table>();
 			mergeTheseTables.add(realTable);
 			for (int i = 0; i < mergeTheseTables.size(); i++) {
 				final Table cand = (Table) mergeTheseTables.get(i);
-				for (final Iterator j = cand.getRelations().iterator(); j
+				for (final Iterator<Relation> j = cand.getRelations().iterator(); j
 						.hasNext();) {
 					final Relation candRel = (Relation) j.next();
 					if (mergeTheseRelations.contains(candRel))
@@ -476,11 +476,11 @@ public class DataSet extends Schema {
 		final List dimensionQ = new ArrayList();
 
 		// Set up a list to hold columns for this table's primary key.
-		final List dsTablePKCols = new ArrayList();
+		final List<Column> dsTablePKCols = new ArrayList<Column>();
 
 		// Make a list of existing columns and foreign keys.
-		final Collection unusedCols = new HashSet(dsTable.getColumns().values());
-		final Collection unusedFKs = new HashSet(dsTable.getForeignKeys());
+		final Collection<Column> unusedCols = new HashSet<Column>(dsTable.getColumns().values());
+		final Collection<Key> unusedFKs = new HashSet<Key>(dsTable.getForeignKeys());
 
 		// Make a map for unique column base names.
 		final Map uniqueBases = new HashMap();
@@ -497,7 +497,7 @@ public class DataSet extends Schema {
 			dsTable.addTransformationUnit(parentTU);
 
 			// Make a list to hold the child table's FK cols.
-			final List dsTableFKCols = new ArrayList();
+			final List<Column> dsTableFKCols = new ArrayList<Column>();
 
 			// Get the primary key of the parent DS table.
 			final PrimaryKey parentDSTablePK = parentDSTable.getPrimaryKey();
@@ -510,7 +510,7 @@ public class DataSet extends Schema {
 			// in a restriction on the very first join.
 			final RestrictedRelationDefinition restrictDef = sourceRelation
 					.getRestrictRelation(this, dsTable.getName(), 0);
-			for (final Iterator i = parentDSTable.getColumns().values()
+			for (final Iterator<Column> i = parentDSTable.getColumns().values()
 					.iterator(); i.hasNext();) {
 				final DataSetColumn parentDSCol = (DataSetColumn) i.next();
 				boolean inRelationRestriction = false;
@@ -551,7 +551,7 @@ public class DataSet extends Schema {
 					// If any other col has modified name same as
 					// inherited col's modified name, then rename the
 					// other column to avoid clash.
-					for (final Iterator j = dsTable.getColumns().values()
+					for (final Iterator<Column> j = dsTable.getColumns().values()
 							.iterator(); j.hasNext();) {
 						final DataSetColumn cand = (DataSetColumn) j.next();
 						if (!(cand instanceof InheritedColumn)
@@ -604,9 +604,9 @@ public class DataSet extends Schema {
 						.toArray(new Column[0]));
 
 				// Create only if not already exists.
-				for (final Iterator i = dsTable.getForeignKeys().iterator(); i
+				for (final Iterator<ForeignKey> i = dsTable.getForeignKeys().iterator(); i
 						.hasNext();) {
-					final ForeignKey cand = (ForeignKey) i.next();
+					final ForeignKey cand = i.next();
 					if (cand.equals(dsTableFK))
 						dsTableFK = cand;
 				}
@@ -1105,7 +1105,7 @@ public class DataSet extends Schema {
 		this.includedSchemas.add(mergeTable.getSchema());
 
 		// Don't ignore any keys by default.
-		final Set ignoreCols = new HashSet();
+		final Set<Column> ignoreCols = new HashSet<Column>();
 
 		final TransformationUnit tu;
 
@@ -1694,17 +1694,22 @@ public class DataSet extends Schema {
 		}
 
 		// Drop any rels from tables still in list, then drop tables too.
-		for (final Iterator i = unusedTables.iterator(); i.hasNext();) {
+		//TODO 
+		for (final Iterator<Table> i = unusedTables.iterator(); i.hasNext();) {
 			final Table deadTbl = (Table) i.next();
-			for (final Iterator j = deadTbl.getKeys().iterator(); j.hasNext();) {
-				final Key key = (Key) j.next();
-				for (final Iterator r = key.getRelations().iterator(); r
-						.hasNext();) {
-					final Relation rel = (Relation) r.next();
-					rel.getFirstKey().getRelations().remove(rel);
-					rel.getSecondKey().getRelations().remove(rel);
-				}
+			for (final Iterator<Key> j = deadTbl.getKeys().iterator(); j.hasNext();) {
+					final Key key = j.next();
+					for (final Iterator r = key.getRelations().iterator(); r
+							.hasNext();) {
+						final Relation rel = (Relation) r.next();
+						Key otherKey = rel.getOtherKey(key);
+						otherKey.getRelations().remove(rel);
+						r.remove();
+						//rel.getFirstKey().getRelations().remove(rel);
+						//rel.getSecondKey().getRelations().remove(rel);
+					}
 			}
+			
 			deadTbl.setPrimaryKey(null);
 			deadTbl.getForeignKeys().clear();
 			this.getTables().remove(deadTbl.getName());
