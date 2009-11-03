@@ -27,8 +27,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.biomart.builder.exceptions.ValidationException;
-import org.biomart.builder.model.Key.ForeignKey;
-import org.biomart.builder.model.Key.PrimaryKey;
+import org.biomart.builder.model.ForeignKey;
+import org.biomart.builder.model.PrimaryKey;
 import org.biomart.common.exceptions.AssociationException;
 import org.biomart.common.resources.Log;
 import org.biomart.common.resources.Resources;

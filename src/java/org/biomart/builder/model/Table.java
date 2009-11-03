@@ -32,8 +32,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.biomart.builder.model.Key.ForeignKey;
-import org.biomart.builder.model.Key.PrimaryKey;
+import org.biomart.builder.model.ForeignKey;
+import org.biomart.builder.model.PrimaryKey;
 import org.biomart.common.resources.Log;
 import org.biomart.common.resources.Resources;
 import org.biomart.common.utils.McBeanCollection;
@@ -79,7 +79,7 @@ public class Table implements Comparable<Table>, TransactionListener {
 	private final Schema schema;
 
 	private boolean masked = false;
-	private final McBeanCollection<Relation> relationCache;
+	private final Set<Relation> relations;
 	private boolean directModified = false;
 
 	private final Map<DataSet,Map<String,Map>> mods = new HashMap<DataSet,Map<String,Map>>();
@@ -126,7 +126,7 @@ public class Table implements Comparable<Table>, TransactionListener {
 
 		// Listen to own PK and FKs and update key+relation caches.
 
-		this.relationCache = new McBeanCollection<Relation>(new HashSet<Relation>());
+		this.relations = new HashSet<Relation>();
 		this.addPropertyChangeListener("primaryKey", this.relationCacheBuilder);
 		this.getForeignKeys().addPropertyChangeListener(
 				this.relationCacheBuilder);
@@ -310,10 +310,10 @@ public class Table implements Comparable<Table>, TransactionListener {
 			final Key key = (Key) i.next();
 			newRels.addAll(key.getRelations());
 		}
-		if (!newRels.equals(this.relationCache)) {
+		if (!newRels.equals(this.relations)) {
 			this.setDirectModified(true);
-			this.relationCache.clear();
-			this.relationCache.addAll(newRels);
+			this.relations.clear();
+			this.relations.addAll(newRels);
 		}
 	}
 
@@ -335,8 +335,8 @@ public class Table implements Comparable<Table>, TransactionListener {
 	 * 
 	 * @return the unmodifiable collection of relations.
 	 */
-	public McBeanCollection<Relation> getRelations() {
-		return this.relationCache;
+	public Set<Relation> getRelations() {
+		return this.relations;
 	}
 
 	/**

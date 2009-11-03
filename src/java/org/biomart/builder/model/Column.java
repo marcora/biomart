@@ -19,11 +19,8 @@
 package org.biomart.builder.model;
 
 import java.beans.PropertyChangeListener;
-import java.util.HashSet;
-
 import org.biomart.common.resources.Log;
 import org.biomart.common.resources.Resources;
-import org.biomart.common.utils.McBeanCollection;
 import org.biomart.common.utils.Transaction;
 import org.biomart.common.utils.WeakPropertyChangeSupport;
 import org.biomart.common.utils.Transaction.TransactionEvent;
@@ -92,15 +89,6 @@ public class Column implements Comparable<Column>, TransactionListener {
 		this.name = name;
 
 		Transaction.addTransactionListener(this);
-	}
-
-	/**
-	 * Does this exist for the given schema prefix?
-	 * @param schemaPrefix the prefix.
-	 * @return <tt>true</tt> if it does.
-	 */
-	public boolean existsForPartition(final String schemaPrefix) {
-		return true;
 	}
 
 

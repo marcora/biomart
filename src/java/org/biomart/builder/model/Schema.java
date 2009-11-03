@@ -290,8 +290,6 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 		if(propertyName.equals(McBeanMap.property_AddItem)) {
 			Table table = (Table)pce.getNewValue();
 			//only listen for add/remove relation
-			table.getRelations().addPropertyChangeListener(McBeanCollection.property_AddItem,this.relationCacheBuilder);
-			table.getRelations().addPropertyChangeListener(McBeanCollection.property_RemoveItem,this.relationCacheBuilder);
 			this.relations.addAll(table.getRelations());
 		} //table dropped
 		else if(propertyName.equals(McBeanMap.property_RemoveItem)) {
@@ -310,17 +308,6 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 			System.err.println("source = "+pce.getSource());
 			System.err.println("property message not handled");
 		}
-		
-		//TODO 
-/*		final Collection<Relation> newRels = new HashSet<Relation>();
-		for (final Iterator<Table> i = this.tables.values().iterator(); i.hasNext();) {
-			final Table table = i.next();
-			newRels.addAll(table.getRelations());
-		}
-		if (!newRels.equals(this.relations)) {
-			this.relations.clear();
-			this.relations.addAll(newRels);
-		}*/
 	}
 
 	/**

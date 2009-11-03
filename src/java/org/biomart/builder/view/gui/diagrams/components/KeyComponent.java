@@ -58,7 +58,7 @@ import javax.swing.SwingUtilities;
 import org.biomart.builder.model.Column;
 import org.biomart.builder.model.DataSetColumn;
 import org.biomart.builder.model.Key;
-import org.biomart.builder.model.Key.PrimaryKey;
+import org.biomart.builder.model.PrimaryKey;
 import org.biomart.builder.view.gui.diagrams.Diagram;
 import org.biomart.common.resources.Resources;
 import org.biomart.common.view.gui.dialogs.StackTrace;

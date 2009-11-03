@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.biomart.builder.exceptions.ValidationException;
-import org.biomart.builder.model.Key.ForeignKey;
+import org.biomart.builder.model.ForeignKey;
 
 import org.biomart.builder.model.Relation.CompoundRelationDefinition;
 import org.biomart.builder.model.TransformationUnit.JoinTable;

@@ -33,8 +33,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.biomart.builder.exceptions.ValidationException;
-import org.biomart.builder.model.Key.ForeignKey;
-import org.biomart.builder.model.Key.PrimaryKey;
+import org.biomart.builder.model.ForeignKey;
+import org.biomart.builder.model.PrimaryKey;
 import org.biomart.builder.model.Relation.CompoundRelationDefinition;
 import org.biomart.builder.model.Relation.RestrictedRelationDefinition;
 import org.biomart.builder.model.TransformationUnit.JoinTable;
@@ -492,7 +492,7 @@ public class DataSet extends Schema {
 		// the PK with FK link, plus all the relations we followed to
 		// get these columns.
 		TransformationUnit parentTU = null;
-		if (secondStartTable == null && parentDSTable != null) {
+		if (parentDSTable != null) {
 			parentTU = new SelectFromTable(parentDSTable);
 			dsTable.addTransformationUnit(parentTU);
 
@@ -1558,7 +1558,7 @@ public class DataSet extends Schema {
 			tbl.addPropertyChangeListener("transformStart",
 					this.rebuildListener);
 			tbl.getColumns().addPropertyChangeListener(this.rebuildListener);
-			tbl.getRelations().addPropertyChangeListener(this.rebuildListener);
+//			tbl.getRelations().addPropertyChangeListener(this.rebuildListener);
 		}
 		// Listen to useful bits of the relation.
 		for (final Iterator i = listeningRels.iterator(); i.hasNext();) {
