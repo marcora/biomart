@@ -1,22 +1,16 @@
 package org.biomart.martRemote.objects.request;
 
 
+import org.biomart.martRemote.XmlParameters;
+import org.biomart.martRemote.enums.MartRemoteEnum;
 import org.biomart.martRemote.enums.MartServiceFormat;
-import org.jdom.Namespace;
 
 
-public class GetLinksRequest extends MartServiceRequest {
+public class GetLinksRequest extends MartRemoteRequest {
 	
 	protected String datasetName = null;
-	public GetLinksRequest(String username, String password, String datasetName) {
-		this(null, null, null, null, username, password, null, datasetName);
-	}
-	public GetLinksRequest(String username, String password, MartServiceFormat format, String datasetName) {
-		this(null, null, null, null, username, password, format, datasetName);
-	}
-	public GetLinksRequest(String requestName, Namespace martServiceNamespace, Namespace xsiNamespace, String xsdFile,
-			String username, String password, MartServiceFormat format, String datasetName) {
-		super(requestName, martServiceNamespace, xsiNamespace, xsdFile, username, password, format);
+	public GetLinksRequest(XmlParameters xmlParameters, String username, String password, MartServiceFormat format, String datasetName) {
+		super(MartRemoteEnum.GET_LINKS, xmlParameters, username, password, format);
 		this.datasetName = datasetName;
 	}
 	public String getDatasetName() {

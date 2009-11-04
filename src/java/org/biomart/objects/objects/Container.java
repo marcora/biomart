@@ -180,7 +180,7 @@ public class Container extends Containee implements Comparable<Container>, Compa
 
 	// ===================================== Should be a different class ============================================
 	
-	public Container(Container container, List<Integer> mainRowNumbersWanted) throws CloneNotSupportedException {	// creates a light clone (temporary solution)
+	public Container(Container container, List<Integer> mainRowNumbersWanted) {	// creates a light clone (temporary solution)
 		this(
 				container.parentContainer!=null ? new Container(null, container.parentContainer.name, null, null, null, null, null) : null,	// just to have the name 
 				container.name, container.displayName, container.description, container.visible, 

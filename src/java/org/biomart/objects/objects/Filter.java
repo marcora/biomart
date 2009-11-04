@@ -151,7 +151,7 @@ public class Filter extends org.biomart.objects.objects.Element	// to avoid any 
 	
 	// ===================================== Should be a different class ============================================
 
-	protected Filter(Filter filter, Part part) throws CloneNotSupportedException {	// creates a light clone (temporary solution)
+	protected Filter(Filter filter, Part part) {	// creates a light clone (temporary solution)
 		super(filter, part);
 		this.qualifier = filter.qualifier;
 		this.caseSensitive = filter.caseSensitive;

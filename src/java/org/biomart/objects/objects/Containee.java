@@ -75,10 +75,10 @@ public class Containee extends MartConfiguratorObject implements Serializable {
 	
 	// ===================================== Should be a different class ============================================
 
-	protected Containee(Containee containee) throws CloneNotSupportedException {
+	protected Containee(Containee containee) {
 		this(containee, null);
 	}
-	protected Containee(Containee containee, Part part) throws CloneNotSupportedException {	// creates a light clone (temporary solution)
+	protected Containee(Containee containee, Part part) {	// creates a light clone (temporary solution)
 		super(containee, part);
 	}
 	protected void updatePointerClone(org.biomart.objects.objects.Element pointingElement) {

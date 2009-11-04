@@ -305,7 +305,7 @@ public class Element extends Containee implements Serializable {
 	
 	// ===================================== Should be a different class ============================================
 
-	protected Element(Element element, Part part) throws CloneNotSupportedException {	// creates a light clone (temporary solution)
+	protected Element(Element element, Part part) {	// creates a light clone (temporary solution)
 		super(element, part);		
 		
 		super.visible = null;	// irrelevant for elements

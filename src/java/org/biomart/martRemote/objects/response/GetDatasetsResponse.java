@@ -8,7 +8,7 @@ import net.sf.json.JSONObject;
 
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.martRemote.objects.request.GetDatasetsRequest;
-import org.biomart.martRemote.objects.request.MartServiceRequest;
+import org.biomart.martRemote.objects.request.MartRemoteRequest;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.objects.objects.Config;
 import org.biomart.objects.objects.Dataset;
@@ -17,17 +17,15 @@ import org.biomart.objects.objects.Mart;
 import org.biomart.objects.objects.MartRegistry;
 import org.jdom.Document;
 import org.jdom.Element;
-import org.jdom.Namespace;
 
-public class GetDatasetsResponse extends MartServiceResponse {
+public class GetDatasetsResponse extends MartRemoteResponse {
 
 	//private List<Mart> martList = null;
 	private List<Dataset> datasetList = null;
 	//private List<Config> configList = null;
 
-	public GetDatasetsResponse(String responseName, Namespace martServiceNamespace, Namespace xsiNamespace, String xsdFile,
-			MartRegistry martRegistry, MartServiceRequest martServiceRequest) {
-		super(responseName, martServiceNamespace, xsiNamespace, xsdFile, martRegistry, martServiceRequest);
+	public GetDatasetsResponse(MartRegistry martRegistry, MartRemoteRequest martServiceRequest) {
+		super(martRegistry, martServiceRequest);
 		//this.martList = new ArrayList<Mart>();
 		this.datasetList = new ArrayList<Dataset>();
 		//this.configList = new ArrayList<Config>();
@@ -49,7 +47,7 @@ public class GetDatasetsResponse extends MartServiceResponse {
 				if (getDatasetsRequest.getUsername().equals(location.getUser())) {
 					List<Mart> martList = location.getMartList();
 					for (Mart mart : martList) {
-System.out.println(mart.getName() + ", " + mart.getVersion() + ", " + getDatasetsRequest.getMartName() + ", " + getDatasetsRequest.getMartVersion());						
+//System.out.println(mart.getName() + ", " + mart.getVersion() + ", " + getDatasetsRequest.getMartName() + ", " + getDatasetsRequest.getMartVersion());						
 						if (getDatasetsRequest.getMartName().equals(mart.getName()) && 
 								getDatasetsRequest.getMartVersion().intValue()==mart.getVersion().intValue()) {
 							//Mart cloneMart = new Mart(mart);
@@ -113,7 +111,7 @@ System.out.println(mart.getName() + ", " + mart.getVersion() + ", " + getDataset
 		}
 		
 		JSONObject root = new JSONObject();
-		root.put(super.responseName, array);
+		root.put(martServiceRequest.getType().getResponseName(), array);
 		return root;
 	}
 	private String computeDatasetName(Mart mart, Config config) {

@@ -8,9 +8,9 @@ import org.biomart.martRemote.MartApi;
 import org.biomart.martRemote.objects.request.GetDatasetsRequest;
 import org.biomart.martRemote.objects.request.GetRegistryRequest;
 import org.biomart.martRemote.objects.request.GetRootContainerRequest;
-import org.biomart.martRemote.objects.request.MartServiceRequest;
+import org.biomart.martRemote.objects.request.MartRemoteRequest;
 import org.biomart.martRemote.objects.request.QueryRequest;
-import org.biomart.martRemote.objects.response.MartServiceResponse;
+import org.biomart.martRemote.objects.response.MartRemoteResponse;
 
 public class MartServiceHelper {
 	
@@ -29,9 +29,9 @@ public class MartServiceHelper {
 		return null;
 	}
 	
-	public static String executeRequest(MartServiceRequest martServiceRequest) throws FunctionalException {
+	public static String executeRequest(MartRemoteRequest martServiceRequest) throws FunctionalException {
 
-		MartServiceResponse martServiceResponse = null;
+		MartRemoteResponse martServiceResponse = null;
 		try {
 			if (martServiceRequest instanceof GetRegistryRequest) {
 				martServiceResponse = MartService.martServiceApi.executeGetRegistry(martServiceRequest);

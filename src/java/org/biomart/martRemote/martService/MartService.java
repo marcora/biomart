@@ -8,7 +8,7 @@ import org.biomart.common.general.utils.MyUtils;
 import org.biomart.martRemote.MartApi;
 import org.biomart.martRemote.MartRemoteConstants;
 import org.biomart.martRemote.enums.MartServiceFormat;
-import org.biomart.martRemote.objects.request.MartServiceRequest;
+import org.biomart.martRemote.objects.request.MartRemoteRequest;
 
 
 /**
@@ -44,7 +44,7 @@ public class MartService {
 		
 	public String getRegistry(String username, String password, String format) throws FunctionalException, TechnicalException {
 		MartServiceHelper.initialize();
-		MartServiceRequest martServiceRequest = MartService.martServiceApi.prepareGetRegistry(
+		MartRemoteRequest martServiceRequest = MartService.martServiceApi.prepareGetRegistry(
 				username, password, MartServiceFormat.getFormat(format));
 		return martServiceRequest.isValid() ?
 				MartServiceHelper.executeRequest(martServiceRequest) : "invalid request";
@@ -52,7 +52,7 @@ public class MartService {
 
 	public String getDatasets(String username, String password, String format, String mart, Integer version) throws FunctionalException, TechnicalException {
 		MartServiceHelper.initialize();
-		MartServiceRequest martServiceRequest = MartService.martServiceApi.prepareGetDatasets(
+		MartRemoteRequest martServiceRequest = MartService.martServiceApi.prepareGetDatasets(
 				username, password, MartServiceFormat.getFormat(format), mart, version);
 		return martServiceRequest.isValid() ?
 				MartServiceHelper.executeRequest(martServiceRequest) : "invalid request";
@@ -60,7 +60,7 @@ public class MartService {
 	
 	public String query(String username, String password, String format, String query) throws FunctionalException, TechnicalException {
 		MartServiceHelper.initialize();
-		MartServiceRequest martServiceRequest = null;
+		MartRemoteRequest martServiceRequest = null;
 		try {
 			martServiceRequest = MartService.martServiceApi.prepareQuery(
 					username, password, MartServiceFormat.getFormat(format), query);
@@ -77,7 +77,7 @@ public class MartService {
 	
 	public String getRootContainer(String username, String password, String format, String dataset, String partitionFilter) throws FunctionalException, TechnicalException {
 		MartServiceHelper.initialize();
-		MartServiceRequest martServiceRequest = MartService.martServiceApi.prepareGetRootContainer(
+		MartRemoteRequest martServiceRequest = MartService.martServiceApi.prepareGetRootContainer(
 				username, password, MartServiceFormat.getFormat(format), dataset, partitionFilter);
 		return martServiceRequest.isValid() ?
 				MartServiceHelper.executeRequest(martServiceRequest) : "invalid request";

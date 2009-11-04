@@ -6,21 +6,19 @@ import java.util.List;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
-import org.biomart.martRemote.objects.request.MartServiceRequest;
+import org.biomart.martRemote.objects.request.MartRemoteRequest;
 import org.biomart.objects.objects.Dataset;
 import org.biomart.objects.objects.Location;
 import org.biomart.objects.objects.Mart;
 import org.biomart.objects.objects.MartRegistry;
 import org.jdom.Document;
-import org.jdom.Namespace;
 
-public class GetLinksResponse extends MartServiceResponse {
+public class GetLinksResponse extends MartRemoteResponse {
 	
 	private List<Dataset> datasetList = null;
 	
-	public GetLinksResponse(String responseName, Namespace martServiceNamespace, Namespace xsiNamespace, String xsdFile,
-			MartRegistry martRegistry, MartServiceRequest martServiceRequest) {
-		super(responseName, martServiceNamespace, xsiNamespace, xsdFile, martRegistry, martServiceRequest);
+	public GetLinksResponse(MartRegistry martRegistry, MartRemoteRequest martServiceRequest) {
+		super(martRegistry, martServiceRequest);
 		this.datasetList = new ArrayList<Dataset>();
 	}
 
@@ -58,7 +56,7 @@ public class GetLinksResponse extends MartServiceResponse {
 		}*/
 		
 		JSONObject root = new JSONObject();
-		root.put(super.responseName, array);
+		root.put(martServiceRequest.getType().getResponseName(), array);
 		return root;
 	}
 }

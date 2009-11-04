@@ -101,7 +101,7 @@ public class Attribute extends Element implements /*Comparable<Attribute>, Compa
 	
 	// ===================================== Should be a different class ============================================
 
-	public Attribute(Attribute attribute, Part part) throws CloneNotSupportedException {	// creates a light clone (temporary solution)
+	public Attribute(Attribute attribute, Part part) {	// creates a light clone (temporary solution)
 		super(attribute, part);
 		this.maxLength = attribute.maxLength;
 		this.linkURL = MartConfiguratorUtils.replacePartitionReferencesByValues(attribute.linkURL, part);

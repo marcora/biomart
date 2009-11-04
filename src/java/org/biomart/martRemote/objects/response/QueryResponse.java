@@ -18,7 +18,7 @@ import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.MyUtils;
 import org.biomart.martRemote.MartRemoteConstants;
-import org.biomart.martRemote.objects.request.MartServiceRequest;
+import org.biomart.martRemote.objects.request.MartRemoteRequest;
 import org.biomart.martRemote.objects.request.Query;
 import org.biomart.martRemote.objects.request.QueryDataset;
 import org.biomart.martRemote.objects.request.QueryRequest;
@@ -30,16 +30,14 @@ import org.biomart.old.martService.restFulQueries.objects.Attribute;
 import org.biomart.old.martService.restFulQueries.objects.Filter;
 import org.jdom.Document;
 import org.jdom.Element;
-import org.jdom.Namespace;
 
-public class QueryResponse extends MartServiceResponse {
+public class QueryResponse extends MartRemoteResponse {
 
 	private List<List<String>> data = null;
 	private List<String> headers = null;
 	
-	public QueryResponse(String responseName, Namespace martServiceNamespace, Namespace xsiNamespace, String xsdFile, 
-			MartRegistry martRegistry, MartServiceRequest martServiceRequest) {
-		super(responseName, martServiceNamespace, xsiNamespace, xsdFile, martRegistry, martServiceRequest);
+	public QueryResponse(MartRegistry martRegistry, MartRemoteRequest martServiceRequest) {
+		super(martRegistry, martServiceRequest);
 		this.data = new ArrayList<List<String>>();
 		this.headers = new ArrayList<String>();
 	}

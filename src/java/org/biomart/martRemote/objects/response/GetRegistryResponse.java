@@ -7,23 +7,21 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import org.biomart.common.general.exceptions.FunctionalException;
-import org.biomart.martRemote.objects.request.MartServiceRequest;
+import org.biomart.martRemote.objects.request.MartRemoteRequest;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.objects.objects.Location;
 import org.biomart.objects.objects.Mart;
 import org.biomart.objects.objects.MartRegistry;
 import org.jdom.Document;
 import org.jdom.Element;
-import org.jdom.Namespace;
 
-public class GetRegistryResponse extends MartServiceResponse {
+public class GetRegistryResponse extends MartRemoteResponse {
 
 	private List<Location> locationList = null;	// same index
 	private List<Mart> martList = null;	// same index
 
-	public GetRegistryResponse(String responseName, Namespace martServiceNamespace, Namespace xsiNamespace, String xsdFile, 
-			MartRegistry martRegistry, MartServiceRequest martServiceRequest) {
-		super(responseName, martServiceNamespace, xsiNamespace, xsdFile, martRegistry, martServiceRequest);
+	public GetRegistryResponse(MartRegistry martRegistry, MartRemoteRequest martServiceRequest) {
+		super(martRegistry, martServiceRequest);
 		this.martList = new ArrayList<Mart>();
 		this.locationList = new ArrayList<Location>();
 	}
@@ -108,7 +106,7 @@ public class GetRegistryResponse extends MartServiceResponse {
 		}
 		
 		JSONObject root = new JSONObject();
-		root.put(super.responseName, array);
+		root.put(martServiceRequest.getType().getResponseName(), array);
 		return root;
 	}
 }

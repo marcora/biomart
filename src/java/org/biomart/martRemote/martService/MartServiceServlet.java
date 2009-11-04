@@ -17,9 +17,9 @@ import org.biomart.common.general.utils.XmlUtils;
 import org.biomart.martRemote.MartApi;
 import org.biomart.martRemote.enums.MartRemoteEnum;
 import org.biomart.martRemote.enums.MartServiceFormat;
-import org.biomart.martRemote.objects.request.MartServiceRequest;
+import org.biomart.martRemote.objects.request.MartRemoteRequest;
 import org.biomart.martRemote.objects.request.QueryRequest;
-import org.biomart.martRemote.objects.response.MartServiceResponse;
+import org.biomart.martRemote.objects.response.MartRemoteResponse;
 import org.jdom.JDOMException;
 
 
@@ -120,8 +120,8 @@ public class MartServiceServlet extends HttpServlet {
 			String partitionFilter = req.getParameter("partitionFilter");
 			
 			// Run appropriate method
-			MartServiceRequest martServiceRequest = null;
-			MartServiceResponse martServiceResult = null;
+			MartRemoteRequest martServiceRequest = null;
+			MartRemoteResponse martServiceResult = null;
 			PrintWriter printWriter = resp.getWriter();
 			StringBuffer errorMessage = new StringBuffer();
 			MartRemoteEnum remoteAccessEnum = MartRemoteEnum.getEnumFromIdentifier(type);

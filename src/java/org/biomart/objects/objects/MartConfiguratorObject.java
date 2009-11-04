@@ -147,10 +147,10 @@ public class MartConfiguratorObject implements Serializable /*implements Compara
 	
 	// ===================================== Should be a different class ============================================
 
-	protected MartConfiguratorObject(MartConfiguratorObject martConfiguratorObject) throws CloneNotSupportedException {
+	protected MartConfiguratorObject(MartConfiguratorObject martConfiguratorObject) {
 		this(martConfiguratorObject, null);
 	}
-	protected MartConfiguratorObject(MartConfiguratorObject martConfiguratorObject, Part part) throws CloneNotSupportedException {	// creates a light clone (temporary solution)
+	protected MartConfiguratorObject(MartConfiguratorObject martConfiguratorObject, Part part) {	// creates a light clone (temporary solution)
 		this(
 				part==null ? martConfiguratorObject.name : 
 					MartConfiguratorUtils.replacePartitionReferencesByValues(martConfiguratorObject.name, part),

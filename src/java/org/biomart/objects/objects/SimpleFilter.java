@@ -277,7 +277,7 @@ public class SimpleFilter extends Filter implements Serializable {
 	
 	// ===================================== Should be a different class ============================================
 
-	public SimpleFilter(SimpleFilter simpleFilter, Part part) throws CloneNotSupportedException {	// creates a light clone (temporary solution)
+	public SimpleFilter(SimpleFilter simpleFilter, Part part) {	// creates a light clone (temporary solution)
 		super(simpleFilter, part);
 		
 		this.displayType = MartConfiguratorUtils.replacePartitionReferencesByValues(simpleFilter.displayType, part);

@@ -121,7 +121,7 @@ public class GroupFilter extends Filter implements Serializable {
 	
 	// ===================================== Should be a different class ============================================
 
-	public GroupFilter(GroupFilter groupFilter, Part part) throws CloneNotSupportedException {	// creates a light clone (temporary solution)
+	public GroupFilter(GroupFilter groupFilter, Part part) {	// creates a light clone (temporary solution)
 		super(groupFilter, part);
 		this.logicalOperator = groupFilter.logicalOperator;
 		this.multipleFilter = groupFilter.multipleFilter;
