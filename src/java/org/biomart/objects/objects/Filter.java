@@ -16,7 +16,8 @@ import org.biomart.objects.data.TreeFilterData;
 import org.jdom.Namespace;
 
 
-public class Filter extends Element implements Comparable<Filter>, Comparator<Filter>, Serializable {
+public class Filter extends org.biomart.objects.objects.Element	// to avoid any ambiguity with jdom's 
+	implements Comparable<Filter>, Comparator<Filter>, Serializable {
 
 	private static final long serialVersionUID = 8117878349721027751L;
 	
@@ -150,15 +151,11 @@ public class Filter extends Element implements Comparable<Filter>, Comparator<Fi
 	
 	// ===================================== Should be a different class ============================================
 
-	private org.jdom.Element filterDataElement = null;	// easier to handle than the big map
-	public org.jdom.Element getFilterDataElement() {
-		return filterDataElement;
-	}
 	protected Filter(Filter filter, Part part) throws CloneNotSupportedException {	// creates a light clone (temporary solution)
 		super(filter, part);
 		this.qualifier = filter.qualifier;
 		this.caseSensitive = filter.caseSensitive;
-		this.filterDataElement = filter.filterData!=null ? filter.filterData.generateXml(true) : null;
+		this.filterData = filter.filterData;
 	}
 	
 	public org.jdom.Element generateXmlForWebService() throws FunctionalException {
@@ -169,8 +166,8 @@ public class Filter extends Element implements Comparable<Filter>, Comparator<Fi
 		
 		MartConfiguratorUtils.addAttribute(jdomObject, "qualifier", this.qualifier);
 		MartConfiguratorUtils.addAttribute(jdomObject, "caseSensitive", this.caseSensitive);
-		if (this.filterDataElement!=null) {
-			jdomObject.addContent(this.filterDataElement);
+		if (this.filterData!=null) {
+			jdomObject.addContent(this.filterData.generateXml(true));
 		}
 		
 		return jdomObject;
@@ -181,6 +178,9 @@ public class Filter extends Element implements Comparable<Filter>, Comparator<Fi
 		JSONObject object = (JSONObject)jsonObject.get(super.xmlElementName);
 		object.put("qualifier", this.qualifier);
 		object.put("caseSensitive", this.caseSensitive);
+		if (this.filterData!=null) {
+			object.put(FilterData.XML_ELEMENT_NAME, this.filterData.generateJson(true));
+		}
 		
 		jsonObject.put(super.xmlElementName, object);
 		return jsonObject;

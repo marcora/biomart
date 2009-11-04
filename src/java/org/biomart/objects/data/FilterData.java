@@ -7,14 +7,20 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.MyUtils;
+import org.biomart.martRemote.MartRemoteUtils;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.objects.objects.Filter;
 import org.biomart.objects.objects.Part;
+import org.jdom.Document;
 import org.jdom.Element;
+import org.json.XML;
 
 /**
  * !!! TODO sufficient for the transformation but will need to be much more sophisticated in reality
@@ -22,6 +28,8 @@ import org.jdom.Element;
 public class FilterData implements Serializable {
 
 	private static final long serialVersionUID = 1316941933451308039L;
+	
+	public static final String XML_ELEMENT_NAME = "data";
 
 	public static void main(String[] args) {}
 
@@ -191,14 +199,16 @@ public class FilterData implements Serializable {
 		MyUtils.writeXmlFile(rootElement, dataFilePathAndName);
 	}
 	
+
+	
 	public Element generateXml(boolean flatten) {
-		Element rootElement = new Element("data");
+		Element rootElement = new Element(XML_ELEMENT_NAME);
 		for (Iterator<Part> it = this.map.keySet().iterator(); it.hasNext();) {
 			Part part = it.next();
 			
-			Element partElement = new Element("part");
+			Element partElement = new Element(MartConfiguratorConstants.XML_ELEMENT_PART);
 			String partName = part.getXmlValue(flatten);
-			partElement.setAttribute("name", partName);
+			partElement.setAttribute(MartConfiguratorConstants.XML_ELEMENT_ATTRIBUTE_PART_NAME, partName);
 			rootElement.addContent(partElement);
 			
 			LinkedHashMap<filterDataRow, LinkedHashMap<Filter, ArrayList<filterDataRow>>> subMap = this.map.get(part);
@@ -212,8 +222,8 @@ public class FilterData implements Serializable {
 				for (Iterator<Filter> it3 = subSubMap.keySet().iterator(); it3.hasNext();) {
 					Filter cascadeChild = it3.next();
 					
-					Element cascadeChildElement = new Element("cascadeChild");
-					cascadeChildElement.setAttribute("name", cascadeChild.getName());
+					Element cascadeChildElement = new Element(MartConfiguratorConstants.XML_ELEMENT_CASCADE_CHILD);
+					cascadeChildElement.setAttribute(MartConfiguratorConstants.XML_ELEMENT_ATTRIBUTE_PART_NAME, cascadeChild.getName());
 					filterDataRowElement.addContent(cascadeChildElement);
 					
 					ArrayList<filterDataRow> filterDataRowList = subSubMap.get(cascadeChild);
@@ -223,8 +233,52 @@ public class FilterData implements Serializable {
 					}
 				}
 			}
-			
 		}
 		return rootElement;
+	}
+	
+	public JSONObject generateJson(boolean flatten) {
+		
+		Element root = generateXml(flatten);
+		Document document = new Document(root);
+		//String documentString = MartRemoteUtils.getXmlDocumentString(document);
+		//return XML.toJSONObject(documentString);
+		return null;
+
+		
+		//JSONArray array = new JSONArray();
+		/*for (Iterator<Part> it = this.map.keySet().iterator(); it.hasNext();) {
+			Part part = it.next();
+			
+			JSONObject part = new JSONObject();
+			object.put(key, value)MartConfiguratorConstants.XML_ELEMENT_PART);
+			String partName = part.getXmlValue(flatten);
+			part.put(MartConfiguratorConstants.XML_ELEMENT_ATTRIBUTE_PART_NAME, partName);
+			array.add(partElement);
+			
+			LinkedHashMap<filterDataRow, LinkedHashMap<Filter, ArrayList<filterDataRow>>> subMap = this.map.get(part);
+			for (Iterator<filterDataRow> it2 = subMap.keySet().iterator(); it2.hasNext();) {
+				filterDataRow filterDataRow = it2.next();
+				
+				Element filterDataRowElement = filterDataRow.generateXml();
+				partElement.addContent(filterDataRowElement);
+				
+				LinkedHashMap<Filter, ArrayList<filterDataRow>> subSubMap = subMap.get(filterDataRow);
+				for (Iterator<Filter> it3 = subSubMap.keySet().iterator(); it3.hasNext();) {
+					Filter cascadeChild = it3.next();
+					
+					Element cascadeChildElement = new Element(MartConfiguratorConstants.XML_ELEMENT_CASCADE_CHILD);
+					cascadeChildElement.setAttribute(MartConfiguratorConstants.XML_ELEMENT_ATTRIBUTE_PART_NAME, cascadeChild.getName());
+					filterDataRowElement.addContent(cascadeChildElement);
+					
+					ArrayList<filterDataRow> filterDataRowList = subSubMap.get(cascadeChild);
+					for (filterDataRow subFilterDataRow : filterDataRowList) {
+						Element subFilterDataRowElement = subFilterDataRow.generateXml();
+						cascadeChildElement.addContent(subFilterDataRowElement);
+					}
+				}
+			}
+		}*/
+		//return array;
 	}
 }

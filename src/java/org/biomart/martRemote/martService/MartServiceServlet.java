@@ -13,8 +13,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.MyUtils;
+import org.biomart.common.general.utils.XmlUtils;
 import org.biomart.martRemote.MartApi;
-import org.biomart.martRemote.MartRemoteUtils;
 import org.biomart.martRemote.enums.MartRemoteEnum;
 import org.biomart.martRemote.enums.MartServiceFormat;
 import org.biomart.martRemote.objects.request.MartServiceRequest;
@@ -147,7 +147,7 @@ public class MartServiceServlet extends HttpServlet {
 				QueryRequest queryRequest = this.martServiceApi.prepareQuery(username, password, format, query);
 				if (!queryRequest.isValid()) {
 					errorMessage.append("Invalid query request " + 
-							MartRemoteUtils.getXmlDocumentString(queryRequest.getQueryDocument()) + MyUtils.LINE_SEPARATOR);
+							XmlUtils.getXmlDocumentString(queryRequest.getQueryDocument()) + MyUtils.LINE_SEPARATOR);
 					this.martServiceApi.writeError(errorMessage, printWriter);
 					return;
 				}

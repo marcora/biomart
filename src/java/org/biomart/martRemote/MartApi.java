@@ -2,22 +2,22 @@ package org.biomart.martRemote;
 
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
-import net.sf.json.JSONArray;
+import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
+import org.biomart.common.general.utils.JsonUtils;
 import org.biomart.common.general.utils.MyUtils;
+import org.biomart.common.general.utils.XmlUtils;
 import org.biomart.martRemote.enums.MartRemoteEnum;
 import org.biomart.martRemote.enums.MartServiceFormat;
 import org.biomart.martRemote.objects.request.GetDatasetsRequest;
@@ -74,7 +74,7 @@ public class MartApi {
 		String query = "query1";
 		String filterPartitionString = TransformationConstants.MAIN_PARTITION_FILTER_NAME + 
 			".\"hsapiens_gene_ensembl,mmusculus_gene_ensembl,celegans_gene_ensembl\"";
-		MartServiceFormat format = MartServiceFormat.XML;
+		MartServiceFormat format = MartServiceFormat.JSON;
 		
 		MartRemoteEnum remoteAccessEnum = MartRemoteEnum.getEnumFromIdentifier(type);
 		boolean valid = true;
@@ -91,7 +91,7 @@ public class MartApi {
 		} */else if (MartRemoteEnum.GET_LINKS.equals(remoteAccessEnum)) {
 			martServiceRequest = martApi.prepareGetLinks(username, password, format, datasetName);			
 		} else if (MartRemoteEnum.QUERY.equals(remoteAccessEnum)) {
-			martServiceRequest = martApi.prepareQuery(username, password, format, MartRemoteUtils.getProperty(query));			
+			martServiceRequest = martApi.prepareQuery(username, password, format, MyUtils.getProperty(query));			
 		}
 		
 		if (!martServiceRequest.isValid()) {
@@ -120,7 +120,7 @@ public class MartApi {
 		}
 		stringWriter.flush();
 		String string = stringWriter.toString();
-		System.out.println(string);
+		//System.out.println(string);
 		MyUtils.writeFile("/home/anthony/Desktop/MartApi", string);
 	}
 	
@@ -206,7 +206,7 @@ public class MartApi {
 		return getLinksRequest;
 	}
 	
-	// Request exectution
+	// Request execution
 	public GetRegistryResponse executeGetRegistry(MartServiceRequest martServiceRequest) throws FunctionalException {
 		GetRegistryResponse getRegistryResponse = new GetRegistryResponse(
 				MartRemoteEnum.GET_REGISTRY.getResponseName(), martServiceNamespace, xsiNamespace, xsdFilePath, 
@@ -291,7 +291,7 @@ public class MartApi {
 		queryRequest.rebuildQueryDocument();	// adding proper namespaces and wrapper
 							// update errorMessage if not validation fails
 		queryRequest.buildObjects();
-		if (this.debug) System.out.println(MartRemoteUtils.getXmlDocumentString(queryRequest.getQueryDocument()));
+		if (this.debug) System.out.println(XmlUtils.getXmlDocumentString(queryRequest.getQueryDocument()));
 		
 		return queryRequest;
 	}	
@@ -322,9 +322,21 @@ public class MartApi {
 				return writeXmlResponse(document, writer);					
 			}
 		} else if (martServiceResponse.getMartServiceRequest().getFormat().isJson()) {
-			JSONObject jsonObject = martServiceResponse.getJsonObject();
+			/*JSONObject jsonObject = martServiceResponse.getJsonObject2();
 			if (martServiceResponse.isValid()) {					
 				return writeJsonResponse(jsonObject, writer);
+			}*/
+			/*JSON json = martServiceResponse.getJsonObject2();
+			if (martServiceResponse.isValid()) {					
+				return writeJsonResponse(json, writer);
+			}*/
+			/*org.json.JSONObject jsonObject = martServiceResponse.getJsonObject();
+			if (martServiceResponse.isValid()) {					
+				return writeJsonResponse(jsonObject, writer);
+			}*/
+			JSONObject jSONObject = martServiceResponse.getJsonObject4();
+			if (martServiceResponse.isValid()) {					
+				return writeJsonResponse(jSONObject, writer);
 			}
 		}
 		return writeError(martServiceResponse.getErrorMessage(), writer);	//	if (!martServiceResult.isValid())
@@ -338,16 +350,37 @@ public class MartApi {
 				throw new TechnicalException(e);
 			}
 		}
-		return MartRemoteUtils.getXmlDocumentString(document);
+		return XmlUtils.getXmlDocumentString(document);
 	}
-	public String writeJsonResponse(JSONObject root, Writer writer) throws TechnicalException {
+	public String writeJsonResponse(JSONObject jSONObject, Writer writer) throws TechnicalException {
 		if (null!=writer) {
 			try {
-				writer.append(MartRemoteUtils.getJSONObjectNiceString(root) + MyUtils.LINE_SEPARATOR);
+				writer.append(JsonUtils.getJSONObjectNiceString(jSONObject) + MyUtils.LINE_SEPARATOR);
 			} catch (IOException e) {
 				throw new TechnicalException(e);
 			}
 		}
+		return jSONObject.toString();
+	}
+	public String writeJsonResponse(JSON json, Writer writer) throws TechnicalException {
+		if (null!=writer) {
+			try {
+				writer.append(json.toString().substring(0, 1000) + MyUtils.LINE_SEPARATOR);
+			} catch (IOException e) {
+				throw new TechnicalException(e);
+			}
+		}
+		return json.toString().substring(0, 1000);
+	}
+	@Deprecated
+	public String writeJsonResponse(org.json.JSONObject root, Writer writer) throws TechnicalException {
+		/*if (null!=writer) {
+			try {
+				writer.append(JsonUtils.getJSONObjectNiceString(root) + MyUtils.LINE_SEPARATOR);
+			} catch (IOException e) {
+				throw new TechnicalException(e);
+			}
+		}*/
 		return root.toString();
 	}
 	

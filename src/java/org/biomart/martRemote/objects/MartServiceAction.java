@@ -3,7 +3,7 @@ package org.biomart.martRemote.objects;
 
 import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.MyUtils;
-import org.biomart.martRemote.MartRemoteUtils;
+import org.biomart.common.general.utils.XmlUtils;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.Namespace;
@@ -44,7 +44,7 @@ public class MartServiceAction {
 	}
 
 	protected boolean validateXml(Document document) throws TechnicalException {
-		String errorValidation = MartRemoteUtils.validationXml(document);
+		String errorValidation = XmlUtils.validationXml(document);
 		if (null!=errorValidation) {
 			createErrorResponse(document, errorValidation);
 			return false;
@@ -54,7 +54,7 @@ public class MartServiceAction {
 	
 	// Error response creation
 	protected void createErrorResponse(Document document, String errorValidation) throws TechnicalException {
-		this.errorMessage.append(MyUtils.LINE_SEPARATOR + MartRemoteUtils.getXmlDocumentString(document) + 
+		this.errorMessage.append(MyUtils.LINE_SEPARATOR + XmlUtils.getXmlDocumentString(document) + 
 				MyUtils.LINE_SEPARATOR + MyUtils.LINE_SEPARATOR + errorValidation);
 	}
 }

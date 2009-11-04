@@ -276,11 +276,7 @@ public class SimpleFilter extends Filter implements Serializable {
 	
 	
 	// ===================================== Should be a different class ============================================
-	
-	private org.jdom.Element treeFilterDataElement = null;	// easier to handle than the big map
-	public org.jdom.Element getTreeFilterDataElement() {
-		return treeFilterDataElement;
-	}
+
 	public SimpleFilter(SimpleFilter simpleFilter, Part part) throws CloneNotSupportedException {	// creates a light clone (temporary solution)
 		super(simpleFilter, part);
 		
@@ -299,7 +295,7 @@ public class SimpleFilter extends Filter implements Serializable {
 			this.cascadeChildrenNamesList.add(MartConfiguratorUtils.replacePartitionReferencesByValues(cascadeChildName, part));
 		}
 		
-		this.treeFilterDataElement = simpleFilter.treeFilterData!=null ? simpleFilter.treeFilterData.generateXml(true) : null;
+		this.treeFilterData = simpleFilter.treeFilterData;
 	}
 	
 	public org.jdom.Element generateXmlForWebService() throws FunctionalException {
@@ -327,8 +323,8 @@ public class SimpleFilter extends Filter implements Serializable {
 		MartConfiguratorUtils.addAttribute(jdomObject, "falseValue", this.falseValue);
 		MartConfiguratorUtils.addAttribute(jdomObject, "falseDisplay",  this.falseDisplay);
 
-		if (this.treeFilterDataElement!=null) {
-			jdomObject.addContent(this.treeFilterDataElement);
+		if (this.treeFilterData!=null) {
+			jdomObject.addContent(this.treeFilterData.generateXml(true));
 		}
 		
 		return jdomObject;

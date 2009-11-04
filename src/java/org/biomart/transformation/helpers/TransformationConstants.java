@@ -114,7 +114,6 @@ public class TransformationConstants {
 	public static final String SERIAL_FOLDER_NAME = "Serial";
 	
 	public static final String WEB_SERVICE_CONFIGURATION_SERIAL_FILE_NAME = "WebServiceConfiguration";
-	//public static final String RDBMS_CONFIGURATION_SERIAL_FILE_NAME = "RdbmsConfiguration";
 	
 	public static final String DEFAULT_USER = "anonymous";
 	

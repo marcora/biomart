@@ -4,16 +4,20 @@ package org.biomart.martRemote.objects.response;
 import java.io.IOException;
 import java.io.Writer;
 
+import net.sf.json.JSON;
 import net.sf.json.JSONObject;
+import net.sf.json.xml.XMLSerializer;
 
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
+import org.biomart.common.general.utils.JsonUtils;
 import org.biomart.common.general.utils.MyUtils;
-import org.biomart.martRemote.MartRemoteUtils;
+import org.biomart.common.general.utils.XmlUtils;
 import org.biomart.martRemote.objects.MartServiceAction;
 import org.biomart.martRemote.objects.request.MartServiceRequest;
 import org.biomart.objects.objects.MartRegistry;
 import org.jdom.Document;
+import org.jdom.Element;
 import org.jdom.Namespace;
 
 
@@ -46,7 +50,7 @@ public abstract class MartServiceResponse extends MartServiceAction {
 		document = createXmlResponse(document);
 		if (debug && printWriter!=null) {
 			try {
-				printWriter.append(MartRemoteUtils.getXmlDocumentString(document) + MyUtils.LINE_SEPARATOR);
+				printWriter.append(XmlUtils.getXmlDocumentString(document) + MyUtils.LINE_SEPARATOR);
 			} catch (IOException e) {
 				throw new TechnicalException(e);
 			}
@@ -58,8 +62,45 @@ public abstract class MartServiceResponse extends MartServiceAction {
 		return document;
 	}	
 
-	public JSONObject getJsonObject() {
-		return createJsonResponse();	// no pre/post processing
+	public JSON getJsonObject2() throws TechnicalException, FunctionalException {
+		Document document = getXmlDocument();
+		
+		
+		
+		Element rootElement = document.getRootElement();
+		Element newRoot = new Element(rootElement.getName());
+		newRoot.setContent(rootElement.cloneContent());
+
+		Document newDoc = new Document(newRoot);
+		
+		System.out.println(XmlUtils.getXmlDocumentString(document));
+		
+		JSON jSON = new XMLSerializer().read(XmlUtils.getXmlDocumentString(newDoc));
+		return jSON;
+		//return createJsonResponse();	// no pre/post processing
+	}
+	@Deprecated
+	public org.json.JSONObject getJsonObject() throws TechnicalException, FunctionalException {
+		//String documentString = MartRemoteUtils.getXmlDocumentString(getXmlDocument());
+		org.json.JSONObject jsonObject = null;
+		//try {
+			//jsonObject = 
+				//XML.toJSONObject(documentString);
+				//MartRemoteUtils.getJSONObjectFromDocument(getXmlDocument());
+		/*} catch (JSONException e) {
+			throw new TechnicalException(e);
+		}*/
+			
+		//http://json-lib.sourceforge.net/apidocs/net/sf/json/xml/XMLSerializer.html
+		//new JSONObject().fromObject(object)
+			
+	
+			
+		return jsonObject;
+	}
+	public JSONObject getJsonObject4() throws TechnicalException, FunctionalException {
+		Document document = getXmlDocument();
+		return JsonUtils.getJSONObjectFromDocument(document);
 	}
 	
 	protected abstract void populateObjects() throws TechnicalException, FunctionalException;

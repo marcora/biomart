@@ -76,4 +76,9 @@ public class MartConfiguratorConstants {
 	public static final String MULTIPLE_FILTER_VALUE_ALL = "ALL";
 	public static final String PARTITION_TABLE_ROW_WILDCARD = "*";
 	public static final int PARTITION_TABLE_ROW_WILDCARD_NUMBER = -1;
+	
+	// Filter data
+	public static final String XML_ELEMENT_PART = "part";
+	public static final String XML_ELEMENT_ATTRIBUTE_PART_NAME = "name";
+	public static final String XML_ELEMENT_CASCADE_CHILD = "cascadeChild";
 }
