@@ -269,8 +269,14 @@ public class Table implements Comparable<Table>, TransactionListener {
 	 * pce source can be a PK, FK, Column, Relation
 	 * propertyName can be primaryKey, McBeanMap.*, McCollection.*
 	 */
+	/*
+	 * pce source can be a PK, FK, Column, Relation direct modify
+	 * propertyName can be primaryKey, McBeanMap.*, McCollection.*
+	 * 
+	 */
 	private synchronized void recalculateCaches(PropertyChangeEvent pce) {
 		String pName = pce.getPropertyName();
+//		Log.info("processing message "+ pName +" "+pce.getSource());
 		if(pName.equals("primaryKey")) {
 			this.setDirectModified(true);
 			if(pce.getNewValue()!=null) {
@@ -279,12 +285,13 @@ public class Table implements Comparable<Table>, TransactionListener {
 						this.relationCacheBuilder);
 				key.addPropertyChangeListener(Resources.get("PCDIRECTMODIFIED"),
 						this.relationCacheBuilder);
-				key.addPropertyChangeListener(Resources.get("PCDIRECTMODIFIED"), this.listener);
-			}		
+//				key.addPropertyChangeListener(Resources.get("PCDIRECTMODIFIED"), this.listener);
+				this.relations.addAll(key.getRelations());
+			}
 		}else if(pName.equals(McBeanMap.property_AddItem)) { 
 			//handle column add/remove
-			Column col = (Column)pce.getNewValue();
-			col.addPropertyChangeListener(Resources.get("PCDIRECTMODIFIED"),this.listener);
+//			Column col = (Column)pce.getNewValue();
+//			col.addPropertyChangeListener(Resources.get("PCDIRECTMODIFIED"),this.listener);
 			this.setDirectModified(true);
 		}else if(pName.equals(McBeanMap.property_RemoveItem)) {
 			this.setDirectModified(true);
@@ -296,25 +303,19 @@ public class Table implements Comparable<Table>, TransactionListener {
 						this.relationCacheBuilder);
 				key.addPropertyChangeListener(Resources.get("PCDIRECTMODIFIED"),
 						this.relationCacheBuilder);
-				key.addPropertyChangeListener(Resources.get("PCDIRECTMODIFIED"), this.listener);		
+//				key.addPropertyChangeListener(Resources.get("PCDIRECTMODIFIED"), this.listener);		
+				this.relations.addAll(key.getRelations());
+			}else if(pce.getNewValue() instanceof Relation) {
+				Relation r = (Relation)pce.getNewValue();
+				this.relations.add(r);
 			}
 		}else if(pName.equals(McBeanCollection.property_RemoveItem)) {
-
 		}else {
-			System.err.println("propertyName  = "+pName + " not handled");
-			System.err.println("source = "+pce.getSource());
+			System.err.println("propertyName1  = "+pName + " not handled");
+			System.err.println("source1 = "+pce.getSource());
 		}
+		
 			
-		final Collection<Relation> newRels = new HashSet<Relation>();
-		for (final Iterator<Key> i = this.getKeys().iterator(); i.hasNext();) {
-			final Key key = (Key) i.next();
-			newRels.addAll(key.getRelations());
-		}
-		if (!newRels.equals(this.relations)) {
-			this.setDirectModified(true);
-			this.relations.clear();
-			this.relations.addAll(newRels);
-		}
 	}
 
 	/**
