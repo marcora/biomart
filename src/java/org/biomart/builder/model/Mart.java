@@ -452,7 +452,7 @@ public class Mart {
 		final Collection<Table> rootTables = new HashSet<Table>(includeTables);
 		for (final Iterator<Table> i = includeTables.iterator(); i.hasNext();) {
 			final Table candidate = i.next();
-			for (final Iterator j = candidate.getRelations().iterator(); j
+			for (final Iterator<Relation> j = candidate.getRelations().iterator(); j
 					.hasNext();) {
 				final Relation rel = (Relation) j.next();
 				if (rel.getStatus().equals(ComponentStatus.INFERRED_INCORRECT))
@@ -505,7 +505,7 @@ public class Mart {
 			// covered by the subclass relations is the same as the
 			// original set of tables requested.
 			final Collection<Table> scTables = new HashSet<Table>();
-			for (final Iterator j = candidate.getIncludedRelations().iterator(); j
+			for (final Iterator<Relation> j = candidate.getIncludedRelations().iterator(); j
 					.hasNext();) {
 				final Relation r = (Relation) j.next();
 				if (!r.isSubclassRelation(candidate))
@@ -568,18 +568,18 @@ public class Mart {
 
 		// Make a unique set to hold all the resulting datasets. It
 		// is initially empty.
-		final Collection<DataSet> suggestedDataSets = new HashSet<DataSet>();
+		final Set<DataSet> suggestedDataSets = new HashSet<DataSet>();
 		// Make a set to contain relations to subclass.
-		final Collection subclassedRelations = new HashSet();
+		final Set<Relation> subclassedRelations = new HashSet<Relation>();
 		// Make a map to hold tables included for each relation.
-		final Map relationTablesIncluded = new HashMap();
+		final Map<Relation,Set<Table>> relationTablesIncluded = new HashMap<Relation,Set<Table>>();
 		// Make a list to hold all tables included at this level.
-		final Collection localTablesIncluded = new HashSet(tablesIncluded);
+		final Set<Table> localTablesIncluded = new HashSet<Table>(tablesIncluded);
 
 		// Find all 1:M relations starting from the given table that point
 		// to another interesting table (includeTables).
 		if (pk != null)
-			for (final Iterator i = pk.getRelations().iterator(); i.hasNext();) {
+			for (final Iterator<Relation> i = pk.getRelations().iterator(); i.hasNext();) {
 				final Relation r = (Relation) i.next();
 				if (!r.isOneToMany())
 					continue;
@@ -593,7 +593,7 @@ public class Mart {
 				if (includeTables.contains(target)
 						&& !localTablesIncluded.contains(target)) {
 					subclassedRelations.add(r);
-					final Collection newRelationTablesIncluded = new HashSet(
+					final Set<Table> newRelationTablesIncluded = new HashSet<Table>(
 							tablesIncluded);
 					relationTablesIncluded.put(r, newRelationTablesIncluded);
 					newRelationTablesIncluded.add(target);
@@ -604,7 +604,7 @@ public class Mart {
 		// Find all 1:M:1 relations starting from the given table that point
 		// to another interesting table.
 		if (pk != null)
-			for (final Iterator i = pk.getRelations().iterator(); i.hasNext();) {
+			for (final Iterator<Relation> i = pk.getRelations().iterator(); i.hasNext();) {
 				final Relation firstRel = (Relation) i.next();
 				if (!firstRel.isOneToMany())
 					continue;
@@ -613,13 +613,13 @@ public class Mart {
 					continue;
 
 				final Table intermediate = firstRel.getManyKey().getTable();
-				for (final Iterator j = intermediate.getForeignKeys()
+				for (final Iterator<ForeignKey> j = intermediate.getForeignKeys()
 						.iterator(); j.hasNext();) {
 					final Key fk = (Key) j.next();
 					if (fk.getStatus().equals(
 							ComponentStatus.INFERRED_INCORRECT))
 						continue;
-					for (final Iterator k = fk.getRelations().iterator(); k
+					for (final Iterator<Relation> k = fk.getRelations().iterator(); k
 							.hasNext();) {
 						final Relation secondRel = (Relation) k.next();
 						if (secondRel.equals(firstRel))
@@ -637,7 +637,7 @@ public class Mart {
 						if (includeTables.contains(target)
 								&& !localTablesIncluded.contains(target)) {
 							subclassedRelations.add(firstRel);
-							final Collection newRelationTablesIncluded = new HashSet(
+							final Set<Table> newRelationTablesIncluded = new HashSet<Table>(
 									tablesIncluded);
 							relationTablesIncluded.put(firstRel,
 									newRelationTablesIncluded);
@@ -796,17 +796,15 @@ public class Mart {
 	}
 	
 	public void addDataSet(DataSet newDs) {
-		final Set<String> oldDSs = new HashSet<String>(this.datasetsObj.getDataSets()
-				.keySet());
-			if (!oldDSs.remove(newDs.getName())) {
+		if(this.datasetsObj.getDataSet(newDs.getName())==null) {
 				// Single-add.
-				if (!newDs.isMasked())
-					this.datasetsObj.addDataSet(newDs);
-				newDs.addPropertyChangeListener("masked",
-						this.datasetsObj.renameListener);
-				newDs.addPropertyChangeListener("name",
-						this.datasetsObj.renameListener);
-			}
+			if (!newDs.isMasked())
+				this.datasetsObj.addDataSet(newDs);
+			newDs.addPropertyChangeListener("masked",
+					this.datasetsObj.renameListener);
+			newDs.addPropertyChangeListener("name",
+					this.datasetsObj.renameListener);
+		}
 	}
 	
 	public void removeDataSet(DataSet ds) {

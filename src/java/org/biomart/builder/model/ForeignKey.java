@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import org.biomart.common.resources.Resources;
+import org.biomart.common.utils.McBeanCollection;
 
 	/**
 	 * This implementation is a simple foreign key.
@@ -41,7 +42,10 @@ import org.biomart.common.resources.Resources;
 			super(columns);
 
 			// If we are removed from the table, remove all our relations.
-			this.getTable().getForeignKeys().addPropertyChangeListener(
+			//try to remove all global listener
+			this.getTable().getForeignKeys().addPropertyChangeListener(McBeanCollection.property_AddItem,
+					this.listener);
+			this.getTable().getForeignKeys().addPropertyChangeListener(McBeanCollection.property_RemoveItem,
 					this.listener);
 		}
 

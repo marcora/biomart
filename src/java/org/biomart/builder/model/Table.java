@@ -128,7 +128,9 @@ public class Table implements Comparable<Table>, TransactionListener {
 
 		this.relations = new HashSet<Relation>();
 		this.addPropertyChangeListener("primaryKey", this.relationCacheBuilder);
-		this.getForeignKeys().addPropertyChangeListener(
+		this.getForeignKeys().addPropertyChangeListener(McBeanCollection.property_AddItem,
+				this.relationCacheBuilder);
+		this.getForeignKeys().addPropertyChangeListener(McBeanCollection.property_RemoveItem,
 				this.relationCacheBuilder);
 		this.getColumns().addPropertyChangeListener(this.relationCacheBuilder);
 
