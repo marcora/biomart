@@ -38,7 +38,7 @@ public class GetRootContainerResponse extends GetContaineesResponse {
 		}
 		
 		JSONObject root = new JSONObject();
-		root.put(martServiceRequest.getType().getResponseName(), array);
+		root.put(martRemoteRequest.getType().getResponseName(), array);
 		return root;
 	}
 }

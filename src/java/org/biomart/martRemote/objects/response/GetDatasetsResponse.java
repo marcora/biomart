@@ -41,7 +41,7 @@ public class GetDatasetsResponse extends MartRemoteResponse {
 		//this.configList = new ArrayList<Config>();
 		
 		List<Location> locationList = martRegistry.getLocationList();
-		GetDatasetsRequest getDatasetsRequest = (GetDatasetsRequest)super.martServiceRequest;
+		GetDatasetsRequest getDatasetsRequest = (GetDatasetsRequest)super.martRemoteRequest;
 		try {
 			for (Location location : locationList) {
 				if (getDatasetsRequest.getUsername().equals(location.getUser())) {
@@ -111,7 +111,7 @@ public class GetDatasetsResponse extends MartRemoteResponse {
 		}
 		
 		JSONObject root = new JSONObject();
-		root.put(martServiceRequest.getType().getResponseName(), array);
+		root.put(martRemoteRequest.getType().getResponseName(), array);
 		return root;
 	}
 	private String computeDatasetName(Mart mart, Config config) {

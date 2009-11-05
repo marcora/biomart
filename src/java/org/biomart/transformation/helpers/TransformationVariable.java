@@ -33,7 +33,8 @@ public class TransformationVariable {
 	private PartitionTable defaultPT = null;
 	private List<Table> tableList = null;
 	private Dataset dataset = null;
-	
+	private String fixedPart = null;
+
 	private Boolean template = null;
 	
 	private HashMap<String, Attribute> attributeMap = null;
@@ -97,6 +98,14 @@ public class TransformationVariable {
 		this.pointedDatasetGenericNamesSet = new HashSet<String>();
 		this.pointerElementList = new ArrayList<PointerElementInfo>();
 		
+	}
+	
+	public String getFixedPart() {
+		return fixedPart;
+	}
+
+	public void setFixedPart(String fixedPart) {
+		this.fixedPart = fixedPart;
 	}
 
 	public List<String> getNameConflictWarningList() {

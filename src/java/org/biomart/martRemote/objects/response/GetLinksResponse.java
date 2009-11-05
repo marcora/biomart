@@ -33,7 +33,7 @@ public class GetLinksResponse extends MartRemoteResponse {
 		//TODO dummy for now
 		List<Location> locationList = martRegistry.getLocationList();
 		for (Location location : locationList) {
-			if (super.martServiceRequest.getUsername().equals(location.getUser())) {
+			if (super.martRemoteRequest.getUsername().equals(location.getUser())) {
 				List<Mart> martList = location.getMartList();
 				for (Mart mart : martList) {
 					datasetList.addAll(mart.getDatasetList());
@@ -56,7 +56,7 @@ public class GetLinksResponse extends MartRemoteResponse {
 		}*/
 		
 		JSONObject root = new JSONObject();
-		root.put(martServiceRequest.getType().getResponseName(), array);
+		root.put(martRemoteRequest.getType().getResponseName(), array);
 		return root;
 	}
 }

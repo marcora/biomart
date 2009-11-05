@@ -337,7 +337,7 @@ public class PointerTransformation {
 			
 			// If local pointer than simply get the pointed attribute from the appropriate map, and the current name of the dataset
 			if (pointerElementInfo.getLocal()) {
-				MyUtils.checkStatusProgram(!vars.isTemplate() || MartConfiguratorUtils.containsPartitionReferences(pointedDatasetName));
+				//MyUtils.checkStatusProgram(!vars.isTemplate() || MartConfiguratorUtils.containsPartitionReferences(pointedDatasetName));
 				pointedElement = isAttributePointer ? vars.getAttributeMap().get(pointedElementName) : vars.getFilterMap().get(pointedElementName);
 				transformedDatasetName = vars.getDataset().getName();
 			}
@@ -504,7 +504,7 @@ public class PointerTransformation {
 			
 			// Find the matching row number in the remote dataset
 			int remoteRowNumber = remoteMainPartitionTable.getRowNamesList().indexOf(unreferencedRemoteDatasetName);
-			MyUtils.checkStatusProgram(remoteRowNumber!=-1);
+			MyUtils.checkStatusProgram(remoteRowNumber!=-1, unreferencedRemoteDatasetName + ", " + remoteMainPartitionTable.getRowNamesList());
 			
 			// Find the one match
 			Part matchingRemotePart = null;

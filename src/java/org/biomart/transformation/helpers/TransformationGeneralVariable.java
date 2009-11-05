@@ -1,10 +1,10 @@
 package org.biomart.transformation.helpers;
 
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
 
 import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.MyUtils;
@@ -78,8 +78,10 @@ public class TransformationGeneralVariable {
 			String datasetOrTemplateNameTmp = this.plainDatasetNameToTransformedDatasetName.get(pointedDatasetPlainName);
 			if (datasetOrTemplateNameTmp.equals(datasetOrTemplateName)) {
 				atLeastOne = true;
-				MyUtils.checkStatusProgram(datasetOrTemplateNameTmp!=null && 
-						(isWebService || (!datasetOrTemplateNameTmp.equals(transformedDatasetName))));
+				/*MyUtils.checkStatusProgram(datasetOrTemplateNameTmp!=null && 
+						(isWebService || (!datasetOrTemplateNameTmp.equals(transformedDatasetName))),
+						(datasetOrTemplateNameTmp!=null) + ", " + isWebService + ", " + (!datasetOrTemplateNameTmp.equals(transformedDatasetName)) + ", " +
+						datasetOrTemplateNameTmp + ", " + transformedDatasetName);*/
 				this.plainDatasetNameToTransformedDatasetName.put(pointedDatasetPlainName, transformedDatasetName);
 			}
 		}
@@ -113,6 +115,14 @@ public class TransformationGeneralVariable {
 		return this.transformedTemplatesMap.get(datasetOrTemplateName);
 	}
 
+	// Get All
+	public Collection<Transformation> getAllTransformedDatasets() {
+		return this.transformedDatasetsMap.values();
+	}
+	public Collection<Transformation> getAllTransformedTemplates() {
+		return this.transformedTemplatesMap.values();
+	}
+	
 	public HashMap<String, Document> getDatasetNameToWebServiceJdomDocument() {
 		return datasetNameToWebServiceJdomDocument;
 	}

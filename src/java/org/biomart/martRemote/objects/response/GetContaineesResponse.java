@@ -31,7 +31,7 @@ public abstract class GetContaineesResponse extends MartRemoteResponse {
 	}
 	
 	private void fetchDatasetByName() {
-		GetContaineesRequest getContaineesRequest = (GetContaineesRequest)super.martServiceRequest;
+		GetContaineesRequest getContaineesRequest = (GetContaineesRequest)super.martRemoteRequest;
 		List<Location> locationList = super.martRegistry.getLocationList();
 		for (Location location : locationList) {
 			if (getContaineesRequest.getUsername().equals(location.getUser())) {
@@ -49,7 +49,7 @@ public abstract class GetContaineesResponse extends MartRemoteResponse {
 	}
 	
 	private void fetchContainerList() throws FunctionalException {
-		GetContaineesRequest getContaineesRequest = (GetContaineesRequest)super.martServiceRequest;
+		GetContaineesRequest getContaineesRequest = (GetContaineesRequest)super.martRemoteRequest;
 		this.containerList = new ArrayList<Container>();
 		if (dataset!=null) {
 			List<Config> configList = dataset.getConfigList();

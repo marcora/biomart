@@ -87,7 +87,7 @@ public class MartServiceServlet extends HttpServlet {
 	}
 	
 	public void initialize() throws FileNotFoundException, JDOMException, IOException, TechnicalException {
-		this.martServiceApi = new MartApi(true, null, MartService.XSD_FILE_URL, null, MartService.PORTAL_SERIAL_FILE_URL);
+		//this.martServiceApi = new MartApi(true, null, MartService.XSD_FILE_URL, null, MartService.PORTAL_SERIAL_FILE_URL);
 	}
 
 	@Override

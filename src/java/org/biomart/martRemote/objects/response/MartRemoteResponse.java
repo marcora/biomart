@@ -22,14 +22,14 @@ import org.jdom.Element;
 
 public abstract class MartRemoteResponse {
 
-	protected MartRemoteRequest martServiceRequest = null;
+	protected MartRemoteRequest martRemoteRequest = null;
 	protected MartRegistry martRegistry = null;
 	
 	protected StringBuffer errorMessage = null;
 	
 	protected MartRemoteResponse(MartRegistry martRegistry, MartRemoteRequest martServiceRequest) {
 		this.martRegistry = martRegistry;
-		this.martServiceRequest = martServiceRequest;
+		this.martRemoteRequest = martServiceRequest;
 		this.errorMessage = new StringBuffer();
 	}
 
@@ -40,8 +40,8 @@ public abstract class MartRemoteResponse {
 		return errorMessage.length()==0;
 	}
 	
-	public MartRemoteRequest getMartServiceRequest() {
-		return martServiceRequest;
+	public MartRemoteRequest getMartServiceRemote() {
+		return martRemoteRequest;
 	}
 	
 	public Document getXmlDocument() throws TechnicalException, FunctionalException {
@@ -52,7 +52,7 @@ public abstract class MartRemoteResponse {
 	 */
 	public Document getXmlDocument(boolean debug, Writer printWriter) throws TechnicalException, FunctionalException {
 		Document document = MartRemoteUtils.createNewResponseXmlDocument(
-				martServiceRequest.getXmlParameters(), martServiceRequest.getType().getResponseName());
+				martRemoteRequest.getXmlParameters(), martRemoteRequest.getType().getResponseName());
 		document = createXmlResponse(document);
 		if (debug && printWriter!=null) {
 			try {
@@ -104,9 +104,26 @@ public abstract class MartRemoteResponse {
 			
 		return jsonObject;
 	}
-	public JSONObject getJsonObject4() throws TechnicalException, FunctionalException {
+	
+	public JSONObject getJsonObject4(boolean debug, Writer printWriter) throws TechnicalException, FunctionalException {
 		Document document = getXmlDocument();
-		return JsonUtils.getJSONObjectFromDocument(document);
+		Element rootElement = document.getRootElement();
+		
+		Element newRootElement = new Element(rootElement.getName());
+		newRootElement.addContent(rootElement.cloneContent());
+		Document newDocument = new Document(newRootElement);
+		
+		JSONObject jsonObject = JsonUtils.getJSONObjectFromDocument(newDocument);
+		
+		if (debug && printWriter!=null) {
+			try {
+				printWriter.append(JsonUtils.getJSONObjectNiceString(jsonObject) + MyUtils.LINE_SEPARATOR);
+			} catch (IOException e) {
+				throw new TechnicalException(e);
+			}
+		}
+		
+		return jsonObject;
 	}
 	
 	protected abstract void populateObjects() throws TechnicalException, FunctionalException;

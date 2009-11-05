@@ -10,12 +10,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
-import org.biomart.common.general.utils.JsonUtils;
 import org.biomart.common.general.utils.MyUtils;
 import org.biomart.common.general.utils.XmlUtils;
 import org.biomart.martRemote.enums.MartRemoteEnum;
@@ -51,7 +49,7 @@ import org.jdom.output.XMLOutputter;
 
 public class MartApi {
 
-private static boolean COMPACT = false;
+private static boolean COMPACT = true;
 	@SuppressWarnings("all")
 	public static void main(String[] args) throws Exception {
 		
@@ -64,10 +62,10 @@ private static boolean COMPACT = false;
 		
 		String type = 
 			//"getRegistry";
-			//"getDatasets";
+			"getDatasets";
 			//"getRootContainer";
 			//"getAttributes";
-			"getFilters";
+			//"getFilters";
 			//"query";
 		String username = "anonymous";
 		String password = "";
@@ -83,7 +81,7 @@ private static boolean COMPACT = false;
 		String query = "query1";
 		String filterPartitionString = TransformationConstants.MAIN_PARTITION_FILTER_NAME + 
 			".\"hsapiens_gene_ensembl,mmusculus_gene_ensembl,celegans_gene_ensembl\"";
-		MartServiceFormat format = MartServiceFormat.XML;
+		MartServiceFormat format = MartServiceFormat.JSON;
 		
 		MartRemoteEnum remoteAccessEnum = MartRemoteEnum.getEnumFromIdentifier(type);
 		boolean valid = true;
@@ -141,8 +139,6 @@ private static boolean COMPACT = false;
 	private Document xsd = null;
 	private MartRegistry martRegistry = null;
 	private SAXBuilder builder = null;
-	//private Namespace martServiceNamespace = null;
-	//private Namespace xsiNamespace = null;
 	
 	public MartApi() throws IOException, JDOMException, TechnicalException {
 		this(false, MartRemoteConstants.XSD_FILE_FILE_PATH_AND_NAME, MartRemoteConstants.XSD_FILE_FILE_PATH_AND_NAME, 
@@ -307,12 +303,12 @@ private static boolean COMPACT = false;
 	 */
 	// Response writing
 	public String processMartServiceResult(MartRemoteResponse martServiceResponse, Writer writer) throws TechnicalException, FunctionalException {
-		if (martServiceResponse.getMartServiceRequest().getFormat().isXml()) {
+		if (martServiceResponse.getMartServiceRemote().getFormat().isXml()) {
 			Document document = martServiceResponse.getXmlDocument(this.debug, writer);
 			if (martServiceResponse.isValid()) {
 				return writeXmlResponse(document, writer);					
 			}
-		} else if (martServiceResponse.getMartServiceRequest().getFormat().isJson()) {
+		} else if (martServiceResponse.getMartServiceRemote().getFormat().isJson()) {
 			/*JSONObject jsonObject = martServiceResponse.getJsonObject2();
 			if (martServiceResponse.isValid()) {					
 				return writeJsonResponse(jsonObject, writer);
@@ -325,7 +321,7 @@ private static boolean COMPACT = false;
 			if (martServiceResponse.isValid()) {					
 				return writeJsonResponse(jsonObject, writer);
 			}*/
-			JSONObject jSONObject = martServiceResponse.getJsonObject4();
+			JSONObject jSONObject = martServiceResponse.getJsonObject4(this.debug, writer);
 			if (martServiceResponse.isValid()) {					
 				return writeJsonResponse(jSONObject, writer);
 			}
@@ -346,14 +342,17 @@ private static boolean COMPACT = false;
 	public String writeJsonResponse(JSONObject jSONObject, Writer writer) throws TechnicalException {
 		if (null!=writer && COMPACT) {
 			try {
-				writer.append(JsonUtils.getJSONObjectNiceString(jSONObject) + MyUtils.LINE_SEPARATOR);
+				writer.append(
+						jSONObject
+						//JsonUtils.getJSONObjectNiceString(jSONObject)
+						+ MyUtils.LINE_SEPARATOR);
 			} catch (IOException e) {
 				throw new TechnicalException(e);
 			}
 		}
 		return jSONObject.toString();
 	}
-	public String writeJsonResponse(JSON json, Writer writer) throws TechnicalException {
+	/*public String writeJsonResponse(JSON json, Writer writer) throws TechnicalException {
 		if (null!=writer && COMPACT) {
 			try {
 				writer.append(json.toString().substring(0, 1000) + MyUtils.LINE_SEPARATOR);
@@ -362,7 +361,7 @@ private static boolean COMPACT = false;
 			}
 		}
 		return json.toString().substring(0, 1000);
-	}
+	}*/
 	@Deprecated
 	public String writeJsonResponse(org.json.JSONObject root, Writer writer) throws TechnicalException {
 		/*if (null!=writer && COMPACT) {

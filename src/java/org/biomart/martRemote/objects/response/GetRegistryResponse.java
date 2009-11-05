@@ -41,7 +41,7 @@ public class GetRegistryResponse extends MartRemoteResponse {
 		List<Location> locationListTmp = martRegistry.getLocationList();
 		try {
 			for (Location location : locationListTmp) {
-				if (super.martServiceRequest.getUsername().equals(location.getUser())) {
+				if (super.martRemoteRequest.getUsername().equals(location.getUser())) {
 					Location locationClone = new Location(location);
 					List<Mart> martListTmp = location.getMartList();
 						for (Mart mart : martListTmp) {
@@ -106,7 +106,7 @@ public class GetRegistryResponse extends MartRemoteResponse {
 		}
 		
 		JSONObject root = new JSONObject();
-		root.put(martServiceRequest.getType().getResponseName(), array);
+		root.put(martRemoteRequest.getType().getResponseName(), array);
 		return root;
 	}
 }

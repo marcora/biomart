@@ -43,7 +43,7 @@ public class QueryResponse extends MartRemoteResponse {
 	}
 
 	public void populateObjects() throws TechnicalException, FunctionalException {
-		QueryRequest queryRequest = (QueryRequest)super.martServiceRequest;
+		QueryRequest queryRequest = (QueryRequest)super.martRemoteRequest;
 		Query query = queryRequest.getQuery();
 		this.data = fetchData(query);
 		this.headers = fetchHeaders(query);
@@ -150,7 +150,7 @@ public class QueryResponse extends MartRemoteResponse {
 		
 		rows.setAttribute("count", String.valueOf(size));
 	
-		QueryRequest queryRequest = (QueryRequest)super.martServiceRequest;
+		QueryRequest queryRequest = (QueryRequest)super.martRemoteRequest;
 		List<String> attributeNameList = queryRequest.getQuery().getQueryDataset().getAttributeNameList();
 		
 		for (List<String> row : data) {
@@ -168,7 +168,7 @@ public class QueryResponse extends MartRemoteResponse {
 	}
 	protected JSONObject createJsonResponse() {
 
-		QueryRequest queryRequest = (QueryRequest)super.martServiceRequest;
+		QueryRequest queryRequest = (QueryRequest)super.martRemoteRequest;
 		List<String> attributeNameList = queryRequest.getQuery().getQueryDataset().getAttributeNameList();
 		int size = data.size();
 		

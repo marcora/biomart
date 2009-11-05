@@ -82,15 +82,17 @@ public class DatasetTransformation {
 		if (vars.isTemplate()) {
 			List<OldDynamicDataset> oldDynamicDatasetList = oldDatasetConfig.getOldDynamicDatasetList();
 			String fixedPart = OldDynamicDataset.extractFixedPart(oldDynamicDatasetList);
+			vars.setFixedPart(fixedPart);
 			mainPartitionTable = OldDynamicDataset.transformToPartitionTable(fixedPart,	
 					oldDynamicDatasetList, vars.getDdptColumnNumberToColumnNameMap(), vars.getDdptColumnNameToColumnNumberMap());
-			vars.setDdPT(mainPartitionTable);
+			vars.setDdPT(mainPartitionTable);			
 			
 			// Update dataset name according to the main partition table
-			newDatasetName = mainPartitionTable.getReference(
+			newDatasetName = 
+				mainPartitionTable.getReference(
 					TransformationConstants.DYNAMIC_DATASET_PARTITION_TABLE_DATASET_NAME_VARIABLE_PART_COLUMN_NUMBER) +
 														// variable part of the dataset name is stored on this column
-					fixedPart;		// Name becomes (PmC1)fixedPart, eg: hsapiens_gene_ensembl		
+				fixedPart;		// Name becomes (PmC1)fixedPart, eg: hsapiens_gene_ensembl
 		} else {
 			String datasetOriginalName = oldDatasetConfig.getDataset();
 			mainPartitionTable = createDefaultPartitionTable(datasetOriginalName);

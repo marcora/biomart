@@ -1,14 +1,19 @@
 package org.biomart.transformation;
 
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
-
 
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.MyUtils;
 import org.biomart.objects.helpers.CurrentPath;
+import org.biomart.objects.objects.Attribute;
 import org.biomart.objects.objects.Dataset;
+import org.biomart.objects.objects.Filter;
 import org.biomart.objects.objects.Location;
 import org.biomart.objects.objects.LocationType;
 import org.biomart.objects.objects.Mart;
@@ -95,13 +100,58 @@ public class Transformation {
 		
 		// Transform the dataset
 		DatasetTransformation datasetTransformation = new DatasetTransformation(general, params, vars, help);
-		mart.addDataset(datasetTransformation.transformDataset(this.oldDatasetConfig));
+		Dataset transformedDataset = datasetTransformation.transformDataset(this.oldDatasetConfig);
+		mart.addDataset(transformedDataset);
+		
+		// If template, change all dataset names and their references with the fixed part of their name
+		if (!params.isWebservice()) {
+			updateDatasetNames();
+		}
 		
 		// Generate the XML structure and output XML as file and on STDOUT
 		xmlGeneration();
 		
 		return true;
 	}
+	
+	/**
+	 * Remove partition info (should be done differently)
+	 */
+	private void updateDatasetNames() {
+		
+		List<Transformation> allTransformedTemplates = new ArrayList<Transformation>(general.getAllTransformedTemplates());
+		allTransformedTemplates.add(this);
+		
+		Map<String, String> renamingMap = new HashMap<String, String>();
+		for (Transformation transformation : allTransformedTemplates) {
+			Dataset dataset = transformation.vars.getDataset();;
+			String newDatasetName = transformation.vars.getFixedPart();
+			newDatasetName = (newDatasetName.startsWith("_") ? newDatasetName.substring(1) : newDatasetName);
+			renamingMap.put(dataset.getName(), newDatasetName);
+		}
+		
+		for (Transformation transformation : allTransformedTemplates) {
+			Dataset dataset = transformation.vars.getDataset();;
+			dataset.setName(renamingMap.get(dataset.getName()));
+			
+			HashMap<String, Attribute> attributeMap = transformation.vars.getAttributeMap();
+			for (Iterator<Attribute> it = attributeMap.values().iterator(); it.hasNext();) {
+				Attribute attribute = it.next();
+				if (attribute.getPointer()) {
+					attribute.setDatasetName(renamingMap.get(attribute.getDatasetName()));
+				}
+			}
+			
+			HashMap<String, Filter> filterMap = transformation.vars.getFilterMap();
+			for (Iterator<Filter> it = filterMap.values().iterator(); it.hasNext();) {
+				Filter filter = it.next();
+				if (filter.getPointer()) {
+					filter.setDatasetName(renamingMap.get(filter.getDatasetName()));
+				}
+			}
+		}
+	}
+	
 	private Mart createEmptyConfiguration() throws TechnicalException, FunctionalException {
 		
 		this.martRegistry = new MartRegistry();
