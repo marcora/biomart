@@ -4,20 +4,14 @@ package org.biomart.martRemote.objects.response;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.MyUtils;
-import org.biomart.martRemote.MartRemoteConstants;
+import org.biomart.martRemote.Jsoml;
 import org.biomart.martRemote.objects.request.MartRemoteRequest;
 import org.biomart.martRemote.objects.request.Query;
 import org.biomart.martRemote.objects.request.QueryDataset;
@@ -28,8 +22,6 @@ import org.biomart.old.martService.restFulQueries.RestFulQuery;
 import org.biomart.old.martService.restFulQueries.RestFulQueryDataset;
 import org.biomart.old.martService.restFulQueries.objects.Attribute;
 import org.biomart.old.martService.restFulQueries.objects.Filter;
-import org.jdom.Document;
-import org.jdom.Element;
 
 public class QueryResponse extends MartRemoteResponse {
 
@@ -39,15 +31,53 @@ public class QueryResponse extends MartRemoteResponse {
 	public QueryResponse(MartRegistry martRegistry, MartRemoteRequest martServiceRequest) {
 		super(martRegistry, martServiceRequest);
 		this.data = new ArrayList<List<String>>();
-		this.headers = new ArrayList<String>();
+		//this.headers = new ArrayList<String>();
+		this.headers = null;
 	}
 
 	public void populateObjects() throws TechnicalException, FunctionalException {
 		QueryRequest queryRequest = (QueryRequest)super.martRemoteRequest;
 		Query query = queryRequest.getQuery();
 		this.data = fetchData(query);
-		this.headers = fetchHeaders(query);
+		//this.headers = fetchHeaders(query);
+		if (queryRequest.getQuery().getHeader()) {
+			this.headers = this.data.remove(0);
+		}
 	}
+
+	/*private List<String> fetchHeaders(Query query) throws TechnicalException { 	// for now only 1 dataset & no aliases
+
+		QueryDataset queryDataset = query.getQueryDataset();
+		String datasetName = queryDataset.getDatasetNameList().get(0);	// only 1 dataset for now
+		List<String> attributes = queryDataset.getAttributeNameList();	// no aliases for now
+		
+		String urlString = MartServiceConstants.CENTRAL_PORTAL_MART_SERVICE_STRING_URL + 
+		"?" + "type" + "=" + "attributes" + "&" + "dataset" + "=" + datasetName + 
+			(query.getFormerVirtualSchema()!=null ? "&" + "virtualSchema" + "=" + query.getFormerVirtualSchema() : ""); //http://www.biomart.org/biomart/martservice?type=filters&dataset=oanatinus_gene_ensembl
+		List<List<String>> datasetAttributes = null;
+		try {
+			datasetAttributes = MyUtils.copyUrlContentToListStringList(new URL(urlString), MyUtils.TAB_SEPARATOR);
+		} catch (MalformedURLException e) {
+			throw new TechnicalException(e);
+		} catch (IOException e) {
+			throw new TechnicalException(e);
+		}
+		
+		Map<String, String> map = new HashMap<String, String>();
+		for (List<String> attribute : datasetAttributes) {
+			if (attributes.contains(attribute.get(MartRemoteConstants.ELEMENT_NAME_POSITION))) {
+				map.put(attribute.get(
+						MartRemoteConstants.ELEMENT_NAME_POSITION), attribute.get(MartRemoteConstants.ELEMENT_DISPLAY_NAME_POSITION));
+			}
+		}
+		
+		List<String> headers = new ArrayList<String>();
+		for (String attribute : attributes) {
+			headers.add(map.get(attribute));
+		}
+		
+		return headers;
+	}*/
 	
 	private List<List<String>> fetchData(Query query) 
 	throws FunctionalException, TechnicalException {	// for now only 1 dataset & no aliases		
@@ -88,39 +118,34 @@ public class QueryResponse extends MartRemoteResponse {
 		
 		return data;
 	}
-
-	private List<String> fetchHeaders(Query query) throws TechnicalException { 	// for now only 1 dataset & no aliases
-
-		QueryDataset queryDataset = query.getQueryDataset();
-		String datasetName = queryDataset.getDatasetNameList().get(0);	// only 1 dataset for now
-		List<String> attributes = queryDataset.getAttributeNameList();	// no aliases for now
-		
-		String urlString = MartServiceConstants.CENTRAL_PORTAL_MART_SERVICE_STRING_URL + 
-		"?" + "type" + "=" + "attributes" + "&" + "dataset" + "=" + datasetName + 
-			(query.getFormerVirtualSchema()!=null ? "&" + "virtualSchema" + "=" + query.getFormerVirtualSchema() : ""); //http://www.biomart.org/biomart/martservice?type=filters&dataset=oanatinus_gene_ensembl
-		List<List<String>> datasetAttributes = null;
-		try {
-			datasetAttributes = MyUtils.copyUrlContentToListStringList(new URL(urlString), MyUtils.TAB_SEPARATOR);
-		} catch (MalformedURLException e) {
-			throw new TechnicalException(e);
-		} catch (IOException e) {
-			throw new TechnicalException(e);
-		}
-		
-		Map<String, String> map = new HashMap<String, String>();
-		for (List<String> attribute : datasetAttributes) {
-			if (attributes.contains(attribute.get(MartRemoteConstants.ELEMENT_NAME_POSITION))) {
-				map.put(attribute.get(
-						MartRemoteConstants.ELEMENT_NAME_POSITION), attribute.get(MartRemoteConstants.ELEMENT_DISPLAY_NAME_POSITION));
+	
+	@Override
+	public Jsoml createOutputResponse(boolean xml, Jsoml root) throws FunctionalException {
+		if (this.headers!=null) {
+			Jsoml jsomlHeaders = new Jsoml(xml, "headers");
+			for (String header : this.headers) {		// Should happen in a specific object that would contain headers and data 
+														// (along with the light read-only clones)
+				Jsoml jsomlHeader = new Jsoml(xml, "header");
+				jsomlHeader.setText(header);
+				jsomlHeaders.addContent(jsomlHeader);
 			}
+			root.addContent(jsomlHeaders);
 		}
 		
-		List<String> headers = new ArrayList<String>();
-		for (String attribute : attributes) {
-			headers.add(map.get(attribute));
+		Jsoml jsomlRows = new Jsoml(xml, "rows");
+		for (List<String> row : this.data) {
+			
+			Jsoml jsomlRow = new Jsoml(xml, "row");
+			for (String value : row) {
+				Jsoml jsomlValue = new Jsoml(xml, "value");
+				jsomlValue.setText(value);
+				jsomlRow.addContent(jsomlValue);
+			}
+			jsomlRows.addContent(jsomlRow);
 		}
+		root.addContent(jsomlRows);
 		
-		return headers;
+		return root;
 	}
 	
 	/**
@@ -141,7 +166,7 @@ public class QueryResponse extends MartRemoteResponse {
 		</queryResponse>
 		
 	**/
-	protected Document createXmlResponse(Document document) {
+	/*protected Document createXmlResponse(Document document) {
 		Element root = document.getRootElement();
 		
 		int size = data.size();
@@ -208,5 +233,5 @@ public class QueryResponse extends MartRemoteResponse {
 		root.put("fields", fields);
 		root.put("columns", columns);
 		return root;
-	}
+	}*/
 }

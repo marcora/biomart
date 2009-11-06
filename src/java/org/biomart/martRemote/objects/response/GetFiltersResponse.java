@@ -3,14 +3,12 @@ package org.biomart.martRemote.objects.response;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.sf.json.JSONObject;
-
 import org.biomart.common.general.exceptions.FunctionalException;
+import org.biomart.martRemote.Jsoml;
 import org.biomart.martRemote.objects.request.MartRemoteRequest;
 import org.biomart.objects.objects.Element;
 import org.biomart.objects.objects.Filter;
 import org.biomart.objects.objects.MartRegistry;
-import org.jdom.Document;
 
 public class GetFiltersResponse extends GetElementsResponse {
 
@@ -32,15 +30,18 @@ public class GetFiltersResponse extends GetElementsResponse {
 		}
 	}
 	
-	protected Document createXmlResponse(Document document) throws FunctionalException {
+	@Override
+	public Jsoml createOutputResponse(boolean xml, Jsoml root) throws FunctionalException {
+		for (Filter filter : this.filterList) {
+			root.addContent(filter.generateOutputForWebService(xml));
+		}
+		return root;
+	}
+	/*protected Document createXmlResponse(Document document) throws FunctionalException {
 		org.jdom.Element root = document.getRootElement();
 		for (Filter filter : this.filterList) {
 			root.addContent(filter.generateXmlForWebService());
 		}
 		return document;
-	}
-	protected JSONObject createJsonResponse(String responseName) {
-		//TODO?
-		return null;
-	}
+	}*/
 }

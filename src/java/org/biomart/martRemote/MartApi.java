@@ -51,6 +51,7 @@ import org.jdom.output.XMLOutputter;
 public class MartApi {
 
 private static boolean COMPACT = false;
+
 	@SuppressWarnings("all")
 	public static void main(String[] args) throws Exception {
 
@@ -67,10 +68,10 @@ private static boolean COMPACT = false;
 		String type = 
 			//"getRegistry";
 			//"getDatasets";
-			"getRootContainer";
+			//"getRootContainer";
 			//"getAttributes";
 			//"getFilters";
-			//"query";
+			"query";
 		String username = "anonymous";
 		String password = "";
 		String martName = MartRemoteConstants.WEB_PORTAL ? 
@@ -85,7 +86,7 @@ private static boolean COMPACT = false;
 		String query = "query1";
 		String filterPartitionString = TransformationConstants.MAIN_PARTITION_FILTER_NAME + 
 			".\"hsapiens_gene_ensembl,mmusculus_gene_ensembl,celegans_gene_ensembl\"";
-		MartServiceFormat format = MartServiceFormat.JSON;
+		MartServiceFormat format = MartServiceFormat.XML;
 		
 		MartRemoteEnum remoteAccessEnum = MartRemoteEnum.getEnumFromIdentifier(type);
 		boolean valid = true;
@@ -131,10 +132,11 @@ private static boolean COMPACT = false;
 		}
 		stringWriter.flush();
 		String string = stringWriter.toString();
-//		System.out.println(string);
+		System.out.println(string);
 		MyUtils.writeFile("/home/anthony/Desktop/MartApi", string);
-timer.stopTimer();
-System.out.println(timer);
+		
+		timer.stopTimer();
+		System.out.println(timer);
 	}
 	
 	private Boolean debug = null;

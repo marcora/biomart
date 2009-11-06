@@ -2,14 +2,11 @@ package org.biomart.martRemote.objects.response;
 
 import java.util.List;
 
-import net.sf.json.JSONObject;
-
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.martRemote.Jsoml;
 import org.biomart.martRemote.objects.request.MartRemoteRequest;
 import org.biomart.objects.objects.Container;
 import org.biomart.objects.objects.MartRegistry;
-import org.jdom.Document;
 
 public class GetRootContainerResponse extends GetContaineesResponse {
 
@@ -22,14 +19,8 @@ public class GetRootContainerResponse extends GetContaineesResponse {
 	public void populateObjects() throws FunctionalException {
 		super.populateObjects();
 	}
-	protected Document createXmlResponse(Document document) throws FunctionalException {
-		Jsoml root = new Jsoml(document.getRootElement());
-		createOutputResponse(true, root).getXmlElement();
-		return document;		
-	}
-	protected JSONObject createJsonResponse(String responseName) throws FunctionalException {
-		return createOutputResponse(false, new Jsoml(false, responseName)).getJsonObject();		
-	}
+	
+	@Override
 	public Jsoml createOutputResponse(boolean xml, Jsoml root) throws FunctionalException {
 		for (Container container : this.containerList) {
 			root.addContent(container.generateOutputForWebService(xml));

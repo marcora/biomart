@@ -323,31 +323,50 @@
 	<xs:element name="queryResponse">
 		<xs:complexType>
 			<xs:sequence>
+				<xs:element name="headers" type="tns:headersType" minOccurs="0" maxOccurs="1" />
 				<xs:element name="rows" type="tns:rowsType" minOccurs="1" maxOccurs="1" />	<!-- only 1 <rows> element that hold all rows + associated info -->
 			</xs:sequence>
 		</xs:complexType>		
 	</xs:element>
 	
+	<xs:complexType name="headersType">
+		<xs:sequence>
+			<xs:element name="header" type="xs:string" minOccurs="1" maxOccurs="unbounded" /> 
+		</xs:sequence> 
+	</xs:complexType>
+	
 	<xs:complexType name="rowsType">
 		<xs:sequence>
-			<xs:element name="row" type="tns:rowType" minOccurs="0" maxOccurs="unbounded" />	<!-- as many rows as wanted -->
-		</xs:sequence>
-		<xs:attribute name="count" type="xs:integer" use="required" />	<!-- gives row count -->
+			<xs:element name="row" type="tns:rowType" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence> 
 	</xs:complexType>
 	
 	<xs:complexType name="rowType">
 		<xs:sequence>
-			<xs:element name="field" type="tns:fieldType" minOccurs="1" maxOccurs="unbounded" />	<!-- at least 1 attribute -->
+			<xs:element name="value" type="xs:string" minOccurs="1" maxOccurs="unbounded" />
+		</xs:sequence> 
+	</xs:complexType>
+	
+	<!--<xs:complexType name="rowsType">
+		<xs:sequence>
+			<xs:element name="row" type="tns:rowType" minOccurs="0" maxOccurs="unbounded" />	 as many rows as wanted 
+		</xs:sequence>
+		<xs:attribute name="count" type="xs:integer" use="required" />	 gives row count 
+	</xs:complexType>
+	
+	<xs:complexType name="rowType">
+		<xs:sequence>
+			<xs:element name="field" type="tns:fieldType" minOccurs="1" maxOccurs="unbounded" />	 at least 1 attribute 
 		</xs:sequence>
 	</xs:complexType>
 	
 	<xs:complexType name="fieldType" >
 		<xs:simpleContent>
-			<xs:extension base="xs:string">											<!-- value -->
-				<xs:attribute name="fieldName" type="xs:string" use="required" />	<!-- field name -->
+			<xs:extension base="xs:string">											 value 
+				<xs:attribute name="fieldName" type="xs:string" use="required" />	 field name 
 			</xs:extension>
 		</xs:simpleContent>
-	</xs:complexType>
+	</xs:complexType>-->
 	
 	<!-- ================================================================================================================== -->
 	

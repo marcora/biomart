@@ -3,20 +3,15 @@ package org.biomart.martRemote.objects.response;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-
 import org.biomart.common.general.exceptions.FunctionalException;
+import org.biomart.martRemote.Jsoml;
 import org.biomart.martRemote.objects.request.GetDatasetsRequest;
 import org.biomart.martRemote.objects.request.MartRemoteRequest;
-import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.objects.objects.Config;
 import org.biomart.objects.objects.Dataset;
 import org.biomart.objects.objects.Location;
 import org.biomart.objects.objects.Mart;
 import org.biomart.objects.objects.MartRegistry;
-import org.jdom.Document;
-import org.jdom.Element;
 
 public class GetDatasetsResponse extends MartRemoteResponse {
 
@@ -69,7 +64,28 @@ public class GetDatasetsResponse extends MartRemoteResponse {
 			throw new FunctionalException(e);
 		}
 	}
-	protected Document createXmlResponse(Document document) {
+	
+	@Override
+	public Jsoml createOutputResponse(boolean xml, Jsoml root) throws FunctionalException {
+		
+		for (int i = 0; i < this.datasetList.size(); i++) {
+			Dataset dataset = this.datasetList.get(i);
+			
+			Jsoml jdomObject = new Jsoml(xml, "dataset");
+			
+			// Config info
+			jdomObject.setAttribute("name", dataset.getName());
+			jdomObject.setAttribute("visible", dataset.getVisible()/* && config.getVisible()*/);
+			
+			// Dataset info
+			jdomObject.setAttribute("materialized", dataset.getMaterialized());
+			
+			root.addContent(jdomObject);
+		}
+		return root;
+	}
+	
+	/*protected Document createXmlResponse(Document document) {
 		Element root = document.getRootElement();
 		for (int i = 0; i < this.datasetList.size(); i++) {
 			//Mart mart = this.martList.get(i);
@@ -83,13 +99,13 @@ public class GetDatasetsResponse extends MartRemoteResponse {
 			
 			// Config info
 			MartConfiguratorUtils.addAttribute(jdomObject, "name", dataset.getName());
-			MartConfiguratorUtils.addAttribute(jdomObject, "visible", dataset.getVisible()/* && config.getVisible()*/);
+			MartConfiguratorUtils.addAttribute(jdomObject, "visible", dataset.getVisible() && config.getVisible());
 			
 			root.addContent(jdomObject);
 		}
 		return document;
-	}
-	protected JSONObject createJsonResponse(String responseName) {
+	}*/
+	/*protected JSONObject createJsonResponse(String responseName) {
 		JSONArray array = new JSONArray();
 		for (int i = 0; i < this.datasetList.size(); i++) {
 			//Mart mart = this.martList.get(i);
@@ -103,7 +119,7 @@ public class GetDatasetsResponse extends MartRemoteResponse {
 			
 			// Config info
 			object.put("name", dataset.getName());
-			object.put("visible", dataset.getVisible()/* && config.getVisible()*/);
+			object.put("visible", dataset.getVisible() && config.getVisible());
 			
 			JSONObject wrapper = new JSONObject();
 			wrapper.put("dataset", object);
@@ -113,7 +129,7 @@ public class GetDatasetsResponse extends MartRemoteResponse {
 		JSONObject root = new JSONObject();
 		root.put(martRemoteRequest.getType().getResponseName(), array);
 		return root;
-	}
+	}*/
 	private String computeDatasetName(Mart mart, Config config) {
 		return config.getName() + "." + mart.getName() + "." + mart.getVersion();
 	}

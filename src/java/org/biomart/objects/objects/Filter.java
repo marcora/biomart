@@ -164,7 +164,7 @@ public class Filter extends org.biomart.objects.objects.Element	// to avoid any 
 		}
 	}	
 
-	protected Jsoml generateOutputForWebService(boolean xml) throws FunctionalException {
+	public Jsoml generateOutputForWebService(boolean xml) throws FunctionalException {
 		Jsoml jsoml = super.generateOutputForWebService(xml);
 		
 		jsoml.setAttribute("qualifier", this.qualifier);

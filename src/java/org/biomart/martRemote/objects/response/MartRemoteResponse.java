@@ -14,6 +14,7 @@ import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.JsonUtils;
 import org.biomart.common.general.utils.MyUtils;
 import org.biomart.common.general.utils.XmlUtils;
+import org.biomart.martRemote.Jsoml;
 import org.biomart.martRemote.MartRemoteUtils;
 import org.biomart.martRemote.objects.request.MartRemoteRequest;
 import org.biomart.objects.objects.MartRegistry;
@@ -136,7 +137,19 @@ public abstract class MartRemoteResponse {
 		return jsonObject;
 	}
 	
+
+	protected Document createXmlResponse(Document document) throws FunctionalException {
+		Jsoml root = new Jsoml(document.getRootElement());
+		createOutputResponse(true, root).getXmlElement();
+		return document;		
+	}
+	protected JSONObject createJsonResponse(String responseName) throws FunctionalException {
+		return createOutputResponse(false, new Jsoml(false, responseName)).getJsonObject();		
+	}
+	
+	protected abstract Jsoml createOutputResponse(boolean xml, Jsoml root) throws FunctionalException;
+	
 	protected abstract void populateObjects() throws TechnicalException, FunctionalException;
-	protected abstract Document createXmlResponse(Document document) throws FunctionalException;
-	protected abstract JSONObject createJsonResponse(String responseName) throws FunctionalException;
+	/*protected abstract Document createXmlResponse(Document document) throws FunctionalException;
+	protected abstract JSONObject createJsonResponse(String responseName) throws FunctionalException;*/
 }
