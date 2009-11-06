@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
@@ -116,6 +117,7 @@ public class JsonUtils {
 	private static String getJSONObjectNiceString(JSONObject jSONObject, int depth, boolean arrayItem, boolean debug) throws TechnicalException {
 		StringBuffer stringBuffer = new StringBuffer();
 		stringBuffer.append(computeTabs(depth) + "{");
+		Integer depthLevel = null;
 		try {
 			int size = jSONObject.size();
 			int index = 0;
@@ -123,26 +125,66 @@ public class JsonUtils {
 				String key = it.next();
 				Object value = jSONObject.get(key);
 				
-				String str = "\"" + key + "\"" + ":";
 				if (value instanceof JSONObject || value instanceof JSONArray) {
-					stringBuffer.append(MyUtils.LINE_SEPARATOR + computeTabs(depth+1) + str);
+					stringBuffer.append(MyUtils.LINE_SEPARATOR + computeTabs(depth+1) + computeKey(key));
 					if (value instanceof JSONObject) {
-						stringBuffer.append(MyUtils.LINE_SEPARATOR + getJSONObjectNiceString((JSONObject)value, depth+2, false, debug));
+						depthLevel = depth+2;
+						stringBuffer.append(MyUtils.LINE_SEPARATOR + getJSONObjectNiceString((JSONObject)value, depthLevel, false, debug));
 					} else if (value instanceof JSONArray) {
 						JSONArray jSONArray = (JSONArray)value;
 						int size2 = jSONArray.size();
 						int index2 = 0;
 						stringBuffer.append(MyUtils.LINE_SEPARATOR + computeTabs(depth+2) + "[");
-						for (Iterator<JSONObject> it2 = (Iterator<JSONObject>)jSONArray.listIterator(); it2.hasNext();) {
-							JSONObject jSONObject2 = it2.next();
-							stringBuffer.append(MyUtils.LINE_SEPARATOR + getJSONObjectNiceString(jSONObject2, depth+3, true, debug) + (index2==size2-1 ? "" : ","));
+						for (Iterator<Object> it2 = (Iterator<Object>)jSONArray.listIterator(); it2.hasNext();) {
+							
+							Object value2 = it2.next();
+							if (value2 instanceof JSONObject) {
+								depthLevel = depth+3;
+								JSONObject jsonObject2 = (JSONObject)value2;
+								
+								// To save space
+								boolean simpleObject = false;
+								String onlyKey = null;
+								Object onlyValue = null;
+								Set<String> keySet = (Set<String>)jsonObject2.keySet();
+								if (keySet.size()==1) {
+									onlyKey = keySet.iterator().next();
+									onlyValue = jsonObject2.get(onlyKey);
+									simpleObject = !(onlyValue instanceof JSONObject || onlyValue instanceof JSONArray);
+								}
+								
+								// Treat a simple objects differently (no new lines)
+								if (index2==0 || !simpleObject) {
+									stringBuffer.append(MyUtils.LINE_SEPARATOR);
+								}
+								
+								if (simpleObject) {
+									if (index2==0) {
+										stringBuffer.append(computeTabs(depthLevel));
+									}
+									stringBuffer.append("{" + computeKey(onlyKey) + ":" + computeValue(onlyValue) + "}");
+														// both onlyKey and onlyValue are not null if found to be a simple object
+								} else {
+									stringBuffer.append(getJSONObjectNiceString(jsonObject2, depthLevel, true, debug));
+								}
+								stringBuffer.append(index2==size2-1 ? "" : ",");
+							} else if (value2 instanceof JSONArray) {
+								throw new TechnicalException("Unhandled"); // for now, to be written if it becomes neccessary
+							} else if (value2 instanceof String) {
+								throw new TechnicalException("Unhandled"); // for now, to be written if it becomes neccessary
+								/*MyUtils.checkStatusProgram(value2 instanceof String);
+								stringBuffer.append(
+										MyUtils.LINE_SEPARATOR + "#################" + value2 + (index2==size2-1 ? "" : ","));*/
+							} else {
+								throw new TechnicalException("Unhandled"); // TODO better
+							}
 							index2++;
 						}
 						stringBuffer.append(MyUtils.LINE_SEPARATOR + computeTabs(depth+2) + "]");
 					}
 				} else {
-					stringBuffer.append((index==0 ? MyUtils.LINE_SEPARATOR + computeTabs(depth+1) : " ") + str);
-					stringBuffer.append("\"" + value + "\"");
+					depthLevel = depth+1;
+					stringBuffer.append((index==0 ? MyUtils.LINE_SEPARATOR + computeTabs(depthLevel) : " ") + computeKey(key) + ":" + computeValue(value));
 				}
 				stringBuffer.append((index==size-1 ? "" : ","));
 				index++;
@@ -152,6 +194,12 @@ public class JsonUtils {
 		}
 		stringBuffer.append(MyUtils.LINE_SEPARATOR + computeTabs(depth) + "}");
 		return stringBuffer.toString();
+	}
+	private static String computeKey(String key) {
+		return "\"" + key + "\"";
+	}
+	private static String computeValue(Object value) {
+		return "\"" + value + "\"";
 	}
 	private static StringBuffer computeTabs(int depth) {
 		return computeTabs(depth, TAB);

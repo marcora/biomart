@@ -166,7 +166,7 @@ public class QueryResponse extends MartRemoteResponse {
 		
 		return document;
 	}
-	protected JSONObject createJsonResponse() {
+	protected JSONObject createJsonResponse(String responseName) {
 
 		QueryRequest queryRequest = (QueryRequest)super.martRemoteRequest;
 		List<String> attributeNameList = queryRequest.getQuery().getQueryDataset().getAttributeNameList();

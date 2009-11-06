@@ -5,6 +5,7 @@ import java.io.Serializable;
 import net.sf.json.JSONObject;
 
 import org.biomart.common.general.exceptions.FunctionalException;
+import org.biomart.martRemote.Jsoml;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.jdom.Element;
 import org.jdom.Namespace;
@@ -84,6 +85,20 @@ public class Containee extends MartConfiguratorObject implements Serializable {
 	protected void updatePointerClone(org.biomart.objects.objects.Element pointingElement) {
 		super.updatePointerClone(pointingElement);
 		this.parentContainer = pointingElement.parentContainer;
+	}
+	
+	protected Jsoml generateOutputForWebService(boolean xml) throws FunctionalException {
+		return super.generateOutputForWebService(xml);
+		
+		/*Jsoml xmlOrJson = null;
+		if (xml) {
+			Element xmlElement = generateXmlForWebService();
+			xmlOrJson = new Jsoml(xmlElement);
+		} else {
+			JSONObject jsonObject = generateJsonForWebService();
+			xmlOrJson = new Jsoml(jsonObject);
+		}
+		return xmlOrJson;*/
 	}
 	
 	protected Element generateXmlForWebService(boolean recursively) throws FunctionalException {

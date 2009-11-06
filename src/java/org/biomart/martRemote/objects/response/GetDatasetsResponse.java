@@ -89,7 +89,7 @@ public class GetDatasetsResponse extends MartRemoteResponse {
 		}
 		return document;
 	}
-	protected JSONObject createJsonResponse() {
+	protected JSONObject createJsonResponse(String responseName) {
 		JSONArray array = new JSONArray();
 		for (int i = 0; i < this.datasetList.size(); i++) {
 			//Mart mart = this.martList.get(i);

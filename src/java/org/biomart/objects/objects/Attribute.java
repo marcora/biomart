@@ -7,6 +7,7 @@ import java.util.List;
 import net.sf.json.JSONObject;
 
 import org.biomart.common.general.exceptions.FunctionalException;
+import org.biomart.martRemote.Jsoml;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.jdom.Namespace;
@@ -107,6 +108,26 @@ public class Attribute extends Element implements /*Comparable<Attribute>, Compa
 		this.linkURL = MartConfiguratorUtils.replacePartitionReferencesByValues(attribute.linkURL, part);
 	}
 	
+
+	public Jsoml generateOutputForWebService(boolean xml) throws FunctionalException {
+		Jsoml jsoml = super.generateOutputForWebService(xml);
+		
+		jsoml.setAttribute("maxLength", this.maxLength);
+		jsoml.setAttribute("linkURL", this.linkURL);
+		
+		return jsoml;
+	}
+	/*public Jsoml generateOutputForWebService(boolean xml) throws FunctionalException {
+		Jsoml xmlOrJson = null;
+		if (xml) {
+			org.jdom.Element xmlElement = generateXmlForWebService();
+			xmlOrJson = new Jsoml(xmlElement);
+		} else {
+			JSONObject jsonObject = generateJsonForWebService();
+			xmlOrJson = new Jsoml(jsonObject);
+		}
+		return xmlOrJson;
+	}*/
 	public org.jdom.Element generateXmlForWebService() throws FunctionalException {
 		return generateXmlForWebService(null);
 	}

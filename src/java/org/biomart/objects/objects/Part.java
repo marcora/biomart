@@ -40,6 +40,12 @@ public class Part implements /*Comparable<Part>, Comparator<Part>, */Serializabl
 		this.visible = visible;
 		this.partSpecificElement = partSpecificElement;
 	}
+	public Part(Part part) {
+		this(part.mainPartitionTable, part.getMainRowNumber());
+	}
+	public Part(PartitionTable mainPartitionTable, Integer mainRow) {
+		this(false, null, null, new PartitionTableAndRow(mainPartitionTable, mainRow));
+	}
 	
 	public boolean contains(PartitionTable partitionTable, int row) throws TechnicalException {
 		Integer rowNumber = this.map.get(partitionTable);

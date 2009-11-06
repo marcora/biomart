@@ -3,17 +3,15 @@ package org.biomart.martRemote.objects.response;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import org.biomart.common.general.exceptions.FunctionalException;
+import org.biomart.martRemote.Jsoml;
 import org.biomart.martRemote.objects.request.MartRemoteRequest;
-import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.objects.objects.Location;
 import org.biomart.objects.objects.Mart;
 import org.biomart.objects.objects.MartRegistry;
 import org.jdom.Document;
-import org.jdom.Element;
 
 public class GetRegistryResponse extends MartRemoteResponse {
 
@@ -54,8 +52,40 @@ public class GetRegistryResponse extends MartRemoteResponse {
 			throw new FunctionalException(e);
 		}
 	}
+	protected Document createXmlResponse(Document document) throws FunctionalException {
+		Jsoml root = new Jsoml(document.getRootElement());
+		createOutputResponse(true, root).getXmlElement();
+		return document;		
+	}
+	protected JSONObject createJsonResponse(String responseName) throws FunctionalException {
+		return createOutputResponse(false, new Jsoml(false, responseName)).getJsonObject();		
+	}
+	public Jsoml createOutputResponse(boolean xml, Jsoml root) throws FunctionalException {
+				
+		for (int i = 0; i < this.martList.size(); i++) {
+			Mart mart = this.martList.get(i);	// martList is never null (empty at worse)
+			Location location = this.locationList.get(i);
+			
+			Jsoml jsoml = new Jsoml(xml, "mart");
+			
+			// Mart info
+			jsoml.setAttribute("name", mart.getName());
+			jsoml.setAttribute("displayName", mart.getDisplayName());
+			jsoml.setAttribute("visible", mart.getVisible());		
+			
+			jsoml.setAttribute("version", mart.getVersion());
+			
+			// Location info
+			jsoml.setAttribute("host", location.getHost());
+			jsoml.setAttribute("type", (location.getType()!=null ? location.getType().getXmlValue() : null));
+			jsoml.setAttribute("user", location.getUser());
+			
+			root.addContent(jsoml);
+		}
+		return root;
+	}
 	
-	protected Document createXmlResponse(Document document) {
+	/*protected Document createXmlResponse(Document document) {
 		Element root = document.getRootElement();
 		for (int i = 0; i < this.martList.size(); i++) {
 			Mart mart = this.martList.get(i);	// martList is never null (empty at worse)
@@ -108,5 +138,5 @@ public class GetRegistryResponse extends MartRemoteResponse {
 		JSONObject root = new JSONObject();
 		root.put(martRemoteRequest.getType().getResponseName(), array);
 		return root;
-	}
+	}*/
 }

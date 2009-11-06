@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 import net.sf.json.JSON;
+import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import net.sf.json.xml.XMLSerializer;
 
@@ -67,11 +68,40 @@ public abstract class MartRemoteResponse {
 			
 		return document;
 	}
+	public JSONObject getJsonObject(boolean debug, Writer printWriter) throws TechnicalException, FunctionalException {
+		//String documentString = MartRemoteUtils.getXmlDocumentString(getXmlDocument());
+		//org.json.JSONObject jsonObject = null;
+		//try {
+			//jsonObject = 
+				//XML.toJSONObject(documentString);
+				//MartRemoteUtils.getJSONObjectFromDocument(getXmlDocument());
+		/*} catch (JSONException e) {
+			throw new TechnicalException(e);
+		}*/
+			
+		//http://json-lib.sourceforge.net/apidocs/net/sf/json/xml/XMLSerializer.html
+		//new JSONObject().fromObject(object)
+		
+		JSONObject jsonObject = null;
+		try {
+			jsonObject = createJsonResponse(martRemoteRequest.getType().getResponseName());
+			if (debug && printWriter!=null) {
+				printWriter.append(
+						//jsonObject
+						JsonUtils.getJSONObjectNiceString(jsonObject)
+						+ MyUtils.LINE_SEPARATOR);
+			}
+		} catch (JSONException e) {
+			throw new TechnicalException(e);
+		} catch (IOException e) {
+			throw new TechnicalException(e);
+		}
+		
+		return jsonObject;
+	}
 
 	public JSON getJsonObject2() throws TechnicalException, FunctionalException {
 		Document document = getXmlDocument();
-		
-		
 		
 		Element rootElement = document.getRootElement();
 		Element newRoot = new Element(rootElement.getName());
@@ -83,29 +113,9 @@ public abstract class MartRemoteResponse {
 		
 		JSON jSON = new XMLSerializer().read(XmlUtils.getXmlDocumentString(newDoc));
 		return jSON;
-		//return createJsonResponse();	// no pre/post processing
-	}
-	@Deprecated
-	public org.json.JSONObject getJsonObject() throws TechnicalException, FunctionalException {
-		//String documentString = MartRemoteUtils.getXmlDocumentString(getXmlDocument());
-		org.json.JSONObject jsonObject = null;
-		//try {
-			//jsonObject = 
-				//XML.toJSONObject(documentString);
-				//MartRemoteUtils.getJSONObjectFromDocument(getXmlDocument());
-		/*} catch (JSONException e) {
-			throw new TechnicalException(e);
-		}*/
-			
-		//http://json-lib.sourceforge.net/apidocs/net/sf/json/xml/XMLSerializer.html
-		//new JSONObject().fromObject(object)
-			
-	
-			
-		return jsonObject;
 	}
 	
-	public JSONObject getJsonObject4(boolean debug, Writer printWriter) throws TechnicalException, FunctionalException {
+	public JSONObject getJsonObject4b(boolean debug, Writer printWriter) throws TechnicalException, FunctionalException {
 		Document document = getXmlDocument();
 		Element rootElement = document.getRootElement();
 		
@@ -128,5 +138,5 @@ public abstract class MartRemoteResponse {
 	
 	protected abstract void populateObjects() throws TechnicalException, FunctionalException;
 	protected abstract Document createXmlResponse(Document document) throws FunctionalException;
-	protected abstract JSONObject createJsonResponse();
+	protected abstract JSONObject createJsonResponse(String responseName) throws FunctionalException;
 }

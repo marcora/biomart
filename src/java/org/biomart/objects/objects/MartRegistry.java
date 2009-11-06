@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-
 import org.biomart.objects.MartConfiguratorConstants;
 import org.jdom.Element;
 
@@ -49,7 +48,7 @@ public class MartRegistry implements Comparable<MartRegistry>, Comparator<MartRe
 		}
 		MartRegistry martRegistry=(MartRegistry)object;
 		return (
-		true
+				this.locationList.size()==martRegistry.locationList.size()	// locationList is never null (constructor) TODO better
 		);
 	}
 

@@ -24,7 +24,9 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
@@ -137,6 +139,9 @@ public class MyUtils {
 	public static boolean EXCEPTION = true;
 	public static boolean EXIT_PROGRAM = false; 
 	//TODO better handling of the difference between program and thread
+	public static void checkStatusProgram ( boolean state, boolean exit ) {
+		checkStatusProgram(state, "", exit);
+	}
 	public static void checkStatusProgram ( boolean state, String errorMessage, boolean exit ) {
 		if (CHECK && !state) {
 			errorProgram(errorMessage, exit);
@@ -482,6 +487,7 @@ public class MyUtils {
 		return getCurrentDateAsString() + getCurrentTimeOfDayToMillisecondAsString();
 	}
 	
+	@SuppressWarnings("unchecked")
 	/**
 	 * time saver but not very clean
 	 * @param fileName
@@ -493,6 +499,7 @@ public class MyUtils {
 	/*public static String readPackageLocalFile (Class clazz, String fileName){	//TODO nicer
 		return new ReadFileBaseImpl().read(getPath(clazz, fileName));
 	}*/
+	@SuppressWarnings("unchecked")
 	private static String getPath(Class clazz, String fileName) {
 		return "."+ FILE_SEPARATOR + "src" + FILE_SEPARATOR + 
 		(clazz.getPackage()!=null ? clazz.getPackage().toString().replace("package ", "").replace(".", "/") + FILE_SEPARATOR : "") + 
@@ -934,5 +941,22 @@ public class MyUtils {
 		Properties properties = new Properties();
 		properties.load(new FileInputStream(MartRemoteConstants.QUERY_TEST_PROPERTIES_FILE_PATH_AND_NAME));
 		return properties.getProperty(propertyName);
+	}
+	
+	@SuppressWarnings("unchecked")
+	/**
+	 * To debug a get
+	 */
+	public static Object mapGet(Map map, Object object) {
+		Iterator it = map.keySet().iterator();
+		Iterator it2 = map.values().iterator();
+		while (it.hasNext()) {
+			Object object1 = it.next();
+			Object object2 = it2.next();
+			if (object1.equals(object)) {
+				return object2;
+			}
+		}
+		return null;
 	}
 }

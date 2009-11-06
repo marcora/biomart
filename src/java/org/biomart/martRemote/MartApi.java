@@ -15,6 +15,7 @@ import net.sf.json.JSONObject;
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.MyUtils;
+import org.biomart.common.general.utils.Timer;
 import org.biomart.common.general.utils.XmlUtils;
 import org.biomart.martRemote.enums.MartRemoteEnum;
 import org.biomart.martRemote.enums.MartServiceFormat;
@@ -49,21 +50,24 @@ import org.jdom.output.XMLOutputter;
 
 public class MartApi {
 
-private static boolean COMPACT = true;
+private static boolean COMPACT = false;
 	@SuppressWarnings("all")
 	public static void main(String[] args) throws Exception {
-		
+
 		StringWriter stringWriter = new StringWriter();
 		MartApi martApi = new MartApi();
 		System.out.println("Registry loaded");
+		
+		Timer timer = new Timer();
+		timer.startTimer();
 		
 		MartRemoteRequest martServiceRequest = null;
 		MartRemoteResponse martServiceResult = null;
 		
 		String type = 
 			//"getRegistry";
-			"getDatasets";
-			//"getRootContainer";
+			//"getDatasets";
+			"getRootContainer";
 			//"getAttributes";
 			//"getFilters";
 			//"query";
@@ -76,7 +80,7 @@ private static boolean COMPACT = true;
 				"ensembl_mart_55";
 		Integer martVersion = MartRemoteConstants.WEB_PORTAL ? -1 : 55;
 		String datasetName = 
-			MartRemoteConstants.WEB_PORTAL ? "hsapiens_gene_ensembl" : "(P0C1)_gene_ensembl";
+			MartRemoteConstants.WEB_PORTAL ? "hsapiens_gene_ensembl" : "gene_ensembl";
 			//"UNIPROT";
 		String query = "query1";
 		String filterPartitionString = TransformationConstants.MAIN_PARTITION_FILTER_NAME + 
@@ -127,8 +131,10 @@ private static boolean COMPACT = true;
 		}
 		stringWriter.flush();
 		String string = stringWriter.toString();
-		System.out.println(string);
+//		System.out.println(string);
 		MyUtils.writeFile("/home/anthony/Desktop/MartApi", string);
+timer.stopTimer();
+System.out.println(timer);
 	}
 	
 	private Boolean debug = null;
@@ -321,7 +327,7 @@ private static boolean COMPACT = true;
 			if (martServiceResponse.isValid()) {					
 				return writeJsonResponse(jsonObject, writer);
 			}*/
-			JSONObject jSONObject = martServiceResponse.getJsonObject4(this.debug, writer);
+			JSONObject jSONObject = martServiceResponse.getJsonObject(this.debug, writer);
 			if (martServiceResponse.isValid()) {					
 				return writeJsonResponse(jSONObject, writer);
 			}

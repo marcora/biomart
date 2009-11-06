@@ -10,6 +10,7 @@ import net.sf.json.JSONObject;
 
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.utils.MyUtils;
+import org.biomart.martRemote.Jsoml;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.jdom.Namespace;
@@ -317,7 +318,29 @@ public class Element extends Containee implements Serializable {
 		super.updatePointerClone(pointingElement);
 		this.selectedByDefault = pointingElement.selectedByDefault;
 	}
-	
+	protected Jsoml generateOutputForWebService(boolean xml) throws FunctionalException {
+		//MyUtils.checkStatusProgram(this.targetRange.getPartSet().size()==1);	// there should be only 1 element (it's flattened)
+		
+		Jsoml jsoml = super.generateOutputForWebService(xml);
+		
+		jsoml.removeAttribute("visible");	// not applicable for elements
+		
+		// Element attributes
+		jsoml.setAttribute("default", this.selectedByDefault);
+		
+		return jsoml;
+	}
+	/*public Jsoml generateOutputForWebService(boolean xml) throws FunctionalException {
+		Jsoml xmlOrJson = null;
+		if (xml) {
+			org.jdom.Element xmlElement = generateXmlForWebService();
+			xmlOrJson = new Jsoml(xmlElement);
+		} else {
+			JSONObject jsonObject = generateJsonForWebService();
+			xmlOrJson = new Jsoml(jsonObject);
+		}
+		return xmlOrJson;
+	}*/
 	protected org.jdom.Element generateXmlForWebService() throws FunctionalException {
 		return generateXmlForWebService(null);
 	}

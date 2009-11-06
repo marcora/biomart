@@ -7,20 +7,17 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 
-import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.MyUtils;
-import org.biomart.martRemote.MartRemoteUtils;
+import org.biomart.martRemote.Jsoml;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.objects.objects.Filter;
 import org.biomart.objects.objects.Part;
-import org.jdom.Document;
 import org.jdom.Element;
-import org.json.XML;
 
 /**
  * !!! TODO sufficient for the transformation but will need to be much more sophisticated in reality
@@ -35,87 +32,95 @@ public class FilterData implements Serializable {
 
 	private Filter filter = null;	// We'll see if we make this specific to a filter in particular
 			
+	private Boolean template = null;	// template if all parts have the same data -> [P?R*]
+	//TODO add checks that if template, can't add more than one part, add the template onsetting inside the addPart method (by checking the main PT row)
+	
 	private File dataFile = null;
-	private LinkedHashMap<Part, LinkedHashMap<filterDataRow, LinkedHashMap<Filter, ArrayList<filterDataRow>>>> map = null;
+	private LinkedHashMap<Part, LinkedHashMap<FilterDataRow, LinkedHashMap<Filter, ArrayList<FilterDataRow>>>> map = null;
 					// !!! sufficient for the transformation but will need to be much more sophisticated in reality
 	
 	public FilterData(Filter filter) {
 		super();
 		this.filter = filter;
 		this.dataFile = new File(filter.getDataFolderPath().getAbsolutePath() + MyUtils.FILE_SEPARATOR + filter.getName());
-		this.map = new LinkedHashMap<Part, LinkedHashMap<filterDataRow, LinkedHashMap<Filter,ArrayList<filterDataRow>>>>();
+		this.map = new LinkedHashMap<Part, LinkedHashMap<FilterDataRow, LinkedHashMap<Filter,ArrayList<FilterDataRow>>>>();
+		this.template = false;	// unless specified otherwise later
+	}
+	
+	public void setToTemplate() {
+		this.template = true; 
 	}
 
 	// Methods to access and populate the map "easily" 
-	public LinkedHashMap<filterDataRow, LinkedHashMap<Filter, ArrayList<filterDataRow>>> getPartValue(Part part) {
+	public LinkedHashMap<FilterDataRow, LinkedHashMap<Filter, ArrayList<FilterDataRow>>> getPartValue(Part part) {
 		return this.map.get(part);
 	}
-	public LinkedHashMap<filterDataRow, LinkedHashMap<Filter, ArrayList<filterDataRow>>> addPart(Part part) throws FunctionalException {
-		LinkedHashMap<filterDataRow, LinkedHashMap<Filter, ArrayList<filterDataRow>>> partValue = getPartValue(part);
+	public LinkedHashMap<FilterDataRow, LinkedHashMap<Filter, ArrayList<FilterDataRow>>> addPart(Part part) throws FunctionalException {
+		LinkedHashMap<FilterDataRow, LinkedHashMap<Filter, ArrayList<FilterDataRow>>> partValue = getPartValue(part);
 		if (partValue!=null) {
 			throw new FunctionalException("Part " + partValue + " is already in the data");
 		}
-		partValue = new LinkedHashMap<filterDataRow, LinkedHashMap<Filter,ArrayList<filterDataRow>>>();
+		partValue = new LinkedHashMap<FilterDataRow, LinkedHashMap<Filter,ArrayList<FilterDataRow>>>();
 		this.map.put(part, partValue);
 		return partValue;
 	}
-	public LinkedHashMap<Filter,ArrayList<filterDataRow>> getRowForPartValue(Part part, filterDataRow dataRow) throws FunctionalException {
-		LinkedHashMap<filterDataRow, LinkedHashMap<Filter, ArrayList<filterDataRow>>> partValue = getPartValue(part);
+	public LinkedHashMap<Filter,ArrayList<FilterDataRow>> getRowForPartValue(Part part, FilterDataRow dataRow) throws FunctionalException {
+		LinkedHashMap<FilterDataRow, LinkedHashMap<Filter, ArrayList<FilterDataRow>>> partValue = getPartValue(part);
 		if (null==partValue) {
 			throw new FunctionalException("No row " + dataRow + " for part " + part);
 		}
 		return partValue.get(dataRow);
 	}
-	public LinkedHashMap<Filter,ArrayList<filterDataRow>> addRowForPart(Part part, filterDataRow dataRow) throws FunctionalException {
-		LinkedHashMap<Filter,ArrayList<filterDataRow>> rowForPartValue = getRowForPartValue(part, dataRow);
+	public LinkedHashMap<Filter,ArrayList<FilterDataRow>> addRowForPart(Part part, FilterDataRow dataRow) throws FunctionalException {
+		LinkedHashMap<Filter,ArrayList<FilterDataRow>> rowForPartValue = getRowForPartValue(part, dataRow);
 		if (rowForPartValue!=null) {
 			throw new FunctionalException("Row " + MartConfiguratorUtils.displayJdomElement(dataRow.generateXml()) + 
 					" for part " + part.getXmlValue() + " is already in the data");
 		}
-		rowForPartValue = new LinkedHashMap<Filter, ArrayList<filterDataRow>>();
+		rowForPartValue = new LinkedHashMap<Filter, ArrayList<FilterDataRow>>();
 		
-		LinkedHashMap<filterDataRow, LinkedHashMap<Filter, ArrayList<filterDataRow>>> partMap = getPartValue(part);
+		LinkedHashMap<FilterDataRow, LinkedHashMap<Filter, ArrayList<FilterDataRow>>> partMap = getPartValue(part);
 		partMap.put(dataRow, rowForPartValue);
 		return rowForPartValue;
 	}
-	public ArrayList<filterDataRow> getCascadeChildForRowAndPartValue(
-			Part part, filterDataRow dataRow, Filter cascadeChild) throws FunctionalException {
-		LinkedHashMap<Filter, ArrayList<filterDataRow>> rowForPartValue = getRowForPartValue(part, dataRow);
+	public ArrayList<FilterDataRow> getCascadeChildForRowAndPartValue(
+			Part part, FilterDataRow dataRow, Filter cascadeChild) throws FunctionalException {
+		LinkedHashMap<Filter, ArrayList<FilterDataRow>> rowForPartValue = getRowForPartValue(part, dataRow);
 		if (null==rowForPartValue) {
 			throw new FunctionalException("No cascade child " + cascadeChild.getName() + " for row " + dataRow + " and part " + part);
 		}
 		return rowForPartValue.get(cascadeChild);
 	}
 	
-	public ArrayList<filterDataRow> addCascadeChildForRowAndPart(
-			Part part, filterDataRow dataRow, Filter cascadeChild) throws FunctionalException {
-		ArrayList<filterDataRow> cascadeChildForRowAndPartMapValue = 
+	public ArrayList<FilterDataRow> addCascadeChildForRowAndPart(
+			Part part, FilterDataRow dataRow, Filter cascadeChild) throws FunctionalException {
+		ArrayList<FilterDataRow> cascadeChildForRowAndPartMapValue = 
 			getCascadeChildForRowAndPartValue(part, dataRow, cascadeChild);
 		if (cascadeChildForRowAndPartMapValue!=null) {
 			throw new FunctionalException(
 					"cascade child " + cascadeChild.getName() + " for row " + dataRow + " and part " + part + " is already in the data");
 		}
-		cascadeChildForRowAndPartMapValue = new ArrayList<filterDataRow>();
+		cascadeChildForRowAndPartMapValue = new ArrayList<FilterDataRow>();
 		
-		LinkedHashMap<Filter, ArrayList<filterDataRow>> rowForPartValue = getRowForPartValue(part, dataRow);
+		LinkedHashMap<Filter, ArrayList<FilterDataRow>> rowForPartValue = getRowForPartValue(part, dataRow);
 		rowForPartValue.put(cascadeChild, cascadeChildForRowAndPartMapValue);
 		return cascadeChildForRowAndPartMapValue;
 	}
 	public void removeCascadeChildForRowAndPart(
-			Part part, filterDataRow dataRow, Filter cascadeChild) throws FunctionalException {
-		ArrayList<filterDataRow> cascadeChildForRowAndPartMapValue = 
+			Part part, FilterDataRow dataRow, Filter cascadeChild) throws FunctionalException {
+		ArrayList<FilterDataRow> cascadeChildForRowAndPartMapValue = 
 			getCascadeChildForRowAndPartValue(part, dataRow, cascadeChild);
 		if (cascadeChildForRowAndPartMapValue==null) {
 			throw new FunctionalException(
 					"cascade child " + cascadeChild.getName() + " for row " + dataRow + " and part " + part + " is not in the data");
 		}
 		
-		LinkedHashMap<Filter, ArrayList<filterDataRow>> rowForPartValue = getRowForPartValue(part, dataRow);
+		LinkedHashMap<Filter, ArrayList<FilterDataRow>> rowForPartValue = getRowForPartValue(part, dataRow);
 		rowForPartValue.remove(cascadeChild);
 	}
-	public filterDataRow getRowForCascadeChildAndRowAndPart(
-			Part part, filterDataRow dataRow, Filter cascadeChild, filterDataRow subDataRow) throws FunctionalException {
-		ArrayList<filterDataRow> cascadeChildForRowAndPartValue = getCascadeChildForRowAndPartValue(part, dataRow, cascadeChild);
+	public FilterDataRow getRowForCascadeChildAndRowAndPart(
+			Part part, FilterDataRow dataRow, Filter cascadeChild, FilterDataRow subDataRow) throws FunctionalException {
+		ArrayList<FilterDataRow> cascadeChildForRowAndPartValue = getCascadeChildForRowAndPartValue(part, dataRow, cascadeChild);
 		if (null==cascadeChildForRowAndPartValue) {
 			throw new FunctionalException("No row " + subDataRow + " for cascade child " + cascadeChild.getName() + " and row " + dataRow + " and part " + part);
 		}
@@ -123,16 +128,16 @@ public class FilterData implements Serializable {
 		return index!=-1 ? cascadeChildForRowAndPartValue.get(index) : null;
 	}
 	public void addRowForCascadeChildAndRowAndPart(
-			Part part, filterDataRow dataRow, Filter cascadeChild, filterDataRow subDataRow) throws FunctionalException {
+			Part part, FilterDataRow dataRow, Filter cascadeChild, FilterDataRow subDataRow) throws FunctionalException {
 		
-		filterDataRow rowForCascadeChildAndRowAndPart = getRowForCascadeChildAndRowAndPart(part, dataRow, cascadeChild, subDataRow);
+		FilterDataRow rowForCascadeChildAndRowAndPart = getRowForCascadeChildAndRowAndPart(part, dataRow, cascadeChild, subDataRow);
 		if (rowForCascadeChildAndRowAndPart!=null) {
 			throw new FunctionalException(
 					"subDataRow " + subDataRow + " for cascade child " + cascadeChild.getName() + 
 					" for row " + dataRow + " and part " + part + " is already in the data");
 		}
 	
-		ArrayList<filterDataRow> cascadeChildForRowAndPartValue = getCascadeChildForRowAndPartValue(part, dataRow, cascadeChild);
+		ArrayList<FilterDataRow> cascadeChildForRowAndPartValue = getCascadeChildForRowAndPartValue(part, dataRow, cascadeChild);
 		cascadeChildForRowAndPartValue.add(subDataRow);		
 	}
 	
@@ -141,7 +146,7 @@ public class FilterData implements Serializable {
 	}
 
 	public void setMap(
-			LinkedHashMap<Part, LinkedHashMap<filterDataRow, LinkedHashMap<Filter, ArrayList<filterDataRow>>>> map) {
+			LinkedHashMap<Part, LinkedHashMap<FilterDataRow, LinkedHashMap<Filter, ArrayList<FilterDataRow>>>> map) {
 		this.map = map;
 	}
 
@@ -173,7 +178,7 @@ public class FilterData implements Serializable {
 		return hash;
 	}
 
-	public LinkedHashMap<Part, LinkedHashMap<filterDataRow, LinkedHashMap<Filter, ArrayList<filterDataRow>>>> getMap() {
+	public LinkedHashMap<Part, LinkedHashMap<FilterDataRow, LinkedHashMap<Filter, ArrayList<FilterDataRow>>>> getMap() {
 		return map;
 	}
 
@@ -198,10 +203,8 @@ public class FilterData implements Serializable {
 		// Write the file
 		MyUtils.writeXmlFile(rootElement, dataFilePathAndName);
 	}
-	
-
-	
-	public Element generateXml(boolean flatten) {
+		
+	/*public Element generateXml(boolean flatten) {
 		Element rootElement = new Element(XML_ELEMENT_NAME);
 		for (Iterator<Part> it = this.map.keySet().iterator(); it.hasNext();) {
 			Part part = it.next();
@@ -235,50 +238,77 @@ public class FilterData implements Serializable {
 			}
 		}
 		return rootElement;
-	}
+	}*/
 	
-	public JSONObject generateJson(boolean flatten) {
-		
-		Element root = generateXml(flatten);
-		Document document = new Document(root);
-		//String documentString = MartRemoteUtils.getXmlDocumentString(document);
-		//return XML.toJSONObject(documentString);
-		return null;
+	// ===================================== Should be a different class ============================================
 
+	@SuppressWarnings("unused")
+	private String filterName = null;
+	public FilterData(FilterData filterData, Part part) throws FunctionalException {	// creates a light clone (temporary solution)
+		this.map = new LinkedHashMap<Part, LinkedHashMap<FilterDataRow,LinkedHashMap<Filter,ArrayList<FilterDataRow>>>>();
 		
-		//JSONArray array = new JSONArray();
-		/*for (Iterator<Part> it = this.map.keySet().iterator(); it.hasNext();) {
+		if (filterData.template) {
+			if (filterData.map.keySet().size()!=1) {
+				throw new FunctionalException(
+						"Unexpected filterData structure for a null part, size = " + filterData.map.keySet().size() + " (expected 1)");
+			}
+			part = filterData.map.keySet().iterator().next();
+		}
+		
+		for (Part filterDataPart : filterData.map.keySet()) {
+			if (filterDataPart.getMainRowNumber()==part.getMainRowNumber()) {
+				LinkedHashMap<FilterDataRow, LinkedHashMap<Filter, ArrayList<FilterDataRow>>> value = filterData.map.get(filterDataPart);
+				Part partClone = new Part(filterDataPart);
+				this.map.put(partClone, value);
+						// not a full clone: wait until FilterData is fully fleshed out TODO
+			}
+		}
+		
+		this.filterName = filterData.filter.getName();
+	}
+	public boolean hasData() {
+		return this.map.keySet().size()>0;
+	}
+
+	public Element generateXml(boolean flatten) {
+		return generateExchangeFormat(true, flatten).getXmlElement();
+	}
+	public JSONObject generateJson(boolean flatten) {
+		return generateExchangeFormat(false, flatten).getJsonObject();
+	}
+	public Jsoml generateExchangeFormat(boolean xml, boolean flatten) {
+		Jsoml rootElement = new Jsoml(xml, XML_ELEMENT_NAME);
+		for (Iterator<Part> it = this.map.keySet().iterator(); it.hasNext();) {
 			Part part = it.next();
 			
-			JSONObject part = new JSONObject();
-			object.put(key, value)MartConfiguratorConstants.XML_ELEMENT_PART);
+			Jsoml partElement = new Jsoml(xml, MartConfiguratorConstants.XML_ELEMENT_PART);
 			String partName = part.getXmlValue(flatten);
-			part.put(MartConfiguratorConstants.XML_ELEMENT_ATTRIBUTE_PART_NAME, partName);
-			array.add(partElement);
+			partElement.setAttribute(MartConfiguratorConstants.XML_ELEMENT_ATTRIBUTE_PART_NAME, partName);
 			
-			LinkedHashMap<filterDataRow, LinkedHashMap<Filter, ArrayList<filterDataRow>>> subMap = this.map.get(part);
-			for (Iterator<filterDataRow> it2 = subMap.keySet().iterator(); it2.hasNext();) {
-				filterDataRow filterDataRow = it2.next();
+			LinkedHashMap<FilterDataRow, LinkedHashMap<Filter, ArrayList<FilterDataRow>>> subMap = this.map.get(part);
+			for (Iterator<FilterDataRow> it2 = subMap.keySet().iterator(); it2.hasNext();) {
+				FilterDataRow filterDataRow = it2.next();
 				
-				Element filterDataRowElement = filterDataRow.generateXml();
-				partElement.addContent(filterDataRowElement);
+				Jsoml filterDataRowElement = filterDataRow.generateExchangeFormat(xml);
 				
-				LinkedHashMap<Filter, ArrayList<filterDataRow>> subSubMap = subMap.get(filterDataRow);
+				LinkedHashMap<Filter, ArrayList<FilterDataRow>> subSubMap = subMap.get(filterDataRow);			
 				for (Iterator<Filter> it3 = subSubMap.keySet().iterator(); it3.hasNext();) {
 					Filter cascadeChild = it3.next();
 					
-					Element cascadeChildElement = new Element(MartConfiguratorConstants.XML_ELEMENT_CASCADE_CHILD);
+					Jsoml cascadeChildElement = new Jsoml(xml, MartConfiguratorConstants.XML_ELEMENT_CASCADE_CHILD);
 					cascadeChildElement.setAttribute(MartConfiguratorConstants.XML_ELEMENT_ATTRIBUTE_PART_NAME, cascadeChild.getName());
-					filterDataRowElement.addContent(cascadeChildElement);
 					
-					ArrayList<filterDataRow> filterDataRowList = subSubMap.get(cascadeChild);
-					for (filterDataRow subFilterDataRow : filterDataRowList) {
-						Element subFilterDataRowElement = subFilterDataRow.generateXml();
+					ArrayList<FilterDataRow> filterDataRowList = subSubMap.get(cascadeChild);
+					for (FilterDataRow subFilterDataRow : filterDataRowList) {
+						Jsoml subFilterDataRowElement = subFilterDataRow.generateExchangeFormat(xml);
 						cascadeChildElement.addContent(subFilterDataRowElement);
 					}
+					filterDataRowElement.addContent(cascadeChildElement);
 				}
+				partElement.addContent(filterDataRowElement);
 			}
-		}*/
-		//return array;
+			rootElement.addContent(partElement);
+		}
+		return rootElement;
 	}
 }

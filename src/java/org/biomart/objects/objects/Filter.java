@@ -9,6 +9,7 @@ import java.util.List;
 import net.sf.json.JSONObject;
 
 import org.biomart.common.general.exceptions.FunctionalException;
+import org.biomart.martRemote.Jsoml;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.objects.data.FilterData;
@@ -151,13 +152,40 @@ public class Filter extends org.biomart.objects.objects.Element	// to avoid any 
 	
 	// ===================================== Should be a different class ============================================
 
-	protected Filter(Filter filter, Part part) {	// creates a light clone (temporary solution)
+	protected Filter(Filter filter, Part part) throws FunctionalException {	// creates a light clone (temporary solution)
 		super(filter, part);
 		this.qualifier = filter.qualifier;
 		this.caseSensitive = filter.caseSensitive;
-		this.filterData = filter.filterData;
+		if (filter.filterData!=null) {
+			FilterData filterDataClone = new FilterData(filter.filterData, part);
+			if (filterDataClone.hasData()) {	// may not be the case if parts don't match (not all parts have data)
+				this.filterData = filterDataClone;
+			}
+		}
+	}	
+
+	protected Jsoml generateOutputForWebService(boolean xml) throws FunctionalException {
+		Jsoml jsoml = super.generateOutputForWebService(xml);
+		
+		jsoml.setAttribute("qualifier", this.qualifier);
+		jsoml.setAttribute("caseSensitive", this.caseSensitive);
+		if (this.filterData!=null) {		
+			jsoml.addContent(this.filterData.generateExchangeFormat(xml, true));
+		}
+		
+		return jsoml;
 	}
-	
+	/*public Jsoml generateOutputForWebService(boolean xml) throws FunctionalException {
+		Jsoml xmlOrJson = null;
+		if (xml) {
+			org.jdom.Element xmlElement = generateXmlForWebService();
+			xmlOrJson = new Jsoml(xmlElement);
+		} else {
+			JSONObject jsonObject = generateJsonForWebService();
+			xmlOrJson = new Jsoml(jsonObject);
+		}
+		return xmlOrJson;
+	}*/
 	public org.jdom.Element generateXmlForWebService() throws FunctionalException {
 		return generateXmlForWebService(null);
 	}

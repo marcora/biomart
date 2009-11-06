@@ -7,6 +7,7 @@ import net.sf.json.JSONObject;
 
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.utils.CompareUtils;
+import org.biomart.martRemote.Jsoml;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.jdom.Element;
@@ -161,6 +162,25 @@ public class MartConfiguratorObject implements Serializable /*implements Compara
 				martConfiguratorObject.visible, martConfiguratorObject.xmlElementName);
 	}
 	
+	protected Jsoml generateOutputForWebService(boolean xml) throws FunctionalException {
+		Jsoml jsoml = new Jsoml(xml, this.xmlElementName);
+		
+		jsoml.setAttribute("name", this.name);
+		jsoml.setAttribute("displayName", this.displayName);
+		jsoml.setAttribute("description", this.description);
+		jsoml.setAttribute("visible", this.visible);		
+		
+		return jsoml;
+		/*
+		if (xml) {
+			Element xmlElement = generateXmlForWebService();
+			xmlOrJson = new Jsoml(xmlElement);
+		} else {
+			JSONObject jsonObject = generateJsonForWebService();
+			xmlOrJson = new Jsoml(jsonObject);
+		}
+		return xmlOrJson;*/
+	}
 	protected Element generateXmlForWebService(Namespace namespace) throws FunctionalException {
 		Element jdomObject = new Element(xmlElementName, namespace);
 		

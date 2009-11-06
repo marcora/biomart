@@ -8,9 +8,12 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 
 
+import net.sf.json.JSONObject;
+
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.MyUtils;
+import org.biomart.martRemote.Jsoml;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.objects.Filter;
 import org.biomart.objects.objects.Part;
@@ -27,6 +30,9 @@ public class TreeFilterData implements Serializable {	//TODO merge with ListFilt
 
 	private Filter filter = null;	// We'll see if we make this specific to a filter in particular
 			
+	private Boolean template = null;	// template if all parts have the same data -> [P?R*]
+	//TODO add checks that if template, can't add more than one part, add the template onsetting inside the addPart method (by checking the main PT row)
+	
 	private File dataFile = null;
 	private LinkedHashMap<Part, ArrayList<TreeFilterDataRow>> map = null;
 					// !!! sufficient for the transformation but will need to be much more sophisticated in reality
@@ -36,6 +42,11 @@ public class TreeFilterData implements Serializable {	//TODO merge with ListFilt
 		this.filter = filter;
 		this.dataFile = new File(filter.getDataFolderPath().getAbsolutePath() + MyUtils.FILE_SEPARATOR + filter.getName());
 		this.map = new LinkedHashMap<Part, ArrayList<TreeFilterDataRow>>();
+		this.template = false;	// unless specified otherwise later
+	}
+	
+	public void setToTemplate() {
+		this.template = true; 
 	}
 
 	// Methods to access and populate the map "easily" 
@@ -101,7 +112,60 @@ public class TreeFilterData implements Serializable {	//TODO merge with ListFilt
 		MyUtils.writeXmlFile(rootElement, this.dataFile.getAbsolutePath());
 	}
 	
+	
+	// ===================================== Should be a different class ============================================
+
+	@SuppressWarnings("unused")
+	private String filterName = null;
+	public TreeFilterData(TreeFilterData treeFilterData, Part part) throws FunctionalException {	// creates a light clone (temporary solution)
+		this.map = new LinkedHashMap<Part, ArrayList<TreeFilterDataRow>>();
+		
+		if (treeFilterData.template) {
+			if (treeFilterData.map.keySet().size()!=1) {
+				throw new FunctionalException(
+						"Unexpected filterData structure for a null part, size = " + treeFilterData.map.keySet().size() + " (expected 1)");
+			}
+			part = treeFilterData.map.keySet().iterator().next();
+		}
+		
+		for (Part filterDataPart : treeFilterData.map.keySet()) {
+			if (filterDataPart.getMainRowNumber()==part.getMainRowNumber()) {
+				ArrayList<TreeFilterDataRow> value = treeFilterData.map.get(filterDataPart);
+				Part partClone = new Part(filterDataPart);
+				this.map.put(partClone, value);
+						// not a full clone: wait until FilterData is fully fleshed out TODO
+			}
+		}
+		
+		this.filterName = treeFilterData.filter.getName();
+	}
+	public boolean hasData() {
+		return this.map.keySet().size()>0;
+	}
 	public Element generateXml(boolean flatten) {
+		return generateExchangeFormat(true, flatten).getXmlElement();
+	}
+	public JSONObject generateJson(boolean flatten) {
+		return generateExchangeFormat(false, flatten).getJsonObject();
+	}
+	public Jsoml generateExchangeFormat(boolean xml, boolean flatten) {
+		Jsoml rootElement = new Jsoml(xml, "treeData");
+		for (Iterator<Part> it = this.map.keySet().iterator(); it.hasNext();) {
+			Part part = it.next();
+			
+			Jsoml partElement = new Jsoml(xml, "part");
+			partElement.setAttribute("name", part.getXmlValue(flatten));
+			
+			ArrayList<TreeFilterDataRow> children = this.map.get(part);
+			for (TreeFilterDataRow treeFilterDataRow : children) {
+				Jsoml treeFilterDataRowElement = treeFilterDataRow.generateExchangeFormat(xml);
+				partElement.addContent(treeFilterDataRowElement);
+			}
+			rootElement.addContent(partElement);
+		}
+		return rootElement;
+	}
+	/*public Element generateXml(boolean flatten) {
 		Element rootElement = new Element("treeData");
 		for (Iterator<Part> it = this.map.keySet().iterator(); it.hasNext();) {
 			Part part = it.next();
@@ -117,5 +181,5 @@ public class TreeFilterData implements Serializable {	//TODO merge with ListFilt
 			}
 		}
 		return rootElement;
-	}
+	}*/
 }

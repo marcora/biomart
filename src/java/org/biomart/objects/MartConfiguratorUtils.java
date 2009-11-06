@@ -13,6 +13,7 @@ import org.biomart.objects.helpers.PartitionReference;
 import org.biomart.objects.helpers.Property;
 import org.biomart.objects.objects.Part;
 import org.biomart.objects.objects.PartitionTable;
+import org.biomart.transformation.helpers.PartitionTableAndRow;
 import org.jdom.Attribute;
 import org.jdom.Comment;
 import org.jdom.Element;
@@ -246,5 +247,10 @@ public class MartConfiguratorUtils {
 			value = stringBuffer.toString();
 		}
 		return value; 
+	}
+
+	public static Part createGenericPart(PartitionTable mainPartitionTable) {
+		return new Part(false, null, null, 
+				new PartitionTableAndRow(mainPartitionTable, MartConfiguratorConstants.PARTITION_TABLE_ROW_WILDCARD_NUMBER));
 	}
 }

@@ -8,6 +8,7 @@ import net.sf.json.JSONObject;
 
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.utils.MyUtils;
+import org.biomart.martRemote.Jsoml;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.objects.data.TreeFilterData;
@@ -277,7 +278,13 @@ public class SimpleFilter extends Filter implements Serializable {
 	
 	// ===================================== Should be a different class ============================================
 
-	public SimpleFilter(SimpleFilter simpleFilter, Part part) {	// creates a light clone (temporary solution)
+	public SimpleFilter(SimpleFilter simpleFilter) throws FunctionalException {
+		this(simpleFilter, null, true);
+	}
+	public SimpleFilter(SimpleFilter simpleFilter, Part part) throws FunctionalException {
+		this(simpleFilter, part, false);
+	}
+	public SimpleFilter(SimpleFilter simpleFilter, Part part, Boolean generic) throws FunctionalException {	// creates a light clone (temporary solution)
 		super(simpleFilter, part);
 		
 		this.displayType = MartConfiguratorUtils.replacePartitionReferencesByValues(simpleFilter.displayType, part);
@@ -295,9 +302,53 @@ public class SimpleFilter extends Filter implements Serializable {
 			this.cascadeChildrenNamesList.add(MartConfiguratorUtils.replacePartitionReferencesByValues(cascadeChildName, part));
 		}
 		
-		this.treeFilterData = simpleFilter.treeFilterData;
+		if (simpleFilter.treeFilterData!=null) {
+			TreeFilterData treeFilterDataClone = new TreeFilterData(simpleFilter.treeFilterData, part);
+			if (treeFilterDataClone.hasData()) {	// may not be the case if parts don't match (not all parts have data)
+				this.treeFilterData = treeFilterDataClone;
+			}
+		}
 	}
-	
+
+	public Jsoml generateOutputForWebService(boolean xml) throws FunctionalException {
+		Jsoml jsoml = super.generateOutputForWebService(xml);
+		
+		jsoml.setAttribute("orderBy", this.orderBy);
+		
+		jsoml.setAttribute("displayType", this.displayType);
+		
+		jsoml.setAttribute("upload", this.upload);	
+		
+		jsoml.setAttribute("multiValue", this.multiValue);	
+		
+		jsoml.setAttribute("partition", this.partition);	
+		
+		jsoml.setAttribute("cascadeChildren", this.cascadeChildrenNamesList);
+		
+		jsoml.setAttribute("buttonURL", this.buttonURL);
+		
+		jsoml.setAttribute("trueValue", this.trueValue);
+		jsoml.setAttribute("trueDisplay", this.trueDisplay);
+		jsoml.setAttribute("falseValue", this.falseValue);
+		jsoml.setAttribute("falseDisplay",  this.falseDisplay);
+
+		if (this.treeFilterData!=null) {
+			jsoml.addContent(this.treeFilterData.generateExchangeFormat(xml, true));
+		}
+		
+		return jsoml;
+	}
+	/*public Jsoml generateOutputForWebService(boolean xml) throws FunctionalException {
+		Jsoml xmlOrJson = null;
+		if (xml) {
+			org.jdom.Element xmlElement = generateXmlForWebService();
+			xmlOrJson = new Jsoml(xmlElement);
+		} else {
+			JSONObject jsonObject = generateJsonForWebService();
+			xmlOrJson = new Jsoml(jsonObject);
+		}
+		return xmlOrJson;
+	}*/
 	public org.jdom.Element generateXmlForWebService() throws FunctionalException {
 		return generateXmlForWebService(null);
 	}

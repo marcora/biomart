@@ -15,9 +15,9 @@ import org.biomart.common.general.utils.MyUtils;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.objects.data.FilterData;
+import org.biomart.objects.data.FilterDataRow;
 import org.biomart.objects.data.TreeFilterData;
 import org.biomart.objects.data.TreeFilterDataRow;
-import org.biomart.objects.data.filterDataRow;
 import org.biomart.objects.objects.Attribute;
 import org.biomart.objects.objects.Config;
 import org.biomart.objects.objects.Container;
@@ -32,7 +32,6 @@ import org.biomart.transformation.helpers.DimensionPartition;
 import org.biomart.transformation.helpers.ElementChildrenType;
 import org.biomart.transformation.helpers.FilterOldDisplayType;
 import org.biomart.transformation.helpers.FilterOldStyle;
-import org.biomart.transformation.helpers.PartitionTableAndRow;
 import org.biomart.transformation.helpers.TransformationConstants;
 import org.biomart.transformation.helpers.TransformationGeneralVariable;
 import org.biomart.transformation.helpers.TransformationHelper;
@@ -396,8 +395,9 @@ public class FilterTransformation extends ElementTransformation {
 		}
 
 		// When not partition specific: row=-1..?
-		if (currentMainRow==null) {
-			currentMainRow = -1;
+		boolean template = currentMainRow==null;
+		if (template) {
+			currentMainRow = MartConfiguratorConstants.PARTITION_TABLE_ROW_WILDCARD_NUMBER;
 		}
 			
 		// Sufficient for the transformation
@@ -405,7 +405,11 @@ public class FilterTransformation extends ElementTransformation {
 			filter.setDataFolderPath(params.getDefaultDataFolderPath());
 		}
 		FilterData filterData = filter.getFilterData();
-		Part currentPart = new Part(false, null, null, new PartitionTableAndRow(vars.getMainPartitionTable(), currentMainRow));
+		if (template) {
+			filterData.setToTemplate();
+		}
+		
+		Part currentPart = new Part(vars.getMainPartitionTable(), currentMainRow);
 		
 		MyUtils.checkStatusProgram(filterData!=null && null==filterData.getPartValue(currentPart));
 		filterData.addPart(currentPart);
@@ -414,7 +418,7 @@ public class FilterTransformation extends ElementTransformation {
 		HashSet<SimpleFilter> cascadeChildren = new HashSet<SimpleFilter>();
 		for (OldOptionValue oldOptionValue : oldOptionValueList) {
 			
-			filterDataRow listFilterDataRow = getDataFileRow(filter, rowNumber, oldOptionValue);
+			FilterDataRow listFilterDataRow = getDataFileRow(filter, rowNumber, oldOptionValue);
 			if (null==listFilterDataRow) {	// null if !isSelectable (just ignored like the hidden elements)
 				continue;
 			}
@@ -448,10 +452,11 @@ public class FilterTransformation extends ElementTransformation {
 		}
 
 		// When not partition specific: row=-1..?
-		if (currentMainRow==null) {
+		boolean template = currentMainRow==null;
+		if (template) {
 			currentMainRow = MartConfiguratorConstants.PARTITION_TABLE_ROW_WILDCARD_NUMBER;
 		}
-
+		
 		// Sufficient for the transformation
 		if (null==filter.getDataFolderPath()) {	// Add property here: only if we do have data
 			filter.setDataFolderPath(params.getDefaultDataFolderPath());
@@ -459,9 +464,11 @@ public class FilterTransformation extends ElementTransformation {
 		MyUtils.checkStatusProgram(filter instanceof SimpleFilter);
 		SimpleFilter simpleFilter = (SimpleFilter)filter;
 		TreeFilterData treeFilterData = simpleFilter.getTreeFilterData();
+		if (template) {
+			treeFilterData.setToTemplate();
+		}
 		
-		MyUtils.checkStatusProgram(currentMainRow!=null);	// assumption that we are always specific by now
-		Part currentPart = new Part(false, null, null, new PartitionTableAndRow(vars.getMainPartitionTable(), currentMainRow));
+		Part currentPart = new Part(vars.getMainPartitionTable(), currentMainRow);
 		
 		MyUtils.checkStatusProgram(null==treeFilterData.getPartValue(currentPart));
 		ArrayList<TreeFilterDataRow> list = treeFilterData.addPart(currentPart);
@@ -478,7 +485,7 @@ public class FilterTransformation extends ElementTransformation {
 	}
 	
 	private TreeFilterDataRow processOptionTreeNode (SimpleFilter simpleFilter, OldOptionValue oldOptionValue, int rowNumber){
-		filterDataRow listFilterDataRow = getDataFileRow(simpleFilter, rowNumber, oldOptionValue);
+		FilterDataRow listFilterDataRow = getDataFileRow(simpleFilter, rowNumber, oldOptionValue);
 		if (null==listFilterDataRow) {	// null if !isSelectable (just ignored like the hidden elements)
 			return null;
 		}
@@ -499,7 +506,7 @@ public class FilterTransformation extends ElementTransformation {
 		return treeFilterDataRow;
 	}
 	
-	private HashSet<SimpleFilter> transformPushActions(FilterData listFilterData, Part currentPart, filterDataRow listFilterDataRow, List<OldPushAction> oldPushActionList) throws FunctionalException {
+	private HashSet<SimpleFilter> transformPushActions(FilterData listFilterData, Part currentPart, FilterDataRow listFilterDataRow, List<OldPushAction> oldPushActionList) throws FunctionalException {
 		
 		HashSet<SimpleFilter> cascadeChildrenTmp = new HashSet<SimpleFilter>();
 		for (OldPushAction oldPushAction : oldPushActionList) {
@@ -526,7 +533,7 @@ public class FilterTransformation extends ElementTransformation {
 			int subRowNumber = 0;
 			List<OldOptionValue> subOldOptionValueList = oldPushAction.getOldOptionValueList();
 			for (OldOptionValue subOldOptionValue : subOldOptionValueList) {
-				filterDataRow subListFilterDataRow = getDataFileRow(pushActionFilter, subRowNumber, subOldOptionValue);
+				FilterDataRow subListFilterDataRow = getDataFileRow(pushActionFilter, subRowNumber, subOldOptionValue);
 				if (null!=subListFilterDataRow) {	// null if !isSelectable (just ignored like the hidden elements)		
 					listFilterData.addRowForCascadeChildAndRowAndPart(
 							currentPart, listFilterDataRow, pushActionFilter, subListFilterDataRow);
@@ -552,7 +559,7 @@ public class FilterTransformation extends ElementTransformation {
 	 * @param oldOptionValue
 	 * @return
 	 */
-	private filterDataRow getDataFileRow(Filter filter, int rowNumber, OldOptionValue oldOptionValue) {
+	private FilterDataRow getDataFileRow(Filter filter, int rowNumber, OldOptionValue oldOptionValue) {
 							// TODO should use a superClass of only ListFilter and TreeFilter instead of SimpleFilter
 		// Simply ignore such elements
 		if (!oldOptionValue.getIsSelectable()) {
@@ -563,7 +570,7 @@ public class FilterTransformation extends ElementTransformation {
 		// We ignore oldOptionValue.getInternalName();
 		String optionValue = oldOptionValue.getValue();
 		String optionDisplayName = oldOptionValue.getDisplayName();
-		filterDataRow dataRow = new filterDataRow(
+		FilterDataRow dataRow = new FilterDataRow(
 				filter, optionValue, optionDisplayName, rowNumber==0);	// first row is the default one
 		return dataRow;
 	}
@@ -1024,14 +1031,14 @@ System.out.println("#2" + MartConfiguratorUtils.displayJdomElement(newFilter.gen
 		
 		mainPartitionFilter.setDataFolderPath(params.getDefaultDataFolderPath());
 		FilterData filterData = mainPartitionFilter.getFilterData();
+		filterData.setToTemplate();
 		
-		Part part = new Part(false, null, null, 
-				new PartitionTableAndRow(mainPartitionTable, MartConfiguratorConstants.PARTITION_TABLE_ROW_WILDCARD_NUMBER));
+		Part part = MartConfiguratorUtils.createGenericPart(mainPartitionTable);
 		filterData.addPart(part);
 		
 		for (int rowNumber = 0; rowNumber < mainPartitionTable.getRowNamesList().size(); rowNumber++) {
 			String rowName = mainPartitionTable.getRowNamesList().get(rowNumber);
-			filterDataRow dataRow = new filterDataRow(
+			FilterDataRow dataRow = new FilterDataRow(
 					mainPartitionFilter, rowName, rowName, rowNumber==0);	// first row is the default one
 			filterData.addRowForPart(part, dataRow);			
 		}

@@ -49,7 +49,7 @@ public class GetLinksResponse extends MartRemoteResponse {
 		}*/
 		return document;
 	}
-	protected JSONObject createJsonResponse() {	//TODO
+	protected JSONObject createJsonResponse(String responseName) {	//TODO
 		JSONArray array = new JSONArray();
 		/*for (Dataset dataset : this.datasetList) {
 			array.add(dataset.generateJsonForWebService());

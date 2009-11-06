@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+import net.sf.json.JSONObject;
+
+import org.biomart.martRemote.Jsoml;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.jdom.Element;
 
@@ -15,12 +18,12 @@ public class TreeFilterDataRow implements Serializable /*implements Comparable<T
 
 	public static void main(String[] args) {}
 
-	private filterDataRow listFilterDataRow = null;
+	private FilterDataRow filterDataRow = null;
 	private List<TreeFilterDataRow> children = null;
 
-	public TreeFilterDataRow(filterDataRow listFilterDataRow) {
+	public TreeFilterDataRow(FilterDataRow listFilterDataRow) {
 		super();
-		this.listFilterDataRow = listFilterDataRow;
+		this.filterDataRow = listFilterDataRow;
 		this.children = new ArrayList<TreeFilterDataRow>();
 	}
 	
@@ -28,16 +31,16 @@ public class TreeFilterDataRow implements Serializable /*implements Comparable<T
 		this.children.add(treeFilterDataRow);
 	}
 
-	public filterDataRow getListFilterDataRow() {
-		return listFilterDataRow;
+	public FilterDataRow getListFilterDataRow() {
+		return filterDataRow;
 	}
 
 	public List<TreeFilterDataRow> getChildren() {
 		return children;
 	}
 
-	public void setListFilterDataRow(filterDataRow listFilterDataRow) {
-		this.listFilterDataRow = listFilterDataRow;
+	public void setListFilterDataRow(FilterDataRow listFilterDataRow) {
+		this.filterDataRow = listFilterDataRow;
 	}
 
 	public void setChildren(List<TreeFilterDataRow> children) {
@@ -48,17 +51,30 @@ public class TreeFilterDataRow implements Serializable /*implements Comparable<T
 	public String toString() {
 		return 
 			super.toString() + ", " + 
-			"listFilterDataRow = " + listFilterDataRow + ", " +
+			"listFilterDataRow = " + filterDataRow + ", " +
 			"children = " + children;
 	}
 
 	public Element generateXml() {
+		return generateExchangeFormat(true).getXmlElement();
+	}
+	public JSONObject generateJson() {
+		return generateExchangeFormat(false).getJsonObject();
+	}
+	public Jsoml generateExchangeFormat(boolean xml) {
+		Jsoml listFilterDataRowElement = filterDataRow.generateExchangeFormat(xml);
+		for (TreeFilterDataRow row : this.children) {
+			listFilterDataRowElement.addContent(row.generateExchangeFormat(xml));
+		}
+		return listFilterDataRowElement;
+	}
+	/*public Element generateXml() {
 		Element listFilterDataRowElement = listFilterDataRow.generateXml();
 		for (TreeFilterDataRow row : this.children) {
 			listFilterDataRowElement.addContent(row.generateXml());
 		}
 		return listFilterDataRowElement;
-	}
+	}*/
 	
 	@Override
 	public boolean equals(Object object) {
@@ -70,7 +86,7 @@ public class TreeFilterDataRow implements Serializable /*implements Comparable<T
 		}
 		TreeFilterDataRow treeFilterDataRow=(TreeFilterDataRow)object;
 		return (
-			(this.listFilterDataRow==treeFilterDataRow.listFilterDataRow || (this.listFilterDataRow!=null && listFilterDataRow.equals(treeFilterDataRow.listFilterDataRow))) &&
+			(this.filterDataRow==treeFilterDataRow.filterDataRow || (this.filterDataRow!=null && filterDataRow.equals(treeFilterDataRow.filterDataRow))) &&
 			(this.children==treeFilterDataRow.children || (this.children!=null && children.equals(treeFilterDataRow.children)))
 		);
 	}
@@ -78,7 +94,7 @@ public class TreeFilterDataRow implements Serializable /*implements Comparable<T
 	@Override
 	public int hashCode() {
 		int hash = MartConfiguratorConstants.HASH_SEED1;
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==listFilterDataRow? 0 : listFilterDataRow.hashCode());
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==filterDataRow? 0 : filterDataRow.hashCode());
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==children? 0 : children.hashCode());
 		return hash;
 	}

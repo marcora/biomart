@@ -39,7 +39,7 @@ public class GetFiltersResponse extends GetElementsResponse {
 		}
 		return document;
 	}
-	protected JSONObject createJsonResponse() {
+	protected JSONObject createJsonResponse(String responseName) {
 		//TODO?
 		return null;
 	}

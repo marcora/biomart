@@ -7,6 +7,7 @@ import java.util.List;
 import net.sf.json.JSONObject;
 
 import org.biomart.common.general.exceptions.FunctionalException;
+import org.biomart.martRemote.Jsoml;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.jdom.Namespace;
@@ -121,7 +122,7 @@ public class GroupFilter extends Filter implements Serializable {
 	
 	// ===================================== Should be a different class ============================================
 
-	public GroupFilter(GroupFilter groupFilter, Part part) {	// creates a light clone (temporary solution)
+	public GroupFilter(GroupFilter groupFilter, Part part) throws FunctionalException {	// creates a light clone (temporary solution)
 		super(groupFilter, part);
 		this.logicalOperator = groupFilter.logicalOperator;
 		this.multipleFilter = groupFilter.multipleFilter;
@@ -131,17 +132,37 @@ public class GroupFilter extends Filter implements Serializable {
 			this.filterNamesList.add(MartConfiguratorUtils.replacePartitionReferencesByValues(filterName, part));
 		}
 	}
-	
+
+	public Jsoml generateOutputForWebService(boolean xml) throws FunctionalException {
+		Jsoml jsoml = super.generateOutputForWebService(xml);
+		
+		jsoml.setAttribute("logicalOperator", this.logicalOperator);
+		jsoml.setAttribute("multipleFilter", this.multipleFilter);
+		jsoml.setAttribute("filterList", this.filterNamesList);
+		
+		return jsoml;
+	}
+	/*public Jsoml generateOutputForWebService(boolean xml) throws FunctionalException {
+		Jsoml xmlOrJson = null;
+		if (xml) {
+			org.jdom.Element xmlElement = generateXmlForWebService();
+			xmlOrJson = new Jsoml(xmlElement);
+		} else {
+			JSONObject jsonObject = generateJsonForWebService();
+			xmlOrJson = new Jsoml(jsonObject);
+		}
+		return xmlOrJson;
+	}*/
 	public org.jdom.Element generateXmlForWebService() throws FunctionalException {
 		return generateXmlForWebService(null);
 	}
 	public org.jdom.Element generateXmlForWebService(Namespace namespace) throws FunctionalException {
 		org.jdom.Element jdomObject = super.generateXmlForWebService(namespace);
-		MartConfiguratorUtils.addAttribute(jdomObject, "logicalOperator", this.logicalOperator);
-
-		MartConfiguratorUtils.addAttribute(jdomObject, "multipleFilter", this.multipleFilter);	
 		
+		MartConfiguratorUtils.addAttribute(jdomObject, "logicalOperator", this.logicalOperator);
+		MartConfiguratorUtils.addAttribute(jdomObject, "multipleFilter", this.multipleFilter);
 		MartConfiguratorUtils.addAttribute(jdomObject, "filterList", this.filterNamesList);
+		
 		return jdomObject;
 	}
 	public JSONObject generateJsonForWebService() {

@@ -7,11 +7,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.utils.CompareUtils;
+import org.biomart.martRemote.Jsoml;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.jdom.Element;
@@ -180,7 +178,7 @@ public class Container extends Containee implements Comparable<Container>, Compa
 
 	// ===================================== Should be a different class ============================================
 	
-	public Container(Container container, List<Integer> mainRowNumbersWanted) {	// creates a light clone (temporary solution)
+	public Container(Container container, List<Integer> mainRowNumbersWanted) throws FunctionalException {	// creates a light clone (temporary solution)
 		this(
 				container.parentContainer!=null ? new Container(null, container.parentContainer.name, null, null, null, null, null) : null,	// just to have the name 
 				container.name, container.displayName, container.description, container.visible, 
@@ -196,7 +194,7 @@ public class Container extends Containee implements Comparable<Container>, Compa
 			
 				org.biomart.objects.objects.Element element = (org.biomart.objects.objects.Element)containee;
 				if (element instanceof SimpleFilter && ((SimpleFilter)element).partition) {
-					SimpleFilter filterPartitionClone = new SimpleFilter((SimpleFilter)element, null);
+					SimpleFilter filterPartitionClone = new SimpleFilter((SimpleFilter)element);
 					addFilter(filterPartitionClone);
 				} else {
 					Range targetRange = element.getTargetRange();
@@ -204,9 +202,9 @@ public class Container extends Containee implements Comparable<Container>, Compa
 					for (Part part : partSet) {
 						if (part.getVisible()) {	// Only the visible ones
 							if (element.getPointer() && null==element.getPointedElement()) continue;	// broken pointers (from transformation for instance)
-							int mainRowNumber = part.getMainRowNumber();
+							int mainRowNumber = part.getMainRowNumber();	// could be taken from part too
 							if (mainRowNumbersWanted.contains(mainRowNumber)) {
-								if (element.getPointer()) {	// FIXME not adequate if pointers of pointers...
+								if (element.getPointer()) {	// FIXME not adequate if pointers of pointers... -> but will be solved by light objects anyway
 									org.biomart.objects.objects.Element pointedElement = element.getPointedElement();
 									if (pointedElement instanceof Attribute) {
 										Attribute pointedAttributeClone = new Attribute((Attribute)pointedElement, part);
@@ -253,76 +251,44 @@ public class Container extends Containee implements Comparable<Container>, Compa
 				}
 			} 
 		}
-		
-		/*for (Attribute attribute : container.getAttributeList()) {
-			Range targetRange = attribute.getTargetRange();
-			Set<Part> partSet = targetRange.getPartSet();
-			for (Part part : partSet) {
-				if (part.getVisible()) {	// Only the visible ones
-					if (attribute.getPointer() && null==attribute.getPointedElement()) continue;	// broken pointers (from transformation for instance)
-					int mainRowNumber = part.getMainRowNumber();
-					if (mainRowNumbersWanted.contains(mainRowNumber)) {
-						
-						if (attribute.getPointer()) {
-							org.biomart.objects.objects.Element pointedElement = attribute.getPointedElement();
-							if (pointedElement instanceof Attribute) {
-								Attribute pointedAttributeClone = (Attribute)pointedElement.lightClone(part);
-							} else if (pointedElement instanceof SimpleFilter) {
-								SimpleFilter pointedSimpleFilterClone = (SimpleFilter)pointedElement.lightClone(part);
-							} else if (pointedElement instanceof GroupFilter) {
-								GroupFilter pointedGroupFilterClone = (GroupFilter)pointedElement.lightClone(part);
-							}
-						}
-						
-						Attribute attributeClone = (Attribute)attribute.lightClone(part);
-						if (!this.attributeList.contains(attributeClone)) {	// No repetitions
-							addAttribute(attributeClone);	// also handles containeeList
-						}
-					}
-				}					
-			}
-		}
-		for (Filter filter : container.getFilterList()) {	
-			Range targetRange = filter.getTargetRange();
-			Set<Part> partSet = targetRange.getPartSet();
-			for (Part part : partSet) {
-				if (part.getVisible()) {	// Only the visible ones
-					if (filter.getPointer() && null==filter.getPointedElement()) continue;	// broken pointers (from transformation for instance)
-					int mainRowNumber = part.getMainRowNumber();
-					if (mainRowNumbersWanted.contains(mainRowNumber)) {
-						Filter filterClone = (Filter)filter.lightClone(part);
-						if (!this.filterList.contains(filterClone)) {	// No repetitions
-							addFilter(filterClone);		// also handles containeeList
-						}
-					}
-				}					
-			}
-		}*/
 	}
 	
-	public Element generateXmlForWebService() throws FunctionalException {
+	
+	/*public Element generateXmlForWebService() throws FunctionalException {
 		return generateXmlForWebService(null);
 	}
 	public Element generateXmlForWebService(org.jdom.Namespace namespace) throws FunctionalException {
 		Element jdomObject = super.generateXmlForWebService(namespace);
-		
-		MartConfiguratorUtils.addAttribute(jdomObject, "level", this.level);
-		MartConfiguratorUtils.addAttribute(jdomObject, "queryRestriction", this.queryRestriction);
-		
-		for (Containee containee : containeeList) {
-			if (containee instanceof Container) {
-				Element containeeElement = containee.generateXmlForWebService(namespace);
-				jdomObject.addContent(containeeElement);
-			} else if (containee instanceof org.biomart.objects.objects.Element) {
-				org.biomart.objects.objects.Element martConfiguratorElement = (org.biomart.objects.objects.Element)containee;
-				Element elementElement = martConfiguratorElement.generateXmlForWebService(namespace);
-				jdomObject.addContent(elementElement);
-			}
-		}
-		
+		generateOutputForWebService(jdomObject, true);
 		return jdomObject;
 	}
 	public JSONObject generateJsonForWebService() {
+		JSONObject jsonObject = super.generateJsonForWebService();
+		generateOutputForWebService(jsonObject, false);
+		return jsonObject;
+	}*/
+	public Jsoml generateOutputForWebService(boolean xml) throws FunctionalException {
+		Jsoml jsoml = super.generateOutputForWebService(xml);
+		
+		jsoml.setAttribute("level", this.level);
+		jsoml.setAttribute("queryRestriction", this.queryRestriction);
+		
+		for (Containee containee : containeeList) {
+			if (containee instanceof Container) {
+				Jsoml containeeJsoml = containee.generateOutputForWebService(xml);
+				jsoml.addContent(containeeJsoml);
+			} else if (containee instanceof org.biomart.objects.objects.Element) {
+				org.biomart.objects.objects.Element martConfiguratorElement = (org.biomart.objects.objects.Element)containee;
+				Jsoml elementJsonml = martConfiguratorElement.generateOutputForWebService(xml);
+				jsoml.addContent(elementJsonml);
+			}
+		}
+		
+		return jsoml;
+	}
+	
+	
+	/*public JSONObject generateJsonForWebService() {
 		JSONObject jsonObject = super.generateJsonForWebService();
 		
 		JSONObject object = (JSONObject)jsonObject.get(super.xmlElementName);
@@ -349,5 +315,5 @@ public class Container extends Containee implements Comparable<Container>, Compa
 		
 		jsonObject.put(super.xmlElementName, object);
 		return jsonObject;
-	}
+	}*/
 }
