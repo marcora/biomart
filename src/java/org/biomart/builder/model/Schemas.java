@@ -50,6 +50,7 @@ import org.biomart.common.view.gui.LongProcess;
 import org.biomart.common.view.gui.SwingWorker;
 import org.biomart.common.view.gui.dialogs.ProgressDialog;
 import org.biomart.common.view.gui.dialogs.StackTrace;
+import org.biomart.configurator.utils.McUtils;
 import org.biomart.configurator.utils.type.Cardinality;
 
 
@@ -711,7 +712,9 @@ public class Schemas {
 	 */
 	public void requestInitSchema(final Schema schema,
 			final boolean transactionMod, final List<String> tables) {
+		long t1 = McUtils.getCurrentTime();
 				Transaction.start(transactionMod);
+		long t2 = McUtils.getCurrentTime();
 				try {
 					schema.init(tables);
 				} catch (final Throwable t) {
@@ -721,10 +724,15 @@ public class Schemas {
 						}
 					});
 				}
+		long t3 = McUtils.getCurrentTime();
 				Transaction.end();
+		long t4 = McUtils.getCurrentTime();
+		System.err.println("transaction start "+(t2-t1));
+		System.err.println("schema init "+(t3-t2));
+		System.err.println("transaction end "+(t4-t3));
 				// This is to ensure that any modified flags get cleared.
-				JDBCSchema sch = (JDBCSchema) Schemas.this.schemasMap.get(schema.getName());
-				((SchemaDiagram) sch.getSchemaDiagram()).repaintDiagram();
+//				JDBCSchema sch = (JDBCSchema) Schemas.this.schemasMap.get(schema.getName());
+	//			((SchemaDiagram) sch.getSchemaDiagram()).repaintDiagram();
 	}
 
 

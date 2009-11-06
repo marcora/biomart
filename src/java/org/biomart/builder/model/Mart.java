@@ -639,6 +639,7 @@ public class Mart {
 							subclassedRelations.add(firstRel);
 							final Set<Table> newRelationTablesIncluded = new HashSet<Table>(
 									tablesIncluded);
+							//if may replace the existing one
 							relationTablesIncluded.put(firstRel,
 									newRelationTablesIncluded);
 							newRelationTablesIncluded.add(target);
@@ -655,7 +656,7 @@ public class Mart {
 		// Iterate through the relations we found and recurse.
 		// If not the last one, we copy the original dataset and
 		// work on the copy, otherwise we work on the original.
-		for (final Iterator i = subclassedRelations.iterator(); i.hasNext();) {
+		for (final Iterator<Relation> i = subclassedRelations.iterator(); i.hasNext();) {
 			final Relation r = (Relation) i.next();
 			DataSet suggestedDataSet = dataset;
 			try {
@@ -667,7 +668,8 @@ public class Mart {
 					//		suggestedDataSet);
 					this.addDataSet(suggestedDataSet);
 					// Copy subclassed relations from existing dataset.
-					for (final Iterator j = dataset.getIncludedRelations()
+					//TODO check, that is not all subclass relation????? it seems all empty
+					for (final Iterator<Relation> j = dataset.getIncludedRelations()
 							.iterator(); j.hasNext();)
 						((Relation) j.next()).setSubclassRelation(
 								suggestedDataSet, true);
@@ -678,7 +680,7 @@ public class Mart {
 				continue;
 			}
 			suggestedDataSets.addAll(this.continueSubclassing(includeTables,
-					(Collection) relationTablesIncluded.get(r),
+					(Set<Table>) relationTablesIncluded.get(r),
 					suggestedDataSet, r.getManyKey().getTable()));
 		}
 

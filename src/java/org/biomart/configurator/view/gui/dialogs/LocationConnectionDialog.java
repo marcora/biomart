@@ -56,6 +56,7 @@ import org.biomart.common.resources.Settings;
 import org.biomart.common.view.gui.dialogs.StackTrace;
 import org.biomart.configurator.model.Location;
 import org.biomart.configurator.utils.DsConnectionObject;
+import org.biomart.configurator.utils.McUtils;
 import org.biomart.configurator.utils.treelist.URLMetaTree;
 import org.biomart.configurator.utils.type.IdwViewType;
 import org.biomart.configurator.utils.type.MartType;
@@ -286,9 +287,9 @@ public class LocationConnectionDialog extends JDialog implements ItemListener{
 	private void execute() {
 		if(this.martType.equals(MartType.SOURCE) || this.martType.equals(MartType.TARGET)) {
 			// Assume we've failed.
-			boolean passedTest = false;
+			boolean passedTest = true;
 	
-			try {
+/*			try {
 				// Attempt to pass the test.
 				passedTest = LocationConnectionDialog.this.test();
 			} catch (final Throwable t) {
@@ -298,7 +299,7 @@ public class LocationConnectionDialog extends JDialog implements ItemListener{
 				passedTest = false;
 				StackTrace.showStackTrace(t);
 			}
-	
+*/	
 				// Tell the user if we passed or failed.
 			if (passedTest) {
 				this.setVisible(false);
@@ -310,11 +311,15 @@ public class LocationConnectionDialog extends JDialog implements ItemListener{
 					locName = this.connectionPanel.getHostPortValue();
 				else
 					locName = this.name.getSelectedItem().toString();
-					
+				long t1 = McUtils.getCurrentTime();	
 				this.location = this.connectionPanel.createLocation(
 						locName, this.isSourceSchema()? MartType.SOURCE: MartType.TARGET,this.currentLocations);
+				long t2 = McUtils.getCurrentTime();
 				if(this.location!=null && !isNameEmpty)
 					this.location.storeInHistory();
+				long t3 = McUtils.getCurrentTime();
+				System.err.println("execute - createlocation "+(t2-t1));
+				System.err.println("execute - store "+(t3-t2));
 			} else
 				JOptionPane.showMessageDialog(null, Resources
 						.get("schemaTestFailed"), Resources

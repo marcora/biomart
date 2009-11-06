@@ -20,6 +20,7 @@ import org.biomart.configurator.utils.DPEventObject;
 import org.biomart.configurator.utils.McEventObject;
 import org.biomart.configurator.utils.McGuiUtils;
 import org.biomart.configurator.utils.McIcon;
+import org.biomart.configurator.utils.McUtils;
 import org.biomart.configurator.utils.type.EventType;
 import org.biomart.configurator.utils.type.IdwViewType;
 import org.biomart.configurator.view.MartConfigTree;
@@ -140,9 +141,12 @@ public class McViewTree extends McView {
 				break;
 			}
 			case Request_NewLocation: {
+				long t1 = McUtils.getCurrentTime();
 				tree.getModel().nodeStructureChanged(root);
 				tree.expandNodeToDataSets(Resources.get("DATASET"),null);
 				tree.setSelectionRow(0);
+				long t2 = McUtils.getCurrentTime();
+				System.err.println("draw tree "+(t2-t1));
 			}
 			}
 			this.getViewProperties().setIcon(McIcon.HIGHLIGHT_ICON);

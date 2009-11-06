@@ -978,8 +978,10 @@ public class JDomNodeAdapter extends DefaultMutableTreeNode {
     private void initLocations(Object locObject) {
     	if(locObject instanceof Location) {
     		//TODO should change to DsConnectionObject
+    		long t1 = McUtils.getCurrentTime();
 	    	Location loc = (Location)locObject;
 	    	loc.requestCreateLocationFromDB();
+	    	long t2 = McUtils.getCurrentTime();
 	    	//if finished, add the content to tree
 	    	//this is martRegistry
 	    	//find if this location already exist
@@ -1007,7 +1009,9 @@ public class JDomNodeAdapter extends DefaultMutableTreeNode {
 	    	this.addLocation(loc, locElement);
 			McEventObject mcObject = new McEventObject(EventType.Request_NewLocation,loc);
 			McViews.getInstance().getView(IdwViewType.MCTREE).getController().processV2Cupdate(mcObject); 
-
+			long t3 = McUtils.getCurrentTime();
+			System.err.println("initlocation - createlocationfromdb "+(t2-t1));
+			System.err.println("add location to tree "+(t3-t2));
     	}else if(locObject instanceof DsConnectionObject) {
     		DsConnectionObject conObj = (DsConnectionObject) locObject;
     		Map<String, List<String>> dsInfoMap = conObj.getDsInfoMap();

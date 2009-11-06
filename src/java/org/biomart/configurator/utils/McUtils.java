@@ -13,6 +13,8 @@ import org.biomart.common.resources.Resources;
 
 public class McUtils {
 	
+	//private static Calendar calendar = new GregorianCalendar();
+	
 	public static String getCurrentTimeString() {
 		Format formatter = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss  z");
 		Date date = new Date();
@@ -34,8 +36,8 @@ public class McUtils {
 	}
 
 	public static long getCurrentTime() {
-		Calendar cal = new GregorianCalendar();
-		return cal.getTimeInMillis();
+		Calendar calendar = new GregorianCalendar();
+		return calendar.getTimeInMillis();
 	}
 
     /** Returns an ImageIcon, or null if the path was invalid. */

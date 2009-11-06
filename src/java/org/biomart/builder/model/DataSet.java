@@ -48,6 +48,7 @@ import org.biomart.common.exceptions.TransactionException;
 import org.biomart.common.resources.Log;
 import org.biomart.common.resources.Resources;
 
+import org.biomart.common.utils.McBeanMap;
 import org.biomart.common.utils.Transaction.TransactionEvent;
 
 import org.biomart.configurator.utils.McEventObject;
@@ -1477,8 +1478,8 @@ public class DataSet extends Schema {
 		// Get the real main table.
 		final Table realCentralTable = this.getRealCentralTable();
 
-		// Work out the main tables to skip whilst transforming.
-		final List skippedTables = new ArrayList();
+		// Work out the main tables to skip whilst transforming. main - submain ...
+		final List<Table> skippedTables = new ArrayList<Table>();
 		skippedTables.add(realCentralTable);
 		// the size may changed
 		for (int i = 0; i < skippedTables.size(); i++) {
@@ -1493,7 +1494,7 @@ public class DataSet extends Schema {
 		}
 
 		// Make a list of all table names.
-		final Collection unusedTables = new HashSet(this.getTables().values());
+		final Collection<Table> unusedTables = new HashSet<Table>(this.getTables().values());
 		try {
 			// Generate the main table. It will recursively generate all the
 			// others.
@@ -1526,7 +1527,7 @@ public class DataSet extends Schema {
 			this.getTables().remove(deadTbl.getName());
 			this.mods.remove(deadTbl.getName());
 		}
-
+//TODO belowing can be done separately
 		// Add us as a listener to all included rels and schs, replacing
 		// ourselves if we are already listening to them.
 		for (final Iterator i = this.includedSchemas.iterator(); i.hasNext();) {
@@ -1557,7 +1558,8 @@ public class DataSet extends Schema {
 							this.rebuildListener);
 			tbl.addPropertyChangeListener("transformStart",
 					this.rebuildListener);
-			tbl.getColumns().addPropertyChangeListener(this.rebuildListener);
+			tbl.getColumns().addPropertyChangeListener(McBeanMap.property_AddItem, this.rebuildListener);
+			tbl.getColumns().addPropertyChangeListener(McBeanMap.property_RemoveItem, this.rebuildListener);
 //			tbl.getRelations().addPropertyChangeListener(this.rebuildListener);
 		}
 		// Listen to useful bits of the relation.
@@ -1586,6 +1588,7 @@ public class DataSet extends Schema {
 
 		// Check all visibleModified type/key pairs for
 		// all vismod relations, keys, and columns. Update, then remove.
+		//TODO for what?
 		for (final Iterator i = this.getRelations().iterator(); i.hasNext();) {
 			final Relation rel = (Relation) i.next();
 			final String key = rel.toString();

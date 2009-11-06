@@ -32,6 +32,7 @@ import org.biomart.common.resources.Settings;
 import org.biomart.common.view.gui.dialogs.ProgressDialog2;
 import org.biomart.configurator.controller.dialects.DatabaseDialect;
 import org.biomart.configurator.utils.DbInfoObject;
+import org.biomart.configurator.utils.McUtils;
 import org.biomart.configurator.utils.type.Cardinality;
 
 
@@ -1699,12 +1700,14 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 
 		public void init(List<String> tablesInDb) throws DataModelException, SQLException {
 			Log.info("Initialize " + this);
+			long t1 = McUtils.getCurrentTime();
 			ProgressDialog2.getInstance().setStatus("creating "+this);
 			super.init(tablesInDb);
+			long t2 = McUtils.getCurrentTime();
 			
 			final DatabaseMetaData dmd = this.getConnection(null).getMetaData();
 			final String catalog = this.getConnection(null).getCatalog();
-			
+			long t3 = McUtils.getCurrentTime();
 			// Do the loop.
 			final Collection<Table> tablesToBeKept = new HashSet<Table>();
 			for(String tableStr: tablesInDb) {
@@ -1723,6 +1726,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 				tablesToBeKept.add(dbTable);
 			}
 
+			long t4 = McUtils.getCurrentTime();
 			// Loop over all columns.
 			for (Table dbTable: tablesToBeKept) {
 				final String dbTableName = dbTable.getName();
@@ -1730,15 +1734,16 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 				// them.
 				Log.debug("Loading table column list for " + dbTableName);
 				ResultSet dbTblCols;
-
+long tt1 = McUtils.getCurrentTime();
 				dbTblCols = dmd.getColumns(catalog, this.realSchemaName,dbTableName, "%");
+long tt2 = McUtils.getCurrentTime();
 
 				// FIXME: When using Oracle, if the table is a synonym then the
 				// above call returns no results.
 				while (dbTblCols.next()) {
 					// Check schema and catalog.
-					final String catalogName = dbTblCols.getString("TABLE_CAT");
-					final String schemaName = dbTblCols.getString("TABLE_SCHEM");
+//					final String catalogName = dbTblCols.getString("TABLE_CAT");
+//					final String schemaName = dbTblCols.getString("TABLE_SCHEM");
 
 					// What is the column called, and is it nullable?
 					final String dbTblColName = dbTblCols.getString("COLUMN_NAME");
@@ -1752,13 +1757,22 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 					}
 				}
 				dbTblCols.close();
+				long tt3 = McUtils.getCurrentTime();
+				System.err.println("get dmd for columns "+(tt2-tt1));
+				System.err.println("others "+(tt3-tt2));
 			}
-
+			long t5 = McUtils.getCurrentTime();
 			// Get and create primary keys.
 			// Work out a list of all foreign keys currently existing.
 			// Any remaining in this list later will be dropped.
 			
 			this.initPkFks(dmd, catalog);
+			long t6 = McUtils.getCurrentTime();
+			System.err.println("init super "+(t2-t1));
+			System.err.println("init get dmd "+(t3-t2));
+			System.err.println("init create tables "+(t4-t3));
+			System.err.println("init get columns "+(t5-t4));
+			System.err.println("init initPkFk "+(t6-t5));
 			Log.info("Done synchronising");
 			Log.info("forward message to controller");
 		}
@@ -1779,7 +1793,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 					//find the column numbers
 					int count = 0;
 					ArrayList<Column> colList = new ArrayList<Column>();
-					for(final Iterator i = table.getColumns().values().iterator(); i.hasNext();){
+					for(final Iterator<Column> i = table.getColumns().values().iterator(); i.hasNext();){
 						final Column column = (Column)i.next();
 						if(column.getName().indexOf(Resources.get("martPKSuffix"))>=0) {
 							colList.add(column);
@@ -1797,8 +1811,8 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 						return;
 				}
 			}
-
-			for (final Iterator i = this.getTables().values().iterator(); i.hasNext();) {
+long t1 = McUtils.getCurrentTime();
+			for (final Iterator<Table> i = this.getTables().values().iterator(); i.hasNext();) {
 				final Table t = (Table) i.next();
 
 				// Obtain the primary key from the database. Even in databases
@@ -1807,7 +1821,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 				Log.debug("Loading table primary keys");
 				String searchCatalog = catalog;
 				String searchSchema = this.realSchemaName;
-
+long tt1 = McUtils.getCurrentTime();
 				final ResultSet dbTblPKCols = dmd.getPrimaryKeys(searchCatalog,
 						searchSchema, t.getName());
 
@@ -1827,7 +1841,8 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 					pkCols.put(pkColPosition, (Column)t.getColumns().get(pkColName));
 				}
 				dbTblPKCols.close();
-
+long tt2 = McUtils.getCurrentTime();
+System.out.println("get pk tt "+(tt2-tt1));
 				// Did DMD find a PK? If not, which is really unusual but
 				// potentially may happen, attempt to find one by looking for a
 				// single column with the same name as the table or with '_id'
@@ -1880,7 +1895,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 								}
 							}
 						}else {
-							for(Iterator ci = t.getColumns().values().iterator();ci.hasNext();){
+							for(Iterator<Column> ci = t.getColumns().values().iterator();ci.hasNext();){
 								Column candidateCol = (Column)ci.next();
 								if(candidateCol.getName().indexOf(Resources.get("martPKSuffix"))>=0) {
 									pkCols.put(colPosition, candidateCol);
@@ -1918,7 +1933,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 					}
 				} 
 			} //end of for (final Iterator i = this.getTables().values().iterator(); i.hasNext();)
-
+long t2 = McUtils.getCurrentTime();
 			// Are we key-guessing? Key guess the foreign keys, passing in a
 			// reference to the list of existing foreign keys. After this call
 			// has completed, the list will contain all those foreign keys which
@@ -1936,6 +1951,9 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 			else
 				this.synchroniseKeysUsingDMD(Collections.emptySet(), dmd,
 						this.realSchemaName, catalog);
+long t3 = McUtils.getCurrentTime();
+System.err.println("initPkFK pk "+(t2-t1));
+System.err.println("initPkFk fk relation "+(t3-t2));
 
 		}
 		

@@ -109,10 +109,13 @@ public class McViewSchema extends McView implements TreeSelectionListener {
 		 * this.getController().processV2Cupdate(endObject); } break; }
 		 */
 		case Request_NewLocation: {
+			long t1 = McUtils.getCurrentTime();
 			if(((McEventObject) obj).getObject() instanceof Location) {
 				Location loc = (Location) ((McEventObject) obj).getObject();
 				McGuiUtils.INSTANCE.getCurrentUser().addLocation(loc);
 			}
+			long t2 = McUtils.getCurrentTime();
+			System.err.println("update righthandside "+(t2-t1));
 			break;
 		}
 		case Update_McViewType: {

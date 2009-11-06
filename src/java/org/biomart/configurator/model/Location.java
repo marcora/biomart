@@ -13,6 +13,7 @@ import org.biomart.builder.model.Schema;
 import org.biomart.builder.model.Table;
 import org.biomart.common.resources.Settings;
 import org.biomart.configurator.utils.DbInfoObject;
+import org.biomart.configurator.utils.McUtils;
 
 /**
  * needs to handle new location or a location from XML
@@ -123,6 +124,7 @@ public class Location {
 		//need to check if the mart is a new mart? a mart is an old mart if there is no
 		// selectedTables attached to it.
 		//suggestdatasets one mart one schema
+		long t1 = McUtils.getCurrentTime();
 		for(Iterator<Mart> i=this.marts.values().iterator(); i.hasNext();) {
 			Mart mart = i.next();
 			List<String> stStrings = selectedTables.get(mart.getMartName());
@@ -130,6 +132,7 @@ public class Location {
 				continue;
 			this.requestLoadSchemaInMart(mart, false,this.dbtablesMap.get(mart.getMartName()));
 		}
+		long t2 = McUtils.getCurrentTime();
 		
 		//generate dataset
 		for(Iterator<Mart> i=this.marts.values().iterator(); i.hasNext();) {
@@ -142,7 +145,7 @@ public class Location {
 			Map<String, Schema> schemas = mart.getSchemasObj().getSchemas();
 			for (final Iterator<Schema> s = schemas.values().iterator(); s.hasNext();) {
 				JDBCSchema schema = (JDBCSchema)s.next();
-				Map tables = schema.getTables();
+				Map<String,Table> tables = schema.getTables();
 				
 				for(String st:stStrings) {
 					Table table = (Table)tables.get(st);
@@ -155,6 +158,9 @@ public class Location {
 				e.printStackTrace();
 			}
 		}	
+		long t3 = McUtils.getCurrentTime();
+		System.err.println("create sources "+(t2-t1));
+		System.err.println("create target "+(t3-t2));
 	}
 	
 	private void requestCreateLocationFromTarget(){
