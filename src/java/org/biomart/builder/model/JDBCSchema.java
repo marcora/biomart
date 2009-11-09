@@ -7,6 +7,7 @@ import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -31,6 +32,7 @@ import org.biomart.common.resources.Resources;
 import org.biomart.common.resources.Settings;
 import org.biomart.common.view.gui.dialogs.ProgressDialog2;
 import org.biomart.configurator.controller.dialects.DatabaseDialect;
+import org.biomart.configurator.utils.ConnectionPool;
 import org.biomart.configurator.utils.DbInfoObject;
 import org.biomart.configurator.utils.McUtils;
 import org.biomart.configurator.utils.type.Cardinality;
@@ -373,7 +375,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 					//find the column numbers
 					int count = 0;
 					ArrayList<Column> colList = new ArrayList<Column>();
-					for(final Iterator i = table.getColumns().values().iterator(); i.hasNext();){
+					for(final Iterator<Column> i = table.getColumns().values().iterator(); i.hasNext();){
 						final Column column = (Column)i.next();
 						if(column.getName().indexOf(Resources.get("martPKSuffix"))>=0) {
 							colList.add(column);
@@ -1698,264 +1700,117 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 			this.conObj.setUserName(username);
 		}
 
-		public void init(List<String> tablesInDb) throws DataModelException, SQLException {
+		public void init(String dbName, List<String> tablesInDb) throws DataModelException, SQLException {
 			Log.info("Initialize " + this);
 			long t1 = McUtils.getCurrentTime();
 			ProgressDialog2.getInstance().setStatus("creating "+this);
-			super.init(tablesInDb);
-			long t2 = McUtils.getCurrentTime();
+			super.init(dbName,tablesInDb);
 			
-			final DatabaseMetaData dmd = this.getConnection(null).getMetaData();
-			final String catalog = this.getConnection(null).getCatalog();
-			long t3 = McUtils.getCurrentTime();
-			// Do the loop.
-			final Collection<Table> tablesToBeKept = new HashSet<Table>();
-			for(String tableStr: tablesInDb) {
-				Log.debug("Processing table " + tableStr);
-				ProgressDialog2.getInstance().setStatus("Processing table " + tableStr);
+			StringBuffer sb = new StringBuffer("select table_name,column_name,column_key from information_schema.columns where");
+			sb.append(" table_schema='"+dbName+"' order by table_name, ordinal_position");
 
-				Table dbTable;
-
-				try {
-						dbTable = new Table(this, tableStr);
-						this.getTables().put(tableStr, dbTable);
-					} catch (final Throwable t) {
-						throw new BioMartError(t);
+			//create all columns
+			String lastTableName = "";
+			Table currentTable = null;
+			Map<Integer, Column> pkCols = new TreeMap<Integer, Column>();
+			int pkIndex = 0;
+			Connection con = ConnectionPool.Instance.getConnection(this.conObj);
+			try {
+				Statement st = con.createStatement();
+				ResultSet rs = st.executeQuery(sb.toString());
+				//loop to create Tables, Columns and PKs
+				while(rs.next()) {
+					String tableName = rs.getString("table_name");
+					//finish all columns in one table and move to the next, if previous table doesn't have a PK, 
+					//create using keyguessing
+					if(!lastTableName.equals(tableName)) {
+						this.createPKforTable(currentTable, pkCols);
+						//move to next table
+						currentTable = new Table(this,tableName);
+						this.getTables().put(tableName, currentTable);
+						//clean flags
+						lastTableName = tableName;
+						pkIndex = 0;
+						pkCols.clear();
+					}
+					
+					Column dbTblCol = new Column(currentTable, rs.getString("column_name"));
+					currentTable.getColumns().put(dbTblCol.getName(),dbTblCol);
+					//PK?
+					String priStr = rs.getString("column_key");
+					//PRI is the value return from MySQL
+					if("PRI".equals(priStr)) {
+						pkIndex++;
+						pkCols.put(pkIndex, dbTblCol);
 					}
 
-				tablesToBeKept.add(dbTable);
+				}
+				rs.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
+
+			//create PK for the last table
+			this.createPKforTable(currentTable, pkCols);
+			
+			if (this.isKeyGuessing()) 
+				this.synchroniseKeysUsingKeyGuessing(Collections.emptySet(), 1);
 
 			long t4 = McUtils.getCurrentTime();
-			// Loop over all columns.
-			for (Table dbTable: tablesToBeKept) {
-				final String dbTableName = dbTable.getName();
-				// Load the table columns from the database, then loop over
-				// them.
-				Log.debug("Loading table column list for " + dbTableName);
-				ResultSet dbTblCols;
-long tt1 = McUtils.getCurrentTime();
-				dbTblCols = dmd.getColumns(catalog, this.realSchemaName,dbTableName, "%");
-long tt2 = McUtils.getCurrentTime();
-
-				// FIXME: When using Oracle, if the table is a synonym then the
-				// above call returns no results.
-				while (dbTblCols.next()) {
-					// Check schema and catalog.
-//					final String catalogName = dbTblCols.getString("TABLE_CAT");
-//					final String schemaName = dbTblCols.getString("TABLE_SCHEM");
-
-					// What is the column called, and is it nullable?
-					final String dbTblColName = dbTblCols.getString("COLUMN_NAME");
-					Log.debug("Processing column " + dbTblColName);
-
-					try {
-						Column dbTblCol = new Column(dbTable, dbTblColName);
-						dbTable.getColumns().put(dbTblCol.getName(),dbTblCol);
-					} catch (final Throwable t) {
-						throw new BioMartError(t);
-					}
-				}
-				dbTblCols.close();
-				long tt3 = McUtils.getCurrentTime();
-				System.err.println("get dmd for columns "+(tt2-tt1));
-				System.err.println("others "+(tt3-tt2));
-			}
-			long t5 = McUtils.getCurrentTime();
-			// Get and create primary keys.
-			// Work out a list of all foreign keys currently existing.
-			// Any remaining in this list later will be dropped.
-			
-			this.initPkFks(dmd, catalog);
-			long t6 = McUtils.getCurrentTime();
-			System.err.println("init super "+(t2-t1));
-			System.err.println("init get dmd "+(t3-t2));
-			System.err.println("init create tables "+(t4-t3));
-			System.err.println("init get columns "+(t5-t4));
-			System.err.println("init initPkFk "+(t6-t5));
+			System.err.println("init "+(t4-t1));
 			Log.info("Done synchronising");
 			Log.info("forward message to controller");
 		}
-		
-		private void initPkFks(DatabaseMetaData dmd, final String catalog) throws SQLException, DataModelException {
-			// Get and create primary keys.
-			// Work out a list of all foreign keys currently existing.
-			// Any remaining in this list later will be dropped.
-			
-			//do the pk for the main table first if it is mart
-			List<String> mainTableList = this.getMart().getMartMTNameList();
-			Table[] orderedTables = null;
-			Map<Table, ArrayList<Column>> mtColsMap = new HashMap<Table, ArrayList<Column>>();
-			if(mainTableList!=null) {
-				orderedTables = new Table[mainTableList.size()];
-				for(String tableStr:mainTableList) {
-					Table table = (Table)this.getTables().get(tableStr);
-					//find the column numbers
-					int count = 0;
-					ArrayList<Column> colList = new ArrayList<Column>();
-					for(final Iterator<Column> i = table.getColumns().values().iterator(); i.hasNext();){
-						final Column column = (Column)i.next();
-						if(column.getName().indexOf(Resources.get("martPKSuffix"))>=0) {
-							colList.add(column);
-							count++;
-						}
-					}
-					if(count-1>orderedTables.length)
-						return; //error
-					orderedTables[count-1]=table;
-					mtColsMap.put(table, colList);
-				}
-				//check 
-				for(Table t:orderedTables) {
-					if(t==null)
-						return;
-				}
-			}
-long t1 = McUtils.getCurrentTime();
-			for (final Iterator<Table> i = this.getTables().values().iterator(); i.hasNext();) {
-				final Table t = (Table) i.next();
-
-				// Obtain the primary key from the database. Even in databases
-				// without referential integrity, the primary key is still
-				// defined and can be obtained from the metadata.
-				Log.debug("Loading table primary keys");
-				String searchCatalog = catalog;
-				String searchSchema = this.realSchemaName;
-long tt1 = McUtils.getCurrentTime();
-				final ResultSet dbTblPKCols = dmd.getPrimaryKeys(searchCatalog,
-						searchSchema, t.getName());
-
-				// Load the primary key columns into a map keyed by column
-				// position.
-				// In other words, the first column in the key has a map key of
-				// 1, and so on. We do this because we can't guarantee we'll
-				// read the key columns from the database in the correct order.
-				// We keep the map sorted, so that when we iterate over it later
-				// we get back the columns in the correct order.
-				final Map<Short, Column> pkCols = new TreeMap<Short, Column>();
-				while (dbTblPKCols.next()) {
-					final String pkColName = dbTblPKCols
-							.getString("COLUMN_NAME");
-					final Short pkColPosition = new Short(dbTblPKCols
-							.getShort("KEY_SEQ"));
-					pkCols.put(pkColPosition, (Column)t.getColumns().get(pkColName));
-				}
-				dbTblPKCols.close();
-long tt2 = McUtils.getCurrentTime();
-System.out.println("get pk tt "+(tt2-tt1));
-				// Did DMD find a PK? If not, which is really unusual but
-				// potentially may happen, attempt to find one by looking for a
-				// single column with the same name as the table or with '_id'
-				// appended if it is source. For the mart, pk is the columns with '_key'.
-				// Only do this if we are using key-guessing.
-				if (pkCols.isEmpty() && this.isKeyGuessing()) {
-					Log.debug("Found no primary key, so attempting to guess one");
-					if(!this.isMart()) {
-						// Plain version first.
-						Column candidateCol = (Column) t.getColumns().get(
-								t.getName());
-						// Try with '_id' appended if plain version turned up
-						// nothing.
-						if (candidateCol == null)
-							candidateCol = (Column) t
-									.getColumns()
-									.get(
-											t.getName()
-													+ Resources
-															.get("primaryKeySuffix"));
-						// Found something? Add it to the primary key columns map,
-						// with a dummy key of 1. (Use Short for the key because
-						// that
-						// is what DMD would have used had it found anything
-						// itself).
-						if (candidateCol != null)
-							pkCols.put(Short.valueOf("1"), candidateCol);
-					}else { //database is a target database
-						Short colPosition = 1;
-						if(mtColsMap.containsKey(t)) {
-							List<Column> currentKeysList = mtColsMap.get(t);
-							int keySize = currentKeysList.size();
-							if(keySize == 1) //central main
-								pkCols.put(Short.valueOf("1"),mtColsMap.get(t).get(0));
-							else {
-								//get parent table, a submain table should ignore its parent's key, take another key
-								Table parentTable = orderedTables[keySize-2];
-								//parent key list
-								List<Column> pkeysList = mtColsMap.get(parentTable);
-								for(Column col:currentKeysList) {
-									boolean found = false;
-									for(Column pcol:pkeysList) {
-										if(pcol.getName().equals(col.getName())) {
-											found = true;
-											break;
-										}
-									}
-									if(found == false)
-										pkCols.put(Short.valueOf("1"),col);
-								}
-							}
-						}else {
-							for(Iterator<Column> ci = t.getColumns().values().iterator();ci.hasNext();){
-								Column candidateCol = (Column)ci.next();
-								if(candidateCol.getName().indexOf(Resources.get("martPKSuffix"))>=0) {
-									pkCols.put(colPosition, candidateCol);
-									colPosition++;
-								}
-							}
-						}
-					}
-				}
-
-				// Did we find a PK on the database copy of the table?
-				if (!pkCols.isEmpty()) {
-
-					// Yes, we found a PK on the database copy of the table. So,
-					// create a new key based around the columns we identified.
-					PrimaryKey candidatePK;
-					try {
-						candidatePK = new PrimaryKey((Column[]) pkCols.values()
-								.toArray(new Column[0]));
-					} catch (final Throwable th) {
-						throw new BioMartError(th);
-					}
-
-					// If the existing table has no PK, or has a PK which
-					// matches and is not incorrect, or has a PK which does not
-					// match
-					// and is not handmade, replace that PK with the one we
-					// found.
-					// This way we preserve any existing handmade PKs, and don't
-					// override any marked as incorrect.
-					try {
-						t.setPrimaryKey(candidatePK);
-					} catch (final Throwable th) {
-						throw new BioMartError(th);
-					}
-				} 
-			} //end of for (final Iterator i = this.getTables().values().iterator(); i.hasNext();)
-long t2 = McUtils.getCurrentTime();
-			// Are we key-guessing? Key guess the foreign keys, passing in a
-			// reference to the list of existing foreign keys. After this call
-			// has completed, the list will contain all those foreign keys which
-			// no longer exist, and can safely be dropped.
-			if (this.isKeyGuessing()) {
-				if(this.isMart())					
-					this.synchroniseKeysUsingMartKeyGuessing(Collections.emptySet(), 1, orderedTables);
-				else
-					this.synchroniseKeysUsingKeyGuessing(Collections.emptySet(), 1);
-			// Otherwise, use DMD to do the same, also passing in the list of
-			// existing foreign keys to be updated as the call progresses. Also
-			// pass in the DMD details so it doesn't have to work them out for
-			// itself.
-			}
-			else
-				this.synchroniseKeysUsingDMD(Collections.emptySet(), dmd,
-						this.realSchemaName, catalog);
-long t3 = McUtils.getCurrentTime();
-System.err.println("initPkFK pk "+(t2-t1));
-System.err.println("initPkFk fk relation "+(t3-t2));
+	
+	/**
+	 * create a PK for table, if the table has candidate columns, use them, otherwise use keyGuessing
+	 * @param table
+	 * @param hasPK
+	 * @param pkCols
+	 */
+	private void createPKforTable(Table table, Map<Integer,Column> pkCols) {
+		if(table==null)
+			return;
+		if(pkCols.isEmpty() && this.isKeyGuessing()) {
+			//create PK by keyguessing
+			// Did DMD find a PK? If not, which is really unusual but
+			// potentially may happen, attempt to find one by looking for a
+			// single column with the same name as the table or with '_id'
+			// appended if it is source. For the mart, pk is the columns with '_key'.
+			// Only do this if we are using key-guessing.
+			// Plain version first.
+			Column candidateCol = (Column) table.getColumns().get(table.getName());
+			// Try with '_id' appended if plain version turned up
+			// nothing.
+			if (candidateCol == null)
+				candidateCol = (Column) table.getColumns().get(table.getName()
+								+ Resources.get("primaryKeySuffix"));
+			// Found something? Add it to the primary key columns map,
+			// with a dummy key of 1. (Use Short for the key because
+			// that
+			// is what DMD would have used had it found anything
+			// itself).
+			if (candidateCol != null)
+				pkCols.put(1, candidateCol);
 
 		}
-		
+		//create PK
+		if(!pkCols.isEmpty()) {
+			PrimaryKey candidatePK;
+			try {
+				candidatePK = new PrimaryKey((Column[]) pkCols.values()
+						.toArray(new Column[0]));
+			} catch (final Throwable th) {
+				throw new BioMartError(th);
+			}
 
+			try {
+				table.setPrimaryKey(candidatePK);
+			} catch (final Throwable th) {
+				throw new BioMartError(th);
+			}
+		}
+
+	}
 }

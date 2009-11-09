@@ -631,7 +631,7 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 	 * @throws SQLException 
 	 * @throws DataModelException 
 	 */
-	public void init(List<String> tablesInDb) throws DataModelException, SQLException {
+	public void init(String dbName, List<String> tablesInDb) throws DataModelException, SQLException {
 		
 }
 	

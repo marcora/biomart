@@ -130,7 +130,7 @@ public class Location {
 			List<String> stStrings = selectedTables.get(mart.getMartName());
 			if(stStrings == null || stStrings.size()==0) 
 				continue;
-			this.requestLoadSchemaInMart(mart, false,this.dbtablesMap.get(mart.getMartName()));
+			this.requestLoadSchemaInMart(mart, false,mart.getMartName(), this.dbtablesMap.get(mart.getMartName()));
 		}
 		long t2 = McUtils.getCurrentTime();
 		
@@ -173,7 +173,7 @@ public class Location {
 			if(stStrings == null || stStrings.size()==0)
 				continue;
 			mart.setMainTableList(selectedTables.get(mart.getMartName()));
-			this.requestLoadSchemaInMart(mart, true,this.dbtablesMap.get(mart.getMartName()));
+			this.requestLoadSchemaInMart(mart, true,mart.getMartName(), this.dbtablesMap.get(mart.getMartName()));
 		}
 		
 		
@@ -217,11 +217,11 @@ public class Location {
 	/*
 	 * this function should go in Mart 
 	 */
-	public boolean requestLoadSchemaInMart(Mart mart, boolean isTarget, List<String> tablesInDb) {
+	public boolean requestLoadSchemaInMart(Mart mart, boolean isTarget, String dbName, List<String> tablesInDb) {
 		for(Iterator<Schema> i=mart.getSchemasObj().getSchemas().values().iterator(); i.hasNext();) {
 			JDBCSchema schema = (JDBCSchema)i.next();
 			schema.setIsMart(isTarget);
-			this.marts.get(mart.getMartName()).getSchemasObj().requestInitSchema(schema, false, tablesInDb);
+			this.marts.get(mart.getMartName()).getSchemasObj().requestInitSchema(schema, false,dbName, tablesInDb);
 		}
 		return true;
 	}
