@@ -11,7 +11,6 @@ import net.sf.json.JSONObject;
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.utils.MyUtils;
 import org.biomart.martRemote.Jsoml;
-import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.jdom.Namespace;
 
@@ -40,11 +39,13 @@ public class Element extends Containee implements Serializable {
 	
 	protected Range targetRange = null;
 	protected Range sourceRange = null;
-
+	
+	// Internal use
+	protected Element pointedElement = null;	// For reference
+	
+	// Redundant
 	protected PartitionTable mainPartitionTable = null;
 	protected List<PartitionTable> otherPartitionTableList = null;
-	
-	protected Element pointedElement = null;	// For reference
 	
 	public Element() {} 	// for Serialization
 	protected Element(PartitionTable mainPartitionTable, String name, String displayName, String description, Boolean visible, String xmlElementName, Container parentContainer,
@@ -190,7 +191,6 @@ public class Element extends Containee implements Serializable {
 
 	public void setPointedElement(Element pointedElement) {
 		this.pointedElement = pointedElement;
-		//MyUtils.checkStatusProgram(this.pointedElementName!=null && this.pointedElementName.equals(pointedElement.getName()));
 		this.pointedElementName = pointedElement.getName();
 	}
 	
@@ -198,6 +198,8 @@ public class Element extends Containee implements Serializable {
 	public String toString() {
 		return 
 			super.toString() + ", " + 
+			"selectedByDefault = " + selectedByDefault + ", " +
+			"pointer = " + pointer + ", " +
 			"locationName = " + locationName + ", " +
 			"martName = " + martName + ", " +
 			"version = " + version + ", " +
@@ -206,10 +208,8 @@ public class Element extends Containee implements Serializable {
 			"tableName = " + tableName + ", " +
 			"keyName = " + keyName + ", " +
 			"fieldName = " + fieldName + ", " +
-			"selectedByDefault = " + selectedByDefault + ", " +
-			"pointer = " + pointer + ", " +
-			"pointedElementName = " + pointedElementName + ", " +
 			"checkForNulls = " + checkForNulls + ", " +
+			"pointedElementName = " + pointedElementName + ", " +
 			"targetRange = " + targetRange + ", " +
 			"sourceRange = " + sourceRange;
 	}
@@ -225,7 +225,17 @@ public class Element extends Containee implements Serializable {
 		Element element=(Element)object;
 		return (
 			(super.equals(element)) &&
-			(this.selectedByDefault==element.selectedByDefault || (this.selectedByDefault!=null && selectedByDefault.equals(element.selectedByDefault))) &&
+			(this.pointer ? 
+					(
+							(this.datasetName==element.datasetName || (this.datasetName!=null && datasetName.equals(element.datasetName))) &&
+							(this.pointedElementName==element.pointedElementName || (this.pointedElementName!=null && pointedElementName.equals(element.pointedElementName)))
+					) : (
+							(this.tableName==element.tableName || (this.tableName!=null && tableName.equals(element.tableName))) &&
+							(this.keyName==element.keyName || (this.keyName!=null && keyName.equals(element.keyName))) &&
+							(this.fieldName==element.fieldName || (this.fieldName!=null && fieldName.equals(element.fieldName)))
+					)
+			)
+			/*(this.selectedByDefault==element.selectedByDefault || (this.selectedByDefault!=null && selectedByDefault.equals(element.selectedByDefault))) &&
 			(this.pointer==element.pointer || (this.pointer!=null && pointer.equals(element.pointer))) &&
 			
 			(this.locationName==element.locationName || (this.locationName!=null && locationName.equals(element.locationName))) &&
@@ -242,12 +252,11 @@ public class Element extends Containee implements Serializable {
 			(this.pointedElementName==element.pointedElementName || (this.pointedElementName!=null && pointedElementName.equals(element.pointedElementName))) &&
 			
 			(this.targetRange==element.targetRange || (this.targetRange!=null && targetRange.equals(element.targetRange))) &&
-			(this.sourceRange==element.sourceRange || (this.sourceRange!=null && sourceRange.equals(element.sourceRange)))
-			//TODO add partition tables & pointedElement?
+			(this.sourceRange==element.sourceRange || (this.sourceRange!=null && sourceRange.equals(element.sourceRange)))*/		
 		);
 	}
 
-	@Override
+	/*@Override
 	public int hashCode() {
 		int hash = MartConfiguratorConstants.HASH_SEED1;
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + super.hashCode();
@@ -259,14 +268,14 @@ public class Element extends Containee implements Serializable {
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==tableName? 0 : tableName.hashCode());
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==keyName? 0 : keyName.hashCode());
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==fieldName? 0 : fieldName.hashCode());
-		/*hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==targetRange? 0 : targetRange.hashCode());
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==selectedByDefault? 0 : selectedByDefault.hashCode());*/
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==targetRange? 0 : targetRange.hashCode());
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==selectedByDefault? 0 : selectedByDefault.hashCode());
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==pointer? 0 : pointer.hashCode());
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==pointedElementName? 0 : pointedElementName.hashCode());
-		/*hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==checkForNulls? 0 : checkForNulls.hashCode());
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==sourceRange? 0 : sourceRange.hashCode());*/
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==checkForNulls? 0 : checkForNulls.hashCode());
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==sourceRange? 0 : sourceRange.hashCode());
 		return hash;
-	}
+	}*/
 
 	public org.jdom.Element generateXml() {
 		if (this instanceof Attribute) {
@@ -291,9 +300,7 @@ public class Element extends Containee implements Serializable {
 		MartConfiguratorUtils.addAttribute(element, pointedElementType, this.pointedElementName);
 		MartConfiguratorUtils.addAttribute(element, "checkForNulls", this.checkForNulls);
 
-		if (this.pointer
-//				&& this.sourceRange!=null	//TODO for now -> when broken pointer, no sourceRange
-				) {
+		if (this.pointer) {
 			this.sourceRange.addXmlAttribute(element, "sourceRange");
 		}
 		this.targetRange.addXmlAttribute(element, "targetRange");
@@ -311,16 +318,12 @@ public class Element extends Containee implements Serializable {
 		
 		super.visible = null;	// irrelevant for elements
 		this.selectedByDefault = element.selectedByDefault;
-		/*this.targetRange = new Range(element.mainPartitionTable, true);
-		this.targetRange.addPart(part);	// only one part*/
 	}
 	protected void updatePointerClone(org.biomart.objects.objects.Element pointingElement) {
 		super.updatePointerClone(pointingElement);
 		this.selectedByDefault = pointingElement.selectedByDefault;
 	}
 	protected Jsoml generateOutputForWebService(boolean xml) throws FunctionalException {
-		//MyUtils.checkStatusProgram(this.targetRange.getPartSet().size()==1);	// there should be only 1 element (it's flattened)
-		
 		Jsoml jsoml = super.generateOutputForWebService(xml);
 		
 		jsoml.removeAttribute("visible");	// not applicable for elements
@@ -330,17 +333,6 @@ public class Element extends Containee implements Serializable {
 		
 		return jsoml;
 	}
-	/*public Jsoml generateOutputForWebService(boolean xml) throws FunctionalException {
-		Jsoml xmlOrJson = null;
-		if (xml) {
-			org.jdom.Element xmlElement = generateXmlForWebService();
-			xmlOrJson = new Jsoml(xmlElement);
-		} else {
-			JSONObject jsonObject = generateJsonForWebService();
-			xmlOrJson = new Jsoml(jsonObject);
-		}
-		return xmlOrJson;
-	}*/
 	protected org.jdom.Element generateXmlForWebService() throws FunctionalException {
 		return generateXmlForWebService(null);
 	}

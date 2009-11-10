@@ -3,19 +3,16 @@ package org.biomart.objects.objects;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
 import org.biomart.common.general.exceptions.FunctionalException;
-import org.biomart.common.general.utils.CompareUtils;
 import org.biomart.martRemote.Jsoml;
-import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.jdom.Element;
 
 
-public class Container extends Containee implements Comparable<Container>, Comparator<Container>, Serializable {
+public class Container extends Containee implements Serializable {
 
 	private static final long serialVersionUID = 8818099786702183740L;
 	
@@ -99,12 +96,13 @@ public class Container extends Containee implements Comparable<Container>, Compa
 			super.toString() + ", " + 
 			"level = " + level + ", " +
 			"queryRestriction = " + queryRestriction + ", " +
-			"containerList = " + containerList + ", " +
-			"filterList = " + filterList + ", " +
-			"attributeList = " + attributeList;
+			"containeeList.size() = " + containeeList.size() + ", " +
+			"containerList.size() = " + containerList.size() + ", " +
+			"filterList.size() = " + filterList.size() + ", " +
+			"attributeList.size() = " + attributeList.size();
 	}
 
-	@Override
+	/*@Override
 	public boolean equals(Object object) {
 		if (this==object) {
 			return true;
@@ -132,9 +130,9 @@ public class Container extends Containee implements Comparable<Container>, Compa
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==filterList? 0 : filterList.hashCode());
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==attributeList? 0 : attributeList.hashCode());
 		return hash;
-	}
+	}*/
 
-	public int compare(Container container1, Container container2) {
+	/*public int compare(Container container1, Container container2) {
 		if (container1==null && container2!=null) {
 			return -1;
 		} else if (container1!=null && container2==null) {
@@ -161,7 +159,7 @@ public class Container extends Containee implements Comparable<Container>, Compa
 
 	public int compareTo(Container container) {
 		return compare(this, container);
-	}
+	}*/
 
 	public Element generateXml() {
 		Element element = super.generateXml();
@@ -253,20 +251,6 @@ public class Container extends Containee implements Comparable<Container>, Compa
 		}
 	}
 	
-	
-	/*public Element generateXmlForWebService() throws FunctionalException {
-		return generateXmlForWebService(null);
-	}
-	public Element generateXmlForWebService(org.jdom.Namespace namespace) throws FunctionalException {
-		Element jdomObject = super.generateXmlForWebService(namespace);
-		generateOutputForWebService(jdomObject, true);
-		return jdomObject;
-	}
-	public JSONObject generateJsonForWebService() {
-		JSONObject jsonObject = super.generateJsonForWebService();
-		generateOutputForWebService(jsonObject, false);
-		return jsonObject;
-	}*/
 	public Jsoml generateOutputForWebService(boolean xml) throws FunctionalException {
 		Jsoml jsoml = super.generateOutputForWebService(xml);
 		
@@ -286,34 +270,4 @@ public class Container extends Containee implements Comparable<Container>, Compa
 		
 		return jsoml;
 	}
-	
-	
-	/*public JSONObject generateJsonForWebService() {
-		JSONObject jsonObject = super.generateJsonForWebService();
-		
-		JSONObject object = (JSONObject)jsonObject.get(super.xmlElementName);
-		object.put("level", this.level);
-		object.put("queryRestriction", this.queryRestriction);
-		
-		JSONArray array = new JSONArray();
-		boolean atLeastOne = false;
-		for (Containee containee : containeeList) {
-			if (containee instanceof Container) {
-				JSONObject containeeJSONObject = containee.generateJsonForWebService();
-				array.add(containeeJSONObject);
-				atLeastOne = true;
-			} else if (containee instanceof org.biomart.objects.objects.Element) {
-				org.biomart.objects.objects.Element martConfiguratorElement = (org.biomart.objects.objects.Element)containee;
-				JSONObject elementJSONObject = martConfiguratorElement.generateJsonForWebService();
-				array.add(elementJSONObject);
-				atLeastOne = true;
-			}
-		}
-		if (atLeastOne) {
-			object.put("containees", array);
-		}
-		
-		jsonObject.put(super.xmlElementName, object);
-		return jsonObject;
-	}*/
 }

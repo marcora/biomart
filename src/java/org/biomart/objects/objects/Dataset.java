@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.jdom.Element;
 
@@ -18,12 +17,12 @@ public class Dataset extends MartConfiguratorObject implements Serializable {
 	public static void main(String[] args) {}
 
 	private Boolean materialized = null;
+	private String centralTable = null;
 
 	private List<Config> configList = null;
 	private List<PartitionTable> partitionTableList = null;
 	private List<Table> tableList = null;
 	private List<Relation> relationList = null;
-	private String centralTable = null;
 
 	// For internal use only
 	private PartitionTable mainPartitionTable = null;
@@ -100,7 +99,11 @@ public class Dataset extends MartConfiguratorObject implements Serializable {
 		return 
 			super.toString() + ", " + 
 			"materialized = " + materialized + ", " + 
-			"centralTable = " + centralTable;
+			"centralTable = " + centralTable + ", " + 
+			"configList.size() = " + configList.size() + ", " + 
+			"partitionTableList() = " + partitionTableList.size() + ", " + 
+			"tableList() = " + tableList.size() + ", " + 
+			"relationList() = " + relationList.size();
 	}
 
 	@Override
@@ -114,17 +117,17 @@ public class Dataset extends MartConfiguratorObject implements Serializable {
 		Dataset dataset=(Dataset)object;
 		return (
 			super.equals(dataset) &&
-			(this.materialized==dataset.materialized || (this.materialized!=null && materialized.equals(dataset.materialized)))
+			(this.configList==dataset.configList || (this.configList!=null && this.configList.equals(dataset.configList)))
 		);
 	}
 
-	@Override
+	/*@Override
 	public int hashCode() {
 		int hash = MartConfiguratorConstants.HASH_SEED1;
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==materialized? 0 : materialized.hashCode());
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==centralTable? 0 : centralTable.hashCode());
 		return hash;
-	}
+	}*/
 	
 	public Element generateXml() {
 		Element element = super.generateXml();
@@ -155,10 +158,5 @@ public class Dataset extends MartConfiguratorObject implements Serializable {
 
 	public Dataset(Dataset dataset, String datasetName) throws CloneNotSupportedException {	// creates a light clone (temporary solution)
 		this(datasetName, null, null, dataset.visible, dataset.materialized);
-		
-		/*this.configList = new ArrayList<Config>();
-		for (Config config : dataset.configList) {
-			this.configList.add(new Config(config));
-		}*/
 	}
 }

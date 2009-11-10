@@ -3,14 +3,12 @@ package org.biomart.objects.objects;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.Comparator;
 import java.util.List;
 
 import net.sf.json.JSONObject;
 
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.martRemote.Jsoml;
-import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.objects.data.FilterData;
 import org.biomart.objects.data.TreeFilterData;
@@ -18,7 +16,7 @@ import org.jdom.Namespace;
 
 
 public class Filter extends org.biomart.objects.objects.Element	// to avoid any ambiguity with jdom's 
-	implements Comparable<Filter>, Comparator<Filter>, Serializable {
+	implements /*Comparable<Filter>, Comparator<Filter>, */Serializable {
 
 	private static final long serialVersionUID = 8117878349721027751L;
 	
@@ -100,7 +98,7 @@ public class Filter extends org.biomart.objects.objects.Element	// to avoid any 
 		}
 	}
 
-	@Override
+	/*@Override
 	public boolean equals(Object object) {
 		if (this==object) {
 			return true;
@@ -140,7 +138,7 @@ public class Filter extends org.biomart.objects.objects.Element	// to avoid any 
 
 	public int compareTo(Filter filter) {
 		return compare(this, filter);
-	}
+	}*/
 	
 	public org.jdom.Element generateXml() {
 		org.jdom.Element element = super.generateXml();
@@ -175,17 +173,6 @@ public class Filter extends org.biomart.objects.objects.Element	// to avoid any 
 		
 		return jsoml;
 	}
-	/*public Jsoml generateOutputForWebService(boolean xml) throws FunctionalException {
-		Jsoml xmlOrJson = null;
-		if (xml) {
-			org.jdom.Element xmlElement = generateXmlForWebService();
-			xmlOrJson = new Jsoml(xmlElement);
-		} else {
-			JSONObject jsonObject = generateJsonForWebService();
-			xmlOrJson = new Jsoml(jsonObject);
-		}
-		return xmlOrJson;
-	}*/
 	public org.jdom.Element generateXmlForWebService() throws FunctionalException {
 		return generateXmlForWebService(null);
 	}

@@ -5,8 +5,8 @@ import java.io.Serializable;
 import java.util.Comparator;
 import java.util.HashSet;
 
-
 import org.biomart.common.general.utils.CompareUtils;
+import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.jdom.Element;
 
@@ -20,14 +20,12 @@ public class Table extends MartConfiguratorObject implements Comparable<Table>, 
 	
 	public static void main(String[] args) {}
 
-	private String key = null;
-
 	private Range range = null;
 	private HashSet<String> fields = null;
-	
-	private Boolean main = null;	// Whether this is the main partition table
+	private String key = null;
+	private Boolean main = null;	// Whether this is a main table
 	private TableType type = null;
-
+	
 	public Table(String name, PartitionTable mainPartitionTable, boolean main, TableType type,
 			String key, HashSet<String> fields) {
 		super(name, null, null, null, XML_ELEMENT_NAME);	// displayName, description & visible do not apply for that object
@@ -96,27 +94,11 @@ public class Table extends MartConfiguratorObject implements Comparable<Table>, 
 			return false;
 		}
 		Table table=(Table)object;
-		return (
-			super.name.equals(table.name)
-			/*(super.equals(table)) &&
-			(this.main==table.main || (this.main!=null && main.equals(table.main))) &&
-			(this.key==table.key || (this.key!=null && key.equals(table.key))) &&
-			(this.range==table.range || (this.range!=null && range.equals(table.range))) &&
-			(this.fields==table.fields || (this.fields!=null && fields.equals(table.fields)))*/
-		);
+		return super.name.equalsIgnoreCase(table.name);
 	}
 	
 	public boolean equalsIgnoreCase(Object object) {
-		if (this==object) {
-			return true;
-		}
-		if((object==null) || (object.getClass()!= this.getClass())) {
-			return false;
-		}
-		Table table=(Table)object;
-		return (
-			super.name.equals(table.name)
-		);
+		return this.equals(object);
 	}
 
 	@Override
@@ -128,15 +110,10 @@ public class Table extends MartConfiguratorObject implements Comparable<Table>, 
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==range? 0 : range.hashCode());
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==fields? 0 : fields.hashCode());
 		return hash;*/
-		return 0;		//TODO don't understand why above code is buggy, super.hashCode():
-							/*
-							int hash = MartConfiguratorConstants.HASH_SEED1;
-							hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==name? 0 : name.hashCode());
-							hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==displayName? 0 : displayName.hashCode());
-							hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==description? 0 : description.hashCode());
-							hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==visible? 0 : visible.hashCode());
-							return hash;
-							*/
+		
+		int hash = MartConfiguratorConstants.HASH_SEED1;
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==name? 0 : name.toLowerCase().hashCode());	// Must specify toLowerCase here	TODO move to MCO?
+		return hash;
 	}
 
 	public int compare(Table table1, Table table2) {
@@ -145,11 +122,11 @@ public class Table extends MartConfiguratorObject implements Comparable<Table>, 
 		} else if (table1!=null && table2==null) {
 			return 1;
 		}
-		int compare = CompareUtils.compareString(table1.name, table2.name);
+		int compare = CompareUtils.compareString(table1.name.toLowerCase(), table2.name.toLowerCase());
 		if (compare!=0) {
 			return compare;
 		}
-		return CompareUtils.compareString(table1.key, table2.key);
+		return CompareUtils.compareString(table1.key.toLowerCase(), table2.key.toLowerCase());
 	}
 
 	public int compareTo(Table table) {

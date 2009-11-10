@@ -2,14 +2,12 @@ package org.biomart.objects.objects;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
-import org.biomart.objects.MartConfiguratorConstants;
 import org.jdom.Element;
 
 
-public class MartRegistry implements Comparable<MartRegistry>, Comparator<MartRegistry>, Serializable {
+public class MartRegistry implements Serializable {
 
 	private static final long serialVersionUID = 4555425904982314129L;
 	
@@ -35,10 +33,12 @@ public class MartRegistry implements Comparable<MartRegistry>, Comparator<MartRe
 	@Override
 	public String toString() {
 		return 
-			super.toString();
+			super.toString() +
+			", locationList.size() = " + this.locationList.size();
 	}
 
-	@Override
+	// No real need for those (we won't ever compare registries)
+	/*@Override
 	public boolean equals(Object object) {
 		if (this==object) {
 			return true;
@@ -46,6 +46,7 @@ public class MartRegistry implements Comparable<MartRegistry>, Comparator<MartRe
 		if((object==null) || (object.getClass()!= this.getClass())) {
 			return false;
 		}
+		
 		MartRegistry martRegistry=(MartRegistry)object;
 		return (
 				this.locationList.size()==martRegistry.locationList.size()	// locationList is never null (constructor) TODO better
@@ -69,7 +70,7 @@ public class MartRegistry implements Comparable<MartRegistry>, Comparator<MartRe
 
 	public int compareTo(MartRegistry martRegistry) {
 		return compare(this, martRegistry);
-	}
+	}*/
 	
 	public Element generateXml() {
 		Element element = new Element(XML_ELEMENT_NAME);

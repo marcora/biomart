@@ -8,7 +8,6 @@ import net.sf.json.JSONObject;
 
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.martRemote.Jsoml;
-import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.jdom.Namespace;
 
@@ -64,7 +63,7 @@ public class Attribute extends Element implements /*Comparable<Attribute>, Compa
 			"linkURL = " + linkURL;
 	}
 
-	@Override
+	/*@Override
 	public boolean equals(Object object) {
 		if (this==object) {
 			return true;
@@ -87,7 +86,7 @@ public class Attribute extends Element implements /*Comparable<Attribute>, Compa
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==maxLength? 0 : maxLength.hashCode());
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==linkURL? 0 : linkURL.hashCode());
 		return hash;
-	}
+	}*/
 	
 	public org.jdom.Element generateXml() {
 		
@@ -117,17 +116,6 @@ public class Attribute extends Element implements /*Comparable<Attribute>, Compa
 		
 		return jsoml;
 	}
-	/*public Jsoml generateOutputForWebService(boolean xml) throws FunctionalException {
-		Jsoml xmlOrJson = null;
-		if (xml) {
-			org.jdom.Element xmlElement = generateXmlForWebService();
-			xmlOrJson = new Jsoml(xmlElement);
-		} else {
-			JSONObject jsonObject = generateJsonForWebService();
-			xmlOrJson = new Jsoml(jsonObject);
-		}
-		return xmlOrJson;
-	}*/
 	public org.jdom.Element generateXmlForWebService() throws FunctionalException {
 		return generateXmlForWebService(null);
 	}

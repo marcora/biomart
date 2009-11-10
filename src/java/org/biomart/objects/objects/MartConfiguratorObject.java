@@ -14,7 +14,7 @@ import org.jdom.Element;
 import org.jdom.Namespace;
 
 
-public class MartConfiguratorObject implements Serializable /*implements Comparable<MartConfiguratorObject>, Comparator<MartConfiguratorObject>*/ {
+public class MartConfiguratorObject implements Serializable {
 
 	private static final long serialVersionUID = 3168050129952793078L;
 
@@ -76,12 +76,10 @@ public class MartConfiguratorObject implements Serializable /*implements Compara
 	@Override
 	public String toString() {
 		return 
-			/*super.toString() + ", " + */
 			"name = " + name + ", " +
 			"displayName = " + displayName + ", " +
 			"description = " + description + ", " +
-			"visible = " + visible/* + ", " +
-			"jdomElement = " + jdomElement*/;
+			"visible = " + visible;
 	}
 
 	@Override
@@ -92,27 +90,40 @@ public class MartConfiguratorObject implements Serializable /*implements Compara
 		if((object==null) || (object.getClass()!= this.getClass())) {
 			return false;
 		}
+		
+		// If not the same type or different names -> not equal
 		MartConfiguratorObject martConfiguratorObject=(MartConfiguratorObject)object;
 		return (
+				this.getClass().equals(object.getClass()) &&
+				this.name.equals(martConfiguratorObject.name)
+		);
+		/*return (
 			(this.name==martConfiguratorObject.name || (this.name!=null && name.equals(martConfiguratorObject.name))) &&
 			(this.displayName==martConfiguratorObject.displayName || (this.displayName!=null && displayName.equals(martConfiguratorObject.displayName))) &&
 			(this.description==martConfiguratorObject.description || (this.description!=null && description.equals(martConfiguratorObject.description))) &&
 			(this.visible==martConfiguratorObject.visible || (this.visible!=null && visible.equals(martConfiguratorObject.visible))) &&
 			(this.xmlElementName==martConfiguratorObject.xmlElementName || (this.xmlElementName!=null && xmlElementName.equals(martConfiguratorObject.xmlElementName)))
-		);
+		);*/
 	}
 
 	@Override
 	public int hashCode() {
 		int hash = MartConfiguratorConstants.HASH_SEED1;
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==name? 0 : name.hashCode());	// Sufficient for our system
+		return hash;
+		
+		/*int hash = MartConfiguratorConstants.HASH_SEED1;
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==name? 0 : name.hashCode());
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==displayName? 0 : displayName.hashCode());
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==description? 0 : description.hashCode());
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==visible? 0 : visible.hashCode());
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==xmlElementName? 0 : xmlElementName.hashCode());
-		return hash;
+		return hash;*/
 	}
 
+	/**
+	 * Unused for now, keep?
+	 */
 	protected int compareSuper(MartConfiguratorObject martConfiguratorObject1, MartConfiguratorObject martConfiguratorObject2) {
 		if (martConfiguratorObject1==null && martConfiguratorObject2!=null) {
 			return -1;
@@ -134,6 +145,9 @@ public class MartConfiguratorObject implements Serializable /*implements Compara
 		return CompareUtils.compareBoolean(martConfiguratorObject1.getVisible(), martConfiguratorObject2.getVisible());
 	}
 	
+	/**
+	 * For XML generation
+	 */
 	protected Element generateXml() {
 		Element jdomElement = new Element(xmlElementName);
 		MartConfiguratorUtils.addAttribute(jdomElement, "name", this.name);

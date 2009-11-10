@@ -3,16 +3,13 @@ package org.biomart.objects.objects;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
-import org.biomart.common.general.utils.CompareUtils;
-import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
 
 
 
-public class Exportable extends Portable implements Comparable<Exportable>, Comparator<Exportable>, Serializable {
+public class Exportable extends Portable implements /*Comparable<Exportable>, Comparator<Exportable>,*/ Serializable {
 
 	private static final long serialVersionUID = -6467892724196660537L;
 	
@@ -21,13 +18,15 @@ public class Exportable extends Portable implements Comparable<Exportable>, Comp
 	public static void main(String[] args) {}
 
 	private List<Attribute> attributes = null;
-	private List<String> attributeNames = null;
 	
 	// For backward compatibility
-	private Boolean formerDefault = null;
+	private Boolean formerDefault = null;	// Only mattered in the exportable
 
+	// Internal use
+	private List<String> attributeNames = null;
+	
 	public Exportable(PartitionTable mainPartitionTable, String name) {
-		super(mainPartitionTable, name, null, null, null, XML_ELEMENT_NAME);	// displayName, description & visible do not apply for that object
+		super(mainPartitionTable, name, XML_ELEMENT_NAME);	// displayName, description & visible do not apply for that object
 		
 		this.attributes = new ArrayList<Attribute>();
 		this.attributeNames = new ArrayList<String>();
@@ -42,15 +41,23 @@ public class Exportable extends Portable implements Comparable<Exportable>, Comp
 		return attributes;
 	}
 
+	public Boolean getFormerDefault() {
+		return formerDefault;
+	}
+
+	public void setFormerDefault(Boolean formerDefault) {
+		this.formerDefault = formerDefault;
+	}
+
 	@Override
 	public String toString() {
 		return 
 			super.toString() + ", " + 
-			"attributes = " + attributes + ", " + 
+			"attributeNames = " + attributeNames + ", " + 
 			"formerDefault = " + formerDefault;
 	}
 
-	@Override
+	/*@Override
 	public boolean equals(Object object) {
 		if (this==object) {
 			return true;
@@ -85,15 +92,7 @@ public class Exportable extends Portable implements Comparable<Exportable>, Comp
 
 	public int compareTo(Exportable importable) {
 		return compare(this, importable);
-	}
-
-	public Boolean getFormerDefault() {
-		return formerDefault;
-	}
-
-	public void setFormerDefault(Boolean formerDefault) {
-		this.formerDefault = formerDefault;
-	}
+	}*/
 	
 	public org.jdom.Element generateXml() {
 		org.jdom.Element element = super.generateXml();

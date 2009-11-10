@@ -29,8 +29,9 @@ public class PartitionTable extends MartConfiguratorObject implements Comparable
 	private Integer totalColumns = null;
 	private List<List<String>> table = null;
 	private Boolean flatten = null;
-	
 	private Boolean main = null;	// Whether this is the main partition table
+	
+	// Internal use
 	private Map<String, Integer> rowNameToRowNumberMap = null;
 	private Map<Integer, String> rowNumberToRowNameMap = null;
 
@@ -124,91 +125,7 @@ public class PartitionTable extends MartConfiguratorObject implements Comparable
 	public void setTable(List<List<String>> table) {
 		this.table = table;
 	}
-
-	@Override
-	public String toString() {
-		return 
-			super.toString() + ", " + 
-			"main = " + main + ", " +
-			"totalRows = " + totalRows + ", " +
-			"totalColumns = " + totalColumns + ", " +
-			"flatten = " + flatten + ", " +
-			"table.length = " + table.size()
-			+ ", " + this.hashCode();
-	}
-
-	@Override
-	public boolean equals(Object object) {
-		
-		if (this==object) {
-			return true;
-		}
-		if((object==null) || (object.getClass()!= this.getClass())) {
-			return false;
-		}
-		PartitionTable partitionTable=(PartitionTable)object;
-		return (
-			super.equals(partitionTable) &&
-			
-			(this.main==partitionTable.main || (this.main!=null && main.equals(partitionTable.main))) &&
-			(this.flatten==partitionTable.flatten || (this.flatten!=null && flatten.equals(partitionTable.flatten))) &&
-			
-			(this.totalRows==partitionTable.totalRows || (this.totalRows!=null && totalRows.equals(partitionTable.totalRows))) &&
-			(this.totalColumns==partitionTable.totalColumns || (this.totalColumns!=null && totalColumns.equals(partitionTable.totalColumns))) &&
-			
-			(this.table==partitionTable.table || (this.table!=null && table.equals(partitionTable.table)))
-		);
-	}
-
-	@Override
-	public int hashCode() {
-		int hash = MartConfiguratorConstants.HASH_SEED1;
-		
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + super.hashCode();
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==main? 0 : main.hashCode());
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==flatten? 0 : flatten.hashCode());
-		
-		/*hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==totalRows? 0 : totalRows.hashCode());
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==totalColumns? 0 : totalColumns.hashCode());
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==table? 0 : table.hashCode());*/		//FIXME don't understand that makes it crash
-		
-		return hash;
-	}
-
-	public int compare(PartitionTable partitionTable1, PartitionTable partitionTable2) {
-		if (partitionTable1==null && partitionTable2!=null) {
-			return -1;
-		} else if (partitionTable1!=null && partitionTable2==null) {
-			return 1;
-		}
-		return CompareUtils.compareString(partitionTable1.name, partitionTable2.name);
-	}
-
-	public int compareTo(PartitionTable partitionTable) {
-		return compare(this, partitionTable);
-	}
 	
-	/**
-	 * Only for the node, children are treated separately
-	 */
-	public Element generateXml() {
-		Element element = super.generateXml();
-		MartConfiguratorUtils.addAttribute(element, "rows", this.totalRows);
-		MartConfiguratorUtils.addAttribute(element, "cols", this.totalColumns);
-		MartConfiguratorUtils.addAttribute(element, "flatten", this.flatten);
-		
-		for (int i = 0; i < this.totalRows; i++) {
-			for (int j = 0; j < this.totalColumns; j++) {
-				Element cell = new Element(CELL_XML_ELEMENT_NAME);
-				MartConfiguratorUtils.addAttribute(cell, "row", i);
-				MartConfiguratorUtils.addAttribute(cell, "col", j);
-				MartConfiguratorUtils.addText(cell, this.table.get(i).get(j));				
-				element.addContent(cell);
-			}
-		}
-		
-		return element;
-	}
 	public int addRow(String value) {
 		int newRowNumber = this.totalRows;
 		List<String> list = new ArrayList<String>();
@@ -265,5 +182,90 @@ public class PartitionTable extends MartConfiguratorObject implements Comparable
 	public String getReference(int columnNumber) {
 		PartitionReference partitionReference = new PartitionReference(this, columnNumber);
 		return partitionReference.toXmlString();
+	}
+
+	@Override
+	public String toString() {
+		return 
+			super.toString() + ", " + 
+			"main = " + main + ", " +
+			"totalRows = " + totalRows + ", " +
+			"totalColumns = " + totalColumns + ", " +
+			"flatten = " + flatten + ", " +
+			"table.length = " + table.size()
+			+ ", " + this.hashCode();
+	}
+
+	/*@Override
+	public boolean equals(Object object) {
+		
+		if (this==object) {
+			return true;
+		}
+		if((object==null) || (object.getClass()!= this.getClass())) {
+			return false;
+		}
+		PartitionTable partitionTable=(PartitionTable)object;
+		return (
+			super.equals(partitionTable) &&
+			
+			(this.main==partitionTable.main || (this.main!=null && main.equals(partitionTable.main))) &&
+			(this.flatten==partitionTable.flatten || (this.flatten!=null && flatten.equals(partitionTable.flatten))) &&
+			
+			(this.totalRows==partitionTable.totalRows || (this.totalRows!=null && totalRows.equals(partitionTable.totalRows))) &&
+			(this.totalColumns==partitionTable.totalColumns || (this.totalColumns!=null && totalColumns.equals(partitionTable.totalColumns))) &&
+			
+			(this.table==partitionTable.table || (this.table!=null && table.equals(partitionTable.table)))
+		);
+	}
+
+	@Override
+	public int hashCode() {
+		int hash = MartConfiguratorConstants.HASH_SEED1;
+		
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + super.hashCode();
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==main? 0 : main.hashCode());
+		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==flatten? 0 : flatten.hashCode());
+		
+		//hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==totalRows? 0 : totalRows.hashCode());
+		//hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==totalColumns? 0 : totalColumns.hashCode());
+		//hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==table? 0 : table.hashCode());		//FIXME don't understand that makes it crash
+		
+		return hash;
+	}*/
+
+	public int compare(PartitionTable partitionTable1, PartitionTable partitionTable2) {
+		if (partitionTable1==null && partitionTable2!=null) {
+			return -1;
+		} else if (partitionTable1!=null && partitionTable2==null) {
+			return 1;
+		}
+		return CompareUtils.compareString(partitionTable1.name, partitionTable2.name);
+	}
+
+	public int compareTo(PartitionTable partitionTable) {
+		return compare(this, partitionTable);
+	}
+	
+	/**
+	 * Only for the node, children are treated separately
+	 */
+	public Element generateXml() {
+		Element element = super.generateXml();
+		MartConfiguratorUtils.addAttribute(element, "rows", this.totalRows);
+		MartConfiguratorUtils.addAttribute(element, "cols", this.totalColumns);
+		MartConfiguratorUtils.addAttribute(element, "flatten", this.flatten);
+		
+		for (int i = 0; i < this.totalRows; i++) {
+			for (int j = 0; j < this.totalColumns; j++) {
+				Element cell = new Element(CELL_XML_ELEMENT_NAME);
+				MartConfiguratorUtils.addAttribute(cell, "row", i);
+				MartConfiguratorUtils.addAttribute(cell, "col", j);
+				MartConfiguratorUtils.addText(cell, this.table.get(i).get(j));				
+				element.addContent(cell);
+			}
+		}
+		
+		return element;
 	}
 }

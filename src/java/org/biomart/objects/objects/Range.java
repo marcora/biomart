@@ -38,6 +38,22 @@ public class Range implements Serializable {
 		this.mainPartitionTable = mainPartitionTable;
 		this.mainRowsSet = new HashSet<Integer>();
 	}
+
+	public Set<Part> getPartSet() {
+		return partSet;
+	}
+
+	public Set<PartitionTable> getPartitionTableSet() {
+		return partitionTableSet;
+	}
+
+	public void setPartSet(Set<Part> partSet) {
+		this.partSet = partSet;
+	}
+
+	public void setPartitionTableSet(Set<PartitionTable> partitionTableSet) {
+		this.partitionTableSet = partitionTableSet;
+	}
 	
 	public PartitionTable getMainPartitionTable() {
 		return mainPartitionTable;
@@ -148,28 +164,14 @@ public class Range implements Serializable {
 		return stringBuffer.toString();
 	}
 
-	public Set<Part> getPartSet() {
-		return partSet;
-	}
-
-	public Set<PartitionTable> getPartitionTableSet() {
-		return partitionTableSet;
-	}
-
-	public void setPartSet(Set<Part> partSet) {
-		this.partSet = partSet;
-	}
-
-	public void setPartitionTableSet(Set<PartitionTable> partitionTableSet) {
-		this.partitionTableSet = partitionTableSet;
-	}
-
 	@Override
 	public String toString() {
 		return
 			"partSet = " + partSet + ", " +
 			"partitionTableSet = " + partitionTableSet + ", " +
-			"target = " + target;
+			"target = " + target + ", " +
+			"mainPartitionTable = " + (mainPartitionTable!=null ? mainPartitionTable.name : null) + ", " +
+			"mainRowsSet = " + mainRowsSet;
 	}
 
 	@Override
@@ -183,7 +185,6 @@ public class Range implements Serializable {
 		Range range=(Range)object;
 		return (
 			(this.partSet==range.partSet || (this.partSet!=null && partSet.equals(range.partSet))) &&
-			(this.partitionTableSet==range.partitionTableSet || (this.partitionTableSet!=null && partitionTableSet.equals(range.partitionTableSet))) &&
 			(this.target==range.target || (this.target!=null && target.equals(range.target)))
 		);
 	}
@@ -192,33 +193,8 @@ public class Range implements Serializable {
 	public int hashCode() {
 		int hash = MartConfiguratorConstants.HASH_SEED1;
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==partSet? 0 : partSet.hashCode());
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==partitionTableSet? 0 : partitionTableSet.hashCode());
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==target? 0 : target.hashCode());
 		return hash;
 	}
-
-	/*@Override
-	public int compare(Range range1, Range range2) {
-		if (range1==null && range2!=null) {
-			return -1;
-		} else if (range1!=null && range2==null) {
-			return 1;
-		}
-		int compare = CompareUtils.compareNull(range1.partSet, range2.partSet);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(range1.source, range2.source);
-		if (compare!=0) {
-			return compare;
-		}
-		return CompareUtils.compareNull(range1.partitionTableSet, range2.partitionTableSet);
-	}
-
-	@Override
-	public int compareTo(Range range) {
-		return compare(this, range);
-	}*/
 	
 	public boolean isConsistent() {
 		for (Part part : this.partSet) {
@@ -242,7 +218,7 @@ public class Range implements Serializable {
 	
 	public void addXmlAttribute (Element element, String attributeName) {
 		String xmlValue = getXmlValue();
-//		MyUtils.checkStatusProgram(!MyUtils.isEmpty(xmlValue), MartConfiguratorUtils.displayJdomElement(element));
+		//MyUtils.checkStatusProgram(!MyUtils.isEmpty(xmlValue), MartConfiguratorUtils.displayJdomElement(element));
 		element.setAttribute(attributeName, xmlValue);
 	}
 	
@@ -288,7 +264,7 @@ public class Range implements Serializable {
 	public void setTarget(Boolean target) {
 		this.target = target;
 		for (Part part : this.partSet) {
-			part.setTarget(false);
+			part.setSource();
 		}
 	}
 	
@@ -324,16 +300,7 @@ public class Range implements Serializable {
 		MyUtils.checkStatusProgram(rangeList.size()>=1);
 		Range newRange = null;
 		newRange = rangeList.get(0).cloneRange();
-		if (rangeList.size()>1 && !allEqual(rangeList)) {
-			
-	System.out.println(MyUtils.EQUAL_LINE);
-	for (int i = 0; i < rangeList.size(); i++) {
-		Range range = rangeList.get(i);
-		System.out.println(range.getXmlValue());
-	}
-	System.out.println(MyUtils.EQUAL_LINE);
-	System.out.println(allEqual(rangeList));
-			
+		if (rangeList.size()>1 && !allEqual(rangeList)) {	
 			for (int i = 1; i < rangeList.size(); i++) {
 				Range range = rangeList.get(i);
 				

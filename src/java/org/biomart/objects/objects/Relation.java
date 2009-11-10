@@ -2,7 +2,6 @@ package org.biomart.objects.objects;
 
 import java.io.Serializable;
 
-
 import org.biomart.objects.MartConfiguratorUtils;
 import org.jdom.Element;
 
@@ -15,11 +14,13 @@ public class Relation extends MartConfiguratorObject implements Serializable {
 	
 	public static void main(String[] args) {}
 
+	private RelationType type = null;
 	private Table firstTable = null;
 	private Table secondTable = null;
+
+	// Redundant
 	private String firstKey = null;
 	private String secondKey = null;
-	private RelationType type = null;
 
 	public Relation(String name, Table firstTable, Table secondTable, String firstKey, String secondKey, RelationType type) {
 		super(name, null, null, null, XML_ELEMENT_NAME);	// displayName, description & visible do not apply for that object
@@ -71,14 +72,19 @@ public class Relation extends MartConfiguratorObject implements Serializable {
 		}
 		Relation relation=(Relation)object;
 		return (
-			super.name.equals(relation.name)
+			(super.equals(relation)) &&
+			(this.firstTable==relation.firstTable || (this.firstTable!=null && firstTable.equals(relation.firstTable))) &&
+			(this.secondTable==relation.secondTable || (this.secondTable!=null && secondTable.equals(relation.secondTable))) &&
+			(this.firstKey==relation.firstKey || (this.firstKey!=null && firstKey.equals(relation.firstKey))) &&
+			(this.secondKey==relation.secondKey || (this.secondKey!=null && secondKey.equals(relation.secondKey))) &&
+			(this.type==relation.type || (this.type!=null && type.equals(relation.type)))
 		);
 	}
 
-	@Override
+	/*@Override
 	public int hashCode() {
 		return super.hashCode();
-	}
+	}*/
 	
 	/**
 	 * Only for the node, children are treated separately

@@ -3,16 +3,13 @@ package org.biomart.objects.objects;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
-import org.biomart.common.general.utils.CompareUtils;
-import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
 
 
 
-public class Importable extends Portable implements Comparable<Importable>, Comparator<Importable>, Serializable {
+public class Importable extends Portable implements /*Comparable<Importable>, Comparator<Importable>,*/ Serializable {
 
 	private static final long serialVersionUID = -7990001822496911207L;
 	
@@ -21,10 +18,12 @@ public class Importable extends Portable implements Comparable<Importable>, Comp
 	public static void main(String[] args) {}
 
 	private List<Filter> filters = null;
+	
+	// Redundant
 	private List<String> filterNames = null;
 
 	public Importable(PartitionTable mainPartitionTable, String name) {
-		super(mainPartitionTable, name, null, null, null, XML_ELEMENT_NAME);	// displayName, description & visible do not apply for that object
+		super(mainPartitionTable, name, XML_ELEMENT_NAME);	// displayName, description & visible do not apply for that object
 		
 		this.filters = new ArrayList<Filter>();
 		this.filterNames = new ArrayList<String>();
@@ -43,10 +42,10 @@ public class Importable extends Portable implements Comparable<Importable>, Comp
 	public String toString() {
 		return 
 			super.toString() + ", " + 
-			"filters = " + filters;
+			"filterNames = " + filterNames;
 	}
 
-	@Override
+	/*@Override
 	public boolean equals(Object object) {
 		if (this==object) {
 			return true;
@@ -79,7 +78,7 @@ public class Importable extends Portable implements Comparable<Importable>, Comp
 
 	public int compareTo(Importable importable) {
 		return compare(this, importable);
-	}
+	}*/
 	
 	public org.jdom.Element generateXml() {
 		org.jdom.Element element = super.generateXml();

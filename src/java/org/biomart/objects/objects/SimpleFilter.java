@@ -9,7 +9,6 @@ import net.sf.json.JSONObject;
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.utils.MyUtils;
 import org.biomart.martRemote.Jsoml;
-import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.objects.data.TreeFilterData;
 import org.jdom.Namespace;
@@ -22,22 +21,26 @@ public class SimpleFilter extends Filter implements Serializable {
 	public static void main(String[] args) {}
 
 	protected String displayType = null;
-	protected String orderBy = null;	// TODO Make <field> an object so we reference it instead of keeping the name?
 	protected Boolean multiValue = null;	// Not sure applicable for trees
+	protected String orderBy = null;	// TODO Make <field> an object so we reference it instead of keeping the name?
 	protected String buttonURL = null;
 	protected Boolean upload = null;
+	
+	// For List filters only
 	protected HashSet<SimpleFilter> cascadeChildren = null;
 	
+	// For Booleans filters
 	protected String trueValue = null;
 	protected String trueDisplay = null;
 	protected String falseValue = null;
 	protected String falseDisplay = null;
-	
+
+	// For Partitions filters
 	protected Boolean partition = null;
 	
 	// For internal use only
 	protected HashSet<String> cascadeChildrenNamesList = null;
-	protected Boolean tree = null;
+	protected Boolean tree = null;	//TODO internal use?
 	protected TreeFilterData treeFilterData = null;
 	
 	public SimpleFilter(Container parentContainer, PartitionTable mainPartitionTable, String name) {
@@ -58,21 +61,21 @@ public class SimpleFilter extends Filter implements Serializable {
 			super.toString() + ", " +
 			"displayType = " + displayType + ", " + 
 			"multiValue = " + multiValue + ", " +
-			"partition = " + partition + ", " +
+			"orderBy = " + orderBy + ", " +
+			"buttonURL = " + buttonURL + ", " +
+			"upload = " + upload + ", " +
+			
+			"cascadeChildrenNamesList = " + (cascadeChildrenNamesList!=null ? cascadeChildrenNamesList : null) + ", " +
 			
 			"trueValue = " + trueValue + ", " +
 			"trueDisplay = " + trueDisplay + ", " +
 			"falseValue = " + falseValue + ", " +
 			"falseDisplay = " + falseDisplay + ", " +
 			
-			"upload = " + upload + ", " +
-			
-			"cascadeChildren = " + (cascadeChildren!=null ? cascadeChildren.size() : null) + ", " +
-			
-			"buttonURL = " + buttonURL;
+			"partition = " + partition;
 	}
 
-	@Override
+	/*@Override
 	public boolean equals(Object object) {
 		if (this==object) {
 			return true;
@@ -126,7 +129,7 @@ public class SimpleFilter extends Filter implements Serializable {
 		//hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==treeFilterData? 0 : treeFilterData.hashCode());
 
 		return hash;
-	}
+	}*/
 
 	// List related
 	public HashSet<String> getCascadeChildrenNamesList() {
@@ -156,6 +159,56 @@ public class SimpleFilter extends Filter implements Serializable {
 		return this.treeFilterData = treeFilterData;
 	}
 
+	public Boolean getTree() {
+		return tree;
+	}
+
+	public void setTree(Boolean tree) {
+		this.tree = tree;
+	}
+
+	// Partition related
+	public Boolean getPartition() {
+		return partition;
+	}
+	
+	public void setPartition(Boolean partition) {
+		this.partition = partition;
+	}
+	
+	// Boolean related
+	public String getFalseDisplay() {
+		return falseDisplay;
+	}
+
+	public void setFalseDisplay(String falseDisplay) {
+		this.falseDisplay = falseDisplay;
+	}
+
+	public String getFalseValue() {
+		return falseValue;
+	}
+
+	public void setFalseValue(String falseValue) {
+		this.falseValue = falseValue;
+	}
+
+	public String getTrueDisplay() {
+		return trueDisplay;
+	}
+
+	public void setTrueDisplay(String trueDisplay) {
+		this.trueDisplay = trueDisplay;
+	}
+
+	public String getTrueValue() {
+		return trueValue;
+	}
+
+	public void setTrueValue(String trueValue) {
+		this.trueValue = trueValue;
+	}
+
 	// Other
 	public String getDisplayType() {
 		return displayType;
@@ -181,22 +234,6 @@ public class SimpleFilter extends Filter implements Serializable {
 		this.buttonURL = buttonURL;
 	}
 
-	public String getFalseDisplay() {
-		return falseDisplay;
-	}
-
-	public void setFalseDisplay(String falseDisplay) {
-		this.falseDisplay = falseDisplay;
-	}
-
-	public String getFalseValue() {
-		return falseValue;
-	}
-
-	public void setFalseValue(String falseValue) {
-		this.falseValue = falseValue;
-	}
-
 	public Boolean getMultiValue() {
 		return multiValue;
 	}
@@ -205,44 +242,12 @@ public class SimpleFilter extends Filter implements Serializable {
 		this.multiValue = multiValue;
 	}
 
-	public Boolean getPartition() {
-		return partition;
-	}
-	
-	public void setPartition(Boolean partition) {
-		this.partition = partition;
-	}
-	
-	public String getTrueDisplay() {
-		return trueDisplay;
-	}
-
-	public void setTrueDisplay(String trueDisplay) {
-		this.trueDisplay = trueDisplay;
-	}
-
-	public String getTrueValue() {
-		return trueValue;
-	}
-
-	public void setTrueValue(String trueValue) {
-		this.trueValue = trueValue;
-	}
-
 	public Boolean getUpload() {
 		return upload;
 	}
 
 	public void setUpload(Boolean upload) {
 		this.upload = upload;
-	}
-
-	public Boolean getTree() {
-		return tree;
-	}
-
-	public void setTree(Boolean tree) {
-		this.tree = tree;
 	}
 	
 	public org.jdom.Element generateXml() {
@@ -270,7 +275,7 @@ public class SimpleFilter extends Filter implements Serializable {
 			MartConfiguratorUtils.addAttribute(element, "falseDisplay", this.falseDisplay);
 		} else if (!this.pointer && this.partition) {
 			MartConfiguratorUtils.addAttribute(element, "partition", this.partition);
-		}
+		} // if pointers then taken care of in the super call
 		
 		return element;
 	}
@@ -338,17 +343,6 @@ public class SimpleFilter extends Filter implements Serializable {
 		
 		return jsoml;
 	}
-	/*public Jsoml generateOutputForWebService(boolean xml) throws FunctionalException {
-		Jsoml xmlOrJson = null;
-		if (xml) {
-			org.jdom.Element xmlElement = generateXmlForWebService();
-			xmlOrJson = new Jsoml(xmlElement);
-		} else {
-			JSONObject jsonObject = generateJsonForWebService();
-			xmlOrJson = new Jsoml(jsonObject);
-		}
-		return xmlOrJson;
-	}*/
 	public org.jdom.Element generateXmlForWebService() throws FunctionalException {
 		return generateXmlForWebService(null);
 	}

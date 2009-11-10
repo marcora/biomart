@@ -3,20 +3,17 @@ package org.biomart.objects.objects;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
-import org.biomart.common.general.utils.CompareUtils;
-import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.jdom.Element;
 
 
-public class Location extends MartConfiguratorObject implements Comparable<Location>, Comparator<Location>, Serializable {
+public class Location extends MartConfiguratorObject implements Serializable {
 
 	private static final long serialVersionUID = 3492546591865583968L;
 	
-	public static final String XML_ELEMENT_NAME = "location";
+	public static final String XML_ELEMENT_NAME = "location2";
 	
 	public static void main(String[] args) {}
 
@@ -62,7 +59,8 @@ public class Location extends MartConfiguratorObject implements Comparable<Locat
 			super.toString() + ", " + 
 			"host = " + host + ", " + 
 			"user = " + user + ", " + 
-			"type = " + type;
+			"type = " + type + ", " + 
+			"martList.size() = " + martList.size();
 	}
 
 	@Override
@@ -77,13 +75,11 @@ public class Location extends MartConfiguratorObject implements Comparable<Locat
 		return (
 			super.equals(location) &&
 			(this.host==location.host || (this.host!=null && host.equals(location.host))) &&
-			(this.user==location.user || (this.user!=null && user.equals(location.user))) &&
 			(this.type==location.type || (this.type!=null && type.equals(location.type)))
-			//TODO martList?
 		);
 	}
 
-	@Override
+	/*@Override
 	public int hashCode() {
 		int hash = MartConfiguratorConstants.HASH_SEED1;
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + super.hashCode();
@@ -92,9 +88,9 @@ public class Location extends MartConfiguratorObject implements Comparable<Locat
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==type? 0 : type.hashCode());
 		//TODO martList?
 		return hash;
-	}
+	}*/
 
-	public int compare(Location location1, Location location2) {
+	/*public int compare(Location location1, Location location2) {
 		if (location1==null && location2!=null) {
 			return -1;
 		} else if (location1!=null && location2==null) {
@@ -105,7 +101,7 @@ public class Location extends MartConfiguratorObject implements Comparable<Locat
 
 	public int compareTo(Location location) {
 		return compare(this, location);
-	}
+	}*/
 	
 	/**
 	 * Only for the node, children are treated separately

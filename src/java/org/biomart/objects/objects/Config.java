@@ -3,16 +3,13 @@ package org.biomart.objects.objects;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
-import org.biomart.common.general.utils.CompareUtils;
-import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.jdom.Element;
 
 
-public class Config extends MartConfiguratorObject implements Comparable<Config>, Comparator<Config>, Serializable {
+public class Config extends MartConfiguratorObject implements Serializable {
 
 	private static final long serialVersionUID = -4824812826795490022L;
 
@@ -56,11 +53,18 @@ public class Config extends MartConfiguratorObject implements Comparable<Config>
 		this.datasetName = datasetName;
 	}
 
+	public List<Container> getContainerList() {
+		return containerList;
+	}
+
 	@Override
 	public String toString() {
 		return 
 			super.toString() + ", " +
-			"datasetName = " + datasetName;
+			"datasetName = " + datasetName + ", " +
+			"importableList.size() = " + importableList.size() + ", " +
+			"exportableList.size() = " + exportableList.size() + ", " +
+			"containerList.size() = " + containerList.size();
 	}
 
 	@Override
@@ -74,19 +78,19 @@ public class Config extends MartConfiguratorObject implements Comparable<Config>
 		Config config=(Config)object;
 		return (
 			super.equals(config) &&
-			(this.datasetName==config.datasetName || (this.datasetName!=null && datasetName.equals(config.datasetName)))
+			(this.datasetName==config.datasetName || (this.datasetName!=null && datasetName.equals(config.datasetName)))	// check dataset name too
 		);
 	}
 
-	@Override
+	/*@Override
 	public int hashCode() {
 		int hash = MartConfiguratorConstants.HASH_SEED1;
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + super.hashCode();
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==datasetName? 0 : datasetName.hashCode());
 		return hash;
-	}
+	}*/
 
-	public int compare(Config config1, Config config2) {
+	/*public int compare(Config config1, Config config2) {
 		if (config1==null && config2!=null) {
 			return -1;
 		} else if (config1!=null && config2==null) {
@@ -97,7 +101,7 @@ public class Config extends MartConfiguratorObject implements Comparable<Config>
 
 	public int compareTo(Config config) {
 		return compare(this, config);
-	}
+	}*/
 	
 	public Element generateXml() {
 		Element element = super.generateXml();
@@ -116,9 +120,5 @@ public class Config extends MartConfiguratorObject implements Comparable<Config>
 		}
 		
 		return element;
-	}
-
-	public List<Container> getContainerList() {
-		return containerList;
 	}
 }

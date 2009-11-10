@@ -6,7 +6,6 @@ import net.sf.json.JSONObject;
 
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.martRemote.Jsoml;
-import org.biomart.objects.MartConfiguratorConstants;
 import org.jdom.Element;
 import org.jdom.Namespace;
 
@@ -17,6 +16,7 @@ public class Containee extends MartConfiguratorObject implements Serializable {
 
 	public static void main(String[] args) {}
 	
+	// Redundant
 	protected Container parentContainer = null;	// The parent container if any
 
 	public Containee() {} 	// for Serialization
@@ -29,14 +29,6 @@ public class Containee extends MartConfiguratorObject implements Serializable {
 		return parentContainer;
 	}
 
-	/**
-	 * Have to specify it manually sometimes
-	 * @param parentContainer
-	 */
-	public void setParentContainer(Container parentContainer) {
-		this.parentContainer = parentContainer;
-	}
-
 	@Override
 	public String toString() {
 		return 
@@ -44,7 +36,7 @@ public class Containee extends MartConfiguratorObject implements Serializable {
 			"parentContainer = " + (null==parentContainer ? null : parentContainer.getName());
 	}
 
-	@Override
+	/*@Override
 	public boolean equals(Object object) {
 		if (this==object) {
 			return true;
@@ -65,7 +57,7 @@ public class Containee extends MartConfiguratorObject implements Serializable {
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + super.hashCode();
 		//TODO parentContainer?
 		return hash;
-	}
+	}*/
 	
 	protected Element generateXml() {
 		return super.generateXml();
@@ -89,16 +81,6 @@ public class Containee extends MartConfiguratorObject implements Serializable {
 	
 	protected Jsoml generateOutputForWebService(boolean xml) throws FunctionalException {
 		return super.generateOutputForWebService(xml);
-		
-		/*Jsoml xmlOrJson = null;
-		if (xml) {
-			Element xmlElement = generateXmlForWebService();
-			xmlOrJson = new Jsoml(xmlElement);
-		} else {
-			JSONObject jsonObject = generateJsonForWebService();
-			xmlOrJson = new Jsoml(jsonObject);
-		}
-		return xmlOrJson;*/
 	}
 	
 	protected Element generateXmlForWebService(boolean recursively) throws FunctionalException {
@@ -111,10 +93,7 @@ public class Containee extends MartConfiguratorObject implements Serializable {
 		return generateXmlForWebService(null);
 	}
 	protected Element generateXmlForWebService(Namespace namespace) throws FunctionalException {
-		Element jdomObject = super.generateXmlForWebService(namespace);
-		/*jdomObject.setAttribute("parentContainer", this.parentContainer!=null ? this.parentContainer.name : "null");	// to comply with XSD
-																														//MartConfiguratorUtils.addAttribute(jdomObject, "parentContainer", this.parentContainer!=null ? this.parentContainer.name : null);*/
-		return jdomObject;
+		return super.generateXmlForWebService(namespace);
 	}
 	protected JSONObject generateJsonForWebService() {
 		return super.generateJsonForWebService();
