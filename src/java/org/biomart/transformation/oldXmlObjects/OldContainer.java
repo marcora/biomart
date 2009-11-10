@@ -213,8 +213,8 @@ public class OldContainer extends OldNode /*implements Comparable<OldContainer>,
 		return compare(this, oldContainer);
 	}*/
 	
-	public Container transform(Container parentContainer, int level, Integer queryRestriction) {
-		Container container = new Container(parentContainer, this.internalName, this.displayName, this.description, !this.hideDisplay, 
+	public Container transform(int level, Integer queryRestriction) {
+		Container container = new Container(this.internalName, this.displayName, this.description, !this.hideDisplay, 
 				queryRestriction);
 		return container;	
 	}

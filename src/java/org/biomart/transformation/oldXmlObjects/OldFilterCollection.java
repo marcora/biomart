@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.utils.MyUtils;
 import org.biomart.objects.MartConfiguratorConstants;
@@ -107,7 +106,7 @@ public class OldFilterCollection extends OldFilterContainer /*implements Compara
 	
 	public Container transform(Container parentPageContainer, Container parentGroupContainer, 
 			Map<ContainerPath, List<OldElement>> oldFilterDescriptionMap) {
-		Container container = super.transform(parentGroupContainer, TransformationConstants.COLLECTION_CONTAINER_LEVEL, null);  // no query restriction on pages, only in attribute collections
+		Container container = super.transform(TransformationConstants.COLLECTION_CONTAINER_LEVEL, null);  // no query restriction on pages, only in attribute collections
 		
 		// Delegate transformation of attribute description to the Transformation classes
 		for (OldElement oldElementDescription : this.oldElementDescriptionList) {

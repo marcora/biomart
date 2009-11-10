@@ -31,15 +31,15 @@ public class Filter extends org.biomart.objects.objects.Element	// to avoid any 
 	private FilterData filterData = null;
 	
 	public Filter() {} 	// for Serialization
-	protected Filter(Container parentContainer, PartitionTable mainPartitionTable, String name) {
-		this(parentContainer, mainPartitionTable, name, 
+	protected Filter(PartitionTable mainPartitionTable, String name) {
+		this(mainPartitionTable, name, 
 				null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
 	}
-	protected Filter(Container parentContainer, PartitionTable mainPartitionTable, String name, String displayName, String description, Boolean visible, 
+	protected Filter(PartitionTable mainPartitionTable, String name, String displayName, String description, Boolean visible, 
 			String locationName, String martName, Integer version, String datasetName, String configName, String tableName, String keyName, String fieldName, 
 			List<String> targetRangeList, Boolean selectedByDefault, Boolean pointer, String pointedElementName, Boolean checkForNulls, 
 			List<String> sourceRangeList) {
-		super(mainPartitionTable, name, displayName, description, visible, XML_ELEMENT_NAME, parentContainer,
+		super(mainPartitionTable, name, displayName, description, visible, XML_ELEMENT_NAME, 
 				locationName, martName, version, datasetName, configName, tableName, keyName, fieldName, targetRangeList, selectedByDefault, 
 				pointer, pointedElementName, checkForNulls, sourceRangeList);
 	}

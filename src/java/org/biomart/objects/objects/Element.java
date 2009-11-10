@@ -45,10 +45,10 @@ public class Element extends Containee implements Serializable {
 	protected List<PartitionTable> otherPartitionTableList = null;
 	
 	public Element() {} 	// for Serialization
-	protected Element(PartitionTable mainPartitionTable, String name, String displayName, String description, Boolean visible, String xmlElementName, Container parentContainer,
+	protected Element(PartitionTable mainPartitionTable, String name, String displayName, String description, Boolean visible, String xmlElementName,
 			String locationName, String martName, Integer version, String datasetName, String configName, String tableName, String keyName, String fieldName, 
 			List<String> targetRangeList, Boolean selectedByDefault, Boolean pointer, String pointedElementName, Boolean checkForNulls, List<String> sourceRangeList) {
-		super(name, displayName, description, visible, xmlElementName, parentContainer);
+		super(name, displayName, description, visible, xmlElementName);
 		
 		this.locationName = locationName;
 		this.martName = martName;
@@ -313,6 +313,7 @@ public class Element extends Containee implements Serializable {
 	protected Element(Element element, Part part) {	// creates a light clone (temporary solution)
 		super(element, part);		
 		
+		this.pointer = false;	// no pointers for mart service
 		super.visible = null;	// irrelevant for elements
 		this.selectedByDefault = element.selectedByDefault;
 	}

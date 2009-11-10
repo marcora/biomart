@@ -44,19 +44,19 @@ public class DummyPortal {
 		
 		Container rootContainer = config.getRootContainer();
 		
-		Container container0 = new Container(null, "container0", "container0", "container0", true, null);
+		Container container0 = new Container("container0", "container0", "container0", true, null);
 		rootContainer.addContainer(container0);
 		
-		Container container1 = new Container(null, "container1", "container1", "container1", true, null);
+		Container container1 = new Container("container1", "container1", "container1", true, null);
 		rootContainer.addContainer(container1);
 		
-		Attribute attribute = new Attribute(container0, mainPartitionTable, "attribute");
+		Attribute attribute = new Attribute(mainPartitionTable, "attribute");
 		attribute.setPointer(false);
 		container0.addAttribute(attribute);
 		
-		SimpleFilter simpleFilter0 = new SimpleFilter(container0, mainPartitionTable, "simpleFilter0", false);
-		SimpleFilter simpleFilter1 = new SimpleFilter(container0, mainPartitionTable, "simpleFilter1", false);
-		SimpleFilter simpleFilter2 = new SimpleFilter(container0, mainPartitionTable, "simpleFilter2", false);
+		SimpleFilter simpleFilter0 = new SimpleFilter(mainPartitionTable, "simpleFilter0", false);
+		SimpleFilter simpleFilter1 = new SimpleFilter(mainPartitionTable, "simpleFilter1", false);
+		SimpleFilter simpleFilter2 = new SimpleFilter(mainPartitionTable, "simpleFilter2", false);
 		simpleFilter0.setPointer(false);
 		simpleFilter1.setPointer(false);
 		simpleFilter2.setPointer(false);
@@ -64,7 +64,7 @@ public class DummyPortal {
 		container0.addFilter(simpleFilter1);
 		container0.addFilter(simpleFilter2);
 		
-		GroupFilter groupFilter = new GroupFilter(container1, mainPartitionTable, "groupFilter");
+		GroupFilter groupFilter = new GroupFilter(mainPartitionTable, "groupFilter");
 		groupFilter.addSimpleFilter(simpleFilter0);
 		groupFilter.addSimpleFilter(simpleFilter1);
 		groupFilter.addSimpleFilter(simpleFilter2);

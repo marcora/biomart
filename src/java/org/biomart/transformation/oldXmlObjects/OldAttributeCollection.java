@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.utils.MyUtils;
 import org.biomart.objects.MartConfiguratorConstants;
@@ -122,7 +121,7 @@ public class OldAttributeCollection extends OldAttributeContainer /*implements C
 	
 	public Container transform(Container parentPageContainer, Container parentGroupContainer, 
 			Map<ContainerPath, List<OldElement>> oldAttributeDescriptionMap) {
-		Container container = super.transform(parentGroupContainer, TransformationConstants.COLLECTION_CONTAINER_LEVEL, this.maxSelect);
+		Container container = super.transform(TransformationConstants.COLLECTION_CONTAINER_LEVEL, this.maxSelect);
 		
 		// Delegate transformation of attribute description to the Transformation classes
 		for (OldElement oldElementDescription : this.oldElementDescriptionList) {

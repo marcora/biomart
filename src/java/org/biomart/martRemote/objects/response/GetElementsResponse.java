@@ -25,9 +25,10 @@ public abstract class GetElementsResponse extends GetContaineesResponse {
 		super.populateObjects();
 		
 		// Grab only the elements of interest
-		for (Container container : this.containerList) {
+		addElements(super.rootContainer, attribute);
+		/*for (Container container : this.containerList) {
 			addElements(container, attribute);
-		}
+		}*/
 	}
 	private void addElements(Container container, boolean attribute) {
 		List<Containee> containeeList = container.getContaineeList();

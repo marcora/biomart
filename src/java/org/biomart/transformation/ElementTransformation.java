@@ -243,13 +243,13 @@ public abstract class ElementTransformation {
 		return elementName;
 	}
 	
-	protected Element transformElementIndependently(Container container, OldElement oldElement, Integer currentMainRow, 
+	protected Element transformElementIndependently(OldElement oldElement, Integer currentMainRow, 
 			List<Integer> mainRowsList, DimensionPartition dimensionPartition, String elementName, Boolean forcedVisibility,
 			FilterDisplayType nonSpecificFilterDisplayType) throws FunctionalException, TechnicalException {
 		
 		Element newElement = isAttribute ? 
-				createNewAttribute(container, (OldAttribute)oldElement, currentMainRow, mainRowsList, dimensionPartition) : 
-				createNewFilter(container, (OldFilter)oldElement, currentMainRow, mainRowsList, dimensionPartition, forcedVisibility, nonSpecificFilterDisplayType);
+				createNewAttribute((OldAttribute)oldElement, currentMainRow, mainRowsList, dimensionPartition) : 
+				createNewFilter((OldFilter)oldElement, currentMainRow, mainRowsList, dimensionPartition, forcedVisibility, nonSpecificFilterDisplayType);
 		
 		String warningMessage = "No combination of table+key+field exists in the database for " + 
 		(isAttribute ? ATTRIBUTE_STRING : FILTER_STRING) + ": " + 
@@ -261,10 +261,10 @@ public abstract class ElementTransformation {
 		return newElement;
 	}
 	
-	abstract Attribute createNewAttribute(Container parentContainer, OldAttribute oldAttribute, Integer currentMainRowNumber, List<Integer> mainRowsList,
+	abstract Attribute createNewAttribute(OldAttribute oldAttribute, Integer currentMainRowNumber, List<Integer> mainRowsList,
 			DimensionPartition dimensionPartition) throws FunctionalException, TechnicalException;
 	
-	abstract Filter createNewFilter(Container parentContainer, OldFilter oldFilter, Integer currentMainRowNumber, List<Integer> mainRowsList,
+	abstract Filter createNewFilter(OldFilter oldFilter, Integer currentMainRowNumber, List<Integer> mainRowsList,
 			DimensionPartition dimensionPartition, Boolean forcedVisibility, FilterDisplayType nonSpecificFilterDisplayType) 
 	throws FunctionalException, TechnicalException;
 	

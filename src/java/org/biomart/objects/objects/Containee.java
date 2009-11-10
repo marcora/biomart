@@ -14,11 +14,16 @@ public class Containee extends MartConfiguratorObject implements Serializable {
 	public static void main(String[] args) {}
 	
 	// Redundant
+	protected Integer level = null;
 	protected Container parentContainer = null;	// The parent container if any
 
 	public Containee() {} 	// for Serialization
-	public Containee(String name, String displayName, String description, Boolean visible, String xmlElementName, Container parentContainer) {
+	public Containee(String name, String displayName, String description, Boolean visible, String xmlElementName) {
 		super(name, displayName, description, visible, xmlElementName);
+	}
+	
+	public void setParentContainer(Container parentContainer) {
+		this.level = this.parentContainer==null ? 0 : this.parentContainer.level+1;
 		this.parentContainer = parentContainer;
 	}
 	
@@ -26,10 +31,15 @@ public class Containee extends MartConfiguratorObject implements Serializable {
 		return parentContainer;
 	}
 
+	public Integer getLevel() {
+		return level;
+	}
+
 	@Override
 	public String toString() {
 		return 
 			super.toString() + ", " + 
+			"level = " + level + ", " +
 			"parentContainer = " + (null==parentContainer ? null : parentContainer.getName());
 	}
 

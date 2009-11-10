@@ -72,7 +72,7 @@ public class AttributeTransformation extends ElementTransformation {
 			
 		// Tranform
 		Attribute independentAttribute = (Attribute)transformElementIndependently(
-				container, oldAttribute, currentMainRowNumber, mainRowsList, dimensionPartition, attributeName, null, null);
+				oldAttribute, currentMainRowNumber, mainRowsList, dimensionPartition, attributeName, null, null);
 		if (null==independentAttribute) {
 			return null;
 		}
@@ -148,7 +148,7 @@ public class AttributeTransformation extends ElementTransformation {
 	}
 
 	@Override
-	Filter createNewFilter(Container parentContainer, OldFilter oldFilter, Integer currentMainRowNumber, List<Integer> mainRowsList,
+	Filter createNewFilter(OldFilter oldFilter, Integer currentMainRowNumber, List<Integer> mainRowsList,
 			DimensionPartition dimensionPartition, Boolean forcedVisibility,
 			FilterDisplayType nonSpecificFilterDisplayType) throws FunctionalException, TechnicalException {
 		MyUtils.errorProgram("Shouldn't be here");
@@ -156,14 +156,14 @@ public class AttributeTransformation extends ElementTransformation {
 	}
 	
 	@Override
-	public Attribute createNewAttribute(Container parentContainer, OldAttribute oldAttribute, Integer currentMainRowNumber, List<Integer> mainRowsList,
+	public Attribute createNewAttribute(OldAttribute oldAttribute, Integer currentMainRowNumber, List<Integer> mainRowsList,
 			DimensionPartition dimensionPartition) throws FunctionalException, TechnicalException {
 		
 		PartitionTable mainPartitionTable = vars.getMainPartitionTable();	// Used thoroughly here		
 		String attributeName = help.replaceAliases(oldAttribute.getInternalName());
 		Boolean pointer = oldAttribute.getPointer();
 		
-		Attribute newAttribute = new Attribute(parentContainer, mainPartitionTable, attributeName);
+		Attribute newAttribute = new Attribute(mainPartitionTable, attributeName);
 				
 		// Add ranges
 		updateRangeWithMainPartition(oldAttribute, currentMainRowNumber, mainRowsList, mainPartitionTable, newAttribute, null);

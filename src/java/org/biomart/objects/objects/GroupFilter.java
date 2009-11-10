@@ -23,8 +23,8 @@ public class GroupFilter extends Filter implements Serializable {
 	private List<String> filterNamesList = null;
 
 	public GroupFilter() {}
-	public GroupFilter(Container parentContainer, PartitionTable mainPartitionTable, String name) {
-		super(parentContainer, mainPartitionTable, name);
+	public GroupFilter(PartitionTable mainPartitionTable, String name) {
+		super(mainPartitionTable, name);
 		this.filterList = new ArrayList<SimpleFilter>();
 		this.filterNamesList = new ArrayList<String>();
 	}

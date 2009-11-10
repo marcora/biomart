@@ -40,11 +40,11 @@ public class SimpleFilter extends Filter implements Serializable {
 	protected Boolean tree = null;	//TODO internal use?
 	protected TreeFilterData treeFilterData = null;
 	
-	public SimpleFilter(Container parentContainer, PartitionTable mainPartitionTable, String name) {
-		this(parentContainer, mainPartitionTable, name, false);
+	public SimpleFilter(PartitionTable mainPartitionTable, String name) {
+		this(mainPartitionTable, name, false);
 	}
-	public SimpleFilter(Container parentContainer, PartitionTable mainPartitionTable, String name, Boolean tree) {
-		super(parentContainer, mainPartitionTable, name);
+	public SimpleFilter(PartitionTable mainPartitionTable, String name, Boolean tree) {
+		super(mainPartitionTable, name);
 		
 		this.cascadeChildren = new HashSet<SimpleFilter>();
 		this.cascadeChildrenNamesList = new HashSet<String>();

@@ -68,10 +68,10 @@ private static boolean COMPACT = false;
 		String type = 
 			//"getRegistry";
 			//"getDatasets";
-			//"getRootContainer";
+			"getRootContainer";
 			//"getAttributes";
 			//"getFilters";
-			"query";
+			//"query";
 		String username = "anonymous";
 		String password = "";
 		String martName = MartRemoteConstants.WEB_PORTAL ? 

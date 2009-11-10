@@ -100,7 +100,7 @@ public class OldFilterGroup extends OldFilterContainer /*implements Comparable<O
 	}*/
 	
 	public Container transform(Container parentPageContainer, Map<ContainerPath, List<OldElement>> oldFilterDescriptionMap) {
-		Container container = super.transform(parentPageContainer, TransformationConstants.GROUP_CONTAINER_LEVEL, null);  // no query restriction on pages, only in attribute collections
+		Container container = super.transform(TransformationConstants.GROUP_CONTAINER_LEVEL, null);  // no query restriction on pages, only in attribute collections
 		
 		// Transform the filter collections
 		for (OldFilterCollection oldFilterCollection : this.oldFilterCollectionList) {

@@ -100,7 +100,7 @@ public class OldAttributePage extends OldAttributeContainer /*implements Compara
 	}*/
 	
 	public Container transform(Container parentContainer, Map<ContainerPath, List<OldElement>> oldAttributeDescriptionMap) {
-		Container container = super.transform(parentContainer, TransformationConstants.PAGE_CONTAINER_LEVEL, null);  // no query restriction on pages, only in attribute collections
+		Container container = super.transform(TransformationConstants.PAGE_CONTAINER_LEVEL, null);  // no query restriction on pages, only in attribute collections
 		
 		// Transform the attribute groups
 		for (OldAttributeGroup oldAttributeGroup : this.oldAttributeGroupList) {

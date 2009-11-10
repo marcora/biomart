@@ -16,13 +16,14 @@ import org.biomart.objects.objects.PartitionTable;
 
 public abstract class GetContaineesResponse extends MartRemoteResponse {
 
-	protected List<Container> containerList = null;
+	//protected List<Container> containerList = null;
+	protected Container rootContainer = null;
 
 	private Dataset dataset = null;
 	
 	protected GetContaineesResponse(MartRegistry martRegistry, MartRemoteRequest martServiceRequest) {
 		super(martRegistry, martServiceRequest);
-		this.containerList = new ArrayList<Container>();
+		//this.containerList = new ArrayList<Container>();
 	}
 
 	public void populateObjects() throws FunctionalException {
@@ -50,7 +51,7 @@ public abstract class GetContaineesResponse extends MartRemoteResponse {
 	
 	private void fetchContainerList() throws FunctionalException {
 		GetContaineesRequest getContaineesRequest = (GetContaineesRequest)super.martRemoteRequest;
-		this.containerList = new ArrayList<Container>();
+		//this.containerList = new ArrayList<Container>();
 		if (dataset!=null) {
 			List<Config> configList = dataset.getConfigList();
 			Config config = configList.get(0);	// For now always just 1 config per dataset
@@ -70,7 +71,8 @@ public abstract class GetContaineesResponse extends MartRemoteResponse {
 
 			System.out.println("mainRowNumbersWanted = " + mainRowNumbersWanted);
 
-			
+			this.rootContainer = new Container(config.getRootContainer(), mainRowNumbersWanted);
+			//container.parentContainer!=null ? new Container(null, container.parentContainer.name, null, null, null, null) : null
 			
 			/*for (Container container : config.getContainerList()) {
 				if (container.getVisible()) {

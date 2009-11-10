@@ -107,7 +107,7 @@ public class FilterTransformation extends ElementTransformation {
 		FilterDisplayType nonSpecificFilterDisplayType = FilterDisplayType.fromValue(nonSpecificFilterDisplayTypeValue);
 
 		Filter independentFilter = (Filter)transformElementIndependently(
-				container, oldFilter, currentMainRowNumber, mainRowsList, dimensionPartition, filterName, forcedVisibility, 
+				oldFilter, currentMainRowNumber, mainRowsList, dimensionPartition, filterName, forcedVisibility, 
 				nonSpecificFilterDisplayType);
 		if (null==independentFilter) {
 			return null;
@@ -577,21 +577,21 @@ public class FilterTransformation extends ElementTransformation {
 
 	private SimpleFilter transformPushAction(Container container, PartitionTable mainPartitionTable, OldPushAction oldPushAction) throws FunctionalException {
 		String pushActionName = oldPushAction.getInternalName();	// former 'ref'
-		SimpleFilter pushActionFilter = new SimpleFilter(container, mainPartitionTable, pushActionName);
+		SimpleFilter pushActionFilter = new SimpleFilter(mainPartitionTable, pushActionName);
 		pushActionFilter.setDataFolderPath(params.getDefaultDataFolderPath());	// We know for sure it has data by there
 		this.pushActionMap.put(pushActionFilter.getName(), pushActionFilter);
 		return pushActionFilter;
 	}
 
 	@Override
-	Attribute createNewAttribute(Container parentContainer, OldAttribute oldAttribute, Integer currentMainRowNumber, List<Integer> mainRowsList,
+	Attribute createNewAttribute(OldAttribute oldAttribute, Integer currentMainRowNumber, List<Integer> mainRowsList,
 			DimensionPartition dimensionPartition) throws FunctionalException, TechnicalException {
 		MyUtils.errorProgram("Shouldn't be here");
 		return null;
 	}
 	
 	@Override
-	Filter createNewFilter(Container parentContainer, OldFilter oldFilter, Integer currentMainRowNumber, List<Integer> mainRowsList,
+	Filter createNewFilter(OldFilter oldFilter, Integer currentMainRowNumber, List<Integer> mainRowsList,
 			DimensionPartition dimensionPartition, Boolean forcedVisibility, FilterDisplayType nonSpecificFilterDisplayType) 
 			throws FunctionalException, TechnicalException {
 		
@@ -614,16 +614,16 @@ public class FilterTransformation extends ElementTransformation {
 		if (!oldFilter.getHasFilterList()) {
 			if (pointer || null!=filterType) {
 				boolean tree = FilterDisplayType.TREE.equals(filterType);
-				newFilter = new SimpleFilter(parentContainer, mainPartitionTable, filterName, tree);
+				newFilter = new SimpleFilter(mainPartitionTable, filterName, tree);
 					
 			} else {	// groupFilter
 				MyUtils.checkStatusProgram(null==filterType);
-				newFilter = new GroupFilter(parentContainer, mainPartitionTable, filterName);
+				newFilter = new GroupFilter(mainPartitionTable, filterName);
 			}
 		} else {
 			MyUtils.checkStatusProgram(FilterDisplayType.TEXTFIELD.equals(filterType) || FilterDisplayType.LIST.equals(filterType), 
 					filterType + ", " + MartConfiguratorUtils.displayJdomElement(oldFilter.getJdomElement()));		// case like "chromosome_region"
-			newFilter = new GroupFilter(parentContainer, mainPartitionTable, filterName);
+			newFilter = new GroupFilter(mainPartitionTable, filterName);
 		}
 
 		boolean filterGroup = oldFilter.isFilterGroup();
@@ -1019,12 +1019,10 @@ System.out.println("#2" + MartConfiguratorUtils.displayJdomElement(newFilter.gen
 
 	public void createMainPartitionFilter(Config config, PartitionTable mainPartitionTable) throws FunctionalException {
 
-		Container rootContainer = config.getRootContainer();
 		Container partitionFilterContainer = new Container(
-				rootContainer, TransformationConstants.PARTITION_FILTERS_CONTAINER_NAME, TransformationConstants.PARTITION_FILTERS_CONTAINER_DISPLAY_NAME,
+				TransformationConstants.PARTITION_FILTERS_CONTAINER_NAME, TransformationConstants.PARTITION_FILTERS_CONTAINER_DISPLAY_NAME,
 				null, true, null);
-		SimpleFilter mainPartitionFilter = new SimpleFilter(
-				partitionFilterContainer, mainPartitionTable, TransformationConstants.MAIN_PARTITION_FILTER_NAME);
+		SimpleFilter mainPartitionFilter = new SimpleFilter(mainPartitionTable, TransformationConstants.MAIN_PARTITION_FILTER_NAME);
 		mainPartitionFilter.setDisplayName(TransformationConstants.MAIN_PARTITION_FILTER_DISPLAY_NAME);
 		mainPartitionFilter.setVisible(true);
 		mainPartitionFilter.setSelectedByDefault(false);
@@ -1047,6 +1045,8 @@ System.out.println("#2" + MartConfiguratorUtils.displayJdomElement(newFilter.gen
 		
 		partitionFilterContainer.addFilter(mainPartitionFilter);
 		vars.getFilterMap().put(mainPartitionFilter.getName(), mainPartitionFilter);
+		
+		Container rootContainer = config.getRootContainer();
 		rootContainer.addContainer(partitionFilterContainer);
 	}
 }

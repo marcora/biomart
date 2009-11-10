@@ -23,15 +23,15 @@ public class Attribute extends Element implements /*Comparable<Attribute>, Compa
 	private String linkURL = null;
 
 	public Attribute() {}
-	public Attribute(Container parentContainer, PartitionTable mainPartitionTable, String name) {
-		this(parentContainer, mainPartitionTable, name, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+	public Attribute(PartitionTable mainPartitionTable, String name) {
+		this(mainPartitionTable, name, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
 	}
-	public Attribute(Container parentContainer, PartitionTable mainPartitionTable, String name, String displayName, String description, Boolean visible, 
+	public Attribute(PartitionTable mainPartitionTable, String name, String displayName, String description, Boolean visible, 
 			String locationName, String martName, Integer version, String datasetName, String configName, String tableName, String keyName, String fieldName, 
 			List<String> targetRangeList, Boolean selectedByDefault, Boolean pointer, String pointedElementName, Boolean checkForNulls, 
 			List<String> sourceRangeList,
 			Integer maxLength, String linkURL) {
-		super(mainPartitionTable, name, displayName, description, visible, XML_ELEMENT_NAME, parentContainer,
+		super(mainPartitionTable, name, displayName, description, visible, XML_ELEMENT_NAME,
 				locationName, martName, version, datasetName, configName, tableName, keyName, fieldName, targetRangeList, selectedByDefault, 
 				pointer, pointedElementName, checkForNulls, sourceRangeList);
 		this.maxLength = maxLength;

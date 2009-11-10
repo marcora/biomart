@@ -1,7 +1,5 @@
 package org.biomart.martRemote.objects.response;
 
-import java.util.List;
-
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.martRemote.Jsoml;
 import org.biomart.martRemote.objects.request.MartRemoteRequest;
@@ -13,8 +11,11 @@ public class GetRootContainerResponse extends GetContaineesResponse {
 	public GetRootContainerResponse(MartRegistry martRegistry, MartRemoteRequest martServiceRequest) {
 		super(martRegistry, martServiceRequest);
 	}
-	public List<Container> getContainerList() {
+	/*public List<Container> getContainerList() {
 		return super.containerList;
+	}*/
+	public Container getRootContainer() {
+		return super.rootContainer;
 	}
 	public void populateObjects() throws FunctionalException {
 		super.populateObjects();
@@ -22,34 +23,10 @@ public class GetRootContainerResponse extends GetContaineesResponse {
 	
 	@Override
 	public Jsoml createOutputResponse(boolean xml, Jsoml root) throws FunctionalException {
-		for (Container container : this.containerList) {
+		root.addContent(super.rootContainer.generateOutputForWebService(xml));
+		/*for (Container container : this.containerList) {
 			root.addContent(container.generateOutputForWebService(xml));
-		}
+		}*/
 		return root;
 	}
-	/*protected Document createXmlResponse(Document document) throws FunctionalException {
-		Element root = document.getRootElement();
-		for (Container container : this.containerList) {
-			root.addContent(container.generateOutputForWebService(true).getXmlElement());
-					//.generateXmlForWebService());
-		}
-		return document;
-	}
-	protected JSONObject createJsonResponse(String responseName) {
-		JSONArray array = new JSONArray();
-		
-		for (Container container : this.containerList) {
-			try {
-				array.add(container.generateOutputForWebService(false).getJsonObject());
-			} catch (FunctionalException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-					//generateJsonForWebService());
-		}
-		
-		JSONObject root = new JSONObject();
-		root.put(martRemoteRequest.getType().getResponseName(), array);
-		return root;
-	}*/
 }

@@ -221,7 +221,6 @@
 		<xs:attribute name="visible" type="tns:visibleType" use="required" />
 		<xs:attribute name="description" type="tns:descriptionType" use="optional" />
 		
-		<xs:attribute name="level" type="xs:integer" use="required" />
 		<xs:attribute name="queryRestriction" type="xs:integer" use="optional" />
 	</xs:complexType>
 	
