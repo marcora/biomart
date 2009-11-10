@@ -70,11 +70,13 @@ public abstract class GetContaineesResponse extends MartRemoteResponse {
 
 			System.out.println("mainRowNumbersWanted = " + mainRowNumbersWanted);
 
-			for (Container container : config.getContainerList()) {
+			
+			
+			/*for (Container container : config.getContainerList()) {
 				if (container.getVisible()) {
 					this.containerList.add(new Container(container, mainRowNumbersWanted));
 				}
-			}
+			}*/
 		}
 	}
 }

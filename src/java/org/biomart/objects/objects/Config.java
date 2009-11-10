@@ -20,10 +20,10 @@ public class Config extends MartConfiguratorObject implements Serializable {
 	public static void main(String[] args) {}
 
 	private String datasetName = null;
-	
+	private Container rootContainer = null;
+
 	private List<Importable> importableList = null;
 	private List<Exportable> exportableList = null;
-	private List<Container> containerList = null;
 
 	public Config(String name,  
 			String datasetName) {
@@ -32,7 +32,8 @@ public class Config extends MartConfiguratorObject implements Serializable {
 		
 		this.importableList = new ArrayList<Importable>();
 		this.exportableList = new ArrayList<Exportable>();
-		this.containerList = new ArrayList<Container>();
+		
+		this.rootContainer = Container.createRootContainer();
 	}
 	
 	
@@ -42,9 +43,6 @@ public class Config extends MartConfiguratorObject implements Serializable {
 	public void addExportable(Exportable exportable) {
 		this.exportableList.add(exportable);
 	}
-	public void addContainer(Container container) {
-		this.containerList.add(container);
-	}
 
 
 	public List<Importable> getImportableList() {
@@ -52,9 +50,6 @@ public class Config extends MartConfiguratorObject implements Serializable {
 	}
 	public List<Exportable> getExportableList() {
 		return new ArrayList<Exportable>(this.exportableList);
-	}
-	public List<Container> getContainerList() {
-		return new ArrayList<Container>(this.containerList);
 	}
 	
 	
@@ -64,10 +59,12 @@ public class Config extends MartConfiguratorObject implements Serializable {
 	public Exportable getExportable(String name) {
 		return (Exportable)super.getMartConfiguratorObjectByName(this.exportableList, name);
 	}
-	public Container getContainer(String name) {
-		return (Container)super.getMartConfiguratorObjectByName(this.containerList, name);
-	}
 
+
+	
+	public Container getRootContainer() {
+		return rootContainer;
+	}
 	
 	public String getDatasetName() {
 		return datasetName;
@@ -82,9 +79,9 @@ public class Config extends MartConfiguratorObject implements Serializable {
 		return 
 			super.toString() + ", " +
 			"datasetName = " + datasetName + ", " +
+			"rootContainer = " + rootContainer + ", " +
 			"importableList.size() = " + importableList.size() + ", " +
-			"exportableList.size() = " + exportableList.size() + ", " +
-			"containerList.size() = " + containerList.size();
+			"exportableList.size() = " + exportableList.size();
 	}
 
 	@Override
@@ -135,9 +132,7 @@ public class Config extends MartConfiguratorObject implements Serializable {
 			element.addContent(exportable.generateXml());
 		}
 
-		for (Container container : this.containerList) {
-			element.addContent(container.generateXml());
-		}
+		element.addContent(this.rootContainer.generateXml());
 		
 		return element;
 	}

@@ -317,18 +317,6 @@ private static boolean COMPACT = false;
 				return writeXmlResponse(document, writer);					
 			}
 		} else if (martServiceResponse.getMartServiceRemote().getFormat().isJson()) {
-			/*JSONObject jsonObject = martServiceResponse.getJsonObject2();
-			if (martServiceResponse.isValid()) {					
-				return writeJsonResponse(jsonObject, writer);
-			}*/
-			/*JSON json = martServiceResponse.getJsonObject2();
-			if (martServiceResponse.isValid()) {					
-				return writeJsonResponse(json, writer);
-			}*/
-			/*org.json.JSONObject jsonObject = martServiceResponse.getJsonObject();
-			if (martServiceResponse.isValid()) {					
-				return writeJsonResponse(jsonObject, writer);
-			}*/
 			JSONObject jSONObject = martServiceResponse.getJsonObject(this.debug, writer);
 			if (martServiceResponse.isValid()) {					
 				return writeJsonResponse(jSONObject, writer);
@@ -369,18 +357,18 @@ private static boolean COMPACT = false;
 			}
 		}
 		return json.toString().substring(0, 1000);
-	}*/
+	}
 	@Deprecated
 	public String writeJsonResponse(org.json.JSONObject root, Writer writer) throws TechnicalException {
-		/*if (null!=writer && COMPACT) {
+		if (null!=writer && COMPACT) {
 			try {
 				writer.append(JsonUtils.getJSONObjectNiceString(root) + MyUtils.LINE_SEPARATOR);
 			} catch (IOException e) {
 				throw new TechnicalException(e);
 			}
-		}*/
+		}
 		return root.toString();
-	}
+	}*/
 	
 	public String writeError(StringBuffer errorMessage, Writer writer) throws TechnicalException {
 		String message = "ERROR" + MyUtils.LINE_SEPARATOR + errorMessage;

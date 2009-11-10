@@ -9,6 +9,7 @@ import java.util.Set;
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.configurator.utils.type.McNodeType;
 import org.biomart.martRemote.Jsoml;
+import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.jdom.Element;
 
@@ -33,9 +34,8 @@ public class Container extends Containee implements Serializable {
 	
 	public Container() {}
 	public Container(Container parentContainer, String name, String displayName, String description, Boolean visible,
-			Integer level, Integer queryRestriction) {
+			Integer queryRestriction) {
 		super(name, displayName, description, visible, XML_ELEMENT_NAME, parentContainer);
-		this.level = level;
 		this.queryRestriction = queryRestriction;
 		
 		this.containeeList = new ArrayList<Containee>();
@@ -43,6 +43,15 @@ public class Container extends Containee implements Serializable {
 		this.containerList = new ArrayList<Container>();
 		this.filterList = new ArrayList<Filter>();
 		this.attributeList = new ArrayList<Attribute>();
+
+		this.level = this.parentContainer==null ? 0 : this.parentContainer.level+1;
+	}
+	
+	public static Container createRootContainer() {
+		Container rootContainer = new Container(null,	// only one with no parent
+				MartConfiguratorConstants.ROOT_CONTAINER_NAME, MartConfiguratorConstants.ROOT_CONTAINER_DISPLAY_NAME, 
+				MartConfiguratorConstants.ROOT_CONTAINER_DISPLAY_NAME, true, null);
+		return rootContainer;
 	}
 	
 	public void addContainer(Container container) {
@@ -85,7 +94,6 @@ public class Container extends Containee implements Serializable {
 	public Filter getFilter(String name) {
 		return (Filter)super.getMartConfiguratorObjectByName(this.filterList, name);
 	}
-	
 	
 	public Integer getLevel() {
 		return level;
@@ -191,9 +199,8 @@ public class Container extends Containee implements Serializable {
 	
 	public Container(Container container, List<Integer> mainRowNumbersWanted) throws FunctionalException {	// creates a light clone (temporary solution)
 		this(
-				container.parentContainer!=null ? new Container(null, container.parentContainer.name, null, null, null, null, null) : null,	// just to have the name 
-				container.name, container.displayName, container.description, container.visible, 
-				container.level, container.queryRestriction);
+				container.parentContainer!=null ? new Container(null, container.parentContainer.name, null, null, null, null) : null,	// just to have the name 
+				container.name, container.displayName, container.description, container.visible, container.queryRestriction);
 		
 		for (Containee containee : container.containeeList) {
 			if (containee instanceof Container) {

@@ -22,6 +22,9 @@ public class MartConfiguratorConstants {
 	
 	public static final String PARTITION_TABLE_EMPTY_VALUE = "";
 	
+	public static final String ROOT_CONTAINER_NAME = "rootContainer";
+	public static final String ROOT_CONTAINER_DISPLAY_NAME = "Root";
+	
 	// Find better names
 	public static final String RANGE_PARTITION_TABLE_PREFIX = "P";
 	public static final String RANGE_PARTITION_TABLE_REFERENCE_START = "(";

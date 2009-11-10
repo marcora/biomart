@@ -42,13 +42,12 @@ public class DummyPortal {
 		table.add(new ArrayList<String>(Arrays.asList(new String[] {"row2"})));
 		PartitionTable mainPartitionTable = new PartitionTable("0", 3, 1, table, true);
 		
-		Container rootContainer = new Container(null, "root0", "root0", "root0", true, 0, null);
-		config.addContainer(rootContainer);
+		Container rootContainer = config.getRootContainer();
 		
-		Container container0 = new Container(null, "container0", "container0", "container0", true, 1, null);
+		Container container0 = new Container(null, "container0", "container0", "container0", true, null);
 		rootContainer.addContainer(container0);
 		
-		Container container1 = new Container(null, "container1", "container1", "container1", true, 1, null);
+		Container container1 = new Container(null, "container1", "container1", "container1", true, null);
 		rootContainer.addContainer(container1);
 		
 		Attribute attribute = new Attribute(container0, mainPartitionTable, "attribute");

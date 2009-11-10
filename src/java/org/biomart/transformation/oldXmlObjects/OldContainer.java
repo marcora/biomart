@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.objects.Container;
@@ -215,8 +214,8 @@ public class OldContainer extends OldNode /*implements Comparable<OldContainer>,
 	}*/
 	
 	public Container transform(Container parentContainer, int level, Integer queryRestriction) {
-		Container container = new Container(parentContainer, this.internalName, this.displayName, this.description, !this.hideDisplay,
-				level, queryRestriction);
+		Container container = new Container(parentContainer, this.internalName, this.displayName, this.description, !this.hideDisplay, 
+				queryRestriction);
 		return container;	
 	}
 

@@ -105,6 +105,7 @@ public class DatasetTransformation {
 		// Transform DatasetConfig node and create a default config based on it
 		this.dataset = oldDatasetConfig.transformToDataset(newDatasetName, help);
 		Config config = oldDatasetConfig.transformToConfig();
+		Container rootContainer = config.getRootContainer();
 		vars.getCurrentPath().setDatasetAndConfig(dataset, config);
 		vars.setDataset(this.dataset);
 
@@ -148,15 +149,15 @@ public class DatasetTransformation {
 		// Transform the filter pages, group & collections (not the composing filters -> later)
 		Map<ContainerPath, List<OldElement>> oldFilterDescriptionMap = new LinkedHashMap<ContainerPath, List<OldElement>>();
 		for (OldFilterPage oldFilterPage : oldDatasetConfig.getOldFilterPageList()) {
-			Container container = oldFilterPage.transform(oldFilterDescriptionMap);//TODO
-			config.addContainer(container);
+			Container container = oldFilterPage.transform(rootContainer, oldFilterDescriptionMap);//TODO
+			rootContainer.addContainer(container);
 		}
 		
 		// Transform the attribute pages, group & collections (not the composing attributes -> later)
 		Map<ContainerPath, List<OldElement>> oldAttributeDescriptionMap = new LinkedHashMap<ContainerPath, List<OldElement>>();
 		for (OldAttributePage oldAttributePage : oldDatasetConfig.getOldAttributePageList()) {
-			Container container = oldAttributePage.transform(oldAttributeDescriptionMap);
-			config.addContainer(container);
+			Container container = oldAttributePage.transform(rootContainer, oldAttributeDescriptionMap);
+			rootContainer.addContainer(container);
 		}
 		dataset.addConfig(config);
 		

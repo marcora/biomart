@@ -1018,9 +1018,11 @@ System.out.println("#2" + MartConfiguratorUtils.displayJdomElement(newFilter.gen
 	}
 
 	public void createMainPartitionFilter(Config config, PartitionTable mainPartitionTable) throws FunctionalException {
+
+		Container rootContainer = config.getRootContainer();
 		Container partitionFilterContainer = new Container(
-				null, TransformationConstants.PARTITION_FILTERS_CONTAINER_NAME, TransformationConstants.PARTITION_FILTERS_CONTAINER_DISPLAY_NAME,
-				null, true, 0, null);
+				rootContainer, TransformationConstants.PARTITION_FILTERS_CONTAINER_NAME, TransformationConstants.PARTITION_FILTERS_CONTAINER_DISPLAY_NAME,
+				null, true, null);
 		SimpleFilter mainPartitionFilter = new SimpleFilter(
 				partitionFilterContainer, mainPartitionTable, TransformationConstants.MAIN_PARTITION_FILTER_NAME);
 		mainPartitionFilter.setDisplayName(TransformationConstants.MAIN_PARTITION_FILTER_DISPLAY_NAME);
@@ -1045,7 +1047,7 @@ System.out.println("#2" + MartConfiguratorUtils.displayJdomElement(newFilter.gen
 		
 		partitionFilterContainer.addFilter(mainPartitionFilter);
 		vars.getFilterMap().put(mainPartitionFilter.getName(), mainPartitionFilter);
-		config.addContainer(partitionFilterContainer);
+		rootContainer.addContainer(partitionFilterContainer);
 	}
 }
 
