@@ -2,6 +2,7 @@ package org.biomart.objects.objects;
 
 
 import java.io.Serializable;
+import java.util.Collection;
 
 import net.sf.json.JSONObject;
 
@@ -17,7 +18,7 @@ import org.jdom.Namespace;
 public class MartConfiguratorObject implements Serializable {
 
 	private static final long serialVersionUID = 3168050129952793078L;
-
+	
 	public static void main(String[] args) {}
 
 	protected String name = null;
@@ -35,6 +36,21 @@ public class MartConfiguratorObject implements Serializable {
 		this.displayName = displayName;
 		this.description = description;
 		this.visible = visible;
+	}
+
+	/**
+	 * Will pick the first element in case of name conflict... TODO throw exception then?
+	 * @param list
+	 * @param name
+	 * @return
+	 */
+	public MartConfiguratorObject getMartConfiguratorObjectByName(Collection<? extends MartConfiguratorObject> list, String name) {
+		for (MartConfiguratorObject mco : list) {
+			if (mco.equals(mco.name)) {
+				return mco;
+			}
+		}
+		return null;
 	}
 
 	public String getXmlElementName() {

@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.biomart.configurator.utils.type.McNodeType;
 import org.biomart.objects.MartConfiguratorUtils;
 
 
@@ -14,6 +15,7 @@ public class Exportable extends Portable implements /*Comparable<Exportable>, Co
 	private static final long serialVersionUID = -6467892724196660537L;
 	
 	public static final String XML_ELEMENT_NAME = "exportable";
+	public static final McNodeType MC_NODE_TYPE = null;
 	
 	public static void main(String[] args) {}
 
@@ -38,7 +40,11 @@ public class Exportable extends Portable implements /*Comparable<Exportable>, Co
 	}
 
 	public List<Attribute> getAttributes() {
-		return attributes;
+		return new ArrayList<Attribute>(attributes);
+	}
+	
+	public Attribute getAttribute(String name) {
+		return (Attribute)super.getMartConfiguratorObjectByName(this.attributes, name);
 	}
 
 	public Boolean getFormerDefault() {

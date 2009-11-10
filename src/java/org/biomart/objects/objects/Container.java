@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.biomart.common.general.exceptions.FunctionalException;
+import org.biomart.configurator.utils.type.McNodeType;
 import org.biomart.martRemote.Jsoml;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.jdom.Element;
@@ -17,6 +18,7 @@ public class Container extends Containee implements Serializable {
 	private static final long serialVersionUID = 8818099786702183740L;
 	
 	public static final String XML_ELEMENT_NAME = "container";
+	public static final McNodeType MC_NODE_TYPE = McNodeType.Container;
 	
 	public static void main(String[] args) {}
 
@@ -47,39 +49,50 @@ public class Container extends Containee implements Serializable {
 		this.containerList.add(container);
 		this.containeeList.add(container);
 	}
-	
 	public void addFilter(Filter filter) {
 		this.filterList.add(filter);
 		this.containeeList.add(filter);
 	}
-	
 	public void addAttribute(Attribute attribute) {
 		this.attributeList.add(attribute);
 		this.containeeList.add(attribute);
 	}
+	
+	
+	public List<Containee> getContaineeList() {
+		return new ArrayList<Containee>(this.containeeList);
+	}
+	public List<Container> getContainerList() {
+		return new ArrayList<Container>(containerList);
+	}
+	public List<Filter> getFilterList() {
+		return new ArrayList<Filter>(filterList);
+	}
+	public List<Attribute> getAttributeList() {
+		return new ArrayList<Attribute>(attributeList);
+	}
 
+
+	public Containee getContainee(String name) {
+		return (Containee)super.getMartConfiguratorObjectByName(this.containeeList, name);
+	}
+	public Container getContainer(String name) {
+		return (Container)super.getMartConfiguratorObjectByName(this.containerList, name);
+	}
+	public Attribute getAttribute(String name) {
+		return (Attribute)super.getMartConfiguratorObjectByName(this.attributeList, name);
+	}
+	public Filter getFilter(String name) {
+		return (Filter)super.getMartConfiguratorObjectByName(this.filterList, name);
+	}
+	
+	
 	public Integer getLevel() {
 		return level;
 	}
 
-	public List<Containee> getContaineeList() {
-		return containeeList;
-	}
-
 	public Integer getQueryRestriction() {
 		return queryRestriction;
-	}
-
-	public List<Container> getContainerList() {
-		return containerList;
-	}
-
-	public List<Filter> getFilterList() {
-		return filterList;
-	}
-
-	public List<Attribute> getAttributeList() {
-		return attributeList;
 	}
 
 	public void setLevel(Integer level) {

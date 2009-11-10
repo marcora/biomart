@@ -4,12 +4,10 @@ package org.biomart.objects.objects;
 import java.io.Serializable;
 import java.util.List;
 
-import net.sf.json.JSONObject;
-
 import org.biomart.common.general.exceptions.FunctionalException;
+import org.biomart.configurator.utils.type.McNodeType;
 import org.biomart.martRemote.Jsoml;
 import org.biomart.objects.MartConfiguratorUtils;
-import org.jdom.Namespace;
 
 
 public class Attribute extends Element implements /*Comparable<Attribute>, Comparator<Attribute>, */Serializable {
@@ -17,6 +15,7 @@ public class Attribute extends Element implements /*Comparable<Attribute>, Compa
 	private static final long serialVersionUID = 3472755898394368045L;
 	
 	public static final String XML_ELEMENT_NAME = "attribute";
+	public static final McNodeType MC_NODE_TYPE = McNodeType.Attribute;
 	
 	public static void main(String[] args) {}
 
@@ -93,6 +92,7 @@ public class Attribute extends Element implements /*Comparable<Attribute>, Compa
 		org.jdom.Element element = super.generateXml();
 		MartConfiguratorUtils.addAttribute(element, "maxLength", this.maxLength);
 		MartConfiguratorUtils.addAttribute(element, "linkURL", this.linkURL);
+		
 		return element;
 	}
 	
@@ -106,7 +106,6 @@ public class Attribute extends Element implements /*Comparable<Attribute>, Compa
 		this.maxLength = attribute.maxLength;
 		this.linkURL = MartConfiguratorUtils.replacePartitionReferencesByValues(attribute.linkURL, part);
 	}
-	
 
 	public Jsoml generateOutputForWebService(boolean xml) throws FunctionalException {
 		Jsoml jsoml = super.generateOutputForWebService(xml);
@@ -115,26 +114,5 @@ public class Attribute extends Element implements /*Comparable<Attribute>, Compa
 		jsoml.setAttribute("linkURL", this.linkURL);
 		
 		return jsoml;
-	}
-	public org.jdom.Element generateXmlForWebService() throws FunctionalException {
-		return generateXmlForWebService(null);
-	}
-	public org.jdom.Element generateXmlForWebService(Namespace namespace) throws FunctionalException {
-		org.jdom.Element jdomObject = super.generateXmlForWebService(namespace);
-		
-		MartConfiguratorUtils.addAttribute(jdomObject, "maxLength", this.maxLength);
-		MartConfiguratorUtils.addAttribute(jdomObject, "linkURL", this.linkURL);
-		
-		return jdomObject;
-	}
-	public JSONObject generateJsonForWebService() {
-		JSONObject jsonObject = super.generateJsonForWebService();
-		
-		JSONObject object = (JSONObject)jsonObject.get(super.xmlElementName);
-		object.put("maxLength", this.maxLength);
-		object.put("linkURL", this.linkURL);
-		
-		jsonObject.put(super.xmlElementName, object);
-		return jsonObject;
 	}
 }

@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 
 import org.biomart.common.general.utils.CompareUtils;
+import org.biomart.configurator.utils.type.McNodeType;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.jdom.Element;
@@ -17,6 +18,7 @@ public class Table extends MartConfiguratorObject implements Comparable<Table>, 
 	
 	public static final String XML_ELEMENT_NAME = "table";
 	public static final String COLUMN_XML_ELEMENT_NAME = "column";
+	public static final McNodeType MC_NODE_TYPE = null;
 	
 	public static void main(String[] args) {}
 

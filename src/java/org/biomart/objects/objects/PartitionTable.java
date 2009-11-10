@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.biomart.common.general.utils.CompareUtils;
 import org.biomart.common.general.utils.MyUtils;
+import org.biomart.configurator.utils.type.McNodeType;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.objects.helpers.PartitionReference;
@@ -22,6 +23,7 @@ public class PartitionTable extends MartConfiguratorObject implements Comparable
 	
 	public static final String XML_ELEMENT_NAME = "partitionTable";
 	public static final String CELL_XML_ELEMENT_NAME = "cell";
+	public static final McNodeType MC_NODE_TYPE = null;
 	
 	public static void main(String[] args) {}
 
@@ -108,10 +110,6 @@ public class PartitionTable extends MartConfiguratorObject implements Comparable
 
 	public Integer getTotalColumns() {
 		return totalColumns;
-	}
-
-	public List<List<String>> getTable() {
-		return table;
 	}
 
 	public void setTotalRows(Integer totalRows) {

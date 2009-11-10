@@ -2,6 +2,7 @@ package org.biomart.objects.objects;
 
 import java.io.Serializable;
 
+import org.biomart.configurator.utils.type.McNodeType;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.jdom.Element;
 
@@ -11,6 +12,7 @@ public class Relation extends MartConfiguratorObject implements Serializable {
 	private static final long serialVersionUID = 7272012626195036989L;
 	
 	public static final String XML_ELEMENT_NAME = "relation";
+	public static final McNodeType MC_NODE_TYPE = null;
 	
 	public static void main(String[] args) {}
 

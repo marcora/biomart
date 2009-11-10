@@ -7,7 +7,7 @@ import java.util.List;
 import org.jdom.Element;
 
 
-public class MartRegistry implements Serializable {
+public class MartRegistry extends MartConfiguratorObject implements Serializable {
 
 	private static final long serialVersionUID = 4555425904982314129L;
 	
@@ -22,12 +22,14 @@ public class MartRegistry implements Serializable {
 		this.locationList = new ArrayList<Location>();
 	}
 
-	public List<Location> getLocationList() {
-		return locationList;
-	}
-	
 	public void addLocation(Location location) {
 		this.locationList.add(location);
+	}
+	public List<Location> getLocationList() {
+		return new ArrayList<Location>(this.locationList);
+	}	
+	public Location getLocation(String name) {
+		return (Location)super.getMartConfiguratorObjectByName(this.locationList, name);
 	}
 
 	@Override

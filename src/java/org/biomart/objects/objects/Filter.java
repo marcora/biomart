@@ -5,14 +5,12 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.List;
 
-import net.sf.json.JSONObject;
-
 import org.biomart.common.general.exceptions.FunctionalException;
+import org.biomart.configurator.utils.type.McNodeType;
 import org.biomart.martRemote.Jsoml;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.objects.data.FilterData;
 import org.biomart.objects.data.TreeFilterData;
-import org.jdom.Namespace;
 
 
 public class Filter extends org.biomart.objects.objects.Element	// to avoid any ambiguity with jdom's 
@@ -21,6 +19,7 @@ public class Filter extends org.biomart.objects.objects.Element	// to avoid any 
 	private static final long serialVersionUID = 8117878349721027751L;
 	
 	public static final String XML_ELEMENT_NAME = "filter";
+	public static final McNodeType MC_NODE_TYPE = McNodeType.Filter;
 	
 	public static void main(String[] args) {}
 
@@ -172,32 +171,5 @@ public class Filter extends org.biomart.objects.objects.Element	// to avoid any 
 		}
 		
 		return jsoml;
-	}
-	public org.jdom.Element generateXmlForWebService() throws FunctionalException {
-		return generateXmlForWebService(null);
-	}
-	public org.jdom.Element generateXmlForWebService(Namespace namespace) throws FunctionalException {
-		org.jdom.Element jdomObject = super.generateXmlForWebService(namespace);
-		
-		MartConfiguratorUtils.addAttribute(jdomObject, "qualifier", this.qualifier);
-		MartConfiguratorUtils.addAttribute(jdomObject, "caseSensitive", this.caseSensitive);
-		if (this.filterData!=null) {
-			jdomObject.addContent(this.filterData.generateXml(true));
-		}
-		
-		return jdomObject;
-	}
-	public JSONObject generateJsonForWebService() {
-		JSONObject jsonObject = super.generateJsonForWebService();
-		
-		JSONObject object = (JSONObject)jsonObject.get(super.xmlElementName);
-		object.put("qualifier", this.qualifier);
-		object.put("caseSensitive", this.caseSensitive);
-		if (this.filterData!=null) {
-			object.put(FilterData.XML_ELEMENT_NAME, this.filterData.generateJson(true));
-		}
-		
-		jsonObject.put(super.xmlElementName, object);
-		return jsonObject;
 	}
 }

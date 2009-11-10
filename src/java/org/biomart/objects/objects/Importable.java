@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.biomart.configurator.utils.type.McNodeType;
 import org.biomart.objects.MartConfiguratorUtils;
 
 
@@ -14,6 +15,7 @@ public class Importable extends Portable implements /*Comparable<Importable>, Co
 	private static final long serialVersionUID = -7990001822496911207L;
 	
 	public static final String XML_ELEMENT_NAME = "importable";
+	public static final McNodeType MC_NODE_TYPE = null;
 	
 	public static void main(String[] args) {}
 
@@ -35,7 +37,11 @@ public class Importable extends Portable implements /*Comparable<Importable>, Co
 	}
 
 	public List<Filter> getFilters() {
-		return filters;
+		return new ArrayList<Filter>(filters);
+	}
+	
+	public Filter getFilter(String name) {
+		return (Filter)super.getMartConfiguratorObjectByName(this.filters, name);
 	}
 
 	@Override

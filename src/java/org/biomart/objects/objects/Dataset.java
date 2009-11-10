@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.biomart.configurator.utils.type.McNodeType;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.jdom.Element;
 
@@ -13,6 +14,7 @@ public class Dataset extends MartConfiguratorObject implements Serializable {
 	private static final long serialVersionUID = 1514366091760993846L;
 
 	public static final String XML_ELEMENT_NAME = "dataset";
+	public static final McNodeType MC_NODE_TYPE = McNodeType.DataSet;
 	
 	public static void main(String[] args) {}
 
@@ -37,29 +39,52 @@ public class Dataset extends MartConfiguratorObject implements Serializable {
 		this.tableList = new ArrayList<Table>();
 		this.relationList = new ArrayList<Relation>();
 	}
-	
-	public void addConfig(Config config) {
-		this.configList.add(config);
-	}
-	
-	public void addMainPartitionTable(PartitionTable partitionTable) {
-		addPartitionTable(partitionTable);
-		this.mainPartitionTable = partitionTable;
-	}
-	public void addPartitionTable(PartitionTable partitionTable) {
-		this.partitionTableList.add(partitionTable);
-	}
-	
-	public PartitionTable getMainPartitionTable() {
-		return mainPartitionTable;
-	}
+
 	
 	public void addTable(Table table) {
 		this.tableList.add(table);
 	}
-	
 	public void addRelation(Relation relation) {
 		this.relationList.add(relation);
+	}
+	public void addConfig(Config config) {
+		this.configList.add(config);
+	}
+	public void addPartitionTable(PartitionTable partitionTable) {
+		if (partitionTable.getMain()) {
+			this.mainPartitionTable = partitionTable;
+		}
+		this.partitionTableList.add(partitionTable);
+	}
+
+	public List<Config> getConfigList() {
+		return new ArrayList<Config>(this.configList);
+	}
+	public List<PartitionTable> getPartitionTableList() {
+		return new ArrayList<PartitionTable>(partitionTableList);
+	}
+	public List<Table> getTableList() {
+		return new ArrayList<Table>(tableList);
+	}
+	public List<Relation> getRelationList() {
+		return new ArrayList<Relation>(relationList);
+	}
+
+	public Config getConfig(String name) {
+		return (Config)super.getMartConfiguratorObjectByName(this.configList, name);
+	}
+	public PartitionTable getPartitionTable(String name) {
+		return (PartitionTable)super.getMartConfiguratorObjectByName(this.partitionTableList, name);
+	}
+	public Table getTable(String name) {
+		return (Table)super.getMartConfiguratorObjectByName(this.tableList, name);
+	}
+	public Relation getRelation(String name) {
+		return (Relation)super.getMartConfiguratorObjectByName(this.relationList, name);
+	}
+	
+	public PartitionTable getMainPartitionTable() {
+		return mainPartitionTable;
 	}
 
 	public Boolean getMaterialized() {
@@ -68,22 +93,6 @@ public class Dataset extends MartConfiguratorObject implements Serializable {
 
 	public void setMaterialized(Boolean materialized) {
 		this.materialized = materialized;
-	}
-
-	public List<Config> getConfigList() {
-		return configList;
-	}
-
-	public List<PartitionTable> getPartitionTableList() {
-		return partitionTableList;
-	}
-
-	public List<Table> getTableList() {
-		return tableList;
-	}
-
-	public List<Relation> getRelationList() {
-		return relationList;
 	}
 
 	public String getCentralTable() {

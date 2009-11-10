@@ -6,13 +6,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.sf.json.JSONObject;
-
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.utils.MyUtils;
 import org.biomart.martRemote.Jsoml;
 import org.biomart.objects.MartConfiguratorUtils;
-import org.jdom.Namespace;
 
 
 public class Element extends Containee implements Serializable {
@@ -332,42 +329,5 @@ public class Element extends Containee implements Serializable {
 		jsoml.setAttribute("default", this.selectedByDefault);
 		
 		return jsoml;
-	}
-	protected org.jdom.Element generateXmlForWebService() throws FunctionalException {
-		return generateXmlForWebService(null);
-	}
-	protected org.jdom.Element generateXmlForWebService(Namespace namespace) throws FunctionalException {
-		if (this instanceof Attribute) {
-			return generateXmlForWebService(namespace, Attribute.XML_ELEMENT_NAME);
-		} else {
-			return generateXmlForWebService(namespace, Filter.XML_ELEMENT_NAME);
-		}
-	}
-	private org.jdom.Element generateXmlForWebService(Namespace namespace, String pointedElementType) throws FunctionalException {
-		
-		//MyUtils.checkStatusProgram(this.targetRange.getPartSet().size()==1);	// there should be only 1 element (it's flattened)
-		
-		org.jdom.Element jdomObject = super.generateXmlForWebService(namespace);
-		jdomObject.removeAttribute("visible");	// not applicable for elements
-		
-		// Element attributes
-		MartConfiguratorUtils.addAttribute(jdomObject, "default", this.selectedByDefault);
-				
-		return jdomObject;
-	}
-	protected JSONObject generateJsonForWebService() {
-		if (this instanceof Attribute) {
-			return generateJsonForWebService(Attribute.XML_ELEMENT_NAME);
-		} else {
-			return generateJsonForWebService(Filter.XML_ELEMENT_NAME);
-		}
-	}
-	protected JSONObject generateJsonForWebService(String pointedElementType) {
-		//MyUtils.checkStatusProgram(this.targetRange.getPartSet().size()==1);	// there should be only 1 element (it's flattened)
-		
-		JSONObject object = super.generateJsonForWebService();
-		object.remove("visible");	// doesn't apply for Elements
-		object.put("default", this.selectedByDefault);
-		return object;
 	}
 }

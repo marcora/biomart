@@ -2,12 +2,9 @@ package org.biomart.objects.objects;
 
 import java.io.Serializable;
 
-import net.sf.json.JSONObject;
-
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.martRemote.Jsoml;
 import org.jdom.Element;
-import org.jdom.Namespace;
 
 
 public class Containee extends MartConfiguratorObject implements Serializable {
@@ -81,21 +78,5 @@ public class Containee extends MartConfiguratorObject implements Serializable {
 	
 	protected Jsoml generateOutputForWebService(boolean xml) throws FunctionalException {
 		return super.generateOutputForWebService(xml);
-	}
-	
-	protected Element generateXmlForWebService(boolean recursively) throws FunctionalException {
-		return generateXmlForWebService(null, recursively);
-	}
-	protected Element generateXmlForWebService(Namespace namespace, boolean recursively) throws FunctionalException {
-		return super.generateXmlForWebService(namespace);
-	}
-	protected Element generateXmlForWebService() throws FunctionalException {
-		return generateXmlForWebService(null);
-	}
-	protected Element generateXmlForWebService(Namespace namespace) throws FunctionalException {
-		return super.generateXmlForWebService(namespace);
-	}
-	protected JSONObject generateJsonForWebService() {
-		return super.generateJsonForWebService();
 	}
 }

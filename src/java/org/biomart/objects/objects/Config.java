@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.biomart.configurator.utils.type.McNodeType;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.jdom.Element;
 
@@ -14,6 +15,7 @@ public class Config extends MartConfiguratorObject implements Serializable {
 	private static final long serialVersionUID = -4824812826795490022L;
 
 	public static final String XML_ELEMENT_NAME = "config";
+	public static final McNodeType MC_NODE_TYPE = null;
 	
 	public static void main(String[] args) {}
 
@@ -33,28 +35,46 @@ public class Config extends MartConfiguratorObject implements Serializable {
 		this.containerList = new ArrayList<Container>();
 	}
 	
+	
 	public void addImportable(Importable importable) {
 		this.importableList.add(importable);
 	}
-	
 	public void addExportable(Exportable exportable) {
 		this.exportableList.add(exportable);
 	}
-	
 	public void addContainer(Container container) {
 		this.containerList.add(container);
 	}
 
+
+	public List<Importable> getImportableList() {
+		return new ArrayList<Importable>(this.importableList);
+	}
+	public List<Exportable> getExportableList() {
+		return new ArrayList<Exportable>(this.exportableList);
+	}
+	public List<Container> getContainerList() {
+		return new ArrayList<Container>(this.containerList);
+	}
+	
+	
+	public Importable getImportable(String name) {
+		return (Importable)super.getMartConfiguratorObjectByName(this.importableList, name);
+	}
+	public Exportable getExportable(String name) {
+		return (Exportable)super.getMartConfiguratorObjectByName(this.exportableList, name);
+	}
+	public Container getContainer(String name) {
+		return (Container)super.getMartConfiguratorObjectByName(this.containerList, name);
+	}
+
+	
 	public String getDatasetName() {
 		return datasetName;
 	}
 
 	public void setDatasetName(String datasetName) {
 		this.datasetName = datasetName;
-	}
-
-	public List<Container> getContainerList() {
-		return containerList;
 	}
 
 	@Override

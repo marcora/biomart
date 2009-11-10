@@ -109,7 +109,7 @@ public class DatasetTransformation {
 		vars.setDataset(this.dataset);
 
 		// Add main partition table
-		dataset.addMainPartitionTable(mainPartitionTable);
+		dataset.addPartitionTable(mainPartitionTable);
 		MyUtils.checkStatusProgram(!vars.getNameToPartitionTableMap().keySet().contains(mainPartitionTable.getName()));
 		vars.getNameToPartitionTableMap().put(mainPartitionTable.getName(), mainPartitionTable);
 		vars.setMainPartitionTable(mainPartitionTable);

@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.biomart.configurator.utils.type.McNodeType;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.jdom.Element;
 
@@ -14,6 +15,7 @@ public class Mart extends MartConfiguratorObject implements Serializable {
 	private static final long serialVersionUID = -5444938136316400493L;
 
 	public static final String XML_ELEMENT_NAME = "mart";
+	public static final McNodeType MC_NODE_TYPE = McNodeType.Mart;
 	
 	public static void main(String[] args) {}
 
@@ -32,6 +34,12 @@ public class Mart extends MartConfiguratorObject implements Serializable {
 	public void addDataset(Dataset dataset) {
 		this.datasetList.add(dataset);
 	}
+	public List<Dataset> getDatasetList() {
+		return new ArrayList<Dataset>(this.datasetList);
+	}
+	public Dataset getLocation(String name) {
+		return (Dataset)super.getMartConfiguratorObjectByName(this.datasetList, name);
+	}
 
 	public Integer getVersion() {
 		return version;
@@ -39,10 +47,6 @@ public class Mart extends MartConfiguratorObject implements Serializable {
 
 	public void setVersion(Integer version) {
 		this.version = version;
-	}
-	
-	public List<Dataset> getDatasetList() {
-		return datasetList;
 	}
 
 	@Override

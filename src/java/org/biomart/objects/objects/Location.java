@@ -5,15 +5,16 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.biomart.configurator.utils.type.McNodeType;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.jdom.Element;
-
 
 public class Location extends MartConfiguratorObject implements Serializable {
 
 	private static final long serialVersionUID = 3492546591865583968L;
 	
-	public static final String XML_ELEMENT_NAME = "location2";
+	public static final String XML_ELEMENT_NAME = "location";	//TODO put in McNodeType enum?
+	public static final McNodeType MC_NODE_TYPE = McNodeType.Location;
 	
 	public static void main(String[] args) {}
 
@@ -23,8 +24,14 @@ public class Location extends MartConfiguratorObject implements Serializable {
 	
 	private List<Mart> martList = null;
 
+	public void addMart(Mart mart) {
+		this.martList.add(mart);
+	}
 	public List<Mart> getMartList() {
-		return martList;
+		return new ArrayList<Mart>(this.martList);
+	}
+	public Mart getMart(String name) {
+		return (Mart)super.getMartConfiguratorObjectByName(this.martList, name);
 	}
 
 	public Location(String name, String displayName, String description, Boolean visible, 
@@ -35,10 +42,6 @@ public class Location extends MartConfiguratorObject implements Serializable {
 		this.type = type;
 		
 		this.martList = new ArrayList<Mart>();
-	}
-	
-	public void addMart(Mart mart) {
-		this.martList.add(mart);
 	}
 
 	public String getHost() {
