@@ -22,42 +22,42 @@ public class Config extends MartConfiguratorObject implements Serializable {
 	private String datasetName = null;
 	private Container rootContainer = null;
 
-	private List<Importable> importableList = null;
-	private List<Exportable> exportableList = null;
+	private List<Portable> importableList = null;
+	private List<Portable> exportableList = null;
 
 	public Config(String name,  
 			String datasetName) {
 		super(name, null, null, null, XML_ELEMENT_NAME);	// displayName, description & visible do not apply for that object
 		this.datasetName = datasetName;
 		
-		this.importableList = new ArrayList<Importable>();
-		this.exportableList = new ArrayList<Exportable>();
+		this.importableList = new ArrayList<Portable>();
+		this.exportableList = new ArrayList<Portable>();
 		
 		this.rootContainer = Container.createRootContainer();
 	}
 	
 	
-	public void addImportable(Importable importable) {
+	public void addImportable(Portable importable) {
 		this.importableList.add(importable);
 	}
-	public void addExportable(Exportable exportable) {
+	public void addExportable(Portable exportable) {
 		this.exportableList.add(exportable);
 	}
 
 
-	public List<Importable> getImportableList() {
-		return new ArrayList<Importable>(this.importableList);
+	public List<Portable> getImportableList() {
+		return new ArrayList<Portable>(this.importableList);
 	}
-	public List<Exportable> getExportableList() {
-		return new ArrayList<Exportable>(this.exportableList);
+	public List<Portable> getPortableList() {
+		return new ArrayList<Portable>(this.exportableList);
 	}
 	
 	
-	public Importable getImportable(String name) {
-		return (Importable)super.getMartConfiguratorObjectByName(this.importableList, name);
+	public Portable getImportable(String name) {
+		return (Portable)super.getMartConfiguratorObjectByName(this.importableList, name);
 	}
-	public Exportable getExportable(String name) {
-		return (Exportable)super.getMartConfiguratorObjectByName(this.exportableList, name);
+	public Portable getExportable(String name) {
+		return (Portable)super.getMartConfiguratorObjectByName(this.exportableList, name);
 	}
 
 
@@ -124,11 +124,11 @@ public class Config extends MartConfiguratorObject implements Serializable {
 		Element element = super.generateXml();
 		MartConfiguratorUtils.addAttribute(element, "datasetName", this.datasetName);
 		
-		for (Importable importable : this.importableList) {
+		for (Portable importable : this.importableList) {
 			element.addContent(importable.generateXml());
 		}
 		
-		for (Exportable exportable : this.exportableList) {
+		for (Portable exportable : this.exportableList) {
 			element.addContent(exportable.generateXml());
 		}
 

@@ -9,9 +9,7 @@ import org.biomart.common.general.utils.MyUtils;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.objects.objects.Attribute;
 import org.biomart.objects.objects.Config;
-import org.biomart.objects.objects.Exportable;
 import org.biomart.objects.objects.Filter;
-import org.biomart.objects.objects.Importable;
 import org.biomart.objects.objects.PartitionTable;
 import org.biomart.objects.objects.Portable;
 import org.biomart.objects.objects.Range;
@@ -38,64 +36,54 @@ public class PortableTransformation {
 		this.help = help;
 	}
 	
-	public void transformImportables(Config config, List<OldImportable> oldImportableList) throws TechnicalException, FunctionalException {
-		for (OldImportable oldImportable : oldImportableList) {
-			Importable importable = (Importable)transformPortable((OldPortable)oldImportable, true);
-			if (null!=importable) {
-				config.addImportable(importable);
-			}
-		}
-	}
-	
-	public void transformExportables(Config config, List<OldExportable> oldExportableList) throws TechnicalException, FunctionalException {
-		for (OldExportable oldExportable : oldExportableList) {
-			Exportable exportable = (Exportable)transformPortable((OldPortable)oldExportable, false);
-			if (null!=exportable) {
-				config.addExportable(exportable);
+	public void transformPortables(Config config, List<? extends OldPortable> oldPortableList, boolean isImportable) throws TechnicalException, FunctionalException {
+		for (OldPortable oldPortable : oldPortableList) {
+			Portable portable = (Portable)transformPortable(oldPortable);
+			if (null!=portable) {
+				if (portable.isImportable()) {
+					config.addImportable(portable);
+				} else {
+					config.addExportable(portable);
+				}
 			}
 		}
 	}
 
 	/*
 	 
-	  <Exportable attributes="ensembl_gene_id,ensembl_transcript_id,chromosome_name,exon_chrom_start,exon_chrom_end,strand,transcript_count" internalName="gene_exon_intron" linkName="gene_exon_intron" linkVersion="*link_version*" name="gene_exon_intron" orderBy="ensembl_gene_id" type="link" />
+	  <Portable attributes="ensembl_gene_id,ensembl_transcript_id,chromosome_name,exon_chrom_start,exon_chrom_end,strand,transcript_count" internalName="gene_exon_intron" linkName="gene_exon_intron" linkVersion="*link_version*" name="gene_exon_intron" orderBy="ensembl_gene_id" type="link" />
 	 
-	  <Importable filters="ensembl_gene_id" internalName="ensembl_das_gene" linkName="ensembl_das_gene" name="ensembl_das_gene" type="dasGene" />
-	  <Importable filters="link_ensembl_gene_id" internalName="gene_stable_id" linkName="*species3*_gene_stable_id" name="*species3*_gene_stable_id" type="link" />
-	  <Importable filters="link_development_stage" internalName="development_stage_term" linkName="development_stage_term" name="development_stage_term" type="link" />
+	  <Portable filters="ensembl_gene_id" internalName="ensembl_das_gene" linkName="ensembl_das_gene" name="ensembl_das_gene" type="dasGene" />
+	  <Portable filters="link_ensembl_gene_id" internalName="gene_stable_id" linkName="*species3*_gene_stable_id" name="*species3*_gene_stable_id" type="link" />
+	  <Portable filters="link_development_stage" internalName="development_stage_term" linkName="development_stage_term" name="development_stage_term" type="link" />
 	  
 	  <importable name="imp_ensembl_gene_id" filters="ensembl_gene_id" range="[P1R1][P1R2][P1R3]"/>
 	  
 	  
-	 	Exportable that would need better intersection
+	 	Portable that would need better intersection
 		"(PmC0).gene_exon_intron", "(PmC0).transcript_exon_intron", "(PmC0).gene_flank", "(PmC0).transcript_flank", 
 		"(PmC0).coding_gene_flank", "(PmC0).coding_transcript_flank", "(PmC0).3utr", "(PmC0).5utr", "(PmC0).cdna", "(PmC0).gene_exon",
 		"(PmC0).peptide", "(PmC0).coding"
 	*/
 
-	public Portable transformPortable(OldPortable oldPortable, boolean isImportable) throws TechnicalException, FunctionalException {
+	public Portable transformPortable(OldPortable oldPortable) throws TechnicalException, FunctionalException {
 		
 		MyUtils.checkStatusProgram(!help.containsAliases(oldPortable.getInternalName()));
 		PartitionTable mainPartitionTable = vars.getMainPartitionTable();	
 		/*PartitionReference mainPartitionReference = new PartitionReference(mainPartitionTable);*/
 		String portableName = /*mainPartitionReference.toXmlString() + TransformationConstants.DOT + */oldPortable.getInternalName();
 		
-		Portable portable = isImportable ? 
-				new Importable(mainPartitionTable, portableName) : 
-				new Exportable(mainPartitionTable, portableName);
+		boolean isPortable = oldPortable instanceof OldImportable;
+		Portable portable = new Portable(mainPartitionTable, portableName, isPortable);
 	
 		OldImportable oldImportable = null;
 		OldExportable oldExportable = null;
-		Importable importable = null;
-		Exportable exportable = null;
-		if (isImportable) {
+		if (isPortable) {
 			MyUtils.checkStatusProgram(oldPortable instanceof OldImportable);
 			oldImportable = (OldImportable)oldPortable;
-			importable = (Importable)portable;
 		} else if (oldPortable instanceof OldExportable) {
 			MyUtils.checkStatusProgram(oldPortable instanceof OldExportable);
 			oldExportable = (OldExportable)oldPortable;
-			exportable = (Exportable)portable;
 		}
 		
 		// For backward compatibility: have to keep them	TODO think about it
@@ -104,14 +92,14 @@ public class PortableTransformation {
 																	// cf xml for gene_vega for instance, *link_version2* appears but is never even defined
 		portable.setFormerLinkName(formerLinkName);
 		portable.setFormerLinkVersion(formerLinkVersion);
-		if (!isImportable) {
+		if (!isPortable) {
 			MyUtils.checkStatusProgram(!help.containsAliases(String.valueOf(oldExportable.getDefault_())));
 			Boolean formerDefault = oldExportable.getDefault_();
-			exportable.setFormerDefault(formerDefault);
+			portable.setFormerDefault(formerDefault);
 		}
 		
 		// Fill the list of Element
-		if (isImportable) {
+		if (isPortable) {
 			List<String> filtersList = oldImportable.getFilters();
 			for (String filterName : filtersList) {
 				Filter filter = vars.getFilterMap().get(filterName);
@@ -119,7 +107,7 @@ public class PortableTransformation {
 						"importable " + portableName + " references an invalid filter: " + filterName)) {
 					return null;
 				}
-				importable.getElementList().addElement(filter);
+				portable.getElementList().addElement(filter);
 			}
 		} else {
 			List<String> attributesList = oldExportable.getAttributes();
@@ -129,7 +117,7 @@ public class PortableTransformation {
 						"exportable " + portableName + " references an invalid attribute: " + attributeName)) {
 					return null;
 				}
-				exportable.getElementList().addElement(attribute);
+				portable.getElementList().addElement(attribute);
 			}
 		}
 		

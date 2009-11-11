@@ -174,10 +174,10 @@ public class DatasetTransformation {
 		pointerTransformation.updatePointers();
 				
 		// Transform the importables
-		this.portableTransformation.transformImportables(config, oldDatasetConfig.getOldImportableList());	
+		this.portableTransformation.transformPortables(config, oldDatasetConfig.getOldImportableList(), true);	
 		
 		// Transform the exportables
-		this.portableTransformation.transformExportables(config, oldDatasetConfig.getOldExportableList());
+		this.portableTransformation.transformPortables(config, oldDatasetConfig.getOldExportableList(), false);
 
 		// Handle filters with a specified filter list
 		filterTransformation.updateFiltersWithFilterList();
