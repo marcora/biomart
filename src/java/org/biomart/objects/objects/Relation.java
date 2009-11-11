@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import org.biomart.configurator.utils.type.McNodeType;
 import org.biomart.objects.MartConfiguratorUtils;
+import org.biomart.objects.objects.types.RelationType;
 import org.jdom.Element;
 
 

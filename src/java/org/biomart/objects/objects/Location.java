@@ -5,15 +5,18 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.biomart.common.general.utils.MyUtils;
 import org.biomart.configurator.utils.type.McNodeType;
 import org.biomart.objects.MartConfiguratorUtils;
+import org.biomart.objects.objects.types.LocationType;
 import org.jdom.Element;
 
 public class Location extends MartConfiguratorObject implements Serializable {
 
 	private static final long serialVersionUID = 3492546591865583968L;
 	
-	public static final String XML_ELEMENT_NAME = "location";	//TODO put in McNodeType enum?
+	public static final String XML_ELEMENT_NAME = 	//TODO put in McNodeType enum?
+		"location" + (MyUtils.anthony() ? MyUtils.getDateAndTime() : "");	//TODO remove (to help debug)
 	public static final McNodeType MC_NODE_TYPE = McNodeType.Location;
 	
 	public static void main(String[] args) {}

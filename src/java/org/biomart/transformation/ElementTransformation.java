@@ -22,14 +22,14 @@ import org.biomart.objects.objects.Container;
 import org.biomart.objects.objects.Dataset;
 import org.biomart.objects.objects.Element;
 import org.biomart.objects.objects.Filter;
-import org.biomart.objects.objects.FilterDisplayType;
 import org.biomart.objects.objects.GroupFilter;
 import org.biomart.objects.objects.Part;
 import org.biomart.objects.objects.PartitionTable;
 import org.biomart.objects.objects.Range;
 import org.biomart.objects.objects.SimpleFilter;
 import org.biomart.objects.objects.Table;
-import org.biomart.objects.objects.TableType;
+import org.biomart.objects.objects.types.FilterDisplayType;
+import org.biomart.objects.objects.types.TableType;
 import org.biomart.transformation.helpers.ContainerPath;
 import org.biomart.transformation.helpers.DimensionPartition;
 import org.biomart.transformation.helpers.DimensionPartitionNameAndKeyAndValue;
@@ -402,7 +402,8 @@ public abstract class ElementTransformation {
 		List<Table> tableList = dataset.getTableList();
 		Table table = null;
 		for (Table tableTmp : tableList) {
-			if (newTableName.equalsIgnoreCase(tableTmp.getName()) && keyName.equalsIgnoreCase(tableTmp.getKey())) {
+			if (newTableName.equalsIgnoreCase(tableTmp.getName()) && 
+					keyName.equalsIgnoreCase(tableTmp.getKey().getName())/*keyName.equalsIgnoreCase(tableTmp.getKey())*/) {
 				table = tableTmp;
 				break;
 			}
@@ -416,8 +417,9 @@ public abstract class ElementTransformation {
 			table.getRange().addRangePartitionRow(vars.getDefaultPT(), MartConfiguratorConstants.DEFAULT_PARTITION_TABLE_ROW);
 			dataset.addTable(table);
 		} else {
-			HashSet<String> fields = table.getFields();
-			fields.add(fieldName);
+			table.addColumn(fieldName);
+			/*HashSet<String> fields = table.getFields();
+			fields.add(fieldName);*/
 		}
 	}
 

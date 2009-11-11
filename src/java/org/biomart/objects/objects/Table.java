@@ -6,9 +6,11 @@ import java.util.Comparator;
 import java.util.HashSet;
 
 import org.biomart.common.general.utils.CompareUtils;
+import org.biomart.common.general.utils.MyUtils;
 import org.biomart.configurator.utils.type.McNodeType;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
+import org.biomart.objects.objects.types.TableType;
 import org.jdom.Element;
 
 
@@ -17,31 +19,63 @@ public class Table extends MartConfiguratorObject implements Comparable<Table>, 
 	private static final long serialVersionUID = 994381514343812305L;
 	
 	public static final String XML_ELEMENT_NAME = "table";
-	public static final String COLUMN_XML_ELEMENT_NAME = "column";
 	public static final McNodeType MC_NODE_TYPE = null;
 	
 	public static void main(String[] args) {}
 
 	private Range range = null;
-	private HashSet<String> fields = null;
-	private String key = null;
+	private HashSet<Column> columns = null;
+	private Column key = null;
 	private Boolean main = null;	// Whether this is a main table
 	private TableType type = null;
 	
 	public Table(String name, PartitionTable mainPartitionTable, boolean main, TableType type,
-			String key, HashSet<String> fields) {
+			String keyName, 
+			HashSet<String> fieldNames) {	// key amongst fieldNames will be removed since added separately
 		super(name, null, null, null, XML_ELEMENT_NAME);	// displayName, description & visible do not apply for that object
-		this.key = key;
+		this.columns = new HashSet<Column>();
 		this.type = type;
-		this.fields = fields;
+		
+		if (null!=keyName) {
+			//setKey(keyName);
+			this.key = new Column(keyName, true);
+			addColumn(this.key);
+			MyUtils.checkStatusProgram(fieldNames.contains(keyName), keyName + ", " + fieldNames);
+			fieldNames.remove(keyName);	// do not add it if  in setKey
+		}
+		
+		addColumns(fieldNames);
 		
 		this.range = new Range(mainPartitionTable, false);
 		
 		this.main = main;
 	}
 	
-	public void setKey(String key) {
+	public void setKey(String keyName) {	// column should already be among columns
+		Column key = this.getColumn(keyName);
+		key.setKey(true);
 		this.key = key;
+	}
+
+	public void addColumns(HashSet<String> columnNames) {
+		for (String columnName : columnNames) {
+			addColumn(columnName);
+		}
+	}
+	public void addColumn(String columnName) {
+		addColumn(new Column(columnName));
+	}
+	public void addColumn(Column column) {
+		this.columns.add(column);
+	}
+	public HashSet<Column> getColumns() {
+		return this.columns;
+	}
+	public Column getColumn(String name) {
+		return (Column)super.getMartConfiguratorObjectByNameIgnoreCase(this.columns, name);
+	}
+	public void setColumns(HashSet<Column> columns) {
+		this.columns = columns;
 	}
 
 	public TableType getType() {
@@ -52,7 +86,7 @@ public class Table extends MartConfiguratorObject implements Comparable<Table>, 
 		return main;
 	}
 
-	public String getKey() {
+	public Column getKey() {
 		return key;
 	}
 
@@ -60,20 +94,8 @@ public class Table extends MartConfiguratorObject implements Comparable<Table>, 
 		return range;
 	}
 
-	public HashSet<String> getFields() {
-		return fields;
-	}
-
 	public void setRange(Range range) {
 		this.range = range;
-	}
-
-	public void setFields(HashSet<String> fields) {
-		this.fields = fields;
-	}
-
-	public void addFields(HashSet<String> fields) {
-		this.fields.addAll(fields);
 	}
 
 	@Override
@@ -84,7 +106,7 @@ public class Table extends MartConfiguratorObject implements Comparable<Table>, 
 			"key = " + key + ", " +
 			"type = " + type + ", " +
 			"range = " + range + ", " +
-			"fields = " + fields;
+			"columns = " + columns;
 	}
 
 	@Override
@@ -128,28 +150,27 @@ public class Table extends MartConfiguratorObject implements Comparable<Table>, 
 		if (compare!=0) {
 			return compare;
 		}
-		return CompareUtils.compareString(table1.key.toLowerCase(), table2.key.toLowerCase());
+		return table1.key.compareTo(table2.key);
 	}
 
 	public int compareTo(Table table) {
 		return compare(this, table);
 	}
 	
-	/**
-	 * Only for the node, children are treated separately
-	 */
 	public Element generateXml() {
 		Element element = super.generateXml();
 		
-		MartConfiguratorUtils.addAttribute(element, "key", this.key);
+		MartConfiguratorUtils.addAttribute(element, "key", (this.key!=null ? this.key.getName() : null));
 		MartConfiguratorUtils.addAttribute(element, "main", this.main);
 		MartConfiguratorUtils.addAttribute(element, "type", (this.type!=null ? this.type.getXmlValue() : null));
 		this.range.addXmlAttribute(element, "range");
 		
-		for (String field : this.fields) {
-			Element fieldJdom = new Element(COLUMN_XML_ELEMENT_NAME);
+		//for (String field : this.fields) {
+		for (Column column : this.columns) {
+			element.addContent(column.generateXml());/*
+			Element fieldJdom = new Element(Column.XML_ELEMENT_NAME);
 			MartConfiguratorUtils.addAttribute(fieldJdom, "name", field);
-			element.addContent(fieldJdom);
+			element.addContent(fieldJdom);*/
 		}
 		return element;
 	}

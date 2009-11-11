@@ -1,4 +1,4 @@
-package org.biomart.objects.objects;
+package org.biomart.objects.objects.types;
 
 public enum TableType {
 	SOURCE	("source"),

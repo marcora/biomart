@@ -17,6 +17,7 @@ import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.data.FilterData;
 import org.biomart.objects.data.TreeFilterData;
 import org.biomart.objects.helpers.PartitionReference;
+import org.biomart.objects.objects.Column;
 import org.biomart.objects.objects.Config;
 import org.biomart.objects.objects.Container;
 import org.biomart.objects.objects.Dataset;
@@ -25,10 +26,10 @@ import org.biomart.objects.objects.GroupFilter;
 import org.biomart.objects.objects.PartitionTable;
 import org.biomart.objects.objects.Range;
 import org.biomart.objects.objects.Relation;
-import org.biomart.objects.objects.RelationType;
 import org.biomart.objects.objects.SimpleFilter;
 import org.biomart.objects.objects.Table;
-import org.biomart.objects.objects.TableType;
+import org.biomart.objects.objects.types.RelationType;
+import org.biomart.objects.objects.types.TableType;
 import org.biomart.transformation.helpers.ContainerPath;
 import org.biomart.transformation.helpers.NamingConventionTableName;
 import org.biomart.transformation.helpers.TransformationConstants;
@@ -46,8 +47,6 @@ import org.biomart.transformation.oldXmlObjects.OldNode;
 
 
 public class DatasetTransformation {
-
-	private TablesAndDimensionPartitionTablesGeneration tablesAndDimensionPartitionTablesGeneration = null;	
 
 	private Dataset dataset = null;
 
@@ -120,9 +119,10 @@ public class DatasetTransformation {
 		
 		// If template, generate database info from database, accounting for main partition
 		if (vars.isTemplate()) {
-			this.tablesAndDimensionPartitionTablesGeneration = new TablesAndDimensionPartitionTablesGeneration(params, vars);
-			this.tablesAndDimensionPartitionTablesGeneration.generateTablesAndDimensionPartitionTables(general.getDatabaseCheck());
-			String centralTableName = this.tablesAndDimensionPartitionTablesGeneration.computeCentralTableName(this.dataset.getTableList());
+			TablesAndDimensionPartitionTablesGeneration tablesAndDimensionPartitionTablesGeneration = 
+				new TablesAndDimensionPartitionTablesGeneration(params, vars);
+			tablesAndDimensionPartitionTablesGeneration.generateTablesAndDimensionPartitionTables(general.getDatabaseCheck());
+			String centralTableName = tablesAndDimensionPartitionTablesGeneration.computeCentralTableName(this.dataset.getTableList());
 			this.dataset.setCentralTable(centralTableName);
 		}
 		
@@ -206,7 +206,16 @@ public class DatasetTransformation {
 				for (int j = i+1; j < tableList.size(); j++) {
 					Table table2 = tableList.get(j);
 					if (table2.getMain()) {
-						table2.addFields(new HashSet<String>(table.getFields()));
+						for (Column column : table.getColumns()) {
+							Column cloneColumn = null;
+							try {
+								cloneColumn = (Column)column.clone();
+							} catch (CloneNotSupportedException e) {
+								// can't happen
+							}
+							table2.addColumn(cloneColumn);
+						}
+						//table2.setColumns(new HashSet<Column>(table.getColumns()));
 					}
 				}
 			}
@@ -215,15 +224,44 @@ public class DatasetTransformation {
 
 	private void generateRelations(List<Table> tableList) {
 		
+		if (this.dataset.getName().equals("(P0C1)_gene_ensembl")) {
+			for (Table table : tableList) {
+				System.out.println("table = " + table.getName());
+				int r = 0;
+				System.out.println("\t\t" + table.getKey());
+				for (Column c : table.getColumns()) {
+					System.out.print("\t" + c);
+					if (c.getKey()) {
+						System.out.print(" - " + c.equals(table.getKey()));
+						r++;
+					}
+					System.out.println();
+				}
+				System.out.println("r = " + r);
+				System.out.println();
+			}
+			System.out.println();
+			MyUtils.pressKeyToContinue();
+		}
+		
 		// In the case of db-transfo, infer relations among main tables from the number of "_key" fields
 		if (vars.isTemplate()) {
 			HashMap<Table, Integer> map = new HashMap<Table, Integer>();
 			for (Table table : tableList) {
 				if (table.getMain()) {
-					HashSet<String> fields = table.getFields();
+					/*HashSet<String> fields = table.getFields();
 					map.put(table, 0);
 					for (String field : fields) {
 						if (TransformationUtils.isKey(field)) {
+							Integer totalKeys = map.get(table);
+							MyUtils.checkStatusProgram(totalKeys!=null, "table = " + table);
+							map.put(table, totalKeys+1);
+						}
+					}*/
+					HashSet<Column> columns = table.getColumns();
+					map.put(table, 0);
+					for (Column column : columns) {
+						if (TransformationUtils.isKey(column.getName())) {		// if (column.getKey()) { can't work here
 							Integer totalKeys = map.get(table);
 							MyUtils.checkStatusProgram(totalKeys!=null, "table = " + table);
 							map.put(table, totalKeys+1);
@@ -261,10 +299,15 @@ public class DatasetTransformation {
 		
 		for (Table table : tableList) {
 			if (table.getMain()) {
-				String mainKey = table.getKey();
+				//String mainKey = table.getKey();
+				Column mainKey = table.getKey();
 				for (Table table2 : tableList) {
 					if (!table2.getMain()) {
-						HashSet<String> fieldsDimension = table.getFields();
+						/*HashSet<String> fieldsDimension = table.getFields();
+						if (fieldsDimension.contains(mainKey)) {
+							addRelation(table2, table);
+						}*/
+						HashSet<Column> fieldsDimension = table.getColumns();
 						if (fieldsDimension.contains(mainKey)) {
 							addRelation(table2, table);
 						}
@@ -277,7 +320,7 @@ public class DatasetTransformation {
 	private void addRelation(Table sourceTable, Table targetTable) {
 		String relationName = sourceTable.getName() + "/" + targetTable.getName();
 		Relation relation = new Relation(relationName, targetTable, sourceTable, 
-				targetTable.getKey(), targetTable.getKey(), RelationType.ONE_TO_MANY);
+				targetTable.getKey().getName(), targetTable.getKey().getName(), RelationType.ONE_TO_MANY);
 		this.dataset.addRelation(relation);	
 	}
 

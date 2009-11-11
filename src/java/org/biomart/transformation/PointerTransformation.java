@@ -159,7 +159,7 @@ public class PointerTransformation {
 							configuration.getMartServiceUrl() + ", " + params.getVirtualSchema() + ", " + plainPointerDataset);
 					MartInVirtualSchema martInVirtualSchema = datasetInMart.getMartInVirtualSchema();
 					TransformationUtils.writeWebServiceXmlConfigurationFile(xmlDocument, general.getTransformationsGeneralOutput(), 
-							params.isWebservice(), general.getVersion(), 
+							params.isWebservice(), general.getDatabaseVersion(), 
 							new MartServiceIdentifier(martInVirtualSchema), params.getVirtualSchema(), plainPointerDataset);
 					
 					// If no exception, add it to map so we don't use webservice again for that dataset

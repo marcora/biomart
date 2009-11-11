@@ -11,11 +11,11 @@ import org.biomart.objects.objects.Container;
 import org.biomart.objects.objects.Dataset;
 import org.biomart.objects.objects.GroupFilter;
 import org.biomart.objects.objects.Location;
-import org.biomart.objects.objects.LocationType;
 import org.biomart.objects.objects.Mart;
 import org.biomart.objects.objects.MartRegistry;
 import org.biomart.objects.objects.PartitionTable;
 import org.biomart.objects.objects.SimpleFilter;
+import org.biomart.objects.objects.types.LocationType;
 import org.jdom.Element;
 
 public class DummyPortal {

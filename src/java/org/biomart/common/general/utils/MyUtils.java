@@ -959,4 +959,8 @@ public class MyUtils {
 		}
 		return null;
 	}
+	
+	public static boolean anthony() {	// TODO remove: to help debug
+		return new File(".").getAbsolutePath().startsWith("/home/anthony");
+	}
 }

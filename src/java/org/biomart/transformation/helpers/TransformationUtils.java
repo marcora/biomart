@@ -203,22 +203,22 @@ public class TransformationUtils {
 	}
 	public static String writeWebServiceXmlConfigurationFile(
 			Document xmlDocument, String transformationsGeneralOutput, 
-			boolean webService, String version, MartServiceIdentifier martServiceIdentifier, String virtualSchema, String datasetName) throws TechnicalException {
+			boolean webService, String databaseVersion, MartServiceIdentifier martServiceIdentifier, String virtualSchema, String datasetName) throws TechnicalException {
 		// Write file if it doesn't already exist);
 		String xmlFilePathAndName = transformationsGeneralOutput + MyUtils.FILE_SEPARATOR +
-		generateIdentifier(webService, version, martServiceIdentifier, virtualSchema, datasetName) + ".xml";		
+		generateIdentifier(webService, databaseVersion, martServiceIdentifier, virtualSchema, datasetName) + ".xml";		
 		if (!new File(xmlFilePathAndName).exists()) {
 			MyUtils.writeXmlFile(xmlDocument, xmlFilePathAndName);
 		}
 		return xmlFilePathAndName;
 	}
-	public static String generateIdentifier(boolean webService, String version,
+	public static String generateIdentifier(boolean webService, String databaseVersion,
 			MartServiceIdentifier martServiceIdentifier, String virtualSchema, String datasetOrTemplateName) {
-		return generateTransformationTypeFolderName(webService, version) + MyUtils.INFO_SEPARATOR + MyUtils.INFO_SEPARATOR + 
+		return generateTransformationTypeFolderName(webService, databaseVersion) + MyUtils.INFO_SEPARATOR + MyUtils.INFO_SEPARATOR + 
 						(martServiceIdentifier!=null ? martServiceIdentifier.generateIdentifier() : "") + MyUtils.INFO_SEPARATOR + MyUtils.INFO_SEPARATOR +  
 						virtualSchema + MyUtils.INFO_SEPARATOR + MyUtils.INFO_SEPARATOR + datasetOrTemplateName;
 	}
-	public static String generateTransformationTypeFolderName(boolean webService, String version) {
-		return (webService ? "web" : "rdbms" + version);
+	public static String generateTransformationTypeFolderName(boolean webService, String databaseVersion) {
+		return (webService ? "web" : "rdbms" + databaseVersion);
 	}
 }

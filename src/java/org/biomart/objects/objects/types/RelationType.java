@@ -1,4 +1,4 @@
-package org.biomart.objects.objects;
+package org.biomart.objects.objects.types;
 
 public enum RelationType {
 	ONE_TO_ONE	("1:1"),

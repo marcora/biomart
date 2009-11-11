@@ -16,7 +16,7 @@ import org.jdom.Document;
 public class TransformationGeneralVariable {
 	
 	private Map<String, Configuration> webServiceConfigurationMap = null;
-	private String version = null;
+	private String databaseVersion = null;
 	private MartServiceIdentifier portalIdentifier = null;
 	private DatabaseCheck databaseCheck = null;
 	private String transformationsGeneralOutput = null;
@@ -26,12 +26,12 @@ public class TransformationGeneralVariable {
 	private HashMap<String, String> plainDatasetNameToTransformedDatasetName = null;
 	private String datasetGeneralOutputFolderPathAndName = null;
 
-	public TransformationGeneralVariable(String version, Map<String, Configuration> webServiceConfigurationMap, MartServiceIdentifier portalIdentifier,
+	public TransformationGeneralVariable(String databaseVersion, Map<String, Configuration> webServiceConfigurationMap, MartServiceIdentifier portalIdentifier,
 			String transformationsGeneralOutput, String datasetGeneralOutputFolderPathAndName, 
 			DatabaseParameter databaseParameter, String[] databaseNames) throws TechnicalException {
 		
 		this.databaseCheck = new DatabaseCheck(databaseParameter, databaseNames, transformationsGeneralOutput, datasetGeneralOutputFolderPathAndName);
-		this.version = version;
+		this.databaseVersion = databaseVersion;
 		this.portalIdentifier = portalIdentifier;
 		this.webServiceConfigurationMap = webServiceConfigurationMap;
 		this.transformationsGeneralOutput = transformationsGeneralOutput;
@@ -129,8 +129,8 @@ public class TransformationGeneralVariable {
 	public String getTransformationsGeneralOutput() {
 		return transformationsGeneralOutput;
 	}
-	public String getVersion() {
-		return version;
+	public String getDatabaseVersion() {
+		return databaseVersion;
 	}
 	
 	/*// Display (debug)

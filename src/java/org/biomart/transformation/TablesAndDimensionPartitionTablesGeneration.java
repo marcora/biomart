@@ -12,9 +12,10 @@ import java.util.Map;
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.MyUtils;
+import org.biomart.objects.objects.Column;
 import org.biomart.objects.objects.PartitionTable;
 import org.biomart.objects.objects.Table;
-import org.biomart.objects.objects.TableType;
+import org.biomart.objects.objects.types.TableType;
 import org.biomart.transformation.helpers.DatabaseCheck;
 import org.biomart.transformation.helpers.DimensionPartition;
 import org.biomart.transformation.helpers.DimensionPartitionNameAndKeyAndValue;
@@ -52,7 +53,7 @@ public class TablesAndDimensionPartitionTablesGeneration {
 	public void generateTablesAndDimensionPartitionTables(DatabaseCheck databaseCheck) throws TechnicalException, FunctionalException {
 		
 		// Generate all
-		generate(databaseCheck);
+		generate(databaseCheck);		
 		
 		// Reorder and actually add to dataset
 		Collections.sort(this.tmpPartitionTableList);
@@ -151,7 +152,7 @@ public class TablesAndDimensionPartitionTablesGeneration {
 					}
 				} else {
 					// Add any new columns (rare)
-					table.getFields().addAll(columnSet);					
+					table.addColumns(columnSet);
 				}
 				// Add range
 				
@@ -180,10 +181,16 @@ public class TablesAndDimensionPartitionTablesGeneration {
 			Table table = mainTableKeyGuessingMainTableNameToTableMap.get(newTableName);
 			if (table.getMain()) {
 				List<String> keyList = new ArrayList<String>();
-				HashSet<String> columnSet = table.getFields();
+				/*HashSet<String> columnSet = table.getFields();
 				for (String columnName : columnSet) {
 					if (TransformationUtils.isKey(columnName)) {
 						keyList.add(columnName);
+					}
+				}*/
+				HashSet<Column> columnSet = table.getColumns();
+				for (Column column : columnSet) {
+					if (TransformationUtils.isKey(column.getName())) {		// if (column.getKey()) { can't work here
+						keyList.add(column.getName());
 					}
 				}
 				mainTableKeyGuessingMainTableNameToKeyListMap.put(table, keyList);
@@ -193,14 +200,13 @@ public class TablesAndDimensionPartitionTablesGeneration {
 		// Assign key based on number of keys per table
 		List<String> assignedKeys = new ArrayList<String>();
 		MyUtils.checkStatusProgram(mainTableKeyGuessingMainTableNameToTableMap.size()==mainTableKeyGuessingMainTableNameToKeyListMap.size(),
-				mainTableKeyGuessingMainTableNameToTableMap.size() + ", " + mainTableKeyGuessingMainTableNameToKeyListMap.size());						
+				mainTableKeyGuessingMainTableNameToTableMap.size() + ", " + mainTableKeyGuessingMainTableNameToKeyListMap.size());		
 		while (assignedKeys.size()<mainTableKeyGuessingMainTableNameToKeyListMap.keySet().size()) {
-
 			for (Iterator<Table> it = mainTableKeyGuessingMainTableNameToKeyListMap.keySet().iterator(); it.hasNext();) {
 				Table mainTable = it.next();
 		
 				List<String> keyList = mainTableKeyGuessingMainTableNameToKeyListMap.get(mainTable);
-				MyUtils.checkStatusProgram(keyList!=null, "mainTable = " + mainTable.getName() + ", keyList = " + keyList);
+				MyUtils.checkStatusProgram(keyList!=null/* && keyList.isEmpty()*/, "mainTable = " + mainTable.getName() + ", keyList = " + keyList);
 				
 				// Remove any assigned key
 				for (String assignedKey : assignedKeys) {
@@ -285,8 +291,8 @@ public class TablesAndDimensionPartitionTablesGeneration {
 		String centralTableName = null;
 		for (Table table : tableList) {
 			if (table.getMain()) {
-				HashSet<String> fields = table.getFields();
 				int totalKeys = 0;
+				/*HashSet<String> fields = table.getFields();
 				for (String field : fields) {
 					if (TransformationUtils.isKey(field)) {
 						totalKeys++;
@@ -294,9 +300,19 @@ public class TablesAndDimensionPartitionTablesGeneration {
 							break;
 						}
 					}
+				}*/
+				HashSet<Column> columns = table.getColumns();
+				for (Column column : columns) {
+					if (TransformationUtils.isKey(column.getName())) {		// if (column.getKey()) { can't work here
+						totalKeys++;
+						if (totalKeys>1) {	// Useless, centralTable only has 1 key
+							break;
+						}
+					}
 				}
 				if (totalKeys==1) {
-					MyUtils.checkStatusProgram(centralTableName==null, "centralTableName = " + centralTableName);
+					MyUtils.checkStatusProgram(centralTableName==null, 
+							"centralTableName = " + centralTableName + ", table.getName() = " + table.getName());
 					centralTableName = table.getName(); 
 				}
 			}

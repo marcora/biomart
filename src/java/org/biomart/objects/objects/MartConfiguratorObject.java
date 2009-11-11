@@ -40,13 +40,18 @@ public class MartConfiguratorObject implements Serializable {
 
 	/**
 	 * Will pick the first element in case of name conflict... TODO throw exception then?
-	 * @param list
-	 * @param name
-	 * @return
 	 */
-	public MartConfiguratorObject getMartConfiguratorObjectByName(Collection<? extends MartConfiguratorObject> list, String name) {
-		for (MartConfiguratorObject mco : list) {
-			if (mco.equals(mco.name)) {
+	public MartConfiguratorObject getMartConfiguratorObjectByName(Collection<? extends MartConfiguratorObject> collection, String name) {
+		for (MartConfiguratorObject mco : collection) {
+			if (name.equals(mco.name)) {
+				return mco;
+			}
+		}
+		return null;
+	}
+	public MartConfiguratorObject getMartConfiguratorObjectByNameIgnoreCase(Collection<? extends MartConfiguratorObject> collection, String name) {
+		for (MartConfiguratorObject mco : collection) {
+			if (name.equalsIgnoreCase(mco.name)) {
 				return mco;
 			}
 		}
@@ -98,6 +103,13 @@ public class MartConfiguratorObject implements Serializable {
 			"visible = " + visible;
 	}
 
+	/*return (
+			(this.name==martConfiguratorObject.name || (this.name!=null && name.equals(martConfiguratorObject.name))) &&
+			(this.displayName==martConfiguratorObject.displayName || (this.displayName!=null && displayName.equals(martConfiguratorObject.displayName))) &&
+			(this.description==martConfiguratorObject.description || (this.description!=null && description.equals(martConfiguratorObject.description))) &&
+			(this.visible==martConfiguratorObject.visible || (this.visible!=null && visible.equals(martConfiguratorObject.visible))) &&
+			(this.xmlElementName==martConfiguratorObject.xmlElementName || (this.xmlElementName!=null && xmlElementName.equals(martConfiguratorObject.xmlElementName)))
+		);*/
 	@Override
 	public boolean equals(Object object) {
 		if (this==object) {
@@ -113,13 +125,21 @@ public class MartConfiguratorObject implements Serializable {
 				this.getClass().equals(object.getClass()) &&
 				this.name.equals(martConfiguratorObject.name)
 		);
-		/*return (
-			(this.name==martConfiguratorObject.name || (this.name!=null && name.equals(martConfiguratorObject.name))) &&
-			(this.displayName==martConfiguratorObject.displayName || (this.displayName!=null && displayName.equals(martConfiguratorObject.displayName))) &&
-			(this.description==martConfiguratorObject.description || (this.description!=null && description.equals(martConfiguratorObject.description))) &&
-			(this.visible==martConfiguratorObject.visible || (this.visible!=null && visible.equals(martConfiguratorObject.visible))) &&
-			(this.xmlElementName==martConfiguratorObject.xmlElementName || (this.xmlElementName!=null && xmlElementName.equals(martConfiguratorObject.xmlElementName)))
-		);*/
+	}
+	protected boolean equalsIgnoreCase(Object object) {
+		if (this==object) {
+			return true;
+		}
+		if((object==null) || (object.getClass()!= this.getClass())) {
+			return false;
+		}
+		
+		// If not the same type or different names -> not equal
+		MartConfiguratorObject martConfiguratorObject=(MartConfiguratorObject)object;
+		return (
+				this.getClass().equals(object.getClass()) &&
+				this.name.equalsIgnoreCase(martConfiguratorObject.name)
+		);
 	}
 
 	@Override

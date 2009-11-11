@@ -15,10 +15,10 @@ import org.biomart.objects.objects.Attribute;
 import org.biomart.objects.objects.Dataset;
 import org.biomart.objects.objects.Filter;
 import org.biomart.objects.objects.Location;
-import org.biomart.objects.objects.LocationType;
 import org.biomart.objects.objects.Mart;
 import org.biomart.objects.objects.MartRegistry;
 import org.biomart.objects.objects.PartitionTable;
+import org.biomart.objects.objects.types.LocationType;
 import org.biomart.old.martService.Configuration;
 import org.biomart.old.martService.objects.DatasetInMart;
 import org.biomart.old.martService.objects.MartInVirtualSchema;
@@ -177,8 +177,6 @@ public class Transformation {
 			MyUtils.checkStatusProgram(null!=datasetInMart, 
 					formattedTrueHostMartService + ", " + params.getVirtualSchema() + ", " + params.getDatasetName());
 			MartInVirtualSchema martInVirtualSchema = datasetInMart.getMartInVirtualSchema();
-			/*TransformationMain.expandWebServiceConfigurationMap(
-					martInVirtualSchema.getHost(), martInVirtualSchema.getPath());*/
 			
 			location = new Location(martInVirtualSchema.host, martInVirtualSchema.host, martInVirtualSchema.host, 
 					true, martInVirtualSchema.host, TransformationConstants.DEFAULT_USER, LocationType.URL);
@@ -253,79 +251,3 @@ public class Transformation {
 	}
 }
 
-
-
-
-
-
-
-
-
-/*public martConfigurator.objects.Element getElementFromTransformation(String virtualSchema, String datasetName, String elementName, boolean getAttribute) {
-	martConfigurator.objects.Element element = null;
-	if (this.params.getVirtualSchema().equals(virtualSchema)) {
-		List<Location> locationList = this.martRegistry.getLocationList();
-		if (null!=locationList && !locationList.isEmpty()) {
-			for (Location location : locationList) {
-				List<Mart> martList = location.getMartList();
-				if (null!=martList && !martList.isEmpty()) {
-					for (Mart mart : martList) {
-						List<Dataset> datasetList = mart.getDatasetList();
-						if (null!=datasetList && !datasetList.isEmpty()) {
-							for (Dataset dataset : datasetList) {
-								if (dataset.getName().equals(datasetName)) {
-									element = getElementFromDataset(dataset, elementName, getAttribute);
-									break;	// will take the 1st one in case of name conflicts
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	return element;
-}
-public martConfigurator.objects.Element getElementFromDataset(Dataset dataset, String elementName, boolean getAttribute) {
-	martConfigurator.objects.Element element = null;
-	List<Config> configList = dataset.getConfigList();
-	if (null!=configList && !configList.isEmpty()) {
-		for (Config config : configList) {
-			List<Container> pageContainerList = config.getContainerList();	// Page level
-			if (null!=pageContainerList && !pageContainerList.isEmpty()) {
-				for (Container pageContainer : pageContainerList) {
-					List<Container> groupContainerList = pageContainer.getContainerList();
-					if (null!=groupContainerList && !groupContainerList.isEmpty()) {
-						for (Container groupContainer : groupContainerList) {
-							List<Container> collectionContainerList = groupContainer.getContainerList();
-							if (null!=collectionContainerList && !collectionContainerList.isEmpty()) {
-								for (Container collectionContainer : collectionContainerList) {
-									if (getAttribute) {
-										List<Attribute> attributeList = collectionContainer.getAttributeList();
-										if (null!=attributeList && !attributeList.isEmpty()) {
-											for (Attribute attribute : attributeList) {
-												if (attribute.getName().equals(elementName)) {
-													return attribute;	// will take the 1st one in case of name conflicts
-												}
-											}
-										}
-									} else {	// then getFilter
-										List<Filter> filterList = collectionContainer.getFilterList();
-										if (null!=filterList && !filterList.isEmpty()) {
-											for (Filter filter : filterList) {
-												if (filter.getName().equals(elementName)) {
-													return filter;	// will take the 1st one in case of name conflicts
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	return element;	
-}*/
