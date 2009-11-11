@@ -2,45 +2,40 @@ package org.biomart.configurator.utils;
 
 /**
  * Has all information for creating a JDBC connection
+ * This is an immutable object. 
  * @author yliang
  *
  */
-public class DbInfoObject {
+public class DbConnectionInfoObject {
 	private String jdbcUrl;
 	private String databaseName;
 	private String userName;
 	private String password;
 	private String driverClassString;
+	private String schemaName;
 	
-	public void setJdbcUrl(String jdbcUrl) {
-		this.jdbcUrl = jdbcUrl;
-	}
 	public String getJdbcUrl() {
 		return jdbcUrl;
 	}
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
+
 	public String getUserName() {
 		return userName;
 	}
-	public void setPassword(String password) {
-		this.password = password;
-	}
+
 	public String getPassword() {
 		return password;
 	}
 	
-	public DbInfoObject(String url,String dbName, String userName, String pwd, String driverClassString) {
+	public DbConnectionInfoObject(String url,String dbName, String schemaName,
+			String userName, String pwd, String driverClassString) {
 		this.jdbcUrl = url;
 		this.userName = userName;
 		this.password = pwd;
 		this.driverClassString = driverClassString;
 		this.databaseName = dbName;
+		this.schemaName = schemaName;
 	}
-	public void setDriverClassString(String driverClassString) {
-		this.driverClassString = driverClassString;
-	}
+	
 	public String getDriverClassString() {
 		return driverClassString;
 	}
@@ -55,10 +50,10 @@ public class DbInfoObject {
 		if(this.getClass() != obj.getClass())
 			return false;
 		
-		if(!(obj instanceof DbInfoObject))
+		if(!(obj instanceof DbConnectionInfoObject))
 			return false;
 		
-		DbInfoObject conObj = (DbInfoObject)obj;
+		DbConnectionInfoObject conObj = (DbConnectionInfoObject)obj;
 		if(conObj.getDriverClassString().equals(this.driverClassString) && 
 				conObj.getJdbcUrl().equals(this.jdbcUrl) && 
 				conObj.getUserName().equals(this.userName) &&
@@ -83,4 +78,7 @@ public class DbInfoObject {
 		return databaseName;
 	}
 	
+	public String getSchemaName() {
+		return this.schemaName;
+	}
 }

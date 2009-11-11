@@ -60,7 +60,7 @@ import org.biomart.configurator.jdomUtils.JDomNodeAdapter;
 import org.biomart.configurator.jdomUtils.JDomUtils;
 import org.biomart.configurator.model.Location;
 import org.biomart.configurator.model.McModel;
-import org.biomart.configurator.utils.DbInfoObject;
+import org.biomart.configurator.utils.DbConnectionInfoObject;
 import org.biomart.configurator.utils.McEventObject;
 import org.biomart.configurator.utils.McGuiUtils;
 import org.biomart.configurator.utils.McUtils;
@@ -577,9 +577,9 @@ public class McViewSchema extends McView implements TreeSelectionListener {
 			String schemaName = se.getAttributeValue(Resources.get("NAME"));
 			if(mart.getSchemas().get(schemaName)!=null)
 				continue;
-			DbInfoObject conObj = new DbInfoObject(
+			DbConnectionInfoObject conObj = new DbConnectionInfoObject(
 					se.getAttributeValue("url"),
-					se.getAttributeValue("databaseName"),
+					se.getAttributeValue("databaseName"),"",
 					se.getAttributeValue("userName"), 
 					se.getAttributeValue("password"),
 					se.getAttributeValue("driverClassName")
@@ -742,9 +742,9 @@ public class McViewSchema extends McView implements TreeSelectionListener {
 		Element schemaElement = dsElement.getChild(Resources.get("SOURCESCHEMA"));
 		String schemaName = schemaElement.getAttributeValue(Resources.get("NAME"));
 
-		DbInfoObject conObj = new DbInfoObject(
+		DbConnectionInfoObject conObj = new DbConnectionInfoObject(
 				schemaElement.getAttributeValue("url"),
-				schemaElement.getAttributeValue("databaseName"),
+				schemaElement.getAttributeValue("databaseName"),"",
 				schemaElement.getAttributeValue("userName"), 
 				schemaElement.getAttributeValue("password"),
 				schemaElement.getAttributeValue("driverClassName")
@@ -1243,13 +1243,13 @@ public class McViewSchema extends McView implements TreeSelectionListener {
 		Mart mart = loc.getMart(martName);
 		Schema schema = (Schema)mart.getSchemas().get(schemaName);
 		JDBCSchema jschema = (JDBCSchema)schema;
-		jschema.getConnectionObject().setDriverClassString(schemaElement.getAttributeValue("driverClassName"));
-		jschema.getConnectionObject().setJdbcUrl(schemaElement.getAttributeValue("url"));
+		DbConnectionInfoObject conObj = new DbConnectionInfoObject(schemaElement.getAttributeValue("url"),
+				schemaElement.getAttributeValue("databaseName"),"",schemaElement.getAttributeValue("username"),
+				schemaElement.getAttributeValue(Resources.get("PASSWORD")),schemaElement.getAttributeValue("driverClassName"));
 		jschema.setDataLinkDatabase(schemaElement.getAttributeValue("databaseName"));
 		jschema.setDataLinkSchema(schemaElement.getAttributeValue("schemaName"));
-		jschema.getConnectionObject().setUserName(schemaElement.getAttributeValue("username"));
-		jschema.getConnectionObject().setPassword(schemaElement.getAttributeValue(Resources.get("PASSWORD")));
 		jschema.setKeyGuessing(true);
+		jschema.setConnectionObject(conObj);
 		mart.getSchemasObj().requestSynchroniseSchema(schema,true);
 	}
 

@@ -29,19 +29,19 @@ import javax.swing.tree.TreePath;
 import org.biomart.common.view.gui.SwingWorker;
 import org.biomart.common.view.gui.dialogs.ProgressDialog2;
 import org.biomart.common.view.gui.dialogs.StackTrace;
-import org.biomart.configurator.utils.DbInfoObject;
+import org.biomart.configurator.utils.DbConnectionInfoObject;
 import org.biomart.configurator.utils.ConnectionPool;
 
 
 public class DBMetaTree extends TreeListComponent implements TreeSelectionListener {
     
-	private DbInfoObject conObject;
+	private DbConnectionInfoObject conObject;
 		
 	public DBMetaTree() {
-		super("Databases");
+		super("Schemas");
 	}
 	
-	public void setConnectionObject(DbInfoObject object) {
+	public void setConnectionObject(DbConnectionInfoObject object) {
 		this.conObject = object;
 	}
 
@@ -67,7 +67,7 @@ public class DBMetaTree extends TreeListComponent implements TreeSelectionListen
 		return this.treeItemStrList;
 	}
 	
-	public Set<CheckBoxNode> getTables(String dbName, boolean isSelected) {
+	public Set<CheckBoxNode> getTables(String schemaName, boolean isSelected) {
 		Set<CheckBoxNode> tables = new TreeSet<CheckBoxNode>(new Comparator<CheckBoxNode>() {
 		      public int compare(CheckBoxNode a, CheckBoxNode b) {
 		          CheckBoxNode itemA = (CheckBoxNode) a;
@@ -75,13 +75,16 @@ public class DBMetaTree extends TreeListComponent implements TreeSelectionListen
 		          return itemA.getText().compareTo(itemB.getText());
 		        }
 		      });
-		this.conObject.setDatabaseName(dbName);
-		Connection con = ConnectionPool.Instance.getConnection(this.conObject);
+
+		DbConnectionInfoObject dbConObj = new DbConnectionInfoObject(this.conObject.getJdbcUrl()+schemaName,
+				this.conObject.getDatabaseName(),schemaName,this.conObject.getUserName(),this.conObject.getPassword(),
+				this.conObject.getDriverClassString());
+		Connection con = ConnectionPool.Instance.getConnection(dbConObj);
 		
 		try {
 			DatabaseMetaData dmd = con.getMetaData();
 			final String catalog = con.getCatalog();
-			ResultSet rs2 = dmd.getTables(catalog, dbName, "%", null);
+			ResultSet rs2 = dmd.getTables(catalog, schemaName, "%", null);
 			while (rs2.next()) {
 				CheckBoxNode cbn = new CheckBoxNode(rs2.getString("TABLE_NAME"),isSelected);
 				tables.add(cbn);
@@ -100,7 +103,7 @@ public class DBMetaTree extends TreeListComponent implements TreeSelectionListen
 			CheckBoxNode node = new CheckBoxNode(item,false);
 			nodeList.add(node);
 		}
-		Vector nodesVector = new NamedVector("Databases",nodeList.toArray());
+		Vector nodesVector = new NamedVector("Schemas",nodeList.toArray());
 		Object[] objs = {nodesVector};
 		Vector rootVector = new NamedVector("Root", objs);
 	    CheckBoxNodeRenderer renderer = new CheckBoxNodeRenderer();
@@ -124,7 +127,7 @@ public class DBMetaTree extends TreeListComponent implements TreeSelectionListen
 		
 	}
 	
-	public void updateTree(DbInfoObject conObject) {
+	public void updateTree(DbConnectionInfoObject conObject) {
 		this.conObject = conObject;
 		
 		this.getDatabases();
@@ -140,8 +143,7 @@ public class DBMetaTree extends TreeListComponent implements TreeSelectionListen
 				nodeList.add(node);
 			}
 		}
-		Vector nodesVector = new NamedVector("Databases",nodeList.toArray());
-		Object[] objs = {nodesVector};
+		Vector nodesVector = new NamedVector("Schemas",nodeList.toArray());
 		
 		DefaultMutableTreeNode root = (DefaultMutableTreeNode) tree.getModel().getRoot();
 		DynamicUtilTreeNode dbnode = (DynamicUtilTreeNode) root.getChildAt(0);

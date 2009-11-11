@@ -15,21 +15,21 @@ import java.util.Map;
 public enum ConnectionPool {
 	Instance;
 	
-	private Map<DbInfoObject, Connection> connections;
+	private Map<DbConnectionInfoObject, Connection> connections;
 	
 	private ConnectionPool() {
-		this.connections = new HashMap<DbInfoObject, Connection>();
+		this.connections = new HashMap<DbConnectionInfoObject, Connection>();
 	}
 	/*
 	 * if cannot find a connection object, create a new one and put it in pool
 	 * if the conObject has databasename, the url will include it.
 	 */
-	public Connection getConnection(DbInfoObject conObject) {
+	public Connection getConnection(DbConnectionInfoObject conObject) {
 		Connection con = this.connections.get(conObject);
 		if(con==null) {
 			try {
 				Class.forName(conObject.getDriverClassString());
-				con = DriverManager.getConnection(conObject.getJdbcUrl()+conObject.getDatabaseName(),
+				con = DriverManager.getConnection(conObject.getJdbcUrl(),
 						conObject.getUserName(),conObject.getPassword());			
 			} catch(java.lang.ClassNotFoundException e) {
 			} catch (SQLException e) {
@@ -41,7 +41,7 @@ public enum ConnectionPool {
 		return con;
 	}
 	
-	public void releaseConnection(DbInfoObject conObject) {
+	public void releaseConnection(DbConnectionInfoObject conObject) {
 		Connection con = this.connections.get(conObject);
 		if(con != null) {
 			try {

@@ -33,7 +33,7 @@ import org.biomart.common.resources.Settings;
 import org.biomart.common.view.gui.dialogs.ProgressDialog2;
 import org.biomart.configurator.controller.dialects.DatabaseDialect;
 import org.biomart.configurator.utils.ConnectionPool;
-import org.biomart.configurator.utils.DbInfoObject;
+import org.biomart.configurator.utils.DbConnectionInfoObject;
 import org.biomart.configurator.utils.McUtils;
 import org.biomart.configurator.utils.type.Cardinality;
 
@@ -63,7 +63,7 @@ import org.biomart.configurator.utils.type.Cardinality;
 public class JDBCSchema extends Schema implements JDBCDataLink{
 		private static final long serialVersionUID = 1L;
 		private Connection connection;
-		private DbInfoObject conObj;
+		private DbConnectionInfoObject conObj;
 		private String realSchemaName;
 		private SchemaDiagram schemaDiagram;
 		
@@ -110,7 +110,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 		 * @param partitionNameExpression
 		 *            partition stuff.
 		 */
-		public JDBCSchema(final Mart mart, DbInfoObject conObject,
+		public JDBCSchema(final Mart mart, DbConnectionInfoObject conObject,
 				final String dataLinkSchema, final String name,
 				final boolean keyGuessing, final String partitionRegex,
 				final String partitionNameExpression) {
@@ -131,10 +131,10 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 			}
 		}
 
-		public Collection getUniqueValues(final String schemaPrefix,
+		public Collection<String> getUniqueValues(final String schemaPrefix,
 				final Column column) throws SQLException {
 			// Do the select.
-			final List results = new ArrayList();
+			final List<String> results = new ArrayList<String>();
 			final String schemaName = this
 					.getDataLinkSchema();
 			final Connection conn = this.getConnection(null);
@@ -191,7 +191,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 			final JDBCDataLink partnerLink = (JDBCDataLink) partner;
 
 			// Work out the partner's catalogs and schemas.
-			final Collection partnerSchemas = new HashSet();
+			final Collection<String> partnerSchemas = new HashSet<String>();
 			try {
 				final DatabaseMetaData dmd = partnerLink.getConnection(null)
 						.getMetaData();
@@ -309,10 +309,13 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 				}
 		}
 
-		public DbInfoObject getConnectionObject() {
+		public DbConnectionInfoObject getConnectionObject() {
 			return this.conObj;
 		}
 
+		public void setConnectionObject(DbConnectionInfoObject object) {
+			this.conObj = object;
+		}
 
 		public void storeInHistory() {
 			// Store the schema settings in the history file.
@@ -1684,25 +1687,11 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 			return this.conObj.getUserName();
 		}
 
-		public void setDriverClassName(String driverClassName) {
-			this.conObj.setDriverClassString(driverClassName);			
-		}
-
-		public void setPassword(String password) {
-			this.conObj.setPassword(password);			
-		}
-
-		public void setUrl(String url) {
-			this.conObj.setJdbcUrl(url);
-		}
-
-		public void setUsername(String username) {
-			this.conObj.setUserName(username);
-		}
 
 		public void init(String dbName, List<String> tablesInDb) throws DataModelException, SQLException {
 			Log.info("Initialize " + this);
 			long t1 = McUtils.getCurrentTime();
+			long t2 = 0;
 			ProgressDialog2.getInstance().setStatus("creating "+this);
 			super.init(dbName,tablesInDb);
 			
@@ -1718,6 +1707,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 			try {
 				Statement st = con.createStatement();
 				ResultSet rs = st.executeQuery(sb.toString());
+				t2 = McUtils.getCurrentTime();
 				//loop to create Tables, Columns and PKs
 				while(rs.next()) {
 					String tableName = rs.getString("table_name");
@@ -1758,7 +1748,8 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 				this.synchroniseKeysUsingKeyGuessing(Collections.emptySet(), 1);
 
 			long t4 = McUtils.getCurrentTime();
-			System.err.println("init "+(t4-t1));
+			System.err.println("get data from db "+(t2-t1));
+			System.err.println("init "+(t4-t2));
 			Log.info("Done synchronising");
 			Log.info("forward message to controller");
 		}

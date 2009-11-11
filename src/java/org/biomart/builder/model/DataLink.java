@@ -143,39 +143,6 @@ public interface DataLink {
 		 * @return the username.
 		 */
 		public String getUsername();
-
-		/**
-		 * Sets the name of the driver class, eg. <tt>com.mysql.jdbc.Driver</tt>
-		 * 
-		 * @param driverClassName
-		 *            the name of the driver class.
-		 */
-		public void setDriverClassName(String driverClassName);
-
-		/**
-		 * Sets the JDBC URL.
-		 * 
-		 * @param url
-		 *            the JDBC URL.
-		 */
-		public void setUrl(String url);
-
-		/**
-		 * Sets the password. If <tt>null</tt>, then no password will be
-		 * used.
-		 * 
-		 * @param password
-		 *            the password.
-		 */
-		public void setPassword(String password);
-
-		/**
-		 * Sets the username.
-		 * 
-		 * @param username
-		 *            the username.
-		 */
-		public void setUsername(String username);
 	}
 
 	/**
