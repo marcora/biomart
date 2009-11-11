@@ -19,6 +19,7 @@ public class Column extends MartConfiguratorObject implements Comparable<Column>
 	public static void main(String[] args) {}
 
 	private Boolean key = null;
+	private Column origin = null;	// original column (in a source schema)
 	
 	public Column(String name) {
 		this(name, false);
@@ -41,6 +42,12 @@ public class Column extends MartConfiguratorObject implements Comparable<Column>
 	}
 	public String getName() {
 		return name;
+	}
+	public Column getOrigin() {
+		return origin;
+	}
+	public void setOrigin(Column origin) {
+		this.origin = origin;
 	}
 
 	@Override
@@ -84,6 +91,10 @@ public class Column extends MartConfiguratorObject implements Comparable<Column>
 
 	public int compareTo(Column column) {
 		return compare(this, column);
+	}
+	
+	public String getXmlValue() {
+		return super.name;
 	}
 	
 	/*public Element generateXml() {

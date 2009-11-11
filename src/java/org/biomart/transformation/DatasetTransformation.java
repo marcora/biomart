@@ -224,7 +224,7 @@ public class DatasetTransformation {
 
 	private void generateRelations(List<Table> tableList) {
 		
-		if (this.dataset.getName().equals("(P0C1)_gene_ensembl")) {
+		/*if (this.dataset.getName().equals("(P0C1)_gene_ensembl")) {
 			for (Table table : tableList) {
 				System.out.println("table = " + table.getName());
 				int r = 0;
@@ -242,7 +242,7 @@ public class DatasetTransformation {
 			}
 			System.out.println();
 			MyUtils.pressKeyToContinue();
-		}
+		}*/
 		
 		// In the case of db-transfo, infer relations among main tables from the number of "_key" fields
 		if (vars.isTemplate()) {
