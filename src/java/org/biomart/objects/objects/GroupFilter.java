@@ -15,35 +15,19 @@ public class GroupFilter extends Filter implements Serializable {
 
 	public static void main(String[] args) {}
 
-	private List<SimpleFilter> filterList = null;
+	private ElementList simpleFilterList = null;
 	private String logicalOperator = null;
 	private String multipleFilter = null;	// 1, N or ALL (TODO create enum?)
-	
-	// For internal use only
-	private List<String> filterNamesList = null;
 
 	public GroupFilter() {}
 	public GroupFilter(PartitionTable mainPartitionTable, String name) {
 		super(mainPartitionTable, name);
-		this.filterList = new ArrayList<SimpleFilter>();
-		this.filterNamesList = new ArrayList<String>();
+		
+		this.simpleFilterList = new ElementList();
 	}
 	
-	public void addSimpleFilter(SimpleFilter simpleFilter) {
-		this.filterList.add(simpleFilter);
-		this.filterNamesList.add(simpleFilter.getName());
-	}
-
-	public List<SimpleFilter> getFilterList() {
-		return new ArrayList<SimpleFilter>(this.filterList);
-	}
-	
-	public SimpleFilter getSimpleFilter(String name) {
-		return (SimpleFilter)super.getMartConfiguratorObjectByName(this.filterList, name);
-	}
-
-	public List<String> getFilterNamesList() {
-		return filterNamesList;
+	public ElementList getElementList() {
+		return this.simpleFilterList;
 	}
 
 	public String getLogicalOperator() {
@@ -62,20 +46,13 @@ public class GroupFilter extends Filter implements Serializable {
 		this.multipleFilter = multipleFilter;
 	}
 
-	public void setFilterList(List<SimpleFilter> filterList) {
-		this.filterList = filterList;
-		for (SimpleFilter simpleFilter : filterList) {
-			this.filterNamesList.add(simpleFilter.getName());
-		}
-	}
-
 	@Override
 	public String toString() {
 		return 
 			super.toString() + ", " + 
 			"logicalOperator = " + logicalOperator + ", " + 
 			"multipleFilter = " + multipleFilter + ", " + 
-			"filterNamesList = " + filterNamesList;
+			"simpleFilterList = " + (simpleFilterList!=null ? simpleFilterList.getXmlValue() : null);
 	}
 	
 	/*@Override
@@ -109,7 +86,7 @@ public class GroupFilter extends Filter implements Serializable {
 		org.jdom.Element element = super.generateXml();
 		MartConfiguratorUtils.addAttribute(element, "logicalOperator", this.logicalOperator);
 		MartConfiguratorUtils.addAttribute(element, "multipleFilter", this.multipleFilter);
-		MartConfiguratorUtils.addAttribute(element, "filterList", this.filterNamesList);
+		MartConfiguratorUtils.addAttribute(element, "filterList", (simpleFilterList!=null ? simpleFilterList.getXmlValue() : null));
 		return element;
 	}
 	
@@ -122,14 +99,16 @@ public class GroupFilter extends Filter implements Serializable {
 	
 	// ===================================== Should be a different class ============================================
 
+	private List<String> simpleFilterNames = null;
 	public GroupFilter(GroupFilter groupFilter, Part part) throws FunctionalException {	// creates a light clone (temporary solution)
 		super(groupFilter, part);
 		this.logicalOperator = groupFilter.logicalOperator;
 		this.multipleFilter = groupFilter.multipleFilter;
 		
-		this.filterNamesList = new ArrayList<String>();
-		for (String filterName : groupFilter.filterNamesList) {
-			this.filterNamesList.add(MartConfiguratorUtils.replacePartitionReferencesByValues(filterName, part));
+		this.simpleFilterNames = new ArrayList<String>();
+		List<String> simpleFilterNamesTmp = groupFilter.getElementList().getElementNames();
+		for (String filterName : simpleFilterNamesTmp) {
+			this.simpleFilterNames.add(MartConfiguratorUtils.replacePartitionReferencesByValues(filterName, part));
 		}
 	}
 
@@ -138,7 +117,7 @@ public class GroupFilter extends Filter implements Serializable {
 		
 		jsoml.setAttribute("logicalOperator", this.logicalOperator);
 		jsoml.setAttribute("multipleFilter", this.multipleFilter);
-		jsoml.setAttribute("filterList", this.filterNamesList);
+		jsoml.setAttribute("filterList", (simpleFilterList!=null ? simpleFilterList.getXmlValue() : null));
 		
 		return jsoml;
 	}

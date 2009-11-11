@@ -354,7 +354,7 @@ public class FilterTransformation extends ElementTransformation {
 				if (simpleFilterList.isEmpty()) {	// Case where all the constituing filters are not valid (useless to keep the group)
 					return null;
 				}
-				groupFilter.setFilterList(simpleFilterList);
+				groupFilter.getElementList().addElements(simpleFilterList);
 				setGroupFilterRange(mainPartitionTable, simpleFilterList, groupFilter);
 			}
 		} 
@@ -415,7 +415,7 @@ public class FilterTransformation extends ElementTransformation {
 		filterData.addPart(currentPart);
 		
 		int rowNumber = 0;
-		HashSet<SimpleFilter> cascadeChildren = new HashSet<SimpleFilter>();
+		List<SimpleFilter> cascadeChildren = new ArrayList<SimpleFilter>();
 		for (OldOptionValue oldOptionValue : oldOptionValueList) {
 			
 			FilterDataRow listFilterDataRow = getDataFileRow(filter, rowNumber, oldOptionValue);
@@ -441,7 +441,7 @@ public class FilterTransformation extends ElementTransformation {
 		if (!cascadeChildren.isEmpty()) {	// Cascade only possible for list filters, not group
 			MyUtils.checkStatusProgram(filter instanceof SimpleFilter, "filter.getClass() = " + filter.getClass());
 			SimpleFilter simpleFilter = (SimpleFilter)filter;
-			simpleFilter.addCascadeChildren(cascadeChildren);
+			simpleFilter.getElementList().addElements(cascadeChildren);
 		}
 	}
 	
@@ -905,7 +905,7 @@ System.out.println("#2" + MartConfiguratorUtils.displayJdomElement(newFilter.gen
 			GroupFilter newGroupFilter = (GroupFilter)newFilter;
 			
 			if (!TransformationUtils.checkValidSpecificityListString(
-					templateGroupFilter.getFilterNamesList(), newGroupFilter.getFilterNamesList(), firstSpecific) ||
+					templateGroupFilter.getElementList().getElementNames(), newGroupFilter.getElementList().getElementNames(), firstSpecific) ||
 					!TransformationUtils.checkValidSpecificityString(templateGroupFilter.getLogicalOperator(), newGroupFilter.getLogicalOperator(), firstSpecific) ||
 					//!TransformationUtils.checkValidSpecificityBoolean(templateGroupFilter.getShareValue(), newGroupFilter.getShareValue(), firstSpecific) ||		
 					!TransformationUtils.checkValidSpecificityString(templateGroupFilter.getMultipleFilter(), newGroupFilter.getMultipleFilter(), firstSpecific)) {
@@ -1012,7 +1012,7 @@ System.out.println("#2" + MartConfiguratorUtils.displayJdomElement(newFilter.gen
 				MyUtils.checkStatusProgram(null!=filter);	// Assumes it refers to a filter already defined
 				MyUtils.checkStatusProgram(filter instanceof SimpleFilter);	// Assumes it refers to a simple filter
 				SimpleFilter simpleFilter = (SimpleFilter)filter;
-				groupFilter.addSimpleFilter(simpleFilter);
+				groupFilter.getElementList().addElement(simpleFilter);
 			}
 		}
 	}

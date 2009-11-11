@@ -152,7 +152,6 @@ public class Table extends MartConfiguratorObject implements Comparable<Table>, 
 		}
 		return table1.key.compareTo(table2.key);
 	}
-
 	public int compareTo(Table table) {
 		return compare(this, table);
 	}

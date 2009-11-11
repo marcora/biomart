@@ -17,22 +17,23 @@ public class Element extends Containee implements Serializable {
 	private static final long serialVersionUID = -2902852019170342721L;
 
 	public static void main(String[] args) {}
-
+	
 	protected Boolean selectedByDefault = null;
+	protected Boolean checkForNulls = null;
 	
 	protected Boolean pointer = null;
+
+	protected String tableName = null;
+	protected String keyName = null;
+	protected String fieldName = null;
+	
+	protected String pointedElementName = null;
 	
 	protected String locationName = null;
 	protected String martName = null;
 	protected Integer version = null;
 	protected String datasetName = null;
 	protected String configName = null;
-	protected String tableName = null;
-	protected String keyName = null;
-	protected String fieldName = null;
-	protected Boolean checkForNulls = null;
-	
-	protected String pointedElementName = null;
 	
 	protected Range targetRange = null;
 	protected Range sourceRange = null;

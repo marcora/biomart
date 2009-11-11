@@ -2,7 +2,8 @@ package org.biomart.objects.objects;
 
 
 import java.io.Serializable;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.utils.MyUtils;
@@ -24,7 +25,7 @@ public class SimpleFilter extends Filter implements Serializable {
 	protected Boolean upload = null;
 	
 	// For List filters only
-	protected HashSet<SimpleFilter> cascadeChildren = null;
+	protected ElementList cascadeChildrenElementList = null;
 	
 	// For Booleans filters
 	protected String trueValue = null;
@@ -36,7 +37,6 @@ public class SimpleFilter extends Filter implements Serializable {
 	protected Boolean partition = null;
 	
 	// For internal use only
-	protected HashSet<String> cascadeChildrenNamesList = null;
 	protected Boolean tree = null;	//TODO internal use?
 	protected TreeFilterData treeFilterData = null;
 	
@@ -46,30 +46,10 @@ public class SimpleFilter extends Filter implements Serializable {
 	public SimpleFilter(PartitionTable mainPartitionTable, String name, Boolean tree) {
 		super(mainPartitionTable, name);
 		
-		this.cascadeChildren = new HashSet<SimpleFilter>();
-		this.cascadeChildrenNamesList = new HashSet<String>();
+		this.cascadeChildrenElementList = new ElementList(true);	// no repetitions
+		
 		this.tree = tree;
 		this.partition = false;	// unless changed later
-	}
-	
-
-	public void addCascadeChildren(HashSet<SimpleFilter> cascadeChildren) {
-		this.cascadeChildren.addAll(cascadeChildren);
-		for (SimpleFilter simpleFilter : cascadeChildren) {
-			this.cascadeChildrenNamesList.add(simpleFilter.getName());
-		}
-	}
-	public void addCascadeChild(SimpleFilter cascadeChild) {
-		this.cascadeChildren.add(cascadeChild);
-		this.cascadeChildrenNamesList.add(cascadeChild.getName());
-	}
-	
-	public HashSet<SimpleFilter> getCascadeChildren() {
-		return new HashSet<SimpleFilter>(this.cascadeChildren);
-	}
-	
-	public SimpleFilter getSimpleFilter(String name) {
-		return (SimpleFilter)super.getMartConfiguratorObjectByName(this.cascadeChildren, name);
 	}
 	
 	@Override
@@ -82,7 +62,7 @@ public class SimpleFilter extends Filter implements Serializable {
 			"buttonURL = " + buttonURL + ", " +
 			"upload = " + upload + ", " +
 			
-			"cascadeChildrenNamesList = " + (cascadeChildrenNamesList!=null ? cascadeChildrenNamesList : null) + ", " +
+			"cascadeChildrenElementList = " + (cascadeChildrenElementList!=null ? cascadeChildrenElementList.getXmlValue() : null) + ", " +
 			
 			"trueValue = " + trueValue + ", " +
 			"trueDisplay = " + trueDisplay + ", " +
@@ -147,10 +127,10 @@ public class SimpleFilter extends Filter implements Serializable {
 
 		return hash;
 	}*/
-
+	
 	// List related
-	public HashSet<String> getCascadeChildrenNamesList() {
-		return cascadeChildrenNamesList;
+	public ElementList getElementList() {
+		return this.cascadeChildrenElementList;
 	}
 	
 	// Tree related
@@ -267,7 +247,7 @@ public class SimpleFilter extends Filter implements Serializable {
 			
 			MartConfiguratorUtils.addAttribute(element, "multiValue", this.multiValue);
 			
-			MartConfiguratorUtils.addAttribute(element, "cascadeChildren", this.cascadeChildrenNamesList);
+			MartConfiguratorUtils.addAttribute(element, "cascadeChildren", (cascadeChildrenElementList!=null ? cascadeChildrenElementList.getXmlValue() : null));
 			
 			MartConfiguratorUtils.addAttribute(element, "buttonURL", this.buttonURL!=null ? this.buttonURL.toString() : null);
 			MartConfiguratorUtils.addAttribute(element, "dataFolderPath", this.dataFolderPath);
@@ -286,6 +266,7 @@ public class SimpleFilter extends Filter implements Serializable {
 	
 	// ===================================== Should be a different class ============================================
 
+	private List<String> cascadeChildrenNamesList = null;
 	public SimpleFilter(SimpleFilter simpleFilter) throws FunctionalException {
 		this(simpleFilter, null, true);
 	}
@@ -305,9 +286,10 @@ public class SimpleFilter extends Filter implements Serializable {
 		this.falseValue = MartConfiguratorUtils.replacePartitionReferencesByValues(simpleFilter.falseValue, part);
 		this.falseDisplay = MartConfiguratorUtils.replacePartitionReferencesByValues(simpleFilter.falseDisplay, part);
 		
-		this.cascadeChildrenNamesList = new HashSet<String>();
-		for (String cascadeChildName : simpleFilter.cascadeChildrenNamesList) {
-			this.cascadeChildrenNamesList.add(MartConfiguratorUtils.replacePartitionReferencesByValues(cascadeChildName, part));
+		this.cascadeChildrenNamesList = new ArrayList<String>();
+		List<String> cascadeChildrenNamesTmp = simpleFilter.getElementList().getElementNames();
+		for (String filterName : cascadeChildrenNamesTmp) {
+			this.cascadeChildrenNamesList.add(MartConfiguratorUtils.replacePartitionReferencesByValues(filterName, part));
 		}
 		
 		if (simpleFilter.treeFilterData!=null) {

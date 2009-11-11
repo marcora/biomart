@@ -8,7 +8,7 @@ import org.biomart.objects.MartConfiguratorUtils;
 
 
 
-public class Exportable extends Portable implements Serializable {
+public class Exportable2 extends Portable implements Serializable {
 
 	private static final long serialVersionUID = -6467892724196660537L;
 	
@@ -20,7 +20,7 @@ public class Exportable extends Portable implements Serializable {
 	// For backward compatibility
 	private Boolean formerDefault = null;	// Only mattered in the exportable
 	
-	public Exportable(PartitionTable mainPartitionTable, String name) {
+	public Exportable2(PartitionTable mainPartitionTable, String name) {
 		super(mainPartitionTable, name, XML_ELEMENT_NAME);	// displayName, description & visible do not apply for that object
 	}
 

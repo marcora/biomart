@@ -1,7 +1,6 @@
 package org.biomart.transformation;
 
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.biomart.common.general.exceptions.FunctionalException;
@@ -10,7 +9,6 @@ import org.biomart.common.general.utils.MyUtils;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.objects.objects.Attribute;
 import org.biomart.objects.objects.Config;
-import org.biomart.objects.objects.Element;
 import org.biomart.objects.objects.Exportable;
 import org.biomart.objects.objects.Filter;
 import org.biomart.objects.objects.Importable;
@@ -121,7 +119,7 @@ public class PortableTransformation {
 						"importable " + portableName + " references an invalid filter: " + filterName)) {
 					return null;
 				}
-				importable.addFilter(filter);
+				importable.getElementList().addElement(filter);
 			}
 		} else {
 			List<String> attributesList = oldExportable.getAttributes();
@@ -131,7 +129,7 @@ public class PortableTransformation {
 						"exportable " + portableName + " references an invalid attribute: " + attributeName)) {
 					return null;
 				}
-				exportable.addAttribute(attribute);
+				exportable.getElementList().addElement(attribute);
 			}
 		}
 		
@@ -147,25 +145,9 @@ public class PortableTransformation {
 			MyUtils.checkStatusProgram(MartServiceConstants.XML_ATTRIBUTE_VALUE_LINK.equals(oldPortable.getType()), 
 					"oldPortable = " + MartConfiguratorUtils.displayJdomElement(oldPortable.getJdomElement()));
 			MyUtils.checkStatusProgram(!oldPortable.getPointer());
-				
-			List<Element> elementList = new ArrayList<Element>(isImportable ? importable.getFilters() : exportable.getAttributes());
-			List<Range> rangeList = new ArrayList<Range>();
-	boolean needIntersection = false;	//TODO
-			for (Element element : elementList) {
-				Range targetRange = element.getTargetRange();
-				rangeList.add(targetRange);
-	if (rangeList.size()>1 && targetRange.getPartitionTableSet().size()>1) {
-		System.out.println(targetRange.getXmlValue());
-		needIntersection = true;
-	}
-			}
-	if (needIntersection) {
-		for (Element element : elementList) {
-			System.out.println(MartConfiguratorUtils.displayJdomElement(element.generateXml()));
-		}
-	}
-			
+		
 			// Compute intersection of the main table rows only for now (latest agreement)
+			List<Range> rangeList = portable.getElementList().computeRangeList();
 			Range range = Range.mainRangesIntersection(mainPartitionTable, false, rangeList);
 		
 			portable.setRange(range);

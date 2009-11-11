@@ -4,7 +4,7 @@ package org.biomart.common.general.utils;
 public class Tmp implements Test {
 
 	public static void main(String[] args) throws Exception {
-		
+
 	}
 
 	/*public static String dd() throws IOException {

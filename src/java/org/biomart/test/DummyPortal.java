@@ -65,9 +65,9 @@ public class DummyPortal {
 		container0.addFilter(simpleFilter2);
 		
 		GroupFilter groupFilter = new GroupFilter(mainPartitionTable, "groupFilter");
-		groupFilter.addSimpleFilter(simpleFilter0);
-		groupFilter.addSimpleFilter(simpleFilter1);
-		groupFilter.addSimpleFilter(simpleFilter2);
+		groupFilter.getElementList().addElement(simpleFilter0);
+		groupFilter.getElementList().addElement(simpleFilter1);
+		groupFilter.getElementList().addElement(simpleFilter2);
 		groupFilter.setPointer(false);
 		container1.addFilter(groupFilter);
 		

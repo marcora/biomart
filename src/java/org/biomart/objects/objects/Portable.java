@@ -17,6 +17,7 @@ public class Portable extends MartConfiguratorObject implements Serializable {
 	public static void main(String[] args) {}
 	
 	protected Range range = null;
+	protected ElementList elementList = null;
 	
 	// For backward compatibility
 	protected String formerLinkName = null;
@@ -34,6 +35,8 @@ public class Portable extends MartConfiguratorObject implements Serializable {
 
 		this.mainPartitionTable = mainPartitionTable;
 		this.otherPartitionTableList = new ArrayList<PartitionTable>();
+	
+		this.elementList = new ElementList(); 
 	}
 	
 	public void addOtherPartitionTable(PartitionTable partitionTable) {
@@ -41,40 +44,22 @@ public class Portable extends MartConfiguratorObject implements Serializable {
 		this.otherPartitionTableList.add(partitionTable);
 	}
 
+	public ElementList getElementList() {
+		return this.elementList;
+	}
+	public Element getElement(String name) {
+		return this.elementList.getElement(name);
+	}
+
 	@Override
 	public String toString() {
 		return 
 			super.toString() + ", " + 
 			"range = " + range + ", " + 
+			"elementList = " + elementList + ", " + 
 			"formerLinkName = " + formerLinkName + ", " + 
 			"formerLinkVersion = " + formerLinkVersion;
 	}
-
-	/*@Override
-	public boolean equals(Object object) {
-		if (this==object) {
-			return true;
-		}
-		if((object==null) || (object.getClass()!= this.getClass())) {
-			return false;
-		}
-		Portable portable=(Portable)object;
-		return (
-			(this.range==portable.range || (this.range!=null && range.equals(portable.range))) &&
-			(this.formerLinkName==portable.formerLinkName || (this.formerLinkName!=null && formerLinkName.equals(portable.formerLinkName))) &&
-			(this.formerLinkVersion==portable.formerLinkVersion || (this.formerLinkVersion!=null && formerLinkVersion.equals(portable.formerLinkVersion)))
-		);
-	}
-
-	@Override
-	public int hashCode() {
-		int hash = MartConfiguratorConstants.HASH_SEED1;
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + super.hashCode();
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==range? 0 : range.hashCode());
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==formerLinkName? 0 : formerLinkName.hashCode());
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==formerLinkVersion? 0 : formerLinkVersion.hashCode());
-		return hash;
-	}*/
 
 	public Range getRange() {
 		return range;
@@ -100,12 +85,20 @@ public class Portable extends MartConfiguratorObject implements Serializable {
 		this.formerLinkVersion = formerLinkVersion;
 	}
 	
-	protected org.jdom.Element generateXml() {
+	public org.jdom.Element generateXml() {
+		if (this instanceof Exportable) {
+			return generateXml(Attribute.XML_ELEMENT_NAME);
+		} else {
+			return generateXml(Filter.XML_ELEMENT_NAME);
+		}
+	}
+	protected org.jdom.Element generateXml(String type) {
 		org.jdom.Element element = super.generateXml();
 		
 		MartConfiguratorUtils.addAttribute(element, "formerLinkName", this.formerLinkName);
 		MartConfiguratorUtils.addAttribute(element, "formerLinkVersion", this.formerLinkVersion);
 		this.range.addXmlAttribute(element, "range");
+		MartConfiguratorUtils.addAttribute(element, type + "s", (this.elementList!=null ? this.elementList.getXmlValue() : null));
 		
 		return element;
 	}

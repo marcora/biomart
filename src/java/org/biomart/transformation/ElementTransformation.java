@@ -129,15 +129,10 @@ public abstract class ElementTransformation {
 		if (null!=element) {	// could be null if invalid element
 			if (element instanceof GroupFilter) {
 				GroupFilter groupFilter = (GroupFilter)element;
-				for (SimpleFilter simpleFilter : groupFilter.getFilterList()) {	// May be none
-					postProcessDimensionPartitionElement(simpleFilter);
+				for (Element simpleFilter : groupFilter.getElementList().getElements()) {	// May be none
+					postProcessDimensionPartitionElement((SimpleFilter)simpleFilter);
 				}
-			}/* else if (element instanceof ListFilter) {
-				ListFilter listFilter = (ListFilter)element;
-				for (SimpleFilter cascadeChild : listFilter.getCascadeChildren()) {	// May be none
-					postProcessDimensionPartitionElement(cascadeChild);
-				}
-			} else */{
+			} else {
 				postProcessDimensionPartitionElement(element);
 			}
 		}
