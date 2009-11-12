@@ -10,13 +10,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.TreeMap;
 import javax.swing.JOptionPane;
 import org.biomart.builder.model.DataLink.JDBCDataLink;
@@ -36,6 +36,7 @@ import org.biomart.configurator.utils.ConnectionPool;
 import org.biomart.configurator.utils.DbConnectionInfoObject;
 import org.biomart.configurator.utils.McUtils;
 import org.biomart.configurator.utils.type.Cardinality;
+import org.biomart.configurator.utils.type.JdbcType;
 
 
 	/**
@@ -66,6 +67,11 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 		private DbConnectionInfoObject conObj;
 		private String realSchemaName;
 		private SchemaDiagram schemaDiagram;
+		
+		//TODO need clean up
+		private Map<String,List<String>> tblColMap = new HashMap<String,List<String>>();
+		private Map<String,List<String>> tblPkMap = new HashMap<String,List<String>>();
+		private Map<String,Map<String,List<String>>> tblFkMap = new HashMap<String,Map<String,List<String>>>();
 		
 		public SchemaDiagram getSchemaDiagram() {
 			return this.schemaDiagram;
@@ -230,7 +236,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 
 				// Try the system class loader instead.
 				try {
-					loadedDriverClass = Class.forName(this.conObj.getDriverClassString());
+					loadedDriverClass = Class.forName(this.conObj.getJdbcType().getDriverClassName());
 				} catch (final ClassNotFoundException e) {
 					final SQLException e2 = new SQLException();
 					e2.initCause(e);
@@ -320,7 +326,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 		public void storeInHistory() {
 			// Store the schema settings in the history file.
 			final Properties history = new Properties();
-			history.setProperty("driverClass", this.conObj.getDriverClassString());
+			history.setProperty("driverClass", this.conObj.getJdbcType().getDriverClassName());
 			history.setProperty("jdbcURL", this.conObj.getJdbcUrl());
 			history.setProperty("username", this.conObj.getUserName());
 			history.setProperty("password", this.conObj.getPassword().equals("")? ""
@@ -396,8 +402,8 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 						return;
 				}
 			}
-			final Collection fksToBeDropped = new HashSet();
-			for (final Iterator i = this.getTables().values().iterator(); i.hasNext();) {
+			final Set<ForeignKey> fksToBeDropped = new HashSet<ForeignKey>();
+			for (final Iterator<Table> i = this.getTables().values().iterator(); i.hasNext();) {
 				final Table t = (Table) i.next();
 				fksToBeDropped.addAll(t.getForeignKeys());
 
@@ -654,7 +660,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 				Log.debug("Processing table " + dbTableName);
 
 				//this is hardcode for oracle, check if this table is from recyclebin
-				if(this.conObj.getDriverClassString().equals("oracle.jdbc.driver.OracleDriver") && dbTableName.indexOf("BIN$")==0)
+				if(this.conObj.getJdbcType().equals(JdbcType.Oracle) && dbTableName.indexOf("BIN$")==0)
 					continue;
 
 				// Look to see if we already have a table by this name defined.
@@ -953,7 +959,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 		 * @throws SQLException
 		 * @throws DataModelException
 		 */
-		private void synchroniseKeysUsingDMD(final Collection fksToBeDropped,
+		private void synchroniseKeysUsingDMD(final Set<ForeignKey> fksToBeDropped,
 				final DatabaseMetaData dmd, final String schema,
 				final String catalog)
 				throws SQLException, DataModelException {
@@ -961,7 +967,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 			// Loop through all the tables in the database, which is the same
 			// as looping through all the primary keys.
 			Log.debug("Finding tables");
-			for (final Iterator i = this.getTables().values().iterator(); i
+			for (final Iterator<Table> i = this.getTables().values().iterator(); i
 					.hasNext();) {
 
 				// Obtain the table and its primary key.
@@ -977,7 +983,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 				// from some previous run. Any relations that are left in this
 				// list by the end of the loop for this table no longer exist in
 				// the database, and will be dropped.
-				final Collection relationsToBeDropped = new HashSet(pk
+				final Collection<Relation> relationsToBeDropped = new HashSet<Relation>(pk
 						.getRelations());
 
 				// Identify all foreign keys in the database metadata that refer
@@ -1180,7 +1186,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 
 				// Remove any relations that we didn't find in the database (but
 				// leave the handmade ones behind).
-				for (final Iterator j = relationsToBeDropped.iterator(); j
+				for (final Iterator<Relation> j = relationsToBeDropped.iterator(); j
 						.hasNext();) {
 					final Relation r = (Relation) j.next();
 					if (r.getStatus().equals(ComponentStatus.HANDMADE))
@@ -1217,13 +1223,13 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 		 *             set of foreign keys.
 		 */
 		private void synchroniseKeysUsingKeyGuessing(
-				final Collection fksToBeDropped, final double stepSize)
+				final Set<ForeignKey> fksToBeDropped, final double stepSize)
 				throws SQLException, DataModelException {
 			Log.debug("Running non-DMD key synchronisation");
 			// Loop through all the tables in the database, which is the same
 			// as looping through all the primary keys.
 			Log.debug("Finding tables");
-			for (final Iterator i = this.getTables().values().iterator(); i
+			for (final Iterator<Table> i = this.getTables().values().iterator(); i
 					.hasNext();) {
 				// Update progress;
 				this.progress += stepSize;
@@ -1246,7 +1252,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 				// will have been established from that other table instead. So,
 				// we skip this table.
 				boolean pkIsAlsoAnFK = false;
-				for (final Iterator j = pkTable.getForeignKeys().iterator(); j
+				for (final Iterator<ForeignKey> j = pkTable.getForeignKeys().iterator(); j
 						.hasNext()
 						&& !pkIsAlsoAnFK;) {
 					final Key fk = (Key) j.next();
@@ -1279,7 +1285,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 				// from some previous run. Any relations that are left in this
 				// list by the end of the loop for this table no longer exist in
 				// the database, and will be dropped.
-				final Collection relationsToBeDropped = new HashSet(pk
+				final Collection<Relation> relationsToBeDropped = new HashSet<Relation>(pk
 						.getRelations());
 
 				// Now we know that we can use this PK for certain, look for all
@@ -1288,7 +1294,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 				// appended. Any set that we find is going to be an FK with a
 				// relation back to this PK.
 				Log.debug("Searching for possible referring foreign keys");
-				for (final Iterator l = this.getTables().values().iterator(); l
+				for (final Iterator<Table> l = this.getTables().values().iterator(); l
 						.hasNext();) {
 					// Obtain the next table to look at.
 					final Table fkTable = (Table) l.next();
@@ -1356,7 +1362,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 						// If any FK already exists on the target table with the
 						// same columns in the same order, then reuse it.
 						boolean fkAlreadyExists = false;
-						for (final Iterator f = fkTable.getForeignKeys()
+						for (final Iterator<ForeignKey> f = fkTable.getForeignKeys()
 								.iterator(); f.hasNext() && !fkAlreadyExists;) {
 							final ForeignKey candidateFK = (ForeignKey) f
 									.next();
@@ -1399,7 +1405,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 
 						// Check to see if it already has a relation.
 						boolean relationExists = false;
-						for (final Iterator f = fk.getRelations().iterator(); f
+						for (final Iterator<Relation> f = fk.getRelations().iterator(); f
 								.hasNext();) {
 							// Obtain the next relation.
 							final Relation candidateRel = (Relation) f.next();
@@ -1463,7 +1469,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 
 				// Remove any relations that we didn't find in the database (but
 				// leave the handmade ones behind).
-				for (final Iterator j = relationsToBeDropped.iterator(); j
+				for (final Iterator<Relation> j = relationsToBeDropped.iterator(); j
 						.hasNext();) {
 					final Relation r = (Relation) j.next();
 					if (r.getStatus().equals(ComponentStatus.HANDMADE))
@@ -1672,7 +1678,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 		}
 
 		public String getDriverClassName() {
-			return this.conObj.getDriverClassString();
+			return this.conObj.getJdbcType().getDriverClassName();
 		}
 
 		public String getPassword() {
@@ -1688,64 +1694,38 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 		}
 
 
-		public void init(String dbName, List<String> tablesInDb) throws DataModelException, SQLException {
+		public void init(List<String> tablesInDb) throws DataModelException, SQLException {
 			Log.info("Initialize " + this);
 			long t1 = McUtils.getCurrentTime();
 			long t2 = 0;
 			ProgressDialog2.getInstance().setStatus("creating "+this);
-			super.init(dbName,tablesInDb);
+			super.init(tablesInDb);
 			
-			StringBuffer sb = new StringBuffer("select table_name,column_name,column_key from information_schema.columns where");
-			sb.append(" table_schema='"+dbName+"' order by table_name, ordinal_position");
-
-			//create all columns
-			String lastTableName = "";
-			Table currentTable = null;
-			Map<Integer, Column> pkCols = new TreeMap<Integer, Column>();
-			int pkIndex = 0;
-			Connection con = ConnectionPool.Instance.getConnection(this.conObj);
-			try {
-				Statement st = con.createStatement();
-				ResultSet rs = st.executeQuery(sb.toString());
-				t2 = McUtils.getCurrentTime();
-				//loop to create Tables, Columns and PKs
-				while(rs.next()) {
-					String tableName = rs.getString("table_name");
-					//finish all columns in one table and move to the next, if previous table doesn't have a PK, 
-					//create using keyguessing
-					if(!lastTableName.equals(tableName)) {
-						this.createPKforTable(currentTable, pkCols);
-						//move to next table
-						currentTable = new Table(this,tableName);
-						this.getTables().put(tableName, currentTable);
-						//clean flags
-						lastTableName = tableName;
-						pkIndex = 0;
-						pkCols.clear();
-					}
-					
-					Column dbTblCol = new Column(currentTable, rs.getString("column_name"));
-					currentTable.getColumns().put(dbTblCol.getName(),dbTblCol);
-					//PK?
-					String priStr = rs.getString("column_key");
-					//PRI is the value return from MySQL
-					if("PRI".equals(priStr)) {
-						pkIndex++;
-						pkCols.put(pkIndex, dbTblCol);
-					}
-
+			this.setMetaInfo(this.conObj.getDatabaseName(), this.conObj.getSchemaName());
+			
+			//create table			
+			for(String tbName:this.tblColMap.keySet()) {
+				Table table = new Table(this,tbName);
+				this.getTables().put(tbName, table);
+				//create column
+				for(String colName:this.tblColMap.get(tbName)) {
+					Column dbTblCol = new Column(table,colName);
+					table.getColumns().put(colName, dbTblCol);
 				}
-				rs.close();
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				//create PK
+				List<Column> pkColList = new ArrayList<Column>();
+				if(this.tblPkMap.get(tbName)!=null)
+					for(String pkColName:this.tblPkMap.get(tbName)) {
+						pkColList.add(table.getColumns().get(pkColName));
+					}
+				this.createPKforTable(table, pkColList);
 			}
 
-			//create PK for the last table
-			this.createPKforTable(currentTable, pkCols);
+				t2 = McUtils.getCurrentTime();
 			
 			if (this.isKeyGuessing()) 
-				this.synchroniseKeysUsingKeyGuessing(Collections.emptySet(), 1);
+				this.synchroniseKeysUsingKeyGuessing(new HashSet<ForeignKey>(), 1);
+
 
 			long t4 = McUtils.getCurrentTime();
 			System.err.println("get data from db "+(t2-t1));
@@ -1760,7 +1740,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 	 * @param hasPK
 	 * @param pkCols
 	 */
-	private void createPKforTable(Table table, Map<Integer,Column> pkCols) {
+	private void createPKforTable(Table table, List<Column> pkCols) {
 		if(table==null)
 			return;
 		if(pkCols.isEmpty() && this.isKeyGuessing()) {
@@ -1783,14 +1763,14 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 			// is what DMD would have used had it found anything
 			// itself).
 			if (candidateCol != null)
-				pkCols.put(1, candidateCol);
+				pkCols.add(candidateCol);
 
 		}
 		//create PK
 		if(!pkCols.isEmpty()) {
 			PrimaryKey candidatePK;
 			try {
-				candidatePK = new PrimaryKey((Column[]) pkCols.values()
+				candidatePK = new PrimaryKey((Column[]) pkCols
 						.toArray(new Column[0]));
 			} catch (final Throwable th) {
 				throw new BioMartError(th);
@@ -1801,6 +1781,148 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 			} catch (final Throwable th) {
 				throw new BioMartError(th);
 			}
+		}
+
+	}
+
+	/**
+	 * get the metadata info from source database, and set to tblColMap,tblPkMap, and tblFkMap
+	 * @throws SQLException 
+	 */
+	private void setMetaInfo(String dbName,String schemaName) {
+		this.tblColMap.clear();
+		this.tblPkMap.clear();
+		this.tblFkMap.clear();
+		
+		
+		switch(this.conObj.getJdbcType()) {
+		case MySQL: //MyISAM
+			this.setMySQLMetaInfo(dbName, schemaName);
+			break;
+		case PostGreSQL:
+			this.setPgsMetaInfo(dbName, schemaName);
+			break;
+		case Oracle:
+			break;		
+		}
+			
+	}
+	
+	private void setMySQLMetaInfo(String dbName,String schemaName) {
+		String lastTableName = "";
+		List<String> colList = new ArrayList<String>();
+		List<String> pkList = new ArrayList<String>();
+		StringBuffer sb = new StringBuffer("select table_name,column_name,column_key from information_schema.columns where");
+		sb.append(" table_schema='"+schemaName+"' order by table_name, ordinal_position");
+		Connection con = ConnectionPool.Instance.getConnection(this.conObj);
+		try {
+			Statement st = con.createStatement();
+			ResultSet rs = st.executeQuery(sb.toString());
+			while(rs.next()) {
+				String tableName = rs.getString("table_name");
+				//finish all columns in one table and move to the next, if previous table doesn't have a PK, 
+				//create using keyguessing
+				if(!lastTableName.equals(tableName)) {
+					if(!lastTableName.equals("")) {
+						this.tblColMap.put(lastTableName, colList);
+						this.tblPkMap.put(lastTableName, pkList);
+						//no fk for MyISAM;
+						colList = new ArrayList<String>();
+						pkList = new ArrayList<String>();
+					}
+					//this.createPKforTable(currentTable, pkCols);
+					//move to next table
+					
+					//clean flags
+					lastTableName = tableName;
+				}
+				
+				colList.add(rs.getString("column_name"));
+
+				//PK?
+				String priStr = rs.getString("column_key");
+				//PRI is the value return from MySQL
+				if("PRI".equals(priStr)) {
+					pkList.add(rs.getString("column_name"));
+				}
+
+			}
+			rs.close();
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		this.tblColMap.put(lastTableName, colList);
+		this.tblPkMap.put(lastTableName, pkList);		
+	}
+	
+	/**
+	 * new two sql to get all metadata
+	 * @param dbName
+	 * @param schemaName
+	 */
+	private void setPgsMetaInfo(String dbName, String schemaName) {
+		String lastTableName = "";
+		List<String> colList = new ArrayList<String>();
+		String sql1 = "select table_name,column_name from information_schema.columns where table_schema='" +
+				schemaName+"' order by table_name,ordinal_position";
+		Connection con = ConnectionPool.Instance.getConnection(this.conObj);
+		Statement st = null;
+		try {
+			st = con.createStatement();
+			ResultSet rs = st.executeQuery(sql1);
+			while(rs.next()) {
+				String tableName = rs.getString("table_name");
+				//finish all columns in one table and move to the next
+				if(!lastTableName.equals(tableName)) {
+					if(!lastTableName.equals("")) {
+						this.tblColMap.put(lastTableName, colList);
+						colList = new ArrayList<String>();
+					}
+					lastTableName = tableName;
+				}				
+				colList.add(rs.getString("column_name"));
+			}
+			rs.close();
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		this.tblColMap.put(lastTableName, colList);
+		
+		String sql2 = "SELECT tc.constraint_name, tc.constraint_type, tc.table_name, kcu.column_name " +
+				"FROM information_schema.table_constraints tc LEFT JOIN information_schema.key_column_usage kcu " +
+				"ON tc.constraint_catalog = kcu.constraint_catalog AND tc.constraint_schema = kcu.constraint_schema " +
+				"AND tc.constraint_name = kcu.constraint_name where tc.constraint_schema = '"+schemaName+"' and (constraint_type='PRIMARY KEY' or " +
+				"constraint_type='FOREIGN KEY') order by table_name, constraint_type, column_name";
+
+		lastTableName="";
+		String lastFkName="";
+		List<String> pkList = new ArrayList<String>();
+		Map<String,List<String>> fkMap = new HashMap<String,List<String>>();
+		try {
+			ResultSet rs = st.executeQuery(sql2);
+			while(rs.next()) {
+				String tableName = rs.getString("table_name");
+				if(!lastTableName.equals(tableName)) {
+					if(!lastTableName.equals("")) {
+						this.tblPkMap.put(lastTableName, pkList);
+						this.tblFkMap.put(lastTableName, fkMap);
+						pkList = new ArrayList<String>();
+						fkMap = new HashMap<String,List<String>>();
+					}
+					lastTableName = tableName;
+				}
+				if(rs.getString("constraint_type").equals("PRIMARY KEY")) {
+					pkList.add(rs.getString("column_name"));
+				}
+			}
+			rs.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 	}

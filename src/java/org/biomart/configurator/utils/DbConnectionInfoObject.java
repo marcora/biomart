@@ -1,5 +1,7 @@
 package org.biomart.configurator.utils;
 
+import org.biomart.configurator.utils.type.JdbcType;
+
 /**
  * Has all information for creating a JDBC connection
  * This is an immutable object. 
@@ -11,8 +13,8 @@ public class DbConnectionInfoObject {
 	private String databaseName;
 	private String userName;
 	private String password;
-	private String driverClassString;
 	private String schemaName;
+	private JdbcType type;
 	
 	public String getJdbcUrl() {
 		return jdbcUrl;
@@ -27,17 +29,17 @@ public class DbConnectionInfoObject {
 	}
 	
 	public DbConnectionInfoObject(String url,String dbName, String schemaName,
-			String userName, String pwd, String driverClassString) {
+			String userName, String pwd, JdbcType type) {
 		this.jdbcUrl = url;
 		this.userName = userName;
 		this.password = pwd;
-		this.driverClassString = driverClassString;
+		this.type = type;
 		this.databaseName = dbName;
 		this.schemaName = schemaName;
 	}
 	
-	public String getDriverClassString() {
-		return driverClassString;
+	public JdbcType getJdbcType() {
+		return this.type;
 	}
 	
 	public boolean equals(Object obj) {
@@ -54,7 +56,7 @@ public class DbConnectionInfoObject {
 			return false;
 		
 		DbConnectionInfoObject conObj = (DbConnectionInfoObject)obj;
-		if(conObj.getDriverClassString().equals(this.driverClassString) && 
+		if(conObj.getJdbcType().equals(this.type) && 
 				conObj.getJdbcUrl().equals(this.jdbcUrl) && 
 				conObj.getUserName().equals(this.userName) &&
 				conObj.getPassword().equals(this.password) &&
@@ -66,14 +68,12 @@ public class DbConnectionInfoObject {
 	
 	public int hashCode() {
         final int PRIME = 31;
-        int result = PRIME +  this.driverClassString.hashCode() + 
+        int result = PRIME + 
         	this.jdbcUrl.hashCode() + this.userName.hashCode() + this.password.hashCode() +
         	this.databaseName.hashCode();
         return result;
 	}
-	public void setDatabaseName(String databaseName) {
-		this.databaseName = databaseName;
-	}
+
 	public String getDatabaseName() {
 		return databaseName;
 	}

@@ -28,7 +28,7 @@ public enum ConnectionPool {
 		Connection con = this.connections.get(conObject);
 		if(con==null) {
 			try {
-				Class.forName(conObject.getDriverClassString());
+				Class.forName(conObject.getJdbcType().getDriverClassName());
 				con = DriverManager.getConnection(conObject.getJdbcUrl(),
 						conObject.getUserName(),conObject.getPassword());			
 			} catch(java.lang.ClassNotFoundException e) {

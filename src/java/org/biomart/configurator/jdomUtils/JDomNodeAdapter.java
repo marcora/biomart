@@ -146,7 +146,7 @@ public class JDomNodeAdapter extends DefaultMutableTreeNode {
 
 				schemaElement.setAttribute("name",jdbcSchema.getName());
 				schemaElement.setAttribute("uniqueId",""+jdbcSchema.getUniqueId());
-				schemaElement.setAttribute("driverClassName",jdbcSchema.getConnectionObject().getDriverClassString());
+				schemaElement.setAttribute("driverClassName",jdbcSchema.getConnectionObject().getJdbcType().getDriverClassName());
 				schemaElement.setAttribute("url",jdbcSchema.getConnectionObject().getJdbcUrl());
 				schemaElement.setAttribute("databaseName",jdbcSchema.getDataLinkDatabase());
 				schemaElement.setAttribute("schemaName",jdbcSchema.getDataLinkSchema());
@@ -1710,7 +1710,7 @@ public class JDomNodeAdapter extends DefaultMutableTreeNode {
     		DbConnectionInfoObject genObj = location.getConnectionObject();
     		DbConnectionInfoObject conObj = new DbConnectionInfoObject(genObj.getJdbcUrl()+schemaName,schemaName,
     				schemaName,genObj.getUserName(),
-    				genObj.getPassword(),genObj.getDriverClassString());
+    				genObj.getPassword(),genObj.getJdbcType());
     		
     		Connection con = ConnectionPool.Instance.getConnection(conObj);
     		String sql = "select distinct "+colName +" from "+tableName;

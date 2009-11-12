@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -78,17 +79,18 @@ public class DBMetaTree extends TreeListComponent implements TreeSelectionListen
 
 		DbConnectionInfoObject dbConObj = new DbConnectionInfoObject(this.conObject.getJdbcUrl()+schemaName,
 				this.conObject.getDatabaseName(),schemaName,this.conObject.getUserName(),this.conObject.getPassword(),
-				this.conObject.getDriverClassString());
+				this.conObject.getJdbcType());
 		Connection con = ConnectionPool.Instance.getConnection(dbConObj);
-		
+		String sql = "select table_name from information_schema.tables where table_schema = '"+schemaName+"'";
+
 		try {
-			DatabaseMetaData dmd = con.getMetaData();
-			final String catalog = con.getCatalog();
-			ResultSet rs2 = dmd.getTables(catalog, schemaName, "%", null);
+			Statement st = con.createStatement();
+			ResultSet rs2 = st.executeQuery(sql);
 			while (rs2.next()) {
 				CheckBoxNode cbn = new CheckBoxNode(rs2.getString("TABLE_NAME"),isSelected);
 				tables.add(cbn);
-			}						
+			}	
+			rs2.close();
 		} catch(SQLException ex) {
 			ex.printStackTrace();
 		}

@@ -711,12 +711,12 @@ public class Schemas {
 	 *            modifications.
 	 */
 	public void requestInitSchema(final Schema schema,
-			final boolean transactionMod, final String dbName, final List<String> tables) {
+			final boolean transactionMod, final List<String> tables) {
 		long t1 = McUtils.getCurrentTime();
 				Transaction.start(transactionMod);
 		long t2 = McUtils.getCurrentTime();
 				try {
-					schema.init(dbName,tables);
+					schema.init(tables);
 				} catch (final Throwable t) {
 					SwingUtilities.invokeLater(new Runnable() {
 						public void run() {

@@ -426,7 +426,8 @@ public class JDBCLocationConnectionPanel extends JPanel implements DocumentListe
 		final String username = this.username.getText();
 		final String password = new String(this.password.getPassword());
 		// Construct a JDBCSchema based on them.
-		DbConnectionInfoObject conObj = new DbConnectionInfoObject(url,"","",username,password,driverClassName);
+		DbConnectionInfoObject conObj = new DbConnectionInfoObject(url,"","",username,password,
+				(JdbcType)this.predefinedDriverClass.getSelectedItem());
 		final JDBCSchema schema = new JDBCSchema(null, conObj,
 				 "", name, this.keyguessing.isSelected(), "", 
 				"");
@@ -500,7 +501,7 @@ public class JDBCLocationConnectionPanel extends JPanel implements DocumentListe
 			conObject = new DbConnectionInfoObject(this.jdbcURL.getText(),this.dbTField.getText(),"",
 					this.username.getText(),
 					new String(this.password.getPassword()),
-					this.driverClass.getText());
+					(JdbcType)this.predefinedDriverClass.getSelectedItem());
 			final ProgressDialog2 progressMonitor = ProgressDialog2.getInstance();				
  
     		final SwingWorker worker = new SwingWorker() {
@@ -551,10 +552,10 @@ public class JDBCLocationConnectionPanel extends JPanel implements DocumentListe
 		if(null==locations || locations.get(name) == null) {
 			loc = new Location(name);
 			
-			DbConnectionInfoObject conObj = new DbConnectionInfoObject(this.jdbcURL.getText(),"","",
+			DbConnectionInfoObject conObj = new DbConnectionInfoObject(this.jdbcURL.getText(),this.dbTField.getText(),"",
 					this.username.getText(),
 					new String(this.password.getPassword()),
-					this.driverClass.getText());
+					(JdbcType)this.predefinedDriverClass.getSelectedItem());
 			loc.setConnectionObject(conObj);
 			loc.setKeyGuessing(true);
 		} else
@@ -568,11 +569,13 @@ public class JDBCLocationConnectionPanel extends JPanel implements DocumentListe
 			if(loc.getMart(dbName) == null) {
 				final Mart mart = new Mart(loc,dbName,type);
 				// Construct a JDBCSchema based on them.
-				loc.getConnectionObject().setDatabaseName(dbName);
-				final JDBCSchema schema = new JDBCSchema(mart, loc.getConnectionObject(),
-						 dbName, dbName, true, "", "");
-				mart.addSchema(schema);
-				
+				DbConnectionInfoObject conObj2 = new DbConnectionInfoObject(this.jdbcURL.getText(),this.dbTField.getText(),
+						dbName,this.username.getText(),
+						new String(this.password.getPassword()),
+						(JdbcType)this.predefinedDriverClass.getSelectedItem());
+				final JDBCSchema schema = new JDBCSchema(mart, conObj2,
+						 dbName, dbName, this.keyguessing.isSelected(), "", "");
+				mart.addSchema(schema);				
 				loc.addMart(mart);
 			}
 		}
