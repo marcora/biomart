@@ -14,7 +14,7 @@ import org.biomart.objects.MartConfiguratorUtils;
 import org.jdom.Element;
 
 
-public class Container extends Containee implements Serializable {
+public class Container extends MartConfiguratorObject implements Serializable {
 
 	private static final long serialVersionUID = 8818099786702183740L;
 	
@@ -29,7 +29,7 @@ public class Container extends Containee implements Serializable {
 	private List<Filter> filterList = null;
 	private List<Attribute> attributeList = null;
 	
-	private List<Containee> containeeList = null;	// Ordered references to above lists of containers, filters & attributes 
+	private List<MartConfiguratorObject> containeeList = null;	// Ordered references to above lists of containers, filters & attributes 
 	
 	public Container() {}
 	public Container(String name, String displayName, String description, Boolean visible,
@@ -37,7 +37,7 @@ public class Container extends Containee implements Serializable {
 		super(name, displayName, description, visible, XML_ELEMENT_NAME);
 		this.queryRestriction = queryRestriction;
 		
-		this.containeeList = new ArrayList<Containee>();
+		this.containeeList = new ArrayList<MartConfiguratorObject>();
 		
 		this.containerList = new ArrayList<Container>();
 		this.filterList = new ArrayList<Filter>();
@@ -48,29 +48,28 @@ public class Container extends Containee implements Serializable {
 		Container rootContainer = new Container(
 				MartConfiguratorConstants.ROOT_CONTAINER_NAME, MartConfiguratorConstants.ROOT_CONTAINER_DISPLAY_NAME, 
 				MartConfiguratorConstants.ROOT_CONTAINER_DISPLAY_NAME, true, null);
-		rootContainer.setParentContainer(null);		// only one with no parents
+		//rootContainer.setParentContainer(null);		// only one with no parents
 		return rootContainer;
 	}
 	
 	public void addContainer(Container container) {
 		this.containerList.add(container);
 		this.containeeList.add(container);
-		container.setParentContainer(this);
+		//container.setParentContainer(this);
 	}
 	public void addFilter(Filter filter) {
 		this.filterList.add(filter);
 		this.containeeList.add(filter);
-		filter.setParentContainer(this);
+		//filter.setParentContainer(this);
 	}
 	public void addAttribute(Attribute attribute) {
 		this.attributeList.add(attribute);
 		this.containeeList.add(attribute);
-		attribute.setParentContainer(this);
+		//attribute.setParentContainer(this);
 	}
 	
-	
-	public List<Containee> getContaineeList() {
-		return new ArrayList<Containee>(this.containeeList);
+	public List<MartConfiguratorObject> getContaineeList() {
+		return new ArrayList<MartConfiguratorObject>(this.containeeList);
 	}
 	public List<Container> getContainerList() {
 		return new ArrayList<Container>(containerList);
@@ -83,8 +82,8 @@ public class Container extends Containee implements Serializable {
 	}
 
 
-	public Containee getContainee(String name) {
-		return (Containee)super.getMartConfiguratorObjectByName(this.containeeList, name);
+	public MartConfiguratorObject getContainee(String name) {
+		return super.getMartConfiguratorObjectByName(this.containeeList, name);
 	}
 	public Container getContainer(String name) {
 		return (Container)super.getMartConfiguratorObjectByName(this.containerList, name);
@@ -145,41 +144,12 @@ public class Container extends Containee implements Serializable {
 		return hash;
 	}*/
 
-	/*public int compare(Container container1, Container container2) {
-		if (container1==null && container2!=null) {
-			return -1;
-		} else if (container1!=null && container2==null) {
-			return 1;
-		}
-		int compare = CompareUtils.compareNull(container1.level, container2.level);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(container1.queryRestriction, container2.queryRestriction);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(container1.containerList, container2.containerList);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(container1.filterList, container2.filterList);
-		if (compare!=0) {
-			return compare;
-		}
-		return CompareUtils.compareNull(container1.attributeList, container2.attributeList);
-	}
-
-	public int compareTo(Container container) {
-		return compare(this, container);
-	}*/
-
 	public Element generateXml() {
 		Element element = super.generateXml();
 		
 		MartConfiguratorUtils.addAttribute(element, "queryRestriction", this.queryRestriction);
 		
-		for (Containee containee : this.containeeList) {
+		for (MartConfiguratorObject containee : this.containeeList) {
 			element.addContent(containee.generateXml());
 		}
 		
@@ -192,7 +162,7 @@ public class Container extends Containee implements Serializable {
 	public Container(Container container, List<Integer> mainRowNumbersWanted) throws FunctionalException {	// creates a light clone (temporary solution)
 		this(container.name, container.displayName, container.description, container.visible, container.queryRestriction);
 		
-		for (Containee containee : container.containeeList) {
+		for (MartConfiguratorObject containee : this.containeeList) {
 			if (containee instanceof Container) {
 				if (containee.getVisible()) {	// Only the visible ones
 					Container containerClone = new Container((Container)containee, mainRowNumbersWanted); 
@@ -266,7 +236,7 @@ public class Container extends Containee implements Serializable {
 		
 		jsoml.setAttribute("queryRestriction", this.queryRestriction);
 		
-		for (Containee containee : containeeList) {
+		for (MartConfiguratorObject containee : this.containeeList) {
 			if (containee instanceof Container) {
 				Jsoml containeeJsoml = containee.generateOutputForWebService(xml);
 				jsoml.addContent(containeeJsoml);
@@ -280,3 +250,71 @@ public class Container extends Containee implements Serializable {
 		return jsoml;
 	}
 }
+
+
+/*package org.biomart.objects.objects;
+
+import java.io.Serializable;
+
+
+public abstract class Containee2 extends MartConfiguratorObject implements Serializable {
+
+	private static final long serialVersionUID = -8763113328755703892L;
+
+	public static void main(String[] args) {}
+	
+	// Redundant
+	protected Integer level = null;
+	protected Container parentContainer = null;	// The parent container if any
+
+	public Containee2() {} 	// for Serialization
+	public Containee2(String name, String displayName, String description, Boolean visible, String xmlElementName) {
+		super(name, displayName, description, visible, xmlElementName);
+	}
+	
+	public void setParentContainer(Container parentContainer) {
+		this.level = this.parentContainer==null ? 0 : this.parentContainer.level+1;
+		this.parentContainer = parentContainer;
+	}
+	
+	public Container getParentContainer() {
+		return parentContainer;
+	}
+
+	public Integer getLevel() {
+		return level;
+	}
+
+	@Override
+	public String toString() {
+		return 
+			super.toString() + ", " + 
+			"level = " + level + ", " +
+			"parentContainer = " + (null==parentContainer ? null : parentContainer.getName());
+	}
+	
+	protected Element generateXml() {
+		return super.generateXml();
+	}
+	
+
+
+	
+	// ===================================== Should be a different class ============================================
+
+	protected Containee2(Containee2 containee) {
+		this(containee, null);
+	}
+	protected Containee2(Containee2 containee, Part part) {	// creates a light clone (temporary solution)
+		super(containee, part);
+	}
+	protected void updatePointerClone(org.biomart.objects.objects.Element pointingElement) {
+		super.updatePointerClone(pointingElement);
+		this.parentContainer = pointingElement.parentContainer;
+	}
+	
+	protected Jsoml generateOutputForWebService(boolean xml) throws FunctionalException {
+		return super.generateOutputForWebService(xml);
+	}
+}*/
+

@@ -62,7 +62,7 @@ public class ElementList implements Serializable {
 		return this.elements.size();
 	}
 	
-	public String getXmlValue() {
+	public String getStringValue() {
 		return MartConfiguratorUtils.collectionToCommaSeparatedString(this.elementNames);
 	}
 

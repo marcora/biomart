@@ -6,10 +6,10 @@ import java.util.List;
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.martRemote.objects.request.MartRemoteRequest;
 import org.biomart.objects.objects.Attribute;
-import org.biomart.objects.objects.Containee;
 import org.biomart.objects.objects.Container;
 import org.biomart.objects.objects.Element;
 import org.biomart.objects.objects.Filter;
+import org.biomart.objects.objects.MartConfiguratorObject;
 import org.biomart.objects.objects.MartRegistry;
 
 public abstract class GetElementsResponse extends GetContaineesResponse {
@@ -28,8 +28,8 @@ public abstract class GetElementsResponse extends GetContaineesResponse {
 		addElements(super.rootContainer, attribute);
 	}
 	private void addElements(Container container, boolean attribute) {
-		List<Containee> containeeList = container.getContaineeList();
-		for (Containee containee : containeeList) {
+		List<MartConfiguratorObject> containeeList = container.getContaineeList();
+		for (MartConfiguratorObject containee : containeeList) {
 			if (attribute && containee instanceof Attribute) {
 				this.elementList.add((Attribute)containee);		
 			} else if (!attribute && containee instanceof Filter) {

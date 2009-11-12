@@ -117,7 +117,7 @@ public class Portable extends MartConfiguratorObject implements Serializable {
 		
 		MartConfiguratorUtils.addAttribute(element, "formerLinkName", this.formerLinkName);
 		MartConfiguratorUtils.addAttribute(element, "formerLinkVersion", this.formerLinkVersion);
-		MartConfiguratorUtils.addAttribute(element, type + "s", (this.elementList!=null ? this.elementList.getXmlValue() : null));
+		MartConfiguratorUtils.addAttribute(element, type + "s", (this.elementList!=null ? this.elementList.getStringValue() : null));
 		MartConfiguratorUtils.addAttribute(element, "formerDefault", this.formerDefault);
 		this.range.addXmlAttribute(element, "range");
 		

@@ -14,7 +14,7 @@ import org.biomart.objects.data.TreeFilterData;
 
 
 public abstract class Filter extends org.biomart.objects.objects.Element	// to avoid any ambiguity with jdom's 
-	implements /*Comparable<Filter>, Comparator<Filter>, */Serializable {
+	implements Serializable {
 
 	private static final long serialVersionUID = 8117878349721027751L;
 	

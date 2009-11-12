@@ -17,12 +17,12 @@ import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.objects.helpers.PartitionReference;
 import org.biomart.objects.objects.Attribute;
-import org.biomart.objects.objects.Containee;
 import org.biomart.objects.objects.Container;
 import org.biomart.objects.objects.Dataset;
 import org.biomart.objects.objects.Element;
 import org.biomart.objects.objects.Filter;
 import org.biomart.objects.objects.GroupFilter;
+import org.biomart.objects.objects.MartConfiguratorObject;
 import org.biomart.objects.objects.Part;
 import org.biomart.objects.objects.PartitionTable;
 import org.biomart.objects.objects.Range;
@@ -221,7 +221,7 @@ public abstract class ElementTransformation {
 		Element dimensionPartitionTemplateElement = null;
 		Boolean hasDimensionPartition = dimensionPartition!=null && dimensionPartition.getPartition();
 		if (hasDimensionPartition) { 
-				Containee containee = nonSpecificTemplateElement!=null ? nonSpecificTemplateElement : container;
+				MartConfiguratorObject containee = nonSpecificTemplateElement!=null ? nonSpecificTemplateElement : container;
 			dimensionPartitionTemplateElement = isAttribute ?	// try to allocate a template (not garanteed, if 1st one for instance) 
 					dimensionPartition.getAttributeForContainee(containee) : dimensionPartition.getFilterForContainee(containee);
 		}

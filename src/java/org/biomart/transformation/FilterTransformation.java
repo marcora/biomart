@@ -886,9 +886,6 @@ public class FilterTransformation extends ElementTransformation {
 	@Override
 	protected Filter updateNonSpecificTemplateFilter(Filter templateFilter, Filter newFilter, Integer currentMainRow, boolean firstSpecific) throws FunctionalException, TechnicalException {
 		
-/*System.out.println("#1" + MartConfiguratorUtils.displayJdomElement(templateFilter.generateXml()));
-System.out.println("#2" + MartConfiguratorUtils.displayJdomElement(newFilter.generateXml()));*/
-		
 		updateNonSpecificTemplateElement(templateFilter, newFilter, currentMainRow, firstSpecific);
 		
 		// Check that all these properties are the same, exception made for the first specific which can define the 1st values for some properties

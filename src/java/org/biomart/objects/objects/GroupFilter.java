@@ -52,7 +52,7 @@ public class GroupFilter extends Filter implements Serializable {
 			super.toString() + ", " + 
 			"logicalOperator = " + logicalOperator + ", " + 
 			"multipleFilter = " + multipleFilter + ", " + 
-			"simpleFilterList = " + (simpleFilterList!=null ? simpleFilterList.getXmlValue() : null);
+			"simpleFilterList = " + (simpleFilterList!=null ? simpleFilterList.getStringValue() : null);
 	}
 	
 	/*@Override
@@ -86,7 +86,7 @@ public class GroupFilter extends Filter implements Serializable {
 		org.jdom.Element element = super.generateXml();
 		MartConfiguratorUtils.addAttribute(element, "logicalOperator", this.logicalOperator);
 		MartConfiguratorUtils.addAttribute(element, "multipleFilter", this.multipleFilter);
-		MartConfiguratorUtils.addAttribute(element, "filterList", (simpleFilterList!=null ? simpleFilterList.getXmlValue() : null));
+		MartConfiguratorUtils.addAttribute(element, "filterList", (simpleFilterList!=null ? simpleFilterList.getStringValue() : null));
 		return element;
 	}
 	
@@ -117,7 +117,7 @@ public class GroupFilter extends Filter implements Serializable {
 		
 		jsoml.setAttribute("logicalOperator", this.logicalOperator);
 		jsoml.setAttribute("multipleFilter", this.multipleFilter);
-		jsoml.setAttribute("filterList", (simpleFilterList!=null ? simpleFilterList.getXmlValue() : null));
+		jsoml.setAttribute("filterList", (simpleFilterList!=null ? simpleFilterList.getStringValue() : null));
 		
 		return jsoml;
 	}

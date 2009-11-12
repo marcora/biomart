@@ -62,7 +62,7 @@ public class SimpleFilter extends Filter implements Serializable {
 			"buttonURL = " + buttonURL + ", " +
 			"upload = " + upload + ", " +
 			
-			"cascadeChildrenElementList = " + (cascadeChildrenElementList!=null ? cascadeChildrenElementList.getXmlValue() : null) + ", " +
+			"cascadeChildrenElementList = " + (cascadeChildrenElementList!=null ? cascadeChildrenElementList.getStringValue() : null) + ", " +
 			
 			"trueValue = " + trueValue + ", " +
 			"trueDisplay = " + trueDisplay + ", " +
@@ -247,7 +247,7 @@ public class SimpleFilter extends Filter implements Serializable {
 			
 			MartConfiguratorUtils.addAttribute(element, "multiValue", this.multiValue);
 			
-			MartConfiguratorUtils.addAttribute(element, "cascadeChildren", (cascadeChildrenElementList!=null ? cascadeChildrenElementList.getXmlValue() : null));
+			MartConfiguratorUtils.addAttribute(element, "cascadeChildren", (cascadeChildrenElementList!=null ? cascadeChildrenElementList.getStringValue() : null));
 			
 			MartConfiguratorUtils.addAttribute(element, "buttonURL", this.buttonURL!=null ? this.buttonURL.toString() : null);
 			MartConfiguratorUtils.addAttribute(element, "dataFolderPath", this.dataFolderPath);

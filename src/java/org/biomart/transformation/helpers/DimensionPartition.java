@@ -11,13 +11,13 @@ import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.utils.MyUtils;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.objects.Attribute;
-import org.biomart.objects.objects.Containee;
 import org.biomart.objects.objects.Filter;
+import org.biomart.objects.objects.MartConfiguratorObject;
 import org.biomart.objects.objects.PartitionTable;
 
 
 
-public class DimensionPartition /*implements Comparable<DimensionPartition>, Comparator<DimensionPartition> */{
+public class DimensionPartition {
 
 	public static void main(String[] args) {}
 
@@ -34,8 +34,8 @@ public class DimensionPartition /*implements Comparable<DimensionPartition>, Com
 	private PartitionTable dimensionPartitionTable = null;
 	private Integer dimensionTableRowNumber = null;
 	private String dimensionTableRowName = null;
-	private Map<Containee, Attribute> containeeToAttributesMap = null;
-	private Map<Containee, Filter> containeeToFiltersMap = null;
+	private Map<MartConfiguratorObject, Attribute> containeeToAttributesMap = null;
+	private Map<MartConfiguratorObject, Filter> containeeToFiltersMap = null;
 
 	public DimensionPartition(String tableName, String key) {
 		super();
@@ -45,30 +45,30 @@ public class DimensionPartition /*implements Comparable<DimensionPartition>, Com
 		this.partition = false;	// Until found different
 		
 		this.dimensionPartitionInfoCandidateList = new ArrayList<DimensionPartitionNameAndKeyAndValue>();
-		this.containeeToAttributesMap = new HashMap<Containee, Attribute>();
-		this.containeeToFiltersMap = new HashMap<Containee, Filter>();
+		this.containeeToAttributesMap = new HashMap<MartConfiguratorObject, Attribute>();
+		this.containeeToFiltersMap = new HashMap<MartConfiguratorObject, Filter>();
 	}
 	
-	public void addAttributeToContainee(Containee containee, Attribute attribute) throws FunctionalException { 
+	public void addAttributeToContainee(MartConfiguratorObject containee, Attribute attribute) throws FunctionalException { 
 		Attribute templateAttribute = this.containeeToAttributesMap.get(containee);
 		if (null!=templateAttribute) {
 			throw new FunctionalException("Containee already has a template attribute associated");
 		}
 		this.containeeToAttributesMap.put(containee, attribute);
 	}
-	public Attribute getAttributeForContainee(Containee containee) {
+	public Attribute getAttributeForContainee(MartConfiguratorObject containee) {
 		return this.containeeToAttributesMap.get(containee);
 	}
 
 	
-	public void addFilterToContainee(Containee containee, Filter filter) throws FunctionalException { 
+	public void addFilterToContainee(MartConfiguratorObject containee, Filter filter) throws FunctionalException { 
 		Filter templateFilter = this.containeeToFiltersMap.get(containee);
 		if (null!=templateFilter) {
 			throw new FunctionalException("Containee already has a template filter associated");
 		}
 		this.containeeToFiltersMap.put(containee, filter);
 	}
-	public Filter getFilterForContainee(Containee containee) {
+	public Filter getFilterForContainee(MartConfiguratorObject containee) {
 		return this.containeeToFiltersMap.get(containee);
 	}
 	
@@ -191,16 +191,16 @@ public class DimensionPartition /*implements Comparable<DimensionPartition>, Com
 	public String toString() {
 		StringBuffer sbAttribute = new StringBuffer();
 		int i = 0;
-		for (Iterator<Containee> it = containeeToAttributesMap.keySet().iterator(); it.hasNext();) {
-			Containee containee = it.next();
+		for (Iterator<MartConfiguratorObject> it = containeeToAttributesMap.keySet().iterator(); it.hasNext();) {
+			MartConfiguratorObject containee = it.next();
 			Attribute attribute = containeeToAttributesMap.get(containee);
 			sbAttribute.append((i==0 ? "" : ", ") + attribute.getName());
 			i++;
 		}
 		StringBuffer sbFilter = new StringBuffer();
 		i = 0;
-		for (Iterator<Containee> it = containeeToFiltersMap.keySet().iterator(); it.hasNext();) {
-			Containee containee = it.next();
+		for (Iterator<MartConfiguratorObject> it = containeeToFiltersMap.keySet().iterator(); it.hasNext();) {
+			MartConfiguratorObject containee = it.next();
 			Filter filter = containeeToFiltersMap.get(containee);
 			sbFilter.append((i==0 ? "" : ", ") + filter.getName());
 			i++;
@@ -264,41 +264,5 @@ public class DimensionPartition /*implements Comparable<DimensionPartition>, Com
 	public void setDimensionTableRowName(String dimensionTableRowName) {
 		this.dimensionTableRowName = dimensionTableRowName;
 	}
-
-	/*@Override
-	public int compare(DimensionPartition dimensionPartition1, DimensionPartition dimensionPartition2) {
-		if (dimensionPartition1==null && dimensionPartition2!=null) {
-			return -1;
-		} else if (dimensionPartition1!=null && dimensionPartition2==null) {
-			return 1;
-		}
-		int compare = CompareUtils.compareNull(dimensionPartition1.tableName, dimensionPartition2.tableName);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(dimensionPartition1.key, dimensionPartition2.key);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(dimensionPartition1.partition, dimensionPartition2.partition);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(dimensionPartition1.dimensionTableIdentifier, dimensionPartition2.dimensionTableIdentifier);
-		if (compare!=0) {
-			return compare;
-		}
-		compare = CompareUtils.compareNull(dimensionPartition1.datasetIdentifier, dimensionPartition2.datasetIdentifier);
-		if (compare!=0) {
-			return compare;
-		}
-		return CompareUtils.compareNull(dimensionPartition1.dimensionPartitionInfoCandidateList, dimensionPartition2.dimensionPartitionInfoCandidateList);
-	}
-
-	@Override
-	public int compareTo(DimensionPartition dimensionPartition) {
-		return compare(this, dimensionPartition);
-	}*/
-
 }
 
