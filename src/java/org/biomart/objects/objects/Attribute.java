@@ -87,7 +87,7 @@ public class Attribute extends Element implements /*Comparable<Attribute>, Compa
 		return hash;
 	}*/
 	
-	public org.jdom.Element generateXml() {
+	public org.jdom.Element generateXml() throws FunctionalException {
 		
 		org.jdom.Element element = super.generateXml();
 		MartConfiguratorUtils.addAttribute(element, "maxLength", this.maxLength);

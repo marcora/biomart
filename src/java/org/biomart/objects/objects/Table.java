@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.Comparator;
 import java.util.HashSet;
 
+import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.utils.CompareUtils;
 import org.biomart.common.general.utils.MyUtils;
 import org.biomart.configurator.utils.type.McNodeType;
@@ -156,7 +157,7 @@ public class Table extends MartConfiguratorObject implements Comparable<Table>, 
 		return compare(this, table);
 	}
 	
-	public Element generateXml() {
+	public Element generateXml() throws FunctionalException {
 		Element element = super.generateXml();
 		
 		MartConfiguratorUtils.addAttribute(element, "key", (this.key!=null ? this.key.getName() : null));

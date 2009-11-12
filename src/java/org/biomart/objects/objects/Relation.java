@@ -2,6 +2,7 @@ package org.biomart.objects.objects;
 
 import java.io.Serializable;
 
+import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.configurator.utils.type.McNodeType;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.objects.objects.types.RelationType;
@@ -92,7 +93,7 @@ public class Relation extends MartConfiguratorObject implements Serializable {
 	/**
 	 * Only for the node, children are treated separately
 	 */
-	public Element generateXml() {
+	public Element generateXml() throws FunctionalException {
 		Element element = super.generateXml();
 		
 		MartConfiguratorUtils.addAttribute(element, "firstTable", (this.firstTable!=null ? this.firstTable.getName() : null));

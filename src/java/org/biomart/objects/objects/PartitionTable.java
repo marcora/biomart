@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.utils.CompareUtils;
 import org.biomart.common.general.utils.MyUtils;
 import org.biomart.configurator.utils.type.McNodeType;
@@ -248,7 +249,7 @@ public class PartitionTable extends MartConfiguratorObject implements Comparable
 	/**
 	 * Only for the node, children are treated separately
 	 */
-	public Element generateXml() {
+	public Element generateXml() throws FunctionalException {
 		Element element = super.generateXml();
 		MartConfiguratorUtils.addAttribute(element, "rows", this.totalRows);
 		MartConfiguratorUtils.addAttribute(element, "cols", this.totalColumns);

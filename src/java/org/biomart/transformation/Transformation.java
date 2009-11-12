@@ -199,7 +199,7 @@ public class Transformation {
 		return mart;
 	}
 		
-	private void xmlGeneration() throws TechnicalException {
+	private void xmlGeneration() throws TechnicalException, FunctionalException {
 		// Generate all the xml elements
 		Element newRootElement = this.martRegistry.generateXml();
 		

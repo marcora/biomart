@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.configurator.utils.type.McNodeType;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.jdom.Element;
@@ -22,42 +23,42 @@ public class Config extends MartConfiguratorObject implements Serializable {
 	private String datasetName = null;
 	private Container rootContainer = null;
 
-	private List<Portable> importableList = null;
-	private List<Portable> exportableList = null;
+	private List<ElementList> importableList = null;
+	private List<ElementList> exportableList = null;
 
 	public Config(String name,  
 			String datasetName) {
 		super(name, null, null, null, XML_ELEMENT_NAME);	// displayName, description & visible do not apply for that object
 		this.datasetName = datasetName;
 		
-		this.importableList = new ArrayList<Portable>();
-		this.exportableList = new ArrayList<Portable>();
+		this.importableList = new ArrayList<ElementList>();
+		this.exportableList = new ArrayList<ElementList>();
 		
 		this.rootContainer = Container.createRootContainer();
 	}
 	
 	
-	public void addImportable(Portable importable) {
+	public void addImportable(ElementList importable) {
 		this.importableList.add(importable);
 	}
-	public void addExportable(Portable exportable) {
+	public void addExportable(ElementList exportable) {
 		this.exportableList.add(exportable);
 	}
 
 
-	public List<Portable> getImportableList() {
-		return new ArrayList<Portable>(this.importableList);
+	public List<ElementList> getImportableList() {
+		return new ArrayList<ElementList>(this.importableList);
 	}
-	public List<Portable> getPortableList() {
-		return new ArrayList<Portable>(this.exportableList);
+	public List<ElementList> getPortableList() {
+		return new ArrayList<ElementList>(this.exportableList);
 	}
 	
 	
-	public Portable getImportable(String name) {
-		return (Portable)super.getMartConfiguratorObjectByName(this.importableList, name);
+	public ElementList getImportable(String name) {
+		return (ElementList)super.getMartConfiguratorObjectByName(this.importableList, name);
 	}
-	public Portable getExportable(String name) {
-		return (Portable)super.getMartConfiguratorObjectByName(this.exportableList, name);
+	public ElementList getExportable(String name) {
+		return (ElementList)super.getMartConfiguratorObjectByName(this.exportableList, name);
 	}
 
 
@@ -120,15 +121,15 @@ public class Config extends MartConfiguratorObject implements Serializable {
 		return compare(this, config);
 	}*/
 	
-	public Element generateXml() {
+	public Element generateXml() throws FunctionalException {
 		Element element = super.generateXml();
 		MartConfiguratorUtils.addAttribute(element, "datasetName", this.datasetName);
 		
-		for (Portable importable : this.importableList) {
+		for (ElementList importable : this.importableList) {
 			element.addContent(importable.generateXml());
 		}
 		
-		for (Portable exportable : this.exportableList) {
+		for (ElementList exportable : this.exportableList) {
 			element.addContent(exportable.generateXml());
 		}
 

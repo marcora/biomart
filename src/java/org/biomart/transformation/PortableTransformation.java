@@ -9,10 +9,11 @@ import org.biomart.common.general.utils.MyUtils;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.objects.objects.Attribute;
 import org.biomart.objects.objects.Config;
+import org.biomart.objects.objects.ElementList;
 import org.biomart.objects.objects.Filter;
 import org.biomart.objects.objects.PartitionTable;
-import org.biomart.objects.objects.Portable;
 import org.biomart.objects.objects.Range;
+import org.biomart.objects.objects.types.ElementListType;
 import org.biomart.old.martService.MartServiceConstants;
 import org.biomart.transformation.helpers.TransformationConstants;
 import org.biomart.transformation.helpers.TransformationHelper;
@@ -38,11 +39,11 @@ public class PortableTransformation {
 	
 	public void transformPortables(Config config, List<? extends OldPortable> oldPortableList, boolean isImportable) throws TechnicalException, FunctionalException {
 		for (OldPortable oldPortable : oldPortableList) {
-			Portable portable = (Portable)transformPortable(oldPortable);
+			ElementList portable = transformPortable(oldPortable);
 			if (null!=portable) {
-				if (portable.isImportable()) {
+				if (isImportable) {
 					config.addImportable(portable);
-				} else {
+				} else {	// then exportable
 					config.addExportable(portable);
 				}
 			}
@@ -66,7 +67,7 @@ public class PortableTransformation {
 		"(PmC0).peptide", "(PmC0).coding"
 	*/
 
-	public Portable transformPortable(OldPortable oldPortable) throws TechnicalException, FunctionalException {
+	public ElementList transformPortable(OldPortable oldPortable) throws TechnicalException, FunctionalException {
 		
 		MyUtils.checkStatusProgram(!help.containsAliases(oldPortable.getInternalName()));
 		PartitionTable mainPartitionTable = vars.getMainPartitionTable();	
@@ -74,7 +75,8 @@ public class PortableTransformation {
 		String portableName = /*mainPartitionReference.toXmlString() + TransformationConstants.DOT + */oldPortable.getInternalName();
 		
 		boolean isPortable = oldPortable instanceof OldImportable;
-		Portable portable = new Portable(mainPartitionTable, portableName, isPortable);
+		ElementList portable = new ElementList(isPortable ? 
+				ElementListType.IMPORTABLE : ElementListType.EXPORTABLE, portableName, mainPartitionTable);
 	
 		OldImportable oldImportable = null;
 		OldExportable oldExportable = null;
@@ -107,7 +109,7 @@ public class PortableTransformation {
 						"importable " + portableName + " references an invalid filter: " + filterName)) {
 					return null;
 				}
-				portable.getElementList().addElement(filter);
+				portable.addElement(filter);
 			}
 		} else {
 			List<String> attributesList = oldExportable.getAttributes();
@@ -117,7 +119,7 @@ public class PortableTransformation {
 						"exportable " + portableName + " references an invalid attribute: " + attributeName)) {
 					return null;
 				}
-				portable.getElementList().addElement(attribute);
+				portable.addElement(attribute);
 			}
 		}
 		
@@ -135,7 +137,7 @@ public class PortableTransformation {
 			MyUtils.checkStatusProgram(!oldPortable.getPointer());
 		
 			// Compute intersection of the main table rows only for now (latest agreement)
-			List<Range> rangeList = portable.getElementList().computeRangeList();
+			List<Range> rangeList = portable.computeRangeList();
 			Range range = Range.mainRangesIntersection(mainPartitionTable, false, rangeList);
 		
 			portable.setRange(range);

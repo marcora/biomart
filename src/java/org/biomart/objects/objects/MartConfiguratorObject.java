@@ -184,7 +184,7 @@ public abstract class MartConfiguratorObject implements Serializable {
 	/**
 	 * For XML generation
 	 */
-	protected Element generateXml() {
+	protected Element generateXml() throws FunctionalException {
 		Element jdomElement = new Element(xmlElementName);
 		MartConfiguratorUtils.addAttribute(jdomElement, "name", this.name);
 		MartConfiguratorUtils.addAttribute(jdomElement, "displayName", this.displayName);

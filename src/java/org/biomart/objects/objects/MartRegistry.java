@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.biomart.common.general.exceptions.FunctionalException;
 import org.jdom.Element;
 
 
@@ -74,7 +75,7 @@ public class MartRegistry extends MartConfiguratorObject implements Serializable
 		return compare(this, martRegistry);
 	}*/
 	
-	public Element generateXml() {
+	public Element generateXml() throws FunctionalException {
 		Element element = new Element(XML_ELEMENT_NAME);
 		
 		for (Location location : this.locationList) {

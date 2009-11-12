@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.utils.MyUtils;
 import org.biomart.configurator.utils.type.McNodeType;
 import org.biomart.objects.MartConfiguratorUtils;
@@ -112,7 +113,7 @@ public class Location extends MartConfiguratorObject implements Serializable {
 	/**
 	 * Only for the node, children are treated separately
 	 */
-	public Element generateXml() {
+	public Element generateXml() throws FunctionalException {
 		Element element = super.generateXml();
 		MartConfiguratorUtils.addAttribute(element, "host", this.host);
 		MartConfiguratorUtils.addAttribute(element, "type", (this.type!=null ? this.type.getXmlValue() : null));

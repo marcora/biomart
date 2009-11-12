@@ -144,7 +144,7 @@ public class Container extends MartConfiguratorObject implements Serializable {
 		return hash;
 	}*/
 
-	public Element generateXml() {
+	public Element generateXml() throws FunctionalException  {
 		Element element = super.generateXml();
 		
 		MartConfiguratorUtils.addAttribute(element, "queryRestriction", this.queryRestriction);

@@ -139,7 +139,7 @@ public abstract class Filter extends org.biomart.objects.objects.Element	// to a
 		return compare(this, filter);
 	}*/
 	
-	public org.jdom.Element generateXml() {
+	public org.jdom.Element generateXml() throws FunctionalException {
 		org.jdom.Element element = super.generateXml();
 		MartConfiguratorUtils.addAttribute(element, "dataFolderPath", this.dataFolderPath);
 		return element;

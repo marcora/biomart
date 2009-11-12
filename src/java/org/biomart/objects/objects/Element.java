@@ -275,7 +275,7 @@ public abstract class Element extends MartConfiguratorObject implements Serializ
 		return hash;
 	}*/
 
-	public org.jdom.Element generateXml() {
+	public org.jdom.Element generateXml() throws FunctionalException {
 		if (this instanceof Attribute) {
 			return generateXml(Attribute.XML_ELEMENT_NAME);
 		} else {
@@ -283,7 +283,7 @@ public abstract class Element extends MartConfiguratorObject implements Serializ
 		}
 	}
 	
-	private org.jdom.Element generateXml(String pointedElementType) {
+	private org.jdom.Element generateXml(String pointedElementType) throws FunctionalException {
 		org.jdom.Element element = super.generateXml();
 		MartConfiguratorUtils.addAttribute(element, "location", this.locationName);
 		MartConfiguratorUtils.addAttribute(element, "mart", this.martName);

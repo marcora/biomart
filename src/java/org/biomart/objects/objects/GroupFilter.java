@@ -7,6 +7,7 @@ import java.util.List;
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.martRemote.Jsoml;
 import org.biomart.objects.MartConfiguratorUtils;
+import org.biomart.objects.objects.types.ElementListType;
 
 
 public class GroupFilter extends Filter implements Serializable {
@@ -23,7 +24,7 @@ public class GroupFilter extends Filter implements Serializable {
 	public GroupFilter(PartitionTable mainPartitionTable, String name) {
 		super(mainPartitionTable, name);
 		
-		this.simpleFilterList = new ElementList();
+		this.simpleFilterList = new ElementList(ElementListType.FILTER_GROUP);
 	}
 	
 	public ElementList getElementList() {
@@ -82,7 +83,7 @@ public class GroupFilter extends Filter implements Serializable {
 		return hash;
 	}*/
 	
-	public org.jdom.Element generateXml() {
+	public org.jdom.Element generateXml() throws FunctionalException {
 		org.jdom.Element element = super.generateXml();
 		MartConfiguratorUtils.addAttribute(element, "logicalOperator", this.logicalOperator);
 		MartConfiguratorUtils.addAttribute(element, "multipleFilter", this.multipleFilter);

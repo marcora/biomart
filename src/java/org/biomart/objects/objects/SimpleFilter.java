@@ -10,6 +10,7 @@ import org.biomart.common.general.utils.MyUtils;
 import org.biomart.martRemote.Jsoml;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.objects.data.TreeFilterData;
+import org.biomart.objects.objects.types.ElementListType;
 
 
 public class SimpleFilter extends Filter implements Serializable {
@@ -46,7 +47,7 @@ public class SimpleFilter extends Filter implements Serializable {
 	public SimpleFilter(PartitionTable mainPartitionTable, String name, Boolean tree) {
 		super(mainPartitionTable, name);
 		
-		this.cascadeChildrenElementList = new ElementList(true);	// no repetitions
+		this.cascadeChildrenElementList = new ElementList(ElementListType.FILTER_CASCADE);	// no repetitions
 		
 		this.tree = tree;
 		this.partition = false;	// unless changed later
@@ -232,7 +233,7 @@ public class SimpleFilter extends Filter implements Serializable {
 		this.upload = upload;
 	}
 	
-	public org.jdom.Element generateXml() {
+	public org.jdom.Element generateXml() throws FunctionalException {
 		org.jdom.Element element = super.generateXml();
 		
 		MyUtils.checkStatusProgram(this.partition || this.pointer || (null!=this.displayType && 

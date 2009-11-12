@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.configurator.utils.type.McNodeType;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.jdom.Element;
@@ -93,7 +94,7 @@ public class Mart extends MartConfiguratorObject implements Serializable {
 		return compare(this, mart);
 	}*/
 	
-	public Element generateXml() {
+	public Element generateXml() throws FunctionalException {
 		Element element = super.generateXml();
 		MartConfiguratorUtils.addAttribute(element, "version", this.version);
 		
