@@ -71,7 +71,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 		//TODO need clean up
 		private Map<String,List<String>> tblColMap = new HashMap<String,List<String>>();
 		private Map<String,List<String>> tblPkMap = new HashMap<String,List<String>>();
-		private Map<String,Map<String,List<String>>> tblFkMap = new HashMap<String,Map<String,List<String>>>();
+//		private Map<String,Map<String,List<String>>> tblFkMap = new HashMap<String,Map<String,List<String>>>();
 		
 		public SchemaDiagram getSchemaDiagram() {
 			return this.schemaDiagram;
@@ -1725,6 +1725,9 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 			
 			if (this.isKeyGuessing()) 
 				this.synchroniseKeysUsingKeyGuessing(new HashSet<ForeignKey>(), 1);
+			else
+				this.synchroniseKeysUsingDMD(new HashSet<ForeignKey>(), this.getConnection(null).getMetaData(), 
+						this.conObj.getSchemaName(), this.conObj.getDatabaseName());
 
 
 			long t4 = McUtils.getCurrentTime();
@@ -1792,7 +1795,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 	private void setMetaInfo(String dbName,String schemaName) {
 		this.tblColMap.clear();
 		this.tblPkMap.clear();
-		this.tblFkMap.clear();
+//		this.tblFkMap.clear();
 		
 		
 		switch(this.conObj.getJdbcType()) {
@@ -1892,32 +1895,32 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 		}
 		this.tblColMap.put(lastTableName, colList);
 		
-		String sql2 = "SELECT tc.constraint_name, tc.constraint_type, tc.table_name, kcu.column_name " +
+		//get all PK
+		String sql2 = "SELECT tc.table_name, kcu.column_name " +
 				"FROM information_schema.table_constraints tc LEFT JOIN information_schema.key_column_usage kcu " +
 				"ON tc.constraint_catalog = kcu.constraint_catalog AND tc.constraint_schema = kcu.constraint_schema " +
-				"AND tc.constraint_name = kcu.constraint_name where tc.constraint_schema = '"+schemaName+"' and (constraint_type='PRIMARY KEY' or " +
-				"constraint_type='FOREIGN KEY') order by table_name, constraint_type, column_name";
+				"AND tc.constraint_name = kcu.constraint_name where tc.constraint_schema = '"+schemaName+"' and constraint_type='PRIMARY KEY'" +
+				" order by table_name, column_name";
 
 		lastTableName="";
-		String lastFkName="";
 		List<String> pkList = new ArrayList<String>();
-		Map<String,List<String>> fkMap = new HashMap<String,List<String>>();
 		try {
 			ResultSet rs = st.executeQuery(sql2);
 			while(rs.next()) {
 				String tableName = rs.getString("table_name");
 				if(!lastTableName.equals(tableName)) {
 					if(!lastTableName.equals("")) {
+						//not the first time
 						this.tblPkMap.put(lastTableName, pkList);
-						this.tblFkMap.put(lastTableName, fkMap);
+						//this.tblFkMap.put(lastTableName, fkMap);
 						pkList = new ArrayList<String>();
-						fkMap = new HashMap<String,List<String>>();
+						//fkMap = new HashMap<String,List<String>>();
 					}
 					lastTableName = tableName;
 				}
-				if(rs.getString("constraint_type").equals("PRIMARY KEY")) {
-					pkList.add(rs.getString("column_name"));
-				}
+				
+				pkList.add(rs.getString("column_name"));
+				
 			}
 			rs.close();
 		} catch (SQLException e) {
@@ -1926,4 +1929,5 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 		}
 
 	}
+
 }
