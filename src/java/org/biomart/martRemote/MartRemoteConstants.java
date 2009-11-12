@@ -12,10 +12,9 @@ public class MartRemoteConstants {
 	public static final String XML_FILES_FOLDER_NAME = "conf/xml";
 	public static final String ADDITIONAL_FILES_FOLDER_NAME = "conf/files";
 	
-	public static final Boolean WEB_PORTAL = !new File(".").getAbsolutePath().contains("anthony") ? null : 
-		false;
+	public static final Boolean WEB_PORTAL = !new File(".").getAbsolutePath().contains("anthony");
 	
-	public static final String PORTAL_SERIAL_FILE_NAME = WEB_PORTAL==null ? "portal.serial" : (WEB_PORTAL ? "web_portal.serial" : "rdbms_portal.serial");
+	public static final String PORTAL_SERIAL_FILE_NAME = WEB_PORTAL ? "portal.serial" : "rdbms_portal.serial"; 	// "web_portal.serial"
 	public static final String QUERY_TEST_PROPERTIES_FILE_NAME = "queries.properties";
 	
 	public static final String APPLICATION_ROOT = new File("").getAbsolutePath() + MyUtils.FILE_SEPARATOR;

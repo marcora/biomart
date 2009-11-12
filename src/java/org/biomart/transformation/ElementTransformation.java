@@ -507,55 +507,6 @@ public abstract class ElementTransformation {
 				", newElement = " + MartConfiguratorUtils.displayJdomElement(newElement.generateXml()));
 	}
 	
-	/*protected void updatePushActionTemplateElement(Element templateElement, Element newElement, 
-			Integer currentMainRow, boolean firstSpecific) throws FunctionalException, TechnicalException {
-		
-		PartitionTable mainPartitionTable = vars.getMainPartitionTable();
-		
-		if (firstSpecific) {
-			// Erase main partition rows since they are specified one by one
-			templateElement.getTargetRange().removePartition(mainPartitionTable);
-		}
-		
-		// Add row
-		Range targetRange = templateElement.getTargetRange();
-		MyUtils.checkStatusProgram(!targetRange.contains(mainPartitionTable, currentMainRow));
-		targetRange.addRangePartitionRow(mainPartitionTable, currentMainRow);
-		
-		// Check that all these properties are the same, exception made for the first specific which can define the 1st values for some properties
-		if (templateElement.getTableName()==null || 
-				!templateElement.getTableName().equals(newElement.getTableName())) {	// Can't even be null
-			throw new FunctionalException("Unhandled");
-		}	//TODO what if pointer?
-		if (!TransformationUtils.checkValidSpecificityString(templateElement.getLocationName(), newElement.getLocationName(), firstSpecific) ||
-				!TransformationUtils.checkValidSpecificityString(templateElement.getMartName(), newElement.getMartName(), firstSpecific) ||
-				!TransformationUtils.checkValidSpecificityInteger(templateElement.getVersion(), newElement.getVersion(), firstSpecific) ||
-				!TransformationUtils.checkValidSpecificityString(templateElement.getDatasetName(), newElement.getDatasetName(), firstSpecific) ||
-				!TransformationUtils.checkValidSpecificityString(templateElement.getConfigName(), newElement.getConfigName(), firstSpecific) ||
-				!TransformationUtils.checkValidSpecificityBoolean(templateElement.getPointer(), newElement.getPointer(), firstSpecific) ||
-				!TransformationUtils.checkValidSpecificityBoolean(templateElement.getSelectedByDefault(), newElement.getSelectedByDefault(), firstSpecific) ||
-				!TransformationUtils.checkValidSpecificityString(templateElement.getPointedElementName(), newElement.getPointedElementName(), firstSpecific) ||
-				!TransformationUtils.checkValidSpecificityBoolean(templateElement.getVisible(), newElement.getVisible(), firstSpecific) ||
-				!TransformationUtils.checkValidSpecificityBoolean(templateElement.getCheckForNulls(), newElement.getCheckForNulls(), firstSpecific)) {
-			throw new FunctionalException("Forbidden specificity, " +
-					"templateAttribute = " + MartConfiguratorUtils.displayJdomElement(templateElement.generateXml()) +
-					", newAttribute = " + MartConfiguratorUtils.displayJdomElement(newElement.generateXml()));
-		}
-		
-		// Update properties that are allowed to be part specific
-		Set<Integer> mainRowsSet = targetRange.getMainRowsSet();
-		templateElement.setName(updateSpecificProperty(
-				currentMainRow, templateElement.getName(), newElement.getName(), firstSpecific, mainRowsSet));
-		templateElement.setKeyName(updateSpecificProperty(
-				currentMainRow, templateElement.getKeyName(), newElement.getKeyName(), firstSpecific, mainRowsSet));
-		templateElement.setDescription(updateSpecificProperty(
-				currentMainRow, templateElement.getDescription(), newElement.getDescription(), firstSpecific, mainRowsSet));
-		templateElement.setFieldName(updateSpecificProperty(
-				currentMainRow, templateElement.getFieldName(), newElement.getFieldName(), firstSpecific, mainRowsSet));
-		templateElement.setDisplayName(updateSpecificProperty(
-				currentMainRow, templateElement.getDisplayName(), newElement.getDisplayName(), firstSpecific, mainRowsSet));
-	}*/
-	
 	protected void updateNonSpecificTemplateElement(Element templateElement, Element newElement, 
 			Integer currentMainRow, boolean firstSpecific) throws FunctionalException, TechnicalException {
 		
@@ -665,11 +616,6 @@ public abstract class ElementTransformation {
 				if (CompareUtils.same(templateProperty, newProperty)) {
 					property = templateProperty; // either, they're both the same
 				} else {
-					
-					/*System.out.println("adding..." + templateProperty + ", " + newProperty);
-					//MyUtils.pressKeyToContinue();
-					MyUtils.errorProgram();*/
-					
 					int newColumn = mainPartitionTable.addColumn();
 					
 					PartitionReference mainPartitionReference = new PartitionReference(mainPartitionTable, newColumn);

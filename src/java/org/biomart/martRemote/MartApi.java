@@ -50,7 +50,30 @@ import org.jdom.output.XMLOutputter;
 
 public class MartApi {
 
-private static boolean COMPACT = false;
+	private static boolean COMPACT = !MartRemoteConstants.WEB_PORTAL;
+
+	public static final String type = 
+		"getRegistry";
+		//"getDatasets";
+		//"getRootContainer";
+		//"getAttributes";
+		//"getFilters";
+		//"query";
+	public static final String username = "anonymous";
+	public static final String password = "";
+	public static final String martName = MartRemoteConstants.WEB_PORTAL ? 
+			"ensembl"
+			//"uniprot_mart";
+			:
+			"ensembl_mart_55";
+	public static final Integer martVersion = MartRemoteConstants.WEB_PORTAL ? -1 : 55;
+	public static final String datasetName = 
+		MartRemoteConstants.WEB_PORTAL ? "hsapiens_gene_ensembl" : "gene_ensembl";
+		//"UNIPROT";
+	public static final String query = "query1";
+	public static final String filterPartitionString = TransformationConstants.MAIN_PARTITION_FILTER_NAME + 
+		".\"hsapiens_gene_ensembl,mmusculus_gene_ensembl,celegans_gene_ensembl\"";
+	public static final MartServiceFormat format = MartServiceFormat.XML;
 
 	@SuppressWarnings("all")
 	public static void main(String[] args) throws Exception {
@@ -64,29 +87,6 @@ private static boolean COMPACT = false;
 		
 		MartRemoteRequest martServiceRequest = null;
 		MartRemoteResponse martServiceResult = null;
-		
-		String type = 
-			//"getRegistry";
-			//"getDatasets";
-			"getRootContainer";
-			//"getAttributes";
-			//"getFilters";
-			//"query";
-		String username = "anonymous";
-		String password = "";
-		String martName = MartRemoteConstants.WEB_PORTAL ? 
-				"ensembl"
-				//"uniprot_mart";
-				:
-				"ensembl_mart_55";
-		Integer martVersion = MartRemoteConstants.WEB_PORTAL ? -1 : 55;
-		String datasetName = 
-			MartRemoteConstants.WEB_PORTAL ? "hsapiens_gene_ensembl" : "gene_ensembl";
-			//"UNIPROT";
-		String query = "query1";
-		String filterPartitionString = TransformationConstants.MAIN_PARTITION_FILTER_NAME + 
-			".\"hsapiens_gene_ensembl,mmusculus_gene_ensembl,celegans_gene_ensembl\"";
-		MartServiceFormat format = MartServiceFormat.XML;
 		
 		MartRemoteEnum remoteAccessEnum = MartRemoteEnum.getEnumFromIdentifier(type);
 		boolean valid = true;
@@ -148,11 +148,12 @@ private static boolean COMPACT = false;
 	private MartRegistry martRegistry = null;
 	private SAXBuilder builder = null;
 	
-	public MartApi() throws IOException, JDOMException, TechnicalException {
+	public MartApi() throws TechnicalException {
 		this(false, MartRemoteConstants.XSD_FILE_FILE_PATH_AND_NAME, MartRemoteConstants.XSD_FILE_FILE_PATH_AND_NAME, 
 				MartRemoteConstants.PORTAL_SERIAL_FILE_PATH_AND_NAME, MartRemoteConstants.PORTAL_SERIAL_FILE_PATH_AND_NAME);
 	}
 	public MartApi(boolean webService, String xsdFilePath, String xsdFileUrl, String portalSerialPath, String portalSerialFileUrl) throws TechnicalException {
+		
 		this.debug = !webService;
 		//String xsdFilePath = xsdFilePath;//this.xsdFileUrl = xsdFileUrl;
 			
@@ -180,7 +181,7 @@ private static boolean COMPACT = false;
 		} catch (MalformedURLException e) {
 			throw new TechnicalException(e.getMessage() + ": " + portalSerialFileUrl);
 		}
-		martRegistry = (MartRegistry)MyUtils.readSerializedObject(portalSerialUrl);//martRegistry = TransformationYongPrototype.wrappedRebuildCentralPortalRegistry();		
+		martRegistry = (MartRegistry)MyUtils.readSerializedObject(portalSerialUrl);//martRegistry = TransformationYongPrototype.wrappedRebuildCentralPortalRegistry();
 	}
 	
 	public Document getXsd() {
@@ -298,6 +299,80 @@ private static boolean COMPACT = false;
 		return queryResponse;
 	}
 	
+	public GetRegistryResponse getRegistry(String username, String password, String format) throws FunctionalException {
+		MartRemoteRequest martRemoteRequest = this.prepareGetRegistry(
+				username, password, MartServiceFormat.getFormat(format));
+		return martRemoteRequest.isValid() ?
+				(GetRegistryResponse)executeRequest(martRemoteRequest) : null;
+	}
+	public GetDatasetsResponse getDatasets(String username, String password,
+			String format, String mart, Integer version) throws FunctionalException {
+		MartRemoteRequest martRemoteRequest = this.prepareGetDatasets(
+				username, password, MartServiceFormat.getFormat(format), mart, version);
+		return martRemoteRequest.isValid() ?
+				(GetDatasetsResponse)executeRequest(martRemoteRequest) : null;
+	}
+	public GetContaineesResponse getContainees(MartRemoteEnum type, String username, String password, String format, 
+			String dataset, String partitionFilter) throws FunctionalException, TechnicalException {
+		MartRemoteRequest martRemoteRequest = null;
+		if (MartRemoteEnum.GET_ROOT_CONTAINER.equals(type)) {
+			martRemoteRequest = this.prepareGetRootContainer(
+					username, password, MartServiceFormat.getFormat(format), dataset, partitionFilter);
+		} else if (MartRemoteEnum.GET_ATTRIBUTES.equals(type)) {
+			martRemoteRequest = this.prepareGetAttributes(
+					username, password, MartServiceFormat.getFormat(format), dataset, partitionFilter);
+		}if (MartRemoteEnum.GET_FILTERS.equals(type)) {
+			martRemoteRequest = this.prepareGetFilters(
+					username, password, MartServiceFormat.getFormat(format), dataset, partitionFilter);
+		}
+		return martRemoteRequest.isValid() ?
+				(GetContaineesResponse)executeRequest(martRemoteRequest) : null;
+	}
+	public QueryResponse query(String username, String password, String format,
+			String query) throws FunctionalException {
+		MartRemoteRequest martRemoteRequest = null;
+		try {
+			martRemoteRequest = this.prepareQuery(
+					username, password, MartServiceFormat.getFormat(format), query);
+		} catch (TechnicalException e) {
+			e.printStackTrace();
+			return null;
+		} catch (FunctionalException e) {
+			e.printStackTrace();
+			return null;
+		}
+		return martRemoteRequest.isValid() ?
+			(QueryResponse)executeRequest(martRemoteRequest) : null;
+	}
+	public MartRemoteResponse executeRequest(MartRemoteRequest martRemoteRequest) throws FunctionalException {
+		
+		MartRemoteResponse martRemoteResponse = null;
+		try {
+			if (martRemoteRequest instanceof GetRegistryRequest) {
+				martRemoteResponse = this.executeGetRegistry(martRemoteRequest);
+			} else if (martRemoteRequest instanceof GetDatasetsRequest) {
+				martRemoteResponse = this.executeGetDatasets(martRemoteRequest);		
+			} else if (martRemoteRequest instanceof GetRootContainerRequest) {
+				martRemoteResponse = this.executeGetRootContainer(martRemoteRequest);
+			} else if (martRemoteRequest instanceof GetAttributesRequest) {
+				martRemoteResponse = this.executeGetAttributes(martRemoteRequest);
+			} else if (martRemoteRequest instanceof GetFiltersRequest) {
+				martRemoteResponse = this.executeGetFilters(martRemoteRequest);
+			} else if (martRemoteRequest instanceof QueryRequest) {
+				martRemoteResponse = this.executeQuery(martRemoteRequest);		
+			} else {
+				return null;
+			}
+		} catch (TechnicalException e) {
+			e.printStackTrace();
+			return null;
+		} catch (FunctionalException e) {
+			e.printStackTrace();
+			return null;
+		}
+		return martRemoteResponse;
+	}
+	
 	/**
 		<query processor="CSV" header="true" uniqueRows="false" count="false" datasetConfigVersion="0.8">
 			<dataset name="hsapiens_gene_ensembl">
@@ -325,7 +400,7 @@ private static boolean COMPACT = false;
 		return writeError(martServiceResponse.getErrorMessage(), writer);	//	if (!martServiceResult.isValid())
 	}
 	public String writeXmlResponse(Document document, Writer writer) throws TechnicalException {
-		if (null!=writer && COMPACT) {
+		if (null!=writer && !COMPACT) {
 			try {
 				XMLOutputter compactFormat = new XMLOutputter(Format.getCompactFormat());
 				compactFormat.output(document, writer);
@@ -336,7 +411,7 @@ private static boolean COMPACT = false;
 		return XmlUtils.getXmlDocumentString(document);
 	}
 	public String writeJsonResponse(JSONObject jSONObject, Writer writer) throws TechnicalException {
-		if (null!=writer && COMPACT) {
+		if (null!=writer && !COMPACT) {
 			try {
 				writer.append(
 						jSONObject

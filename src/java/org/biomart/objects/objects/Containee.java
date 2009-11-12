@@ -7,7 +7,7 @@ import org.biomart.martRemote.Jsoml;
 import org.jdom.Element;
 
 
-public class Containee extends MartConfiguratorObject implements Serializable {
+public abstract class Containee extends MartConfiguratorObject implements Serializable {
 
 	private static final long serialVersionUID = -8763113328755703892L;
 

@@ -15,7 +15,7 @@ import org.jdom.Element;
 import org.jdom.Namespace;
 
 
-public class MartConfiguratorObject implements Serializable {
+public abstract class MartConfiguratorObject implements Serializable {
 
 	private static final long serialVersionUID = 3168050129952793078L;
 	

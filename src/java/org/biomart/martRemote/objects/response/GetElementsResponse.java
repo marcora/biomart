@@ -26,9 +26,6 @@ public abstract class GetElementsResponse extends GetContaineesResponse {
 		
 		// Grab only the elements of interest
 		addElements(super.rootContainer, attribute);
-		/*for (Container container : this.containerList) {
-			addElements(container, attribute);
-		}*/
 	}
 	private void addElements(Container container, boolean attribute) {
 		List<Containee> containeeList = container.getContaineeList();

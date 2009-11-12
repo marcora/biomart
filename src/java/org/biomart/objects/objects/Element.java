@@ -12,7 +12,7 @@ import org.biomart.martRemote.Jsoml;
 import org.biomart.objects.MartConfiguratorUtils;
 
 
-public class Element extends Containee implements Serializable {
+public abstract class Element extends Containee implements Serializable {
 
 	private static final long serialVersionUID = -2902852019170342721L;
 

@@ -20,10 +20,6 @@ public class MartService {
 		return MartServiceHelper.getDatasets(username, password, format, mart, version);
 	}
 
-	public String query(String username, String password, String format, String query) throws FunctionalException, TechnicalException {
-		return MartServiceHelper.query(username, password, format, query);
-	}
-
 	public String getRootContainer(String username, String password, String format, String dataset, String partitionFilter) throws FunctionalException, TechnicalException {
 		return MartServiceHelper.getContainees(MartRemoteEnum.GET_ROOT_CONTAINER, username, password, format, dataset, partitionFilter);
 	}
@@ -34,6 +30,10 @@ public class MartService {
 	
 	public String getFilters(String username, String password, String format, String dataset, String partitionFilter) throws FunctionalException, TechnicalException {
 		return MartServiceHelper.getContainees(MartRemoteEnum.GET_FILTERS, username, password, format, dataset, partitionFilter);
+	}
+
+	public String query(String username, String password, String format, String query) throws FunctionalException, TechnicalException {
+		return MartServiceHelper.query(username, password, format, query);
 	}
 
 	public String testXsd() {

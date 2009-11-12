@@ -155,8 +155,10 @@ public class TransformationMain {
 			try {
 				MyUtils.writeSerializedObject(martRegistry, "./conf/files/" + 
 						(webServiceTransformation ? "web" : "rdbms") + "_portal.serial");
+				//MyUtils.writeSerializedObject(martRegistry, "./conf/files/" + "portal.serial");
 				MyUtils.writeXmlFile(newRootElement, "./conf/xml/" + 
 						(webServiceTransformation ? "web" : "rdbms") + "_portal.xml");
+				//MyUtils.writeXmlFile(newRootElement, "./conf/xml/" + "portal.xml");
 			} catch (TechnicalException e) {
 				e.printStackTrace();
 			}
