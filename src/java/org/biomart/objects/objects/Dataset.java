@@ -131,13 +131,16 @@ public class Dataset extends MartConfiguratorObject implements Serializable {
 		);
 	}
 
-	/*@Override
-	public int hashCode() {
-		int hash = MartConfiguratorConstants.HASH_SEED1;
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==materialized? 0 : materialized.hashCode());
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==centralTable? 0 : centralTable.hashCode());
-		return hash;
-	}*/
+	public void merge (Dataset dataset) {
+		List<Config> configList1 = this.getConfigList();
+		List<Config> configList2 = dataset.getConfigList();
+		for (Config config2 : configList2) {
+			int index = configList1.indexOf(config2);
+			if (index==-1) {
+				this.addConfig(config2);
+			}	// else: nothing
+		}
+	}
 	
 	public Element generateXml() throws FunctionalException {
 		Element element = super.generateXml();

@@ -49,7 +49,7 @@ public class Config extends MartConfiguratorObject implements Serializable {
 	public List<ElementList> getImportableList() {
 		return new ArrayList<ElementList>(this.importableList);
 	}
-	public List<ElementList> getPortableList() {
+	public List<ElementList> getExportableList() {
 		return new ArrayList<ElementList>(this.exportableList);
 	}
 	
@@ -99,27 +99,6 @@ public class Config extends MartConfiguratorObject implements Serializable {
 			(this.datasetName==config.datasetName || (this.datasetName!=null && datasetName.equals(config.datasetName)))	// check dataset name too
 		);
 	}
-
-	/*@Override
-	public int hashCode() {
-		int hash = MartConfiguratorConstants.HASH_SEED1;
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + super.hashCode();
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==datasetName? 0 : datasetName.hashCode());
-		return hash;
-	}*/
-
-	/*public int compare(Config config1, Config config2) {
-		if (config1==null && config2!=null) {
-			return -1;
-		} else if (config1!=null && config2==null) {
-			return 1;
-		}
-		return CompareUtils.compareNull(config1.datasetName, config2.datasetName);
-	}
-
-	public int compareTo(Config config) {
-		return compare(this, config);
-	}*/
 	
 	public Element generateXml() throws FunctionalException {
 		Element element = super.generateXml();

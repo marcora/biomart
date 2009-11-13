@@ -73,26 +73,19 @@ public class Mart extends MartConfiguratorObject implements Serializable {
 		);
 	}
 
-	/*@Override
-	public int hashCode() {
-		int hash = MartConfiguratorConstants.HASH_SEED1;
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + super.hashCode();
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==version? 0 : version.hashCode());
-		return hash;
-	}*/
-
-	/*public int compare(Mart mart1, Mart mart2) {
-		if (mart1==null && mart2!=null) {
-			return -1;
-		} else if (mart1!=null && mart2==null) {
-			return 1;
+	public void merge (Mart mart) {
+		List<Dataset> datasetList1 = this.getDatasetList();
+		List<Dataset> datasetList2 = mart.getDatasetList();
+		for (Dataset dataset2 : datasetList2) {
+			int index = datasetList1.indexOf(dataset2);
+			if (index==-1) {
+				this.addDataset(dataset2);
+			} else {	// They are the same, but their content may be different
+				Dataset dataset1 = datasetList1.get(index);
+				dataset1.merge(dataset2);
+			}
 		}
-		return CompareUtils.compareNull(mart1.version, mart2.version);
 	}
-
-	public int compareTo(Mart mart) {
-		return compare(this, mart);
-	}*/
 	
 	public Element generateXml() throws FunctionalException {
 		Element element = super.generateXml();

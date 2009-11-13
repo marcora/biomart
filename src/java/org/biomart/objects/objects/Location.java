@@ -60,6 +60,20 @@ public class Location extends MartConfiguratorObject implements Serializable {
 		return type;
 	}
 
+	public void merge (Location location) {
+		List<Mart> martList1 = this.getMartList();
+		List<Mart> martList2 = location.getMartList();
+		for (Mart mart2 : martList2) {
+			int index = martList1.indexOf(mart2);
+			if (index==-1) {
+				this.addMart(mart2);
+			} else {	// They are the same, but their content may be different
+				Mart mart1 = martList1.get(index);
+				mart1.merge(mart2);
+			}
+		}
+	}
+
 	@Override
 	public String toString() {
 		return 

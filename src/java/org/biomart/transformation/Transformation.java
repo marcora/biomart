@@ -249,5 +249,9 @@ public class Transformation {
 		}
 		return version;
 	}
+	
+	public void merge (Transformation transformation) {
+		this.martRegistry.merge(transformation.getMartRegistry());
+	}
 }
 

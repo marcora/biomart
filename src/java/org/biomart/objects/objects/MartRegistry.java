@@ -40,40 +40,49 @@ public class MartRegistry extends MartConfiguratorObject implements Serializable
 			", locationList.size() = " + this.locationList.size();
 	}
 
-	// No real need for those (we won't ever compare registries)
-	/*@Override
-	public boolean equals(Object object) {
-		if (this==object) {
-			return true;
+	public void merge (MartRegistry martRegistry) {
+		List<Location> locationList1 = this.getLocationList();
+		List<Location> locationList2 = martRegistry.getLocationList();
+		for (Location location2 : locationList2) {
+			int index = locationList1.indexOf(location2);
+			if (index==-1) {
+				this.addLocation(location2);
+			} else {	// They are the same, but their content may be different
+				Location location1 = locationList1.get(index);
+				location1.merge(location2);
+			}
 		}
-		if((object==null) || (object.getClass()!= this.getClass())) {
-			return false;
-		}
-		
-		MartRegistry martRegistry=(MartRegistry)object;
-		return (
-				this.locationList.size()==martRegistry.locationList.size()	// locationList is never null (constructor) TODO better
-		);
+		/*MartRegistry martRegistry = new MartRegistry();
+		List<Location> locationList = new ArrayList<Location>();
+		Map<Location, List<Mart>> martMap = new HashMap<Location, List<Mart>>();
+		for (MartRegistry martRegistryTmp : martRegistryList) {
+			List<Location> locationListTmp = martRegistryTmp.getLocationList();
+			for (Location location : locationListTmp) {
+				if (!locationList.contains(location)) {
+					martRegistry.addLocation(location);
+					locationList.add(location);
+					martMap.put(location, location.getMartList());
+				} else {
+					Location currentLocation = locationList.get(locationList.indexOf(location));
+					List<Mart> martListTmp = location.getMartList();
+					List<Mart> martList = martMap.get(location);
+					for (Mart mart : martListTmp) {
+						if (!martList.contains(mart)) {
+							currentLocation.addMart(mart);
+							martList.add(mart);
+						} else {
+							Mart currentMart = martList.get(martList.indexOf(mart));
+							List<Dataset> datasetList = mart.getDatasetList();
+							for (Dataset dataset : datasetList) {
+								currentMart.addDataset(dataset);
+							}
+						}
+					}
+				}
+			}
+		}*/
 	}
-
-	@Override
-	public int hashCode() {
-		int hash = MartConfiguratorConstants.HASH_SEED1;
-		return hash;
-	}
-
-	public int compare(MartRegistry martRegistry1, MartRegistry martRegistry2) {
-		if (martRegistry1==null && martRegistry2!=null) {
-			return -1;
-		} else if (martRegistry1!=null && martRegistry2==null) {
-			return 1;
-		}
-		return 0;
-	}
-
-	public int compareTo(MartRegistry martRegistry) {
-		return compare(this, martRegistry);
-	}*/
+	
 	
 	public Element generateXml() throws FunctionalException {
 		Element element = new Element(XML_ELEMENT_NAME);

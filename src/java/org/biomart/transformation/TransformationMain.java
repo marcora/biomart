@@ -18,9 +18,6 @@ import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.MyUtils;
 import org.biomart.objects.helpers.DatabaseParameter;
 import org.biomart.objects.helpers.Rdbs;
-import org.biomart.objects.objects.Dataset;
-import org.biomart.objects.objects.Location;
-import org.biomart.objects.objects.Mart;
 import org.biomart.objects.objects.MartRegistry;
 import org.biomart.old.martService.Configuration;
 import org.biomart.old.martService.MartServiceConstants;
@@ -117,37 +114,12 @@ public class TransformationMain {
 	public static MartRegistry rebuildCentralPortalRegistry(String transformationsGeneralOutput, boolean serialize) 
 	throws TechnicalException, FunctionalException {
 		
-		MartRegistry martRegistry = new MartRegistry();
-        
 		List<MartRegistry> martRegistryList = run(transformationsGeneralOutput, serialize);
 		
-		List<Location> locationList = new ArrayList<Location>();
-		Map<Location, List<Mart>> martMap = new HashMap<Location, List<Mart>>();
-		for (MartRegistry martRegistryTmp : martRegistryList) {
-			List<Location> locationListTmp = martRegistryTmp.getLocationList();
-			for (Location location : locationListTmp) {
-				if (!locationList.contains(location)) {
-					martRegistry.addLocation(location);
-					locationList.add(location);
-					martMap.put(location, location.getMartList());
-				} else {
-					Location currentLocation = locationList.get(locationList.indexOf(location));
-					List<Mart> martListTmp = location.getMartList();
-					List<Mart> martList = martMap.get(location);
-					for (Mart mart : martListTmp) {
-						if (!martList.contains(mart)) {
-							currentLocation.addMart(mart);
-							martList.add(mart);
-						} else {
-							Mart currentMart = martList.get(martList.indexOf(mart));
-							List<Dataset> datasetList = mart.getDatasetList();
-							for (Dataset dataset : datasetList) {
-								currentMart.addDataset(dataset);
-							}
-						}
-					}
-				}
-			}
+		MartRegistry martRegistry = martRegistryList.size()>=1 ? martRegistryList.get(0) : null;
+		for (int i = 1; i < martRegistryList.size(); i++) {
+			MartRegistry martRegistry2 = martRegistryList.get(i);
+			martRegistry.merge(martRegistry2);
 		}
 		
 		Element newRootElement = martRegistry.generateXml();
@@ -155,10 +127,10 @@ public class TransformationMain {
 			try {
 				MyUtils.writeSerializedObject(martRegistry, "./conf/files/" + 
 						(webServiceTransformation ? "web" : "rdbms") + "_portal.serial");
-				//MyUtils.writeSerializedObject(martRegistry, "./conf/files/" + "portal.serial");
+				MyUtils.writeSerializedObject(martRegistry, "./conf/files/" + "portal.serial");
 				MyUtils.writeXmlFile(newRootElement, "./conf/xml/" + 
 						(webServiceTransformation ? "web" : "rdbms") + "_portal.xml");
-				//MyUtils.writeXmlFile(newRootElement, "./conf/xml/" + "portal.xml");
+				MyUtils.writeXmlFile(newRootElement, "./conf/xml/" + "portal.xml");
 			} catch (TechnicalException e) {
 				e.printStackTrace();
 			}
