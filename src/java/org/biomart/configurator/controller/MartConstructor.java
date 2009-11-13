@@ -457,8 +457,7 @@ public interface MartConstructor {
 				else if (tu instanceof JoinTable) {
 					if (firstJoinRel == null)
 						firstJoinRel = ((JoinTable) tu).getSchemaRelation();
-					bigness = Math.max(bigness, ((JoinTable) tu).getTable()
-							.getBigTable(dataset, dsTable.getName()));
+					bigness = Math.max(bigness, 0);
 					requiresFinalLeftJoin |= this.doJoinTable(templateSchema,
 							schemaPartition, schemaPrefix, 
 							dataset, dsTable, (JoinTable) tu, firstJoinRel,
@@ -469,8 +468,7 @@ public interface MartConstructor {
 				// Select-from?
 				else if (tu instanceof SelectFromTable) {
 					bigness = Math
-							.max(bigness, ((SelectFromTable) tu).getTable()
-									.getBigTable(dataset, dsTable.getName()));
+							.max(bigness, 0);
 					this.doSelectFromTable(templateSchema, schemaPartition,
 							schemaPrefix,  dataset, dsTable,
 							(SelectFromTable) tu, tempTable, bigness,

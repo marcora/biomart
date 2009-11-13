@@ -583,7 +583,8 @@ public class McViewSchema extends McView implements TreeSelectionListener {
 					se.getAttributeValue("databaseName"),"",
 					se.getAttributeValue("userName"), 
 					se.getAttributeValue("password"),
-					JdbcType.valueOf(se.getAttributeValue("driverClassName"))
+					JdbcType.MySQL
+					//JdbcType.valueOf(se.getAttributeValue("driverClassName"))
 					);
 			Schema schema = new JDBCSchema(mart, conObj, se
 					.getAttributeValue("schemaName"),  schemaName, true, "", "");

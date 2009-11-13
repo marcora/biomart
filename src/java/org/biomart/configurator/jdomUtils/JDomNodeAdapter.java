@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -53,6 +54,7 @@ import org.biomart.configurator.view.gui.dialogs.AddLinkedDataSetsDialog;
 import org.biomart.configurator.view.gui.dialogs.LocationConnectionDialog;
 import org.biomart.configurator.view.idwViews.McViewSchema;
 import org.biomart.configurator.view.idwViews.McViews;
+import org.biomart.objects.objects.MartRegistry;
 import org.biomart.transformation.TransformationMain;
 import org.biomart.transformation.helpers.MartServiceIdentifier;
 import org.biomart.transformation.helpers.TransformationYongPrototype;
@@ -1025,20 +1027,6 @@ public class JDomNodeAdapter extends DefaultMutableTreeNode {
 						MartServiceIdentifier initialHost = new MartServiceIdentifier(conObj.getHost(),conObj.getPort(),conObj.getPath());
 						TransformationMain.fetchWebServiceConfigurationMap(initialHost, conObj.getConfigMap().get(host+conObj.getPath()));
 						Document urlDoc = TransformationYongPrototype.wrappedTransform(initialHost, name, dsName);
-/*						System.out.println(initialHost);
-						System.out.println(name);
-						System.out.println(dsName);
-				    	XMLOutputter outputter = new XMLOutputter();
-				     	try {
-				     		File file = new File("/Users/yliang/output.xml");
-				    		FileOutputStream fos = new FileOutputStream(file);
-				    		outputter.output(urlDoc, fos);
-				    		fos.close();
-				    	}
-				    	catch(Exception e) {
-				    		e.printStackTrace();
-				    	}
-*/
 						//change the location name
 						Element locElement = urlDoc.getRootElement().getChild(Resources.get("LOCATION"));
 						boolean isNameEmpty = false;
@@ -1592,6 +1580,212 @@ public class JDomNodeAdapter extends DefaultMutableTreeNode {
     	}
    	doc = null;
 
+    }
+    
+    private void addLocationFromMartRegistry(MartRegistry registry) {
+    	//find location name
+    	String nameStr = Resources.get("NAME");
+    	org.biomart.objects.objects.Location sourceLoc = registry.getLocationList().get(0);
+    	org.biomart.objects.objects.Mart sourceMart = sourceLoc.getMartList().get(0);
+    	String locName = sourceLoc.getName();
+    	String martName = sourceMart.getName();
+    	
+    	Element locElement = JDomUtils.searchElementInUser(((JDomNodeAdapter)this.getRoot()).getNode(), 
+    			McGuiUtils.INSTANCE.getCurrentUser().getUserName(),
+    			Resources.get("LOCATION"), 
+    			locName);
+
+    	Element martElement = null;
+
+    	if(locElement==null) {
+
+    		locElement = new Element(Resources.get("LOCATION"));
+
+    		locElement.setAttribute(nameStr,locName);
+
+	    	locElement.setAttribute(Resources.get("TYPE"),Resources.get("URLTYPE"));
+	    	//add all users in synchronize list
+	    	List<String> userList = McGuiUtils.INSTANCE.getSynchronizedUserList(McGuiUtils.INSTANCE.getCurrentUser().getUserName());
+
+	    	if(userList==null || userList.size()==0)
+	    		locElement.setAttribute(Resources.get("USER"),McGuiUtils.INSTANCE.getCurrentUser().getUserName()); 
+	    	else
+	    		locElement.setAttribute(Resources.get("USER"),McUtils.StrListToStr(userList));
+    		((JDomNodeAdapter)this.getRoot()).getNode().addContent(locElement);
+    		martElement = new Element(Resources.get("MART"));
+    		martElement.setAttribute(nameStr,martName);
+    		locElement.addContent(martElement);
+    	} else {
+
+    		//check if the mart exist
+
+    		Map<String,String> conditions = new HashMap<String,String>();
+    		conditions.put(nameStr, martName);
+    		martElement = JDomUtils.findChildElement(locElement, Resources.get("MART"), conditions);
+
+    		if(martElement==null) {
+
+        		martElement = new Element(Resources.get("MART"));
+
+        		martElement.setAttribute(nameStr,martName);    			
+
+        	   	locElement.addContent(martElement);
+
+        	}
+
+    	}
+
+    	//assume no duplicate datast for now
+
+    	org.biomart.objects.objects.Dataset sourceDs = sourceMart.getDatasetList().get(0);
+
+    	Element targetDs = new Element(Resources.get("DATASET"));
+
+    	martElement.addContent(targetDs);
+
+    	
+
+    	targetDs.setAttribute(nameStr,sourceDs.getName());
+
+    	targetDs.setAttribute(Resources.get("TIME"),McUtils.getCurrentTimeString());
+
+    	//jdbcSchema
+
+    	Element jdbcSchema = new Element(Resources.get("SOURCESCHEMA"));
+
+    	jdbcSchema.setAttribute(nameStr,martName+"_"+sourceDs.getName());
+    	targetDs.addContent(jdbcSchema);
+    	//get all tables
+    	List<org.biomart.objects.objects.Table> sTableList = sourceDs.getTableList();
+ //   	List<Element> sTableList = JDomUtils.searchElementList(sourceDs, Resources.get("TABLE"), null);
+    	String centralTableName = sourceDs.getCentralTable();
+    	targetDs.setAttribute("centralTable",centralTableName);
+    	List<String> mtList = new ArrayList<String>();
+    	for(org.biomart.objects.objects.Table sTable:sTableList) {
+    		boolean isMain = sTable.getMain();
+    		String keyStr = sTable.getKey().getName();
+    		String tableNameStr = sTable.getName();
+    		if(isMain) 
+    			mtList.add(tableNameStr);
+    		
+    		Element dstElement = new Element(Resources.get("DSTABLE"));
+    		dstElement.setAttribute(nameStr,tableNameStr);
+    		targetDs.addContent(dstElement);
+
+    			
+    		Element stElement = new Element(Resources.get("TABLE"));
+    		stElement.setAttribute(nameStr,tableNameStr);
+    		jdbcSchema.addContent(stElement);
+    		
+    		if(isMain) {
+    			Element pkElement = new Element(Resources.get("PrimaryKey"));
+    			pkElement.setAttribute(Resources.get("inColumns"),keyStr);
+    			pkElement.setAttribute(Resources.get("Status"),"INFERRED");
+    			stElement.addContent(pkElement);    				
+    		}else {
+    			Element fkElement = new Element(Resources.get("ForeignKey"));
+    			fkElement.setAttribute(Resources.get("inColumns"),keyStr);
+    			fkElement.setAttribute(Resources.get("Status"),"INFERRED");
+    			stElement.addContent(fkElement);
+    		}
+    		
+
+    		Set<org.biomart.objects.objects.Column> columnSet = sTable.getColumns();
+
+    		for(org.biomart.objects.objects.Column field:columnSet) {
+    			Element colElement = new Element(Resources.get("COLUMN"));
+    			String colName = field.getName();
+    			colElement.setAttribute(nameStr,colName);
+    			stElement.addContent(colElement);
+
+    			Element attrElement = new Element(Resources.get("COLUMN"));
+    			attrElement.setAttribute(nameStr,colName);
+    			dstElement.addContent(attrElement); 
+    			if(isMain && !tableNameStr.equals(centralTableName)) {
+    				if(colName.indexOf(Resources.get("keySuffix"))>=0 && !colName.equals(keyStr)) {
+    	    			Element fkElement = new Element(Resources.get("ForeignKey"));
+    	    			fkElement.setAttribute(Resources.get("inColumns"),colName);
+    	    			fkElement.setAttribute(Resources.get("Status"),"INFERRED");
+    	    			stElement.addContent(fkElement);    					
+    				}    					
+    			}
+    		}
+
+    	}
+    	//relation
+    
+    	List<org.biomart.objects.objects.Relation> relationList = sourceDs.getRelationList();
+    	for(int i=0; i<relationList.size(); i++) {
+    		org.biomart.objects.objects.Relation relation = relationList.get(i);
+    		Element relElement = new Element(Resources.get("RELATION"));
+    		relElement.setAttribute(Resources.get("FirstKey"),relation.getFirstKey());
+    		relElement.setAttribute(Resources.get("SecondKey"),relation.getSecondKey());
+    		relElement.setAttribute("firstTable",relation.getFirstTable().getName());
+    		relElement.setAttribute("secondTable",relation.getSecondTable().getName());
+    		relElement.setAttribute(Resources.get("TYPE"),relation.getType().toString());
+    		//check if it is subclass
+    		String firstTable = relation.getFirstTable().getName();
+    		String secondTable = relation.getSecondTable().getName();
+
+    		if(mtList.contains(firstTable)&&mtList.contains(secondTable))
+    			relElement.setAttribute("subclass","true");
+    		jdbcSchema.addContent(relElement);
+    	}
+    	
+
+    	//find configs
+    	
+    	List<org.biomart.objects.objects.Config> configList = sourceDs.getConfigList();
+    	Map<String,String> conditions = new HashMap<String,String>();
+    	for(org.biomart.objects.objects.Config config:configList) {
+    		org.biomart.objects.objects.Container containerObject = config.getRootContainer();
+//        	List<Element> containerList = JDomUtils.findChildElements(config, Resources.get("CONTAINER"), conditions);
+/*        	for(Element container:containerList) {
+        		Element childElement = JDomUtils.searchElement(container, Resources.get("FILTER"), null);
+        		if(childElement == null) {
+        			childElement = JDomUtils.searchElement(container, Resources.get("ATTRIBUTE"), null);
+        			if(childElement == null) {
+        				continue;
+        			}
+        		}
+
+        		container.detach();
+        		String userName = McGuiUtils.INSTANCE.getCurrentUser().getUserName();
+            	container.setAttribute(Resources.get("CONFIG"),userName+"_"+container.getAttributeValue(nameStr));
+            	targetDs.addContent(container);      	
+        	}   */
+    		Element container=null;
+			try {
+				container = containerObject.generateXml();
+			} catch (FunctionalException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    		String userName = McGuiUtils.INSTANCE.getCurrentUser().getUserName();
+        	container.setAttribute(Resources.get("CONFIG"),userName+"_"+container.getAttributeValue(nameStr));
+        	targetDs.addContent(container);  
+
+        	//add exportable; importable
+        	
+ /*       	List<Element> expList = JDomUtils.searchElementList(config, Resources.get("EXPORTABLE"), null);
+        	for(Element exp:expList) {
+        		exp.detach();
+            	exp.setAttribute(Resources.get("GUI"),McGuiUtils.INSTANCE.getGuiType().toString());
+        		targetDs.addContent(exp);
+        	}
+
+        	List<Element> impList = JDomUtils.searchElementList(config, Resources.get("IMPORTABLE"), null);
+
+        	for(Element imp:impList) {
+
+        		imp.detach();
+
+            	imp.setAttribute(Resources.get("GUI"),McGuiUtils.INSTANCE.getGuiType().toString());
+
+        		targetDs.addContent(imp);        		
+
+        	}*/
+    	}
     }
 
 

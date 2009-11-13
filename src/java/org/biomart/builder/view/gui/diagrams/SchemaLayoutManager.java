@@ -26,15 +26,13 @@ import java.awt.LayoutManager2;
 import java.awt.Rectangle;
 import java.awt.geom.GeneralPath;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
+import java.util.Set;
 import javax.swing.SwingUtilities;
-
 import org.biomart.builder.view.gui.diagrams.components.DiagramComponent;
 import org.biomart.builder.view.gui.diagrams.components.KeyComponent;
 import org.biomart.builder.view.gui.diagrams.components.RelationComponent;
@@ -58,21 +56,21 @@ public class SchemaLayoutManager implements LayoutManager2 {
 
 	private final Map<Component, Dimension> prefSizes = new HashMap<Component, Dimension>();
 
-	private final Map constraints = new HashMap();
+	private final Map<Component,Object> constraints = new HashMap<Component,Object>();
 
-	private final List rows = new ArrayList();
+	private final List<List<Component>> rows = new ArrayList<List<Component>>();
 
-	private final List relations = new ArrayList();
+	private final List<RelationComponent> relations = new ArrayList<RelationComponent>();
 
-	private final List rowHeights = new ArrayList();
+	private final List<Integer> rowHeights = new ArrayList<Integer>();
 
-	private final List rowWidths = new ArrayList();
+	private final List<Integer> rowWidths = new ArrayList<Integer>();
 
-	private final List rowSpacings = new ArrayList();
+	private final List<Integer> rowSpacings = new ArrayList<Integer>();
 
 	private int tableCount;
 
-	private final Collection fixedComps = new HashSet();
+	private final Set<Component> fixedComps = new HashSet<Component>();
 
 	/**
 	 * Sets up some defaults for the layout, ready for use.
@@ -137,7 +135,7 @@ public class SchemaLayoutManager implements LayoutManager2 {
 			this.prefSizes.clear();
 
 			for (int rowNum = 0; rowNum < this.rows.size(); rowNum++) {
-				final List row = (List) this.rows.get(rowNum);
+				final List<Component> row = this.rows.get(rowNum);
 
 				int rowHeight = 0;
 				int rowWidth = 0;
@@ -146,8 +144,8 @@ public class SchemaLayoutManager implements LayoutManager2 {
 				// For each component, allow space plus padding either
 				// side equivalent to the number of relations from that
 				// component.
-				for (final Iterator i = row.iterator(); i.hasNext();) {
-					final Component comp = (Component) i.next();
+				for (final Iterator<Component> i = row.iterator(); i.hasNext();) {
+					final Component comp = i.next();
 					final Dimension prefSize = comp.getPreferredSize();
 					this.prefSizes.put(comp, prefSize);
 					final int compSpacing = ((SchemaLayoutConstraint) this.constraints
@@ -181,7 +179,7 @@ public class SchemaLayoutManager implements LayoutManager2 {
 			final Object constraints) {
 		synchronized (comp.getTreeLock()) {
 			if (comp instanceof RelationComponent) {
-				this.relations.add(comp);
+				this.relations.add((RelationComponent)comp);
 				this.constraints.put(comp, constraints);
 			} else if (comp instanceof DiagramComponent
 					&& constraints instanceof SchemaLayoutConstraint) {
@@ -197,7 +195,7 @@ public class SchemaLayoutManager implements LayoutManager2 {
 						.sqrt(++this.tableCount));
 				int rowNum = 0;
 				while (rowNum < this.rows.size()
-						&& ((List) this.rows.get(rowNum)).size() >= rowLength)
+						&& ((List<Component>) this.rows.get(rowNum)).size() >= rowLength)
 					rowNum++;
 				((SchemaLayoutConstraint) constraints).setRow(rowNum);
 
@@ -206,10 +204,10 @@ public class SchemaLayoutManager implements LayoutManager2 {
 					this.rowSpacings.add(new Integer(0));
 					this.rowHeights.add(new Integer(0));
 					this.rowWidths.add(new Integer(0));
-					this.rows.add(new ArrayList());
+					this.rows.add(new ArrayList<Component>());
 				}
 
-				((List) this.rows.get(rowNum)).add(comp);
+				this.rows.get(rowNum).add(comp);
 
 				// The component needs space for its relations.
 				final int compSpacing = SchemaLayoutManager.RELATION_SPACING
@@ -266,7 +264,7 @@ public class SchemaLayoutManager implements LayoutManager2 {
 				this.tableCount--;
 				final int rowNum = constraints.getRow();
 
-				((List) this.rows.get(rowNum)).remove(comp);
+				((List<Component>) this.rows.get(rowNum)).remove(comp);
 
 				// Reduce the row width and height accordingly.
 				final int oldRowWidth = ((Integer) this.rowWidths.get(rowNum))
@@ -280,7 +278,7 @@ public class SchemaLayoutManager implements LayoutManager2 {
 				this.rowWidths.set(rowNum, new Integer(newRowWidth));
 
 				int newRowHeight = 0;
-				for (final Iterator i = ((List) this.rows.get(rowNum))
+				for (final Iterator<Component> i = ((List<Component>) this.rows.get(rowNum))
 						.iterator(); i.hasNext();)
 					newRowHeight = Math.max(newRowHeight,
 							((Component) i.next()).getPreferredSize().height
@@ -293,7 +291,7 @@ public class SchemaLayoutManager implements LayoutManager2 {
 				// While last row is empty, remove last row.
 				int lastRow = this.rows.size() - 1;
 				while (lastRow >= 0 && this.rows.get(lastRow) == null
-						&& ((List) this.rows.get(lastRow)).isEmpty()) {
+						&& ((List<Component>) this.rows.get(lastRow)).isEmpty()) {
 					// Remove all references to empty row.
 					this.rows.remove(lastRow);
 					this.rowHeights.remove(lastRow);
@@ -305,7 +303,7 @@ public class SchemaLayoutManager implements LayoutManager2 {
 
 				// New width needs re-calculating from all rows.
 				this.size.width = 0;
-				for (final Iterator i = this.rowWidths.iterator(); i.hasNext();)
+				for (final Iterator<Integer> i = this.rowWidths.iterator(); i.hasNext();)
 					this.size.width = Math.max(((Integer) i.next()).intValue(),
 							this.size.width);
 			}
@@ -332,7 +330,7 @@ public class SchemaLayoutManager implements LayoutManager2 {
 						- ((Integer) this.rowSpacings.get(rowNum)).intValue();
 
 				// Layout each component in the row.
-				for (final Iterator i = ((List) this.rows.get(rowNum))
+				for (final Iterator<Component> i = ((List<Component>) this.rows.get(rowNum))
 						.iterator(); i.hasNext();) {
 					final Component comp = (Component) i.next();
 					final Dimension prefSize = this.prefSizes.get(comp);
@@ -350,7 +348,7 @@ public class SchemaLayoutManager implements LayoutManager2 {
 			}
 
 			// Work out how the relations are going to join things up.
-			for (final Iterator i = this.relations.iterator(); i.hasNext();) {
+			for (final Iterator<RelationComponent> i = this.relations.iterator(); i.hasNext();) {
 				final RelationComponent comp = (RelationComponent) i.next();
 				// Obtain first key and work out position relative to
 				// diagram.

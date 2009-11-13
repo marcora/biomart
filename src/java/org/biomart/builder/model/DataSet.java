@@ -454,8 +454,8 @@ public class DataSet extends Schema {
 					// end to queue.
 					if (!mergeTheseTables.contains(newCand)) {
 						mergeTheseTables.add(newCand);
-						if (newCand.isTransformStart(this, dsTable.getName()))
-							secondStartTable = newCand;
+						//if (newCand.isTransformStart(this, dsTable.getName()))
+						//	secondStartTable = newCand;
 					}
 					mergeTheseRelations.add(candRel);
 				}
@@ -1553,11 +1553,7 @@ public class DataSet extends Schema {
 			listeningRels.addAll(tbl.getRelations());
 			// Listen only to useful things.
 			tbl.addPropertyChangeListener("masked", this.rebuildListener);
-			tbl
-					.addPropertyChangeListener("restrictTable",
-							this.rebuildListener);
-			tbl.addPropertyChangeListener("transformStart",
-					this.rebuildListener);
+			tbl.addPropertyChangeListener("restrictTable",this.rebuildListener);
 			tbl.getColumns().addPropertyChangeListener(McBeanMap.property_AddItem, this.rebuildListener);
 			tbl.getColumns().addPropertyChangeListener(McBeanMap.property_RemoveItem, this.rebuildListener);
 //			tbl.getRelations().addPropertyChangeListener(this.rebuildListener);

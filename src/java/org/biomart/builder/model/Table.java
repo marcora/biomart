@@ -25,13 +25,11 @@ package org.biomart.builder.model;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-
 import org.biomart.builder.model.ForeignKey;
 import org.biomart.builder.model.PrimaryKey;
 import org.biomart.common.resources.Log;
@@ -137,7 +135,6 @@ public class Table implements Comparable<Table>, TransactionListener {
 		// All changes to us make us modified.
 		this.addPropertyChangeListener("masked", this.listener);
 		this.addPropertyChangeListener("restrictTable", this.listener);
-		this.addPropertyChangeListener("bigTable", this.listener);
 	}
 
 	/**
@@ -182,10 +179,6 @@ public class Table implements Comparable<Table>, TransactionListener {
 		this.pcs.addPropertyChangeListener(property, listener);
 	}
 
-
-	public boolean isDirectModified() {
-		return this.directModified;
-	}
 
 	public void setDirectModified(final boolean modified) {
 		if (modified == this.directModified)
@@ -434,49 +427,6 @@ public class Table implements Comparable<Table>, TransactionListener {
 		return this.schema;
 	}
 
-
-	/**
-	 * Is this table big?
-	 * 
-	 * @param dataset
-	 *            the dataset to check for.
-	 * @return the big-ness to use if it is, 0 otherwise.
-	 */
-	public int getBigTable(final DataSet dataset) {
-		final Integer val = (Integer) this.getMods(dataset, null).get(
-				"bigTable");
-		return val == null ? 0 : val.intValue();
-	}
-
-	/**
-	 * Is this table big?
-	 * 
-	 * @param dataset
-	 *            the dataset to check for.
-	 * @param tableKey
-	 *            the table to check for.
-	 * @return the big-ness to use if it is, 0 otherwise.
-	 */
-	public int getBigTable(final DataSet dataset, final String tableKey) {
-		Integer val = (Integer) this.getMods(dataset, tableKey).get("bigTable");
-		if (val == null)
-			return this.getBigTable(dataset);
-		else
-			return val.intValue();
-	}
-
-	/**
-	 * Is this table a transform start?
-	 * 
-	 * @param dataset
-	 *            the dataset to check for.
-	 * @param tableKey
-	 *            the table to check for.
-	 * @return true if it is, false otherwise.
-	 */
-	public boolean isTransformStart(final DataSet dataset, final String tableKey) {
-		return this.getMods(dataset, tableKey).containsKey("transformStart");
-	}
 
 
 	public int compareTo(final Table table) throws ClassCastException {

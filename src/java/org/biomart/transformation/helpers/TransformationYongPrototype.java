@@ -71,6 +71,18 @@ public class TransformationYongPrototype {
 		MyUtils.checkStatusProgram(b && !transformationsGeneralOutputTemporaryFolder.exists());
 		return transformation.getTransformedDocument();
 	}
+	public static MartRegistry wrappedTransformObject(MartServiceIdentifier initialHost, String martName, String datasetName)
+	throws TechnicalException, FunctionalException {
+		
+		File transformationsGeneralOutputTemporaryFolder = createTmpFolders(initialHost.generateIdentifier());
+		HostAndVirtualSchema hostAndVirtualSchema = TransformationMain.computeHostAndVirtualSchema(martName);
+		Transformation transformation = TransformationMain.transform(true, initialHost, 
+				hostAndVirtualSchema.getMartServiceIdentifier(), transformationsGeneralOutputTemporaryFolder.getAbsolutePath(), hostAndVirtualSchema.getVirtualSchema(), datasetName);
+		boolean b = deleteDir(transformationsGeneralOutputTemporaryFolder);
+		MyUtils.checkStatusProgram(b && !transformationsGeneralOutputTemporaryFolder.exists());
+		return transformation.getMartRegistry();
+	}
+
 	public static MartRegistry wrappedRebuildCentralPortalRegistry() throws TechnicalException, FunctionalException {
 		File transformationsGeneralOutputTemporaryFolder = createTmpFolders("portal");
 		MartRegistry martRegistry = TransformationMain.rebuildCentralPortalRegistry(transformationsGeneralOutputTemporaryFolder.getAbsolutePath(), false);
