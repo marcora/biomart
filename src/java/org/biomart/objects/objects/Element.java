@@ -299,9 +299,9 @@ public abstract class Element extends MartConfiguratorObject implements Serializ
 		MartConfiguratorUtils.addAttribute(element, "checkForNulls", this.checkForNulls);
 
 		if (this.pointer) {
-			this.sourceRange.addXmlAttribute(element, "sourceRange");
+			this.sourceRange.getStringValue(element, "sourceRange");
 		}
-		this.targetRange.addXmlAttribute(element, "targetRange");
+		this.targetRange.getStringValue(element, "targetRange");
 		
 		return element;
 	}

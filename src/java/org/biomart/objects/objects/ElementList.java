@@ -146,7 +146,7 @@ public class ElementList extends MartConfiguratorObject implements Serializable 
 		if (this.type.isExportable()) {
 			MartConfiguratorUtils.addAttribute(element, "formerDefault", this.formerDefault);	
 		}
-		this.range.addXmlAttribute(element, "range");
+		this.range.getStringValue(element, "range");
 		
 		return element;
 	}

@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
@@ -217,7 +216,7 @@ public class Range implements Serializable {
 		return stringBuffer.toString();
 	}
 	
-	public void addXmlAttribute (Element element, String attributeName) {
+	public void getStringValue (Element element, String attributeName) {
 		String xmlValue = getXmlValue();
 		//MyUtils.checkStatusProgram(!MyUtils.isEmpty(xmlValue), MartConfiguratorUtils.displayJdomElement(element));
 		element.setAttribute(attributeName, xmlValue);

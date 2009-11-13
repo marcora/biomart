@@ -93,7 +93,7 @@ public class Column extends MartConfiguratorObject implements Comparable<Column>
 		return compare(this, column);
 	}
 	
-	public String getXmlValue() {
+	public String getStringValue() {
 		return super.name;
 	}
 	

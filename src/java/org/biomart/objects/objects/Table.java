@@ -163,7 +163,7 @@ public class Table extends MartConfiguratorObject implements Comparable<Table>, 
 		MartConfiguratorUtils.addAttribute(element, "key", (this.key!=null ? this.key.getName() : null));
 		MartConfiguratorUtils.addAttribute(element, "main", this.main);
 		MartConfiguratorUtils.addAttribute(element, "type", (this.type!=null ? this.type.getXmlValue() : null));
-		this.range.addXmlAttribute(element, "range");
+		this.range.getStringValue(element, "range");
 		
 		//for (String field : this.fields) {
 		for (Column column : this.columns) {
