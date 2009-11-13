@@ -142,23 +142,6 @@ public class Transaction {
 
 	private static Transaction currentTransaction;
 
-	/**
-	 * Reset all transaction listeners ready for a new transaction.
-	 */
-	public static void resetVisibleModified() {
-		for (final Iterator<TransactionListener> i = Transaction.getOrderedListeners().iterator(); i
-				.hasNext();)
-			((TransactionListener) i.next()).transactionResetVisibleModified();
-	}
-
-	/**
-	 * Reset all transaction listeners ready for a new transaction.
-	 */
-	public static void resetDirectModified() {
-		for (final Iterator<TransactionListener> i = Transaction.getOrderedListeners().iterator(); i
-				.hasNext();)
-			((TransactionListener) i.next()).transactionResetDirectModified();
-	}
 
 	/**
 	 * Flag that a transaction has started. If another transaction is already
@@ -331,15 +314,6 @@ public class Transaction {
 	 *            Does this transaction modify visible modification flags?
 	 */
 	public Transaction(final boolean allowVisModChange) {
-		this.allowVisModChange = allowVisModChange;
-	}
-
-	/**
-	 * Does this transaction modify visible modification flags?
-	 * 
-	 * @param allowVisModChange <tt>true</tt> if it does.
-	 */
-	public void setAllowVisModChange(final boolean allowVisModChange) {
 		this.allowVisModChange = allowVisModChange;
 	}
 
