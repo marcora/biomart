@@ -26,8 +26,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.biomart.builder.model.Relation.UnrolledRelationDefinition;
-
 
 /**
  * This interface defines a unit of transformation for mart construction.
@@ -41,7 +39,7 @@ public abstract class TransformationUnit {
 	/**
 	 * A map of source schema column names to dataset column objects.
 	 */
-	private final Map newColumnNameMap;
+	private final Map<Column,DataSetColumn> newColumnNameMap;
 
 	private TransformationUnit previousUnit;
 
@@ -53,7 +51,7 @@ public abstract class TransformationUnit {
 	 *            the unit this one comes after.
 	 */
 	public TransformationUnit(final TransformationUnit previousUnit) {
-		this.newColumnNameMap = new HashMap();
+		this.newColumnNameMap = new HashMap<Column,DataSetColumn>();
 		this.previousUnit = previousUnit;
 	}
 
@@ -95,7 +93,7 @@ public abstract class TransformationUnit {
 	 * 
 	 * @return the map of columns. Potentially empty but never <tt>null</tt>.
 	 */
-	public Map getNewColumnNameMap() {
+	public Map<Column,DataSetColumn> getNewColumnNameMap() {
 		return this.newColumnNameMap;
 	}
 
@@ -184,7 +182,7 @@ public abstract class TransformationUnit {
 	public static class JoinTable extends SelectFromTable {
 		private static final long serialVersionUID = 1L;
 
-		private List sourceDataSetColumns;
+		private List<DataSetColumn> sourceDataSetColumns;
 
 		private Key schemaSourceKey;
 
@@ -211,7 +209,7 @@ public abstract class TransformationUnit {
 		 *            Use 0 if it is not.
 		 */
 		public JoinTable(final TransformationUnit previousUnit,
-				final Table table, final List sourceDataSetColumns,
+				final Table table, final List<DataSetColumn> sourceDataSetColumns,
 				final Key schemaSourceKey, final Relation schemaRelation,
 				final int schemaRelationIteration) {
 			super(previousUnit, table);
@@ -230,7 +228,7 @@ public abstract class TransformationUnit {
 		 * 
 		 * @return the columns.
 		 */
-		public List getSourceDataSetColumns() {
+		public List<DataSetColumn> getSourceDataSetColumns() {
 			return this.sourceDataSetColumns;
 		}
 
@@ -319,92 +317,4 @@ public abstract class TransformationUnit {
 		}
 	}
 
-	/**
-	 * This type of transformation unrolls tables.
-	 */
-	public static class UnrollTable extends TransformationUnit {
-		private static final long serialVersionUID = 1L;
-
-		private final Relation relation;
-
-		private final List sourceDataSetColumns;
-
-		private final UnrolledRelationDefinition unrolledDef;
-
-		private final DataSetColumn unrolledIDColumn;
-
-		private final DataSetColumn unrolledNameColumn;
-
-		/**
-		 * Instantiate a unit that selects from the given schema table.
-		 * 
-		 * @param previousUnit
-		 *            the unit that precedes this one.
-		 * @param relation
-		 *            the relation we are unrolling.
-		 * @param sourceDataSetColumns
-		 *            the columns in the existing dataset table that are used to
-		 *            make the join.
-		 * @param unrolledDef
-		 *            the unrolled relation definition.
-		 * @param unrolledIDColumn
-		 *            the unrolled ID column.
-		 * @param unrolledNameColumn
-		 *            the unrolled name column.
-		 */
-		public UnrollTable(final TransformationUnit previousUnit,
-				final Relation relation, final List sourceDataSetColumns,
-				final UnrolledRelationDefinition unrolledDef,
-				final DataSetColumn unrolledIDColumn,
-				final DataSetColumn unrolledNameColumn) {
-			super(previousUnit);
-			this.relation = relation;
-			this.sourceDataSetColumns = sourceDataSetColumns;
-			this.unrolledDef = unrolledDef;
-			this.unrolledIDColumn = unrolledIDColumn;
-			this.unrolledNameColumn = unrolledNameColumn;
-		}
-
-		/**
-		 * @return the relation
-		 */
-		public Relation getRelation() {
-			return this.relation;
-		}
-
-		/**
-		 * @return the sourceDataSetColumns
-		 */
-		public List getSourceDataSetColumns() {
-			return this.sourceDataSetColumns;
-		}
-
-		/**
-		 * @return the unrolledDef
-		 */
-		public UnrolledRelationDefinition getUnrolledDef() {
-			return this.unrolledDef;
-		}
-
-		/**
-		 * @return the unrolledIDColumn
-		 */
-		public DataSetColumn getUnrolledIDColumn() {
-			return this.unrolledIDColumn;
-		}
-
-		/**
-		 * @return the unrolledNameColumn
-		 */
-		public DataSetColumn getUnrolledNameColumn() {
-			return this.unrolledNameColumn;
-		}
-
-		public DataSetColumn getDataSetColumnFor(final Column column) {
-			if (this.getPreviousUnit() != null)
-				return this.getPreviousUnit().getDataSetColumnFor(column);
-			else
-				return null;
-		}
-	}
 }

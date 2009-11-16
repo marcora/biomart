@@ -31,6 +31,7 @@ import org.biomart.builder.model.Column;
 import org.biomart.builder.model.DataSet;
 import org.biomart.builder.model.DataSetColumn;
 import org.biomart.builder.model.DataSetTable;
+import org.biomart.builder.model.JDBCSchema;
 import org.biomart.builder.model.Key;
 import org.biomart.builder.model.Relation;
 import org.biomart.builder.model.Schema;
@@ -138,6 +139,7 @@ public class Transaction {
 		Transaction.listeners.add(new WeakReference<TransactionListener>(listener));
 	}
 
+	//as lock counter
 	private static int inProgress = 0;
 
 	private static Transaction currentTransaction;
@@ -222,7 +224,7 @@ public class Transaction {
 						continue;
 					} else if (tl instanceof DataSet) {
 						ds.add(tl);
-					} else if (tl instanceof Schema)
+					} else if (tl instanceof JDBCSchema)
 						sch.add(tl);
 					else if (tl instanceof DiagramComponent)
 						diagComp.add(tl);
@@ -255,7 +257,7 @@ public class Transaction {
 			}
 			final List<TransactionListener> list = new ArrayList<TransactionListener>();
 			// schemas.
-			list.addAll(sch);
+//			list.addAll(sch);
 			// non-relation schema components.
 			list.addAll(schComp);
 			// relations.
@@ -271,7 +273,7 @@ public class Transaction {
 			// diagrams.
 			list.addAll(diag);
 			// anything else that is interested.
-			list.addAll(rest);
+//			list.addAll(rest);
 			return list;
 		}
 	}

@@ -30,14 +30,7 @@ import org.biomart.builder.exceptions.ConstructorException;
 
 import org.biomart.builder.model.Column;
 import org.biomart.builder.model.DataLink;
-import org.biomart.builder.model.DataSet;
-
-import org.biomart.builder.model.DataSetTable;
-
 import org.biomart.builder.model.MartConstructorAction;
-
-import org.biomart.builder.model.Relation;
-import org.biomart.builder.model.Schema;
 import org.biomart.builder.model.Table;
 
 import org.biomart.builder.model.DataLink.JDBCDataLink;
@@ -55,8 +48,6 @@ import org.biomart.builder.model.MartConstructorAction.LeftJoin;
 import org.biomart.builder.model.MartConstructorAction.Rename;
 import org.biomart.builder.model.MartConstructorAction.Select;
 import org.biomart.builder.model.MartConstructorAction.UpdateOptimiser;
-
-import org.biomart.builder.model.TransformationUnit.UnrollTable;
 import org.biomart.common.exceptions.BioMartError;
 
 
@@ -498,16 +489,6 @@ public class OracleDialect extends DatabaseDialect {
 					i);
 			sb.append("a." + pkColName + "=b." + fkColName + "");
 		}
-		if (action.getRelationRestriction() != null) {
-			sb.append(" and ");
-			sb.append(action.getRelationRestriction().getSubstitutedExpression(
-					action.getSchemaPrefix(),
-					action.isRelationRestrictionLeftIsFirst() ? "a" : "b",
-					action.isRelationRestrictionLeftIsFirst() ? "b" : "a",
-					action.isRelationRestrictionLeftIsFirst(),
-					!action.isRelationRestrictionLeftIsFirst(),
-					action.getRelationRestrictionPreviousUnit()));
-		}
 		for (final Iterator i = action.getPartitionRestrictions().entrySet()
 				.iterator(); i.hasNext();) {
 			final Map.Entry entry = (Map.Entry) i.next();
@@ -759,65 +740,6 @@ public class OracleDialect extends DatabaseDialect {
 		}
 	}
 
-	public String getUnrollTableSQL(final String schemaPrefix,
-			final DataSet dataset, final DataSetTable dsTable,
-			final Relation parentRel, final Relation childRel,
-			final String schemaPartition, final Schema templateSchema,
-			final UnrollTable utu) {
-		final StringBuffer sql = new StringBuffer();
-		// From lookup table joined with parent table,
-		// find both parent ID col and child ID col.
-		final Table parentTable = parentRel.getOneKey().getTable();
-		final Table childTable = parentRel.getManyKey().getTable();
-		sql.append("select child.");
-		sql.append(childRel.getManyKey().getColumns()[0].getName());
-		sql.append(", child.");
-		sql.append(parentRel.getManyKey().getColumns()[0].getName());
-		sql.append(" from ");
-		sql.append(schemaPartition == null ? ((JDBCDataLink) templateSchema)
-				.getDataLinkSchema() : schemaPartition);
-		sql.append('.');
-		sql.append(parentTable.getName());
-		sql.append(" as parent, ");
-		sql.append(schemaPartition == null ? ((JDBCDataLink) templateSchema)
-				.getDataLinkSchema() : schemaPartition);
-		sql.append('.');
-		sql.append(childTable.getName());
-		sql.append(" as child where parent.");
-		sql.append(parentRel.getOneKey().getColumns()[0].getName());
-		sql.append("=child.");
-		sql.append(childRel.getManyKey().getColumns()[0].getName());
-
-		if (childRel.getRestrictRelation(dataset, dsTable.getName(), 0) != null) {
-			sql.append(" and ");
-			sql
-					.append(childRel.getRestrictRelation(dataset,
-							dsTable.getName(), 0)
-							.getSubstitutedExpression(
-									schemaPrefix,
-									childRel.getFirstKey().equals(
-											childRel.getOneKey()) ? "parent"
-											: "child",
-									childRel.getFirstKey().equals(
-											childRel.getManyKey()) ? "parent"
-											: "child", false, false, utu));
-		}
-		if (parentRel.getRestrictRelation(dataset, dsTable.getName(), 0) != null) {
-			sql.append(" and ");
-			sql
-					.append(parentRel.getRestrictRelation(dataset,
-							dsTable.getName(), 0)
-							.getSubstitutedExpression(
-									schemaPrefix,
-									parentRel.getFirstKey().equals(
-											parentRel.getOneKey()) ? "parent"
-											: "child",
-									parentRel.getFirstKey().equals(
-											parentRel.getManyKey()) ? "parent"
-											: "child", false, false, utu));
-		}
-		return sql.toString();
-	}
 
 
 	public String getSimpleRowsSQL(final String schemaName, final Table table) {

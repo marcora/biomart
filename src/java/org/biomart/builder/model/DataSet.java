@@ -35,12 +35,9 @@ import java.util.Set;
 import org.biomart.builder.exceptions.ValidationException;
 import org.biomart.builder.model.ForeignKey;
 import org.biomart.builder.model.PrimaryKey;
-import org.biomart.builder.model.Relation.CompoundRelationDefinition;
-import org.biomart.builder.model.Relation.RestrictedRelationDefinition;
 import org.biomart.builder.model.TransformationUnit.JoinTable;
 import org.biomart.builder.model.TransformationUnit.SelectFromTable;
 import org.biomart.builder.model.TransformationUnit.SkipTable;
-import org.biomart.builder.model.TransformationUnit.UnrollTable;
 import org.biomart.builder.view.gui.diagrams.DataSetDiagram;
 import org.biomart.common.exceptions.BioMartError;
 import org.biomart.common.exceptions.DataModelException;
@@ -81,7 +78,6 @@ import org.biomart.configurator.view.idwViews.McViews;
  * @since 0.5
  */
 public class DataSet extends Schema {
-	private static final long serialVersionUID = 1L;
 
 	final PropertyChangeListener rebuildListener = new PropertyChangeListener() {
 		public void propertyChange(PropertyChangeEvent evt) {	
@@ -91,24 +87,24 @@ public class DataSet extends Schema {
 				val = evt.getOldValue();
 			if (src instanceof Relation || src instanceof Table) {
 				if (val instanceof DataSet)
-					DataSet.this.needsFullSync = val == DataSet.this;
+					DataSet.this.setFullSyncValue(val == DataSet.this);
 				else if (val instanceof String)
-					DataSet.this.needsFullSync = DataSet.this.getTables()
-							.containsKey(val);
+					DataSet.this.setFullSyncValue(DataSet.this.getTables()
+							.containsKey(val));
 				else
-					DataSet.this.needsFullSync = true;
+					DataSet.this.setFullSyncValue(true);
 			} else
-				DataSet.this.needsFullSync = true;
+				DataSet.this.setFullSyncValue(true);
 		}
 	};
 
 	private final Table centralTable;
 
-	private final Collection<Relation> includedRelations;
+	private final Set<Relation> includedRelations;
 
-	private final Collection<Table> includedTables;
+	private final Set<Table> includedTables;
 
-	private final Collection<Schema> includedSchemas;
+	private final Set<Schema> includedSchemas;
 
 	private boolean invisible;
 
@@ -174,10 +170,6 @@ public class DataSet extends Schema {
 		this.includedTables = new LinkedHashSet<Table>();
 		this.includedSchemas = new LinkedHashSet<Schema>();
 
-
-		// Always need syncing at end of creating transaction.
-		this.needsFullSync = true;
-
 		// All changes to us make us modified.
 
 		// Recalculate completely if parent mart changes case.
@@ -189,10 +181,6 @@ public class DataSet extends Schema {
 		for (final Iterator<Schema> j = this.getMart().getSchemasObj().getSchemas().values().iterator(); j
 				.hasNext();) {
 			final Schema sch = j.next();
-			for (final Iterator<Table> k = sch.getTables().values().iterator(); k
-					.hasNext();)
-				( k.next()).dropMods(dsTable.getDataSet(), dsTable
-						.getName());
 			for (final Iterator<Relation> k = sch.getRelations().iterator(); k.hasNext();)
 				((Relation) k.next()).dropMods(dsTable.getDataSet(), dsTable
 						.getName());
@@ -285,36 +273,6 @@ public class DataSet extends Schema {
 
 
 
-	/**
-	 * Convert/Revert partition table status.
-	 * 
-	 * @param partitionTable
-	 *            <tt>true</tt> if this dataset is to be a partition table.
-
-	 *             if this dataset cannot be converted. You should use
-	 *             to check first
-	 *             before calling this if you want to avoid the exception.
-	 */
-	public void setPartitionTable(final boolean partitionTable)
-{
-		Log.debug("Setting partition table flag to " + partitionTable + " in "
-				+ this);
-		final boolean oldValue = false;
-		if (partitionTable == oldValue)
-			return;
-
-			// Update ourselves to restore dimensions and subclasses.
-			try {
-				this.synchronise();
-			} catch (final Exception e) {
-				e.printStackTrace();
-			}
-	
-		this.pcs.firePropertyChange("partitionTable", oldValue, partitionTable);
-	}
-
-
-
 
 	/**
 	 * Obtain all relations used by this dataset, in the order in which they
@@ -322,7 +280,7 @@ public class DataSet extends Schema {
 	 * 
 	 * @return all relations.
 	 */
-	public Collection<Relation> getIncludedRelations() {
+	public Set<Relation> getIncludedRelations() {
 		return this.includedRelations;
 	}
 
@@ -353,9 +311,9 @@ public class DataSet extends Schema {
 	 */
 	private void generateDataSetTable(final DataSetTableType type,
 			final DataSetTable parentDSTable, final Table realTable,
-			final Collection<Table> skippedMainTables, final List<Column> sourceDSCols,
-			Relation sourceRelation, final Map subclassCount,
-			final int relationIteration, final Collection<Table> unusedTables) {
+			final List<Table> skippedMainTables, final List<DataSetColumn> sourceDSCols,
+			Relation sourceRelation, final Map<Relation,Integer> subclassCount,
+			final int relationIteration, final Set<Table> unusedTables) {
 		Log.debug("Creating dataset table for " + realTable
 				+ " with parent relation " + sourceRelation + " as a " + type);
 		// Create the empty dataset table. Use a unique prefix
@@ -446,8 +404,7 @@ public class DataSet extends Schema {
 					// merged.
 					if (candRel.isOneToMany()
 							&& candRel.getOneKey().getTable().equals(cand)
-							&& !(candRel.isForceRelation(this, dsTable
-									.getName()) || candRel
+							&& !( candRel
 									.isMergeRelation(this)))
 						continue;
 					// Add relation to set, and add table at other
@@ -480,11 +437,11 @@ public class DataSet extends Schema {
 		final List<Column> dsTablePKCols = new ArrayList<Column>();
 
 		// Make a list of existing columns and foreign keys.
-		final Collection<Column> unusedCols = new HashSet<Column>(dsTable.getColumns().values());
+		final Set<Column> unusedCols = new HashSet<Column>(dsTable.getColumns().values());
 		final Collection<Key> unusedFKs = new HashSet<Key>(dsTable.getForeignKeys());
 
 		// Make a map for unique column base names.
-		final Map uniqueBases = new HashMap();
+		final Map<String,Integer> uniqueBases = new HashMap<String,Integer>();
 
 		// Skip this step if using a surrogate start table.
 		// If the parent dataset table is not null, add columns from it
@@ -509,8 +466,6 @@ public class DataSet extends Schema {
 			// key. In either case, if it is in the PK, add it both to the
 			// child PK and the child FK. Also inherit if it is involved
 			// in a restriction on the very first join.
-			final RestrictedRelationDefinition restrictDef = sourceRelation
-					.getRestrictRelation(this, dsTable.getName(), 0);
 			for (final Iterator<Column> i = parentDSTable.getColumns().values()
 					.iterator(); i.hasNext();) {
 				final DataSetColumn parentDSCol = (DataSetColumn) i.next();
@@ -524,20 +479,6 @@ public class DataSet extends Schema {
 							.contains(parentDSCol);
 					// If the column is in a restricted relation
 					// on the source relation, we need to inherit it.
-					if (restrictDef != null) {
-						DataSetColumn inhCol = parentDSCol;
-						while (inhCol instanceof InheritedColumn)
-							inhCol = ((InheritedColumn) inhCol)
-									.getInheritedColumn();
-						if (inhCol instanceof WrappedColumn) {
-							final Column wc = ((WrappedColumn) inhCol)
-									.getWrappedColumn();
-							inRelationRestriction = restrictDef
-									.getLeftAliases().containsKey(wc)
-									|| restrictDef.getRightAliases()
-											.containsKey(wc);
-						}
-					}
 					// Inherit it?
 					if (!inPK && !inSourceKey && !inRelationRestriction)
 						continue;
@@ -627,10 +568,10 @@ public class DataSet extends Schema {
 			// Copy all parent FKs and add to child, but WITHOUT
 			// relations. Subclasses only!
 			if (type.equals(DataSetTableType.MAIN_SUBCLASS))
-				for (final Iterator i = parentDSTable.getForeignKeys()
+				for (final Iterator<ForeignKey> i = parentDSTable.getForeignKeys()
 						.iterator(); i.hasNext();) {
-					final ForeignKey parentFK = (ForeignKey) i.next();
-					final List childFKCols = new ArrayList();
+					final ForeignKey parentFK = i.next();
+					final List<Column> childFKCols = new ArrayList<Column>();
 					for (int j = 0; j < parentFK.getColumns().length; j++)
 						childFKCols.add(parentTU.getNewColumnNameMap().get(
 								parentFK.getColumns()[j]));
@@ -640,9 +581,9 @@ public class DataSet extends Schema {
 								(Column[]) childFKCols.toArray(new Column[0]));
 
 						// Create only if not already exists.
-						for (final Iterator j = dsTable.getForeignKeys()
+						for (final Iterator<ForeignKey> j = dsTable.getForeignKeys()
 								.iterator(); j.hasNext();) {
-							final ForeignKey cand = (ForeignKey) j.next();
+							final ForeignKey cand = j.next();
 							if (cand.equals(dsTableFK))
 								dsTableFK = cand;
 						}
@@ -656,36 +597,31 @@ public class DataSet extends Schema {
 		}
 
 		// How many times are allowed to iterate over each relation?
-		final Map relationCount = new HashMap();
+		final Map<Relation,Integer> relationCount = new HashMap<Relation,Integer>();
 		for (final Iterator<Schema> i = this.getMart().getSchemasObj().getSchemas().values().iterator(); i
 				.hasNext();) {
 			final Schema schema =  i.next();
-			final Set relations = new HashSet();
-			for (final Iterator j = schema.getTables().values().iterator(); j
+			final Set<Relation> relations = new HashSet<Relation>();
+			for (final Iterator<Table> j = schema.getTables().values().iterator(); j
 					.hasNext();) {
-				final Table tbl = (Table) j.next();
+				final Table tbl = j.next();
 				if (tbl.getPrimaryKey() != null)
 					relations.addAll(tbl.getPrimaryKey().getRelations());
-				for (final Iterator k = tbl.getForeignKeys().iterator(); k
+				for (final Iterator<ForeignKey> k = tbl.getForeignKeys().iterator(); k
 						.hasNext();)
-					relations.addAll(((ForeignKey) k.next()).getRelations());
+					relations.addAll(k.next().getRelations());
 			}
-			for (final Iterator j = relations.iterator(); j.hasNext();) {
-				final Relation rel = (Relation) j.next();
+			for (final Iterator<Relation> j = relations.iterator(); j.hasNext();) {
+				final Relation rel = j.next();
 				// Partition compounding is dealt with separately
 				// and does not need to be included here.
-				final CompoundRelationDefinition def = rel.getCompoundRelation(
-						this, dsTable.getName());
-				int compounded = def == null ? 1 : def.getN();
-				// If loopback, increment count by one.
-				if (rel.getLoopbackRelation(this, dsTable.getName()) != null)
-					compounded++;
+				int compounded = 1;
 				relationCount.put(rel, new Integer(compounded));
 			}
 		}
 
 		// How many times have we actually seen each table?
-		final Map tableTracker = new HashMap();
+		final Map<Table,Integer> tableTracker = new HashMap<Table,Integer>();
 
 		// Process the table. This operation will populate the initial
 		// values in the normal, subclass and dimension queues. We only
@@ -738,36 +674,17 @@ public class DataSet extends Schema {
 		else
 			dsTable.setPrimaryKey(null);
 
-		// Fish out any UnrollTable units and move to end of queue.
-		final List units = dsTable.getTransformationUnits();
-		for (int i = 1; i < units.size() - 1; i++) { // Skip very first+last.
-			final TransformationUnit tu = (TransformationUnit) units.get(i);
-			if (tu instanceof UnrollTable) {
-				final TransformationUnit ptu = (TransformationUnit) units
-						.get(i - 1);
-				final TransformationUnit ntu = (TransformationUnit) units
-						.get(i + 1);
-				ntu.setPreviousUnit(ptu);
-				final TransformationUnit ltu = (TransformationUnit) units
-						.get(units.size() - 1);
-				tu.setPreviousUnit(ltu);
-				units.remove(i);
-				units.add(tu);
-				break;
-			}
-		}
-
 		// Drop unused columns and foreign keys.
-		for (final Iterator i = unusedFKs.iterator(); i.hasNext();) {
+		for (final Iterator<Key> i = unusedFKs.iterator(); i.hasNext();) {
 			final ForeignKey fk = (ForeignKey) i.next();
-			for (final Iterator j = fk.getRelations().iterator(); j.hasNext();) {
+			for (final Iterator<Relation> j = fk.getRelations().iterator(); j.hasNext();) {
 				final Relation rel = (Relation) j.next();
 				rel.getFirstKey().getRelations().remove(rel);
 				rel.getSecondKey().getRelations().remove(rel);
 			}
 			dsTable.getForeignKeys().remove(fk);
 		}
-		for (final Iterator i = unusedCols.iterator(); i.hasNext();) {
+		for (final Iterator<Column> i = unusedCols.iterator(); i.hasNext();) {
 			final Column deadCol = (Column) i.next();
 			dsTable.getColumns().remove(deadCol.getName());
 			// mods is Map{tablename -> Map{propertyName -> Map{...}} }
@@ -782,7 +699,7 @@ public class DataSet extends Schema {
 		// Rename columns in keys to have _key suffixes, and
 		// remove that suffix from all others.
 		//TODO is _key done in processTable?
-		for (final Iterator i = dsTable.getColumns().values().iterator(); i
+		for (final Iterator<Column> i = dsTable.getColumns().values().iterator(); i
 				.hasNext();) {
 			final DataSetColumn dsCol = (DataSetColumn) i.next();
 			try {
@@ -901,16 +818,16 @@ public class DataSet extends Schema {
 
 	 */
 	private void processTable(final TransformationUnit previousUnit,
-			final DataSetTable dsTable, final List dsTablePKCols,
-			final Table mergeTable, final List normalQ, final List subclassQ,
-			final List dimensionQ, final List sourceDataSetCols,
-			final Relation sourceRelation, final Map relationCount,
-			final Map subclassCount, final boolean makeDimensions,
-			final List nameCols, final List nameColSuffixes,
+			final DataSetTable dsTable, final List<Column> dsTablePKCols,
+			final Table mergeTable, final List<Object[]> normalQ, final List<Object[]> subclassQ,
+			final List<Object[]> dimensionQ, final List<DataSetColumn> sourceDataSetCols,
+			final Relation sourceRelation, final Map<Relation,Integer> relationCount,
+			final Map<Relation,Integer> subclassCount, final boolean makeDimensions,
+			final List<String> nameCols, final List<String> nameColSuffixes,
 			final int relationIteration, int queuePos,
-			final Collection unusedCols, final Map uniqueBases,
-			final Collection skippedMainTables, final Map tableTracker,
-			final Collection mergeTheseRelationsInstead) {
+			final Set<Column> unusedCols, final Map<String,Integer> uniqueBases,
+			final List<Table> skippedMainTables, final Map<Table,Integer> tableTracker,
+			final Set<Relation> mergeTheseRelationsInstead) {
 		Log.debug("Processing table " + mergeTable);
 
 		// Remember the schema.
@@ -974,13 +891,13 @@ public class DataSet extends Schema {
 					&& !sourceRelation.getSecondKey().equals(mergeTablePK);
 
 		// Make a list of all columns involved in keys on the merge table.
-		final Set colsUsedInKeys = new HashSet();
-		for (final Iterator i = mergeTable.getKeys().iterator(); i.hasNext();)
-			colsUsedInKeys.addAll(Arrays.asList(((Key) i.next()).getColumns()));
+		final Set<Column> colsUsedInKeys = new HashSet<Column>();
+		for (final Iterator<Key> i = mergeTable.getKeys().iterator(); i.hasNext();)
+			colsUsedInKeys.addAll(Arrays.asList(i.next().getColumns()));
 
 		// Add all columns from merge table to dataset table, except those in
 		// the ignore key.
-		for (final Iterator i = mergeTable.getColumns().values().iterator(); i
+		for (final Iterator<Column> i = mergeTable.getColumns().values().iterator(); i
 				.hasNext();) {
 			final Column c = (Column) i.next();
 
@@ -1074,37 +991,27 @@ public class DataSet extends Schema {
 
 		// Update the three queues with relations that lead away from this
 		// table.
-		final List mergeRelations = new ArrayList(mergeTable.getRelations());
+		final List<Relation> mergeRelations = new ArrayList<Relation>(mergeTable.getRelations());
 		Collections.sort(mergeRelations);
 		for (int i = 0; i < mergeRelations.size(); i++) {
 			final Relation r = (Relation) mergeRelations.get(i);
 
 			// Allow to go back up sourceRelation if it is a loopback
 			// 1:M relation and we have just merged the 1 end.
-			final boolean isLoopback = r.getLoopbackRelation(this, dsTable
-					.getName()) != null
-					&& r.getOneKey().equals(r.getKeyForTable(mergeTable));
-			final boolean isFirstLoopback = isLoopback
-					&& !dsTable.includedRelations.contains(r);
+			boolean isFirstLoopback = false;
 
 			// Don't go back up same relation unless we are doing
 			// loopback. If we are doing loopback, do source relation last
 			// by adding it to the end of the queue and skipping it this
 			// time round.
-			if (r.equals(sourceRelation)) {
-				if (!isLoopback)
+			if (r.equals(sourceRelation)) 				
 					continue;
-				if (i < mergeRelations.size() - 1) {
-					mergeRelations.add(r);
-					continue;
-				}
-			}
 
 			// If just come down a 1:1, don't go back up another 1:1
 			// to same table.
 			if (sourceRelation != null && sourceRelation.isOneToOne()
 					&& r.isOneToOne()) {
-				final Set keys = new HashSet();
+				final Set<Table> keys = new HashSet<Table>();
 				keys.add(r.getFirstKey().getTable());
 				keys.add(r.getSecondKey().getTable());
 				keys.remove(sourceRelation.getFirstKey().getTable());
@@ -1135,8 +1042,7 @@ public class DataSet extends Schema {
 			// they have been forced.
 			if (skippedMainTables.contains(r.getOtherKey(
 					r.getKeyForTable(mergeTable)).getTable())
-					&& !(r.isForceRelation(this, dsTable.getName()) || r
-							.isSubclassRelation(this))
+					&& !(r.isSubclassRelation(this))
 					&& !mergeTheseRelationsInstead.contains(r))
 				continue;
 
@@ -1152,7 +1058,7 @@ public class DataSet extends Schema {
 				// Make a fake SKIP table unit to show what
 				// might still be possible for the user.
 				final Key skipKey = r.getKeyForTable(mergeTable);
-				final List newSourceDSCols = new ArrayList();
+				final List<DataSetColumn> newSourceDSCols = new ArrayList<DataSetColumn>();
 				for (int j = 0; j < skipKey.getColumns().length; j++) {
 					final DataSetColumn col = tu.getDataSetColumnFor(skipKey
 							.getColumns()[j]);
@@ -1184,7 +1090,7 @@ public class DataSet extends Schema {
 						&& r.isSubclassRelation(this)
 						&& !dsTable.getType()
 								.equals(DataSetTableType.DIMENSION)) {
-					final List newSourceDSCols = new ArrayList();
+					final List<Column> newSourceDSCols = new ArrayList<Column>();
 					for (int j = 0; j < r.getOneKey().getColumns().length; j++)
 						newSourceDSCols.add(tu.getDataSetColumnFor(r
 								.getOneKey().getColumns()[j]));
@@ -1195,9 +1101,7 @@ public class DataSet extends Schema {
 					subclassCount.put(r, new Integer(nextSC));
 					// Only do this if the subclassCount is less than
 					// the maximum allowed.
-					final CompoundRelationDefinition def = r
-							.getCompoundRelation(this, dsTable.getName());
-					final int childCompounded = def == null ? 1 : def.getN();
+					final int childCompounded = 1;
 					if (nextSC < childCompounded)
 						subclassQ.add(new Object[] { newSourceDSCols, r,
 								new Integer(nextSC) });
@@ -1211,30 +1115,26 @@ public class DataSet extends Schema {
 						&& makeDimensions
 						&& !dsTable.getType()
 								.equals(DataSetTableType.DIMENSION)) {
-					final List newSourceDSCols = new ArrayList();
+					final List<DataSetColumn> newSourceDSCols = new ArrayList<DataSetColumn>();
 					for (int j = 0; j < r.getOneKey().getColumns().length; j++) {
 						final DataSetColumn newCol = tu.getDataSetColumnFor(r
 								.getOneKey().getColumns()[j]);
 						newSourceDSCols.add(newCol);
 					}
 					int childCompounded = 1;
-					final CompoundRelationDefinition def = r
-							.getCompoundRelation(this, dsTable.getName());
-					if (def != null && def.isParallel())
-						childCompounded = def.getN();
 					// Follow the relation.
 					for (int k = 0; k < childCompounded; k++)
 						dimensionQ.add(new Object[] { newSourceDSCols, r,
 								new Integer(k) });
 					if (r.isMergeRelation(this)
-							|| r.getUnrolledRelation(this) != null)
+							)
 						forceFollowRelation = true;
 				}
 
 				// Forcibly follow forced or loopback or unrolled relations.
 				else if (mergeTheseRelationsInstead.contains(r)
-						|| r.getLoopbackRelation(this, dsTable.getName()) != null
-						|| r.isForceRelation(this, dsTable.getName()))
+						
+						)
 					forceFollowRelation = true;
 			}
 
@@ -1248,13 +1148,13 @@ public class DataSet extends Schema {
 			// including dimensions, include them from the 1:1 as well.
 			// Otherwise, stop including dimensions on subsequent tables.
 			if (followRelation || forceFollowRelation) {
-				final List nextNameCols = new ArrayList(nameCols);
-				final Map nextNameColSuffixes = new HashMap();
-				nextNameColSuffixes.put("" + 0, new ArrayList(nameColSuffixes));
+				final List<String> nextNameCols = new ArrayList<String>(nameCols);
+				final Map<String,List<String>> nextNameColSuffixes = new HashMap<String,List<String>>();
+				nextNameColSuffixes.put("" + 0, new ArrayList<String>(nameColSuffixes));
 
 				final Key sourceKey = r.getKeyForTable(mergeTable);
 				final Key targetKey = r.getOtherKey(sourceKey);
-				final List newSourceDSCols = new ArrayList();
+				final List<Column> newSourceDSCols = new ArrayList<Column>();
 				for (int j = 0; j < sourceKey.getColumns().length; j++)
 					newSourceDSCols.add(tu.getDataSetColumnFor(sourceKey
 							.getColumns()[j]));
@@ -1262,25 +1162,14 @@ public class DataSet extends Schema {
 				int defaultChildCompounded = isFirstLoopback ? 2 : 1;
 				int childCompounded = defaultChildCompounded;
 				// Don't compound if loopback and we just processed the M end.
-				final CompoundRelationDefinition def = r.getCompoundRelation(
-						this, dsTable.getName());
-				final boolean skipCompound = r.getLoopbackRelation(this,
-						dsTable.getName()) != null
-						&& r.getManyKey().equals(r.getKeyForTable(mergeTable));
-				if (!skipCompound) {
-					if (def != null && def.isParallel())
-						childCompounded = def.getN();
-					else {
 						// Work out partition compounding. Table
 						// applies within a dimension, where dataset does
 						// not apply, but outside a dimension only dataset
 						// applies.
 
-							childCompounded = defaultChildCompounded;
-					}
-				}
+				childCompounded = defaultChildCompounded;
 				for (int k = 1; k <= childCompounded; k++) {
-					final List nextList = new ArrayList(nameColSuffixes);
+					final List<String> nextList = new ArrayList<String>(nameColSuffixes);
 					nextList.add("" + k);
 					nextNameColSuffixes.put("" + k, nextList);
 				}
@@ -1303,7 +1192,7 @@ public class DataSet extends Schema {
 										|| forceFollowRelation),
 								new Integer(k), nextNameCols,
 								nextNameColSuffixes.get("" + k),
-								new HashMap(relationCount) });
+								new HashMap<Relation,Integer>(relationCount) });
 				else
 					normalQ.add(queuePos++, new Object[] {
 							r,
@@ -1314,7 +1203,7 @@ public class DataSet extends Schema {
 									|| forceFollowRelation),
 							new Integer(relationIteration), nextNameCols,
 							nextNameColSuffixes.get("0"),
-							new HashMap(relationCount) });
+							new HashMap<Relation,Integer>(relationCount) });
 			}
 		}
 	}
@@ -1344,10 +1233,10 @@ public class DataSet extends Schema {
 		boolean found;
 		do {
 			found = false;
-			for (final Iterator i = centralTable.getForeignKeys().iterator(); i
+			for (final Iterator<ForeignKey> i = centralTable.getForeignKeys().iterator(); i
 					.hasNext()
 					&& !found;)
-				for (final Iterator j = ((ForeignKey) i.next()).getRelations()
+				for (final Iterator<Relation> j = ((ForeignKey) i.next()).getRelations()
 						.iterator(); j.hasNext() && !found;) {
 					final Relation rel = (Relation) j.next();
 					if (rel.isSubclassRelation(this)) {
@@ -1367,7 +1256,7 @@ public class DataSet extends Schema {
 	 * @return the central table of this dataset.
 	 */
 	public DataSetTable getMainTable() {
-		for (final Iterator i = this.getTables().values().iterator(); i
+		for (final Iterator<Table> i = this.getTables().values().iterator(); i
 				.hasNext();) {
 			final DataSetTable dst = (DataSetTable) i.next();
 			if (dst.getType().equals(DataSetTableType.MAIN))
@@ -1485,7 +1374,7 @@ public class DataSet extends Schema {
 		for (int i = 0; i < skippedTables.size(); i++) {
 			final Table cand = (Table) skippedTables.get(i);
 			if (cand.getPrimaryKey() != null)
-				for (final Iterator j = cand.getPrimaryKey().getRelations()
+				for (final Iterator<Relation> j = cand.getPrimaryKey().getRelations()
 						.iterator(); j.hasNext();) {
 					final Relation rel = (Relation) j.next();
 					if (rel.isSubclassRelation(this))
@@ -1494,13 +1383,13 @@ public class DataSet extends Schema {
 		}
 
 		// Make a list of all table names.
-		final Collection<Table> unusedTables = new HashSet<Table>(this.getTables().values());
+		final Set<Table> unusedTables = new HashSet<Table>(this.getTables().values());
 		try {
 			// Generate the main table. It will recursively generate all the
 			// others.
 			this.generateDataSetTable(DataSetTableType.MAIN, null,
-					realCentralTable, skippedTables, Collections.EMPTY_LIST,
-					null, new HashMap(), 0, unusedTables);
+					realCentralTable, skippedTables, new ArrayList<DataSetColumn>(),
+					null, new HashMap<Relation,Integer>(), 0, unusedTables);
 		} catch (final Exception pe) {
 			throw new DataModelException(pe);
 		}
@@ -1511,9 +1400,9 @@ public class DataSet extends Schema {
 			final Table deadTbl = (Table) i.next();
 			for (final Iterator<Key> j = deadTbl.getKeys().iterator(); j.hasNext();) {
 					final Key key = j.next();
-					for (final Iterator r = key.getRelations().iterator(); r
+					for (final Iterator<Relation> r = key.getRelations().iterator(); r
 							.hasNext();) {
-						final Relation rel = (Relation) r.next();
+						final Relation rel =  r.next();
 						Key otherKey = rel.getOtherKey(key);
 						otherKey.getRelations().remove(rel);
 						r.remove();
@@ -1530,14 +1419,14 @@ public class DataSet extends Schema {
 //TODO belowing can be done separately
 		// Add us as a listener to all included rels and schs, replacing
 		// ourselves if we are already listening to them.
-		for (final Iterator i = this.includedSchemas.iterator(); i.hasNext();) {
-			final Schema sch = (Schema) i.next();
+		for (final Iterator<Schema> i = this.includedSchemas.iterator(); i.hasNext();) {
+			final Schema sch = i.next();
 			sch.addPropertyChangeListener("masked", this.rebuildListener);
 		}
 		// Gather up the tables we have used and those linked to them.
-		final Set listeningTables = new HashSet();
-		for (final Iterator i = this.includedRelations.iterator(); i.hasNext();) {
-			final Relation rel = (Relation) i.next();
+		final Set<Table> listeningTables = new HashSet<Table>();
+		for (final Iterator<Relation> i = this.includedRelations.iterator(); i.hasNext();) {
+			final Relation rel =  i.next();
 			// Don't bother listening to tables at end of incorrect
 			// relations - but those that are excluded because of
 			// non-relation-related reasons can be listened to.
@@ -1547,37 +1436,25 @@ public class DataSet extends Schema {
 			}
 		}
 		// Listen to the tables and their children.
-		final Set listeningRels = new HashSet();
-		for (final Iterator i = listeningTables.iterator(); i.hasNext();) {
-			final Table tbl = (Table) i.next();
+		final Set<Relation> listeningRels = new HashSet<Relation>();
+		for (final Iterator<Table> i = listeningTables.iterator(); i.hasNext();) {
+			final Table tbl =  i.next();
 			listeningRels.addAll(tbl.getRelations());
 			// Listen only to useful things.
 			tbl.addPropertyChangeListener("masked", this.rebuildListener);
-			tbl.addPropertyChangeListener("restrictTable",this.rebuildListener);
 			tbl.getColumns().addPropertyChangeListener(McBeanMap.property_AddItem, this.rebuildListener);
 			tbl.getColumns().addPropertyChangeListener(McBeanMap.property_RemoveItem, this.rebuildListener);
 //			tbl.getRelations().addPropertyChangeListener(this.rebuildListener);
 		}
 		// Listen to useful bits of the relation.
-		for (final Iterator i = listeningRels.iterator(); i.hasNext();) {
-			final Relation rel = (Relation) i.next();
+		for (final Iterator<Relation> i = listeningRels.iterator(); i.hasNext();) {
+			final Relation rel =  i.next();
 			rel.addPropertyChangeListener("cardinality", this.rebuildListener);
 			rel.addPropertyChangeListener("status", this.rebuildListener);
-			rel.addPropertyChangeListener("compoundRelation",
-					this.rebuildListener);
-			rel.addPropertyChangeListener("unrolledRelation",
-					this.rebuildListener);
-			rel
-					.addPropertyChangeListener("forceRelation",
-							this.rebuildListener);
-			rel.addPropertyChangeListener("loopbackRelation",
-					this.rebuildListener);
 			rel.addPropertyChangeListener("maskRelation", this.rebuildListener);
 			rel
 					.addPropertyChangeListener("mergeRelation",
 							this.rebuildListener);
-			rel.addPropertyChangeListener("restrictRelation",
-					this.rebuildListener);
 			rel.addPropertyChangeListener("subclassRelation",
 					this.rebuildListener);
 		}
@@ -1585,26 +1462,26 @@ public class DataSet extends Schema {
 		// Check all visibleModified type/key pairs for
 		// all vismod relations, keys, and columns. Update, then remove.
 		//TODO for what?
-		for (final Iterator i = this.getRelations().iterator(); i.hasNext();) {
-			final Relation rel = (Relation) i.next();
+		for (final Iterator<Relation> i = this.getRelations().iterator(); i.hasNext();) {
+			final Relation rel = i.next();
 			final String key = rel.toString();
 			if (this.getMods(key, "visibleModified").containsKey(key))
 				rel.setVisibleModified(true);
 			this.mods.remove(key);
 		}
-		for (final Iterator i = this.getTables().values().iterator(); i
+		for (final Iterator<Table> i = this.getTables().values().iterator(); i
 				.hasNext();) {
-			final Table tbl = (Table) i.next();
-			for (final Iterator j = tbl.getKeys().iterator(); j.hasNext();) {
-				final Key k = (Key) j.next();
+			final Table tbl = i.next();
+			for (final Iterator<Key> j = tbl.getKeys().iterator(); j.hasNext();) {
+				final Key k =  j.next();
 				final String key = k.toString();
 				if (this.getMods(key, "visibleModified").containsKey(key))
 					k.setVisibleModified(true);
 				this.mods.remove(key);
 			}
-			for (final Iterator j = tbl.getColumns().values().iterator(); j
+			for (final Iterator<Column> j = tbl.getColumns().values().iterator(); j
 					.hasNext();) {
-				final Column col = (Column) j.next();
+				final Column col =  j.next();
 				final String key = col.toString();
 				if (this.getMods(key, "visibleModified").containsKey(key))
 					col.setVisibleModified(true);
@@ -1634,7 +1511,7 @@ public class DataSet extends Schema {
 	 * 
 	 * @return the set of schemas used.
 	 */
-	public Collection getIncludedSchemas() {
+	public Set<Schema> getIncludedSchemas() {
 		return this.includedSchemas;
 	}
 

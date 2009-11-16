@@ -18,12 +18,9 @@
 
 package org.biomart.configurator.controller;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -32,7 +29,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.biomart.builder.exceptions.ConstructorException;
 import org.biomart.builder.exceptions.ListenerException;
 import org.biomart.builder.exceptions.PartitionException;
@@ -49,30 +45,23 @@ import org.biomart.builder.model.Schema;
 import org.biomart.builder.model.SplitOptimiserColumnDef;
 import org.biomart.builder.model.Table;
 import org.biomart.builder.model.TransformationUnit;
-import org.biomart.builder.model.DataLink.JDBCDataLink;
 import org.biomart.builder.model.MartConstructorAction.CopyOptimiser;
 import org.biomart.builder.model.MartConstructorAction.CreateOptimiser;
 import org.biomart.builder.model.MartConstructorAction.Distinct;
 import org.biomart.builder.model.MartConstructorAction.Drop;
 import org.biomart.builder.model.MartConstructorAction.DropColumns;
-import org.biomart.builder.model.MartConstructorAction.ExpandUnroll;
 import org.biomart.builder.model.MartConstructorAction.Index;
-import org.biomart.builder.model.MartConstructorAction.InitialUnroll;
 import org.biomart.builder.model.MartConstructorAction.Join;
 import org.biomart.builder.model.MartConstructorAction.LeftJoin;
 import org.biomart.builder.model.MartConstructorAction.Rename;
 import org.biomart.builder.model.MartConstructorAction.Select;
 import org.biomart.builder.model.MartConstructorAction.UpdateOptimiser;
-import org.biomart.builder.model.Relation.RestrictedRelationDefinition;
-import org.biomart.builder.model.Relation.UnrolledRelationDefinition;
 import org.biomart.builder.model.TransformationUnit.JoinTable;
 import org.biomart.builder.model.TransformationUnit.SelectFromTable;
 import org.biomart.builder.model.TransformationUnit.SkipTable;
-import org.biomart.builder.model.TransformationUnit.UnrollTable;
 import org.biomart.common.exceptions.BioMartError;
 import org.biomart.common.resources.Log;
 import org.biomart.common.resources.Resources;
-import org.biomart.configurator.controller.dialects.DatabaseDialect;
 import org.biomart.configurator.utils.type.DataSetOptimiserType;
 import org.biomart.configurator.utils.type.DataSetTableType;
 
@@ -395,9 +384,7 @@ public interface MartConstructor {
 						if (!dsTab.isDimensionMasked()
 								&& dsTab.getFocusRelation() != null
 								&& !dsTab.getFocusRelation().isMergeRelation(
-										dataset)
-								&& dsTab.getFocusRelation()
-										.getUnrolledRelation(dataset) == null)
+										dataset))
 							if (dsTab.getType().equals(
 									DataSetTableType.DIMENSION))
 								nextDims.add(dsTab);
@@ -1088,244 +1075,10 @@ public interface MartConstructor {
 			action.setSelectColumns(selectCols);
 			action.setResultTable(tempTable);
 
-			// Don't add restriction if loopback relation from M end.
-			final boolean loopbackManyEnd = ljtu.getSchemaRelation()
-					.getLoopbackRelation(dataset, dsTable.getName()) != null
-					&& ljtu.getSchemaSourceKey().equals(
-							ljtu.getSchemaRelation().getManyKey());
-			final RestrictedRelationDefinition def = ljtu.getSchemaRelation()
-					.getRestrictRelation(dataset, dsTable.getName(),
-							ljtu.getSchemaRelationIteration());
-			if (!loopbackManyEnd && def != null) {
-				// Add the restriction.
-				action.setRelationRestrictionPreviousUnit(ljtu
-						.getPreviousUnit());
-				action.setRelationRestrictionLeftIsFirst(ljtu
-						.getSchemaRelation().getFirstKey().equals(
-								ljtu.getSchemaSourceKey()));
-				action.setRelationRestriction(def);
-			}
-			// If this is a loopback from the one end, add the optional
-			// differentiation column only if we have previously
-			// traversed this same relation.
-			final boolean loopbackOneEnd = ljtu.getSchemaRelation()
-					.getLoopbackRelation(dataset, dsTable.getName()) != null
-					&& ljtu.getSchemaSourceKey().equals(
-							ljtu.getSchemaRelation().getOneKey());
-			if (loopbackOneEnd) {
-				// Identify the differentiation column.
-				final Column diffCol = ljtu.getSchemaRelation()
-						.getLoopbackRelation(dataset, dsTable.getName());
-				if (diffCol != null) {
-					// Identify the differentiation column from the
-					// previous unit's selected columns.
-					DataSetColumn prevDSCol = ljtu.getPreviousUnit()
-							.getDataSetColumnFor(diffCol);
-					if (prevDSCol == null
-							&& ljtu.getSchemaRelationIteration() > 0) {
-						// Hunt for it in alternative fork.
-						for (final Iterator i = dsTable
-								.getTransformationUnits().iterator(); i
-								.hasNext()
-								&& prevDSCol == null; i.next())
-							prevDSCol = ((TransformationUnit) i.next())
-									.getDataSetColumnFor(diffCol);
-					}
-					if (prevDSCol != null) {
-						final String prevDsColName = prevDSCol
-								.getPartitionedName();
-						// Add both to the transformation unit to become
-						// a new restriction later.
-						action.setLoopbackDiffSource(prevDsColName);
-						action.setLoopbackDiffTarget(diffCol.getName());
-					}
-				}
-			}
 			this.issueAction(action);
 			return requiresFinalLeftJoin;
 		}
 
-		private void doUnrollTable(final Schema templateSchema,
-				final String schemaPartition, final String schemaPrefix,
- final DataSet dataset,
-				final DataSetTable dsTable, final UnrollTable utu,
-				final String previousTempTable, final String tempTable,
-				final Set droppedCols, final int bigness,
-				final String finalCombinedName) throws SQLException,
-				ListenerException, PartitionException, ConstructorException {
-
-			// Set parentRel = utu.getRelation, childRel = otherRel
-			// Replace references to utu.getRelation with parentRel
-			// Replace references to otherRel with childRel
-			// If 'inverted sense' flag set on UnrollDefinition, swap
-			// the two around. Flag is set on definition by wizard, which
-			// merges child rel instead of parent rel and unrolls parent rel
-			// when chosen. This swap action restores this - so that the
-			// child records are merged but the correct path of unrolling
-			// is still followed.
-			// Proceed as normal.
-
-			// Find other merged relation between these two tables, and
-			// the many key is the parent key col.
-			final UnrolledRelationDefinition unrollDef = utu.getUnrolledDef();
-			Relation otherRel = null;
-			for (final Iterator i = utu.getRelation().getOneKey()
-					.getRelations().iterator(); i.hasNext() && otherRel == null;) {
-				final Relation candRel = (Relation) i.next();
-				if (candRel.equals(utu.getRelation()))
-					continue;
-				if (candRel.getManyKey().getTable().equals(
-						utu.getRelation().getManyKey().getTable())
-						&& candRel.isMergeRelation(dataset))
-					otherRel = candRel;
-			}
-			if (otherRel == null)
-				throw new BioMartError(); // Should never happen.
-			final Relation parentRel = unrollDef.isReversed() ? otherRel : utu
-					.getRelation();
-			final Relation childRel = unrollDef.isReversed() ? utu
-					.getRelation() : otherRel;
-
-			// Make sure that we use the same partition on the RHS
-			// if it exists, otherwise use the default partition.
-			// Note that it will run unpredictably if compound keys are used.
-			final String unrollFK = unrollDef.isReversed() ? utu
-					.getDataSetColumnFor(childRel.getManyKey().getColumns()[0])
-					.getPartitionedName() : utu.getDataSetColumnFor(
-					parentRel.getManyKey().getColumns()[0])
-					.getPartitionedName();
-			final String unrollPK = utu.getDataSetColumnFor(
-					parentRel.getOneKey().getColumns()[0]).getPartitionedName();
-			final String unrollIDColName = utu.getUnrolledIDColumn()
-					.getPartitionedName();
-			final String unrollNameColName = utu.getUnrolledNameColumn()
-					.getPartitionedName();
-			final String unrollIterationColName = unrollIDColName + "__i";
-
-			// Make n an efficient approximation of the
-			// number of unroll cycles required to get longest path
-			// covered.
-			// = SPREADING RULE. Mark root = 0, descendants = 1,
-			// next descendants = 2, etc. etc. until all nodes
-			// marked. Don't renumber nodes already numbered.
-			// Number used to mark last set of nodes is length of
-			// longest path.
-			// Open connection and query.
-			final Connection conn = ((JDBCDataLink) templateSchema)
-					.getConnection(schemaPartition);
-			final String sqlStr = DatabaseDialect.getDialect(templateSchema)
-					.getUnrollTableSQL(schemaPrefix, dataset, dsTable,
-							parentRel, childRel, schemaPartition,
-							templateSchema, utu);
-			Log.debug("Executing unroll statement: " + sqlStr);
-			final ResultSet rs = conn.prepareStatement(sqlStr).executeQuery();
-			// Iterate over all pairs in db.
-			// For each pair:
-			// 1. if L not in allNodes, add.
-			// 2. if R not in childNodes, add.
-			// 3. get L from allNodes and add R to children.
-			final Map allNodes = new HashMap();
-			int max = 0;
-			int min = 0;
-			while (rs.next()) {
-				final String L = rs.getString(1);
-				final String R = rs.getString(2);
-				final boolean Lnew = !allNodes.containsKey(L);
-				final boolean Rnew = !allNodes.containsKey(R);
-				if (Rnew) {
-					if (Lnew) {
-						// R new L new
-						allNodes.put(L, new Integer(0));
-						allNodes.put(R, new Integer(1));
-					} else
-						// R new L old
-						allNodes.put(R, new Integer(((Integer) allNodes.get(L))
-								.intValue() + 1));
-				} else if (Lnew)
-					// R old L new
-					allNodes.put(L, new Integer(((Integer) allNodes.get(R))
-							.intValue() - 1));
-				else
-					// R old L old
-					allNodes.put(L, new Integer(Math.min(((Integer) allNodes
-							.get(L)).intValue(), ((Integer) allNodes.get(R))
-							.intValue() - 1)));
-				min = Math.min(min, ((Integer) allNodes.get(L)).intValue());
-				max = Math.max(max, ((Integer) allNodes.get(R)).intValue());
-				this.checkCancelled();
-			}
-			final int n = max - min;
-			// Close query and connection.
-			rs.close();
-			conn.close();
-
-			// Create initial select table with unrolled child cols and
-			// iteration col.
-			final InitialUnroll iaction = new InitialUnroll(
-					this.datasetSchemaName, finalCombinedName);
-			iaction.setSchema(this.datasetSchemaName);
-			iaction.setSourceTable(previousTempTable);
-			iaction.setUnrollPKCol(unrollPK);
-			iaction.setUnrollIDCol(unrollIDColName);
-			iaction.setUnrollNameCol(unrollNameColName);
-			iaction.setUnrollIterationCol(unrollIterationColName);
-			iaction.setNamingCol(utu.getDataSetColumnFor(
-					unrollDef.getNameColumn()).getPartitionedName());
-			iaction.setTable(tempTable);
-			iaction.setBigTable(bigness);
-			this.issueAction(iaction);
-			// Index FK of relation in new table.
-			Index index = new Index(this.datasetSchemaName, finalCombinedName);
-			index.setTable(tempTable);
-			index.setColumns(Collections.singletonList(unrollFK));
-			this.issueAction(index);
-			// Index unrolled child id + iteration column.
-			index = new Index(this.datasetSchemaName, finalCombinedName);
-			index.setTable(tempTable);
-			index.setColumns(Arrays.asList(new String[] { unrollIDColName,
-					unrollIterationColName }));
-			this.issueAction(index);
-			// Build a list of cols to include from the parent.
-			final List parentCols = new ArrayList();
-			TransformationUnit tu = utu;
-			while ((tu = tu.getPreviousUnit()) != null)
-				for (final Iterator i = tu.getNewColumnNameMap().values()
-						.iterator(); i.hasNext();) {
-					final DataSetColumn dsCol = (DataSetColumn) i.next();
-					if (dsCol.isRequiredInterim())
-						parentCols.add(dsCol.getPartitionedName());
-				}
-			parentCols.removeAll(droppedCols);
-
-			// Do n expansion insert+update pairs.
-			// We start at 1 because InitialUnroll inserts using 1.
-			for (int i = 1; i <= n; i++) {
-				final ExpandUnroll eaction = new ExpandUnroll(
-						this.datasetSchemaName, finalCombinedName);
-				eaction.setSchema(this.datasetSchemaName);
-				eaction.setSourceTable(tempTable);
-				eaction.setParentCols(parentCols);
-				eaction.setUnrollPKCol(unrollPK);
-				eaction.setUnrollIteration(i);
-				eaction.setUnrollFKCol(unrollFK);
-				eaction.setUnrollIDCol(unrollIDColName);
-				eaction.setUnrollNameCol(unrollNameColName);
-				eaction.setUnrollIterationCol(unrollIterationColName);
-				eaction.setNamingCol(utu.getDataSetColumnFor(
-						unrollDef.getNameColumn()).getPartitionedName());
-				eaction.setBigTable(bigness);
-				eaction.setReversed(unrollDef.isReversed());
-				this.issueAction(eaction);
-			}
-
-			// Drop iteration column.
-			final DropColumns dropcol = new DropColumns(this.datasetSchemaName,
-					finalCombinedName);
-			dropcol.setTable(tempTable);
-			dropcol.setColumns(Collections
-					.singletonList(unrollIterationColName));
-			this.issueAction(dropcol);
-		}
 
 
 		private void issueAction(final MartConstructorAction action)

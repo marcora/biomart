@@ -4,6 +4,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
+import org.biomart.common.resources.Resources;
 import org.biomart.common.utils.Transaction;
 import org.biomart.common.utils.Transaction.TransactionEvent;
 import org.biomart.common.utils.Transaction.TransactionListener;
@@ -76,7 +77,7 @@ import org.biomart.common.utils.Transaction.TransactionListener;
 				return;
 			final boolean oldValue = this.directModified;
 			this.directModified = modified;
-			this.pcs.firePropertyChange("directModified", oldValue, modified);
+			this.pcs.firePropertyChange(Resources.get("PCDIRECTMODIFIED"), oldValue, modified);
 		}
 
 		public boolean isVisibleModified() {

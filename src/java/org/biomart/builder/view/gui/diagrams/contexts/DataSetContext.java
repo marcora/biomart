@@ -99,8 +99,7 @@ public class DataSetContext extends SchemaContext {
 
 			// Is it compounded?
 			if (target.getFocusRelation() != null)
-				relcomp.setCompounded(target.getFocusRelation()
-						.getCompoundRelation(this.getDataSet()) != null);
+				relcomp.setCompounded(false);
 
 			// Fade MASKED DIMENSION relations.
 			if (target.isDimensionMasked() || this.getDataSet().isMasked())
@@ -136,18 +135,10 @@ public class DataSetContext extends SchemaContext {
 							.isMergeRelation(this.getDataSet()))
 				tblcomp.setBackground(TableComponent.MASKED_COLOUR);
 
-			// Highlight UNROLLED DIMENSION tables.
-			else if (tbl.getFocusRelation() != null
-					&& tbl.getFocusRelation().getUnrolledRelation(
-							this.getDataSet()) != null)
-				tblcomp.setBackground(TableComponent.UNROLLED_COLOUR);
-
 			// Highlight DIMENSION tables.
 			else if (tableType.equals(DataSetTableType.DIMENSION)) {
 				// Is it compounded?
-				tblcomp.setCompounded(tbl.getFocusRelation() != null
-						&& tbl.getFocusRelation().getCompoundRelation(
-								this.getDataSet()) != null);
+				tblcomp.setCompounded(false);
 				tblcomp.setBackground(TableComponent.BACKGROUND_COLOUR);
 			}
 
@@ -226,11 +217,8 @@ public class DataSetContext extends SchemaContext {
 							final boolean isMerged = table.getFocusRelation()
 									.isMergeRelation(
 											DataSetContext.this.getDataSet());
-							final boolean isCompound = table.getFocusRelation()
-									.getCompoundRelation(
-											DataSetContext.this.getDataSet()) != null;
 							contextMenu.add(removeDM);
-							if (!isMerged && !isCompound && !isMasked)
+							if (!isMerged && !isMasked)
 								DataSetContext.this.getMart().getDataSetObj()
 										.requestMaskDimension(
 												DataSetContext.this
@@ -415,12 +403,8 @@ public class DataSetContext extends SchemaContext {
 			final boolean isMerged = table.getFocusRelation() != null
 					&& table.getFocusRelation().isMergeRelation(
 							this.getDataSet());
-			final boolean isUnrolled = table.getFocusRelation() != null
-					&& table.getFocusRelation().getUnrolledRelation(
-							this.getDataSet()) != null;
-			final boolean isCompound = table.getFocusRelation() != null
-					&& table.getFocusRelation().getCompoundRelation(
-							this.getDataSet()) != null;
+			final boolean isUnrolled = false;
+			final boolean isCompound = false;
 
 			contextMenu.addSeparator();
 

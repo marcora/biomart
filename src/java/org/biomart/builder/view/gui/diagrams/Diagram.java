@@ -63,7 +63,6 @@ import javax.swing.JViewport;
 import javax.swing.ListCellRenderer;
 import javax.swing.Scrollable;
 import javax.swing.SwingUtilities;
-
 import org.biomart.builder.model.DataSetTable;
 import org.biomart.builder.model.Mart;
 import org.biomart.builder.model.Table;
@@ -379,8 +378,8 @@ public abstract class Diagram extends JLayeredPane implements Scrollable,
 	 */
 	public void toggleGroupItems(final Collection items) {
 		// Cancel all renames first.
-		for (final Iterator i = this.selectedItems.iterator(); i.hasNext();)
-			((BoxShapedComponent) i.next()).cancelRename();
+		for (final Iterator<BoxShapedComponent> i = this.selectedItems.iterator(); i.hasNext();)
+			i.next().cancelRename();
 		for (final Iterator i = items.iterator(); i.hasNext();) {
 			final BoxShapedComponent item = (BoxShapedComponent) i.next();
 			// (De)select this item within existing group.
@@ -453,7 +452,7 @@ public abstract class Diagram extends JLayeredPane implements Scrollable,
 	 * @return the currently selected items. May be empty but never
 	 *         <tt>null</tt>.
 	 */
-	public Collection getSelectedItems() {
+	public List<BoxShapedComponent> getSelectedItems() {
 		return this.selectedItems;
 	}
 

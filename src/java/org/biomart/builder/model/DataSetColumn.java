@@ -135,7 +135,7 @@ import org.biomart.configurator.view.idwViews.McViews;
 		 *            the property to look up.
 		 * @return the set of column names the property applies to.
 		 */
-		protected Map getMods(final String property) {
+		protected Map<String,Object> getMods(final String property) {
 			return this.getDataSet().getMods(this.getDataSetTable().getName(),
 					property);
 		}

@@ -151,8 +151,8 @@ public class TableComponent extends BoxShapedComponent {
 		// Listen to all relations on this table and repaint when needed.
 		// We don't need to monitor relations themselves as the entire
 		// diagram gets recalculated if they change.
-		for (final Iterator i = table.getRelations().iterator(); i.hasNext();) {
-			final Relation rel = (Relation) i.next();
+		for (final Iterator<Relation> i = table.getRelations().iterator(); i.hasNext();) {
+			final Relation rel =  i.next();
 			rel.addPropertyChangeListener(Resources.get("PCDIRECTMODIFIED"),
 					this.repaintListener);
 		}
@@ -170,8 +170,6 @@ public class TableComponent extends BoxShapedComponent {
 						this.repaintListener);
 				dsTbl.getFocusRelation().addPropertyChangeListener(
 						"mergeRelation", this.repaintListener);
-				dsTbl.getFocusRelation().addPropertyChangeListener(
-						"unrolledRelation", this.repaintListener);
 			}
 		}
 
@@ -249,9 +247,9 @@ public class TableComponent extends BoxShapedComponent {
 
 		// Add a key component as a sub-component of this table,
 		// for each of the foreign keys in the table.
-		for (final Iterator i = this.getTable().getKeys().iterator(); i
+		for (final Iterator<Key> i = this.getTable().getKeys().iterator(); i
 				.hasNext();) {
-			final Key key = (Key) i.next();
+			final Key key = i.next();
 			final KeyComponent keyComponent = new KeyComponent(key, this
 					.getDiagram());
 
@@ -273,10 +271,10 @@ public class TableComponent extends BoxShapedComponent {
 				BoxLayout.Y_AXIS));
 
 		// Do a bit of sorting to make them alphabetical first.
-		final Map sortedColMap = new TreeMap();
-		for (final Iterator i = this.getTable().getColumns().values()
+		final Map<String,Column> sortedColMap = new TreeMap<String,Column>();
+		for (final Iterator<Column> i = this.getTable().getColumns().values()
 				.iterator(); i.hasNext();) {
-			final Column col = (Column) i.next();
+			final Column col =  i.next();
 			sortedColMap.put(
 					col instanceof DataSetColumn ? ((DataSetColumn) col)
 							.getModifiedName() : col.getName(), col);
@@ -301,7 +299,7 @@ public class TableComponent extends BoxShapedComponent {
 												.getTable(),
 										TableComponent.this.hidingMaskedCols);
 					// Recalculate the diagram.
-					for (final Iterator i = TableComponent.this
+					for (final Iterator<DiagramComponent> i = TableComponent.this
 							.getSubComponents().values().iterator(); i
 							.hasNext();) {
 						final DiagramComponent comp = (DiagramComponent) i
@@ -330,7 +328,7 @@ public class TableComponent extends BoxShapedComponent {
 		this.columnsListPanel.setVisible(false);
 
 		// Add columns to the list one by one, as column sub-components.
-		for (final Iterator i = sortedColMap.values().iterator(); i.hasNext();) {
+		for (final Iterator<Column> i = sortedColMap.values().iterator(); i.hasNext();) {
 			final Column col = (Column) i.next();
 			final ColumnComponent colComponent = new ColumnComponent(col, this
 					.getDiagram());
@@ -346,7 +344,7 @@ public class TableComponent extends BoxShapedComponent {
 		// Recalculate the diagram if masking as the recalc can sometimes
 		// lose it.
 		if (this.hidingMaskedCols)
-			for (final Iterator i = TableComponent.this.getSubComponents()
+			for (final Iterator<DiagramComponent> i = TableComponent.this.getSubComponents()
 					.values().iterator(); i.hasNext();) {
 				final DiagramComponent comp = (DiagramComponent) i.next();
 				if (comp instanceof ColumnComponent)

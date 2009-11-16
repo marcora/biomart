@@ -166,7 +166,8 @@ public abstract class BoxShapedComponent extends JPanel implements
 	private RenderingHints renderHints;
 
 	// OK to use map, as the components are recreated, not changed.
-	private final McBeanMap subComponents = new McBeanMap(new HashMap());
+	private final McBeanMap<Object,DiagramComponent> subComponents = new McBeanMap<Object,DiagramComponent>
+		(new HashMap<Object,DiagramComponent>());
 
 	/**
 	 * Constructs a box-shaped component around the given database object to be
@@ -293,11 +294,10 @@ public abstract class BoxShapedComponent extends JPanel implements
 				contextMenu = this.getMultiContextMenu();
 				// Customise the context menu for this box's database object.
 				if (this.getDiagram().getDiagramContext() != null) {
-					final Set selectedItems = new HashSet();
-					for (final Iterator i = this.getDiagram()
+					final Set<TransactionListener> selectedItems = new HashSet<TransactionListener>();
+					for (final Iterator<BoxShapedComponent> i = this.getDiagram()
 							.getSelectedItems().iterator(); i.hasNext();)
-						selectedItems.add(((BoxShapedComponent) i.next())
-								.getObject());
+						selectedItems.add(i.next().getObject());
 					this.getDiagram().getDiagramContext()
 							.populateMultiContextMenu(contextMenu,
 									selectedItems, this.getObject().getClass());
@@ -327,7 +327,7 @@ public abstract class BoxShapedComponent extends JPanel implements
 						if (currentlySelected.size() > 0) {
 							final BoxShapedComponent previousSelection = (BoxShapedComponent) currentlySelected
 									.get(currentlySelected.size() - 1);
-							final Class clazz = previousSelection.getObject()
+							final Class<? extends TransactionListener> clazz = previousSelection.getObject()
 									.getClass();
 							final Collection selection = this.getDiagram()
 									.getComponentsInRegion(previousSelection,
@@ -377,7 +377,7 @@ public abstract class BoxShapedComponent extends JPanel implements
 		return this.state;
 	}
 
-	public McBeanMap getSubComponents() {
+	public McBeanMap<Object,DiagramComponent> getSubComponents() {
 		return this.subComponents;
 	}
 

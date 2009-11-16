@@ -11,9 +11,6 @@ import java.util.Set;
 
 import org.biomart.builder.exceptions.ValidationException;
 import org.biomart.builder.model.ForeignKey;
-
-import org.biomart.builder.model.Relation.CompoundRelationDefinition;
-import org.biomart.builder.model.TransformationUnit.JoinTable;
 import org.biomart.builder.model.TransformationUnit.SelectFromTable;
 import org.biomart.common.resources.Log;
 import org.biomart.common.resources.Resources;
@@ -40,11 +37,11 @@ import org.biomart.configurator.utils.type.DataSetTableType;
 
 		private final int focusRelationIteration;
 
-		 final Collection<Relation> includedRelations;
+		 final Set<Relation> includedRelations;
 
-		 final Collection<Table> includedTables;
+		 final Set<Table> includedTables;
 
-		 final Collection<Schema> includedSchemas;
+		 final Set<Schema> includedSchemas;
 
 		/**
 		 * The constructor calls the parent table constructor. It uses a dataset
@@ -139,12 +136,12 @@ import org.biomart.configurator.utils.type.DataSetTableType;
 		private void acceptRejectChanges(final Table targetTable,
 				final boolean reject) {
 			// Reset all keys.
-			for (final Iterator i = this.getKeys().iterator(); i.hasNext();)
-				((Key) i.next()).transactionResetVisibleModified();
+			for (final Iterator<Key> i = this.getKeys().iterator(); i.hasNext();)
+				i.next().transactionResetVisibleModified();
 			// Locate the TU that provides the target table.
-			for (final Iterator i = this.getTransformationUnits().iterator(); i
+			for (final Iterator<TransformationUnit> i = this.getTransformationUnits().iterator(); i
 					.hasNext();) {
-				final TransformationUnit tu = (TransformationUnit) i.next();
+				final TransformationUnit tu =  i.next();
 				if (tu instanceof SelectFromTable
 						&& (targetTable == null || targetTable != null
 								&& (((SelectFromTable) tu).getTable().equals(
@@ -177,25 +174,25 @@ import org.biomart.configurator.utils.type.DataSetTableType;
 			// Only reset parent relation if has one and all columns
 			// on this table are now not modified.
 			if (this.getType() != DataSetTableType.MAIN) {
-				for (final Iterator i = this.getColumns().values().iterator(); i
+				for (final Iterator<Column> i = this.getColumns().values().iterator(); i
 						.hasNext();)
-					if (((Column) i.next()).isVisibleModified())
+					if (i.next().isVisibleModified())
 						return;
 				// Find parent relation and reset that.
 				Relation rel = null;
-				for (final Iterator i = this.getForeignKeys().iterator(); i
+				for (final Iterator<ForeignKey> i = this.getForeignKeys().iterator(); i
 						.hasNext()
 						&& rel == null;)
-					for (final Iterator j = ((Key) i.next()).getRelations()
+					for (final Iterator<Relation> j = ( i.next()).getRelations()
 							.iterator(); j.hasNext() && rel == null;)
-						rel = (Relation) j.next();
+						rel = j.next();
 				// Reset it.
 				rel.setVisibleModified(false);
 			}
 			// Mask this table if it has no unmasked columns left.
 			if (this.getType().equals(DataSetTableType.MAIN))
 				return;
-			for (final Iterator i = this.getColumns().values().iterator(); i
+			for (final Iterator<Column> i = this.getColumns().values().iterator(); i
 					.hasNext();) {
 				final DataSetColumn dsCol = (DataSetColumn) i.next();
 				if ( dsCol instanceof WrappedColumn
@@ -218,7 +215,7 @@ import org.biomart.configurator.utils.type.DataSetTableType;
 		 * @return true if they do.
 		 */
 		public boolean hasVisibleModifiedFrom(final Table table) {
-			for (final Iterator i = this.getColumns().values().iterator(); i
+			for (final Iterator<Column> i = this.getColumns().values().iterator(); i
 					.hasNext();) {
 				final DataSetColumn dsCol = (DataSetColumn) i.next();
 				if (!dsCol.isVisibleModified())
@@ -247,7 +244,7 @@ import org.biomart.configurator.utils.type.DataSetTableType;
 		 *            the property to look up.
 		 * @return the set of column names the property applies to.
 		 */
-		protected Map getMods(final String property) {
+		protected Map<String,Object> getMods(final String property) {
 			return this.getDataSet().getMods(this.getName(), property);
 		}
 
@@ -257,7 +254,7 @@ import org.biomart.configurator.utils.type.DataSetTableType;
 		 * 
 		 * @return all tables.
 		 */
-		public Collection getIncludedTables() {
+		public Set<Table> getIncludedTables() {
 			return this.includedTables;
 		}
 
@@ -267,7 +264,7 @@ import org.biomart.configurator.utils.type.DataSetTableType;
 		 * 
 		 * @return all relations.
 		 */
-		public Collection getIncludedRelations() {
+		public Set<Relation> getIncludedRelations() {
 			return this.includedRelations;
 		}
 
@@ -276,7 +273,7 @@ import org.biomart.configurator.utils.type.DataSetTableType;
 		 * 
 		 * @return the set of schemas used.
 		 */
-		public Collection getIncludedSchemas() {
+		public Set<Schema> getIncludedSchemas() {
 			return this.includedSchemas;
 		}
 

@@ -22,22 +22,14 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 
 import org.biomart.builder.exceptions.ConstructorException;
-import org.biomart.builder.exceptions.PartitionException;
 import org.biomart.builder.model.Column;
 import org.biomart.builder.model.DataLink;
-import org.biomart.builder.model.DataSet;
-import org.biomart.builder.model.DataSetTable;
 import org.biomart.builder.model.MartConstructorAction;
-
-import org.biomart.builder.model.Relation;
-import org.biomart.builder.model.Schema;
 import org.biomart.builder.model.Table;
 import org.biomart.builder.model.JDBCSchema;
-import org.biomart.builder.model.TransformationUnit.UnrollTable;
 import org.biomart.common.resources.Log;
 import org.biomart.common.resources.Resources;
 
@@ -55,7 +47,7 @@ import org.biomart.common.resources.Resources;
  */
 public abstract class DatabaseDialect {
 
-	private static final Set dialects = new HashSet();
+	private static final Set<DatabaseDialect> dialects = new HashSet<DatabaseDialect>();
 
 	private int maxTableNameLength = Integer.MAX_VALUE;
 
@@ -100,7 +92,7 @@ public abstract class DatabaseDialect {
 	 */
 	public static DatabaseDialect getDialect(final DataLink dataLink)
 			throws SQLException {
-		for (final Iterator i = DatabaseDialect.dialects.iterator(); i
+		for (final Iterator<DatabaseDialect> i = DatabaseDialect.dialects.iterator(); i
 				.hasNext();) {
 			final DatabaseDialect d = (DatabaseDialect) i.next();
 			if (d.understandsDataLink(dataLink)) {
@@ -199,32 +191,6 @@ public abstract class DatabaseDialect {
 					columnName));
 	}
 
-	/**
-	 * Get the SQL for unrolling a table's rolled-up relations.
-	 * 
-	 * @param schemaPrefix
-	 *            the value to substitute for ':schemaPrefix'.
-	 * @param dataset
-	 *            the dataset.
-	 * @param dsTable
-	 *            the dataset table.
-	 * @param parentRel
-	 *            the parent relation.
-	 * @param childRel
-	 *            the child relation.
-	 * @param schemaPartition
-	 *            the schema partition, or <tt>null</tt> for none.
-	 * @param templateSchema
-	 *            the template schema.
-	 * @param utu
-	 *            the unroll unit leading to this.
-	 * @return the SQL.
-	 */
-	public abstract String getUnrollTableSQL(final String schemaPrefix,
-			final DataSet dataset, final DataSetTable dsTable,
-			final Relation parentRel, final Relation childRel,
-			final String schemaPartition, final Schema templateSchema,
-			final UnrollTable utu);
 
 
 	/**

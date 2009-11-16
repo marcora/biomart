@@ -22,8 +22,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.biomart.builder.model.Relation.RestrictedRelationDefinition;
 import org.biomart.builder.model.Table.RestrictedTableDefinition;
 import org.biomart.common.resources.Log;
 import org.biomart.common.resources.Resources;
@@ -679,7 +677,6 @@ public abstract class MartConstructorAction {
 		private Map selectColumns;
 
 		private String resultTable;
-		private RestrictedRelationDefinition relationRestriction;
 
 		private boolean relationRestrictionLeftIsFirst;
 
@@ -829,21 +826,6 @@ public abstract class MartConstructorAction {
 
 
 
-		/**
-		 * @return the relationRestriction
-		 */
-		public RestrictedRelationDefinition getRelationRestriction() {
-			return this.relationRestriction;
-		}
-
-		/**
-		 * @param relationRestriction
-		 *            the relationRestriction to set
-		 */
-		public void setRelationRestriction(
-				final RestrictedRelationDefinition relationRestriction) {
-			this.relationRestriction = relationRestriction;
-		}
 
 		/**
 		 * @return the relationRestrictionLeftIsFirst
@@ -1302,14 +1284,6 @@ public abstract class MartConstructorAction {
 			return this.tableRestriction;
 		}
 
-		/**
-		 * @param tableRestriction
-		 *            the tableRestriction to set
-		 */
-		public void setTableRestriction(
-				final RestrictedTableDefinition tableRestriction) {
-			this.tableRestriction = tableRestriction;
-		}
 
 		/**
 		 * @return the bigTable

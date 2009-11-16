@@ -60,8 +60,7 @@ public class Table implements Comparable<Table>, TransactionListener {
 	/**
 	 * Subclasses use this field to fire events of their own.
 	 */
-	protected final WeakPropertyChangeSupport pcs = new WeakPropertyChangeSupport(
-			this);
+	protected final WeakPropertyChangeSupport pcs = new WeakPropertyChangeSupport(this);
 
 	private static final long serialVersionUID = 1L;
 
@@ -79,10 +78,6 @@ public class Table implements Comparable<Table>, TransactionListener {
 	private boolean masked = false;
 	private final Set<Relation> relations;
 	private boolean directModified = false;
-
-	private final Map<DataSet,Map<String,Map>> mods = new HashMap<DataSet,Map<String,Map>>();
-
-	private static final String DATASET_WIDE = "__DATASET_WIDE__";
 
 	private final PropertyChangeListener relationCacheBuilder = new PropertyChangeListener() {
 		public void propertyChange(final PropertyChangeEvent evt) {
@@ -134,7 +129,6 @@ public class Table implements Comparable<Table>, TransactionListener {
 
 		// All changes to us make us modified.
 		this.addPropertyChangeListener("masked", this.listener);
-		this.addPropertyChangeListener("restrictTable", this.listener);
 	}
 
 	/**
@@ -221,44 +215,6 @@ public class Table implements Comparable<Table>, TransactionListener {
 		// Don't really care for now.
 	}
 
-	/**
-	 * Drop modifications for the given dataset and optional table.
-	 * 
-	 * @param dataset
-	 *            dataset
-	 * @param tableKey
-	 *            table key - <tt>null</tt> for all tables.
-	 */
-	public void dropMods(final DataSet dataset, final String tableKey) {
-		// Drop all related mods.
-		if (tableKey == null)
-			this.mods.remove(dataset);
-		else if (this.mods.containsKey(dataset))
-			((Map) this.mods.get(dataset)).remove(tableKey);
-	}
-
-	/**
-	 * This contains the set of modifications to this schema that apply to a
-	 * particular dataset and table (null table means all tables in dataset).
-	 * 
-	 * @param dataset
-	 *            the dataset to lookup.
-	 * @param tableKey
-	 *            the table to lookup.
-	 * @return the set of tables that the property currently applies to. This
-	 *         set can be added to or removed from accordingly. The keys of the
-	 *         map are names, the values are optional subsidiary objects.
-	 */
-	public Map getMods(final DataSet dataset, String tableKey) {
-		if (tableKey == null)
-			tableKey = Table.DATASET_WIDE;
-		if (!this.mods.containsKey(dataset))
-			this.mods.put(dataset, new HashMap<String,Map>());
-		final Map<String,Map> dsMap =  this.mods.get(dataset);
-		if (!dsMap.containsKey(tableKey))
-			dsMap.put(tableKey.intern(), new HashMap());
-		return (Map) dsMap.get(tableKey);
-	}
 
 	/*
 	 * pce source can be a PK, FK, Column, Relation

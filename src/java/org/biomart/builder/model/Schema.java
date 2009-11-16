@@ -21,7 +21,6 @@ package org.biomart.builder.model;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -79,10 +78,7 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 	//add/remove table will trigger relationCacheBuilder
 	private McBeanMap<String,Table> tables;
 
-	/**
-	 * Subclasses use this to notify update requirements.
-	 */
-	protected boolean needsFullSync;
+	private boolean needsFullSync = false;
 	private boolean hideMasked = false;
 	private final Set<Relation> relations;
 	/**
@@ -162,7 +158,6 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 		this.setMasked(false);
 		// TreeMap keeps the partition cache in alphabetical order by name.
 		this.tables = new McBeanMap<String,Table>(new HashMap<String,Table>());
-		this.needsFullSync = false;
 
 		Transaction.addTransactionListener(this);
 
@@ -172,22 +167,6 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 		this.tables.addPropertyChangeListener(McBeanMap.property_RemoveItem,this.relationCacheBuilder);
 	}
 
-	/**
-	 * Do a 'select distinct' on the given column in the given schema.
-	 * 
-	 * @param schemaPrefix
-	 *            the schema prefix identifier. Use a sensible default if null
-	 *            given.
-	 * @param column
-	 *            the column to select.
-	 * @return the values.
-	 * @throws SQLException
-	 *             if it goes wrong.
-	 */
-	public Collection getUniqueValues(final String schemaPrefix,
-			final Column column) throws SQLException {
-		return Collections.EMPTY_SET;
-	}
 
 	/**
 	 * Change the unique ID for this schema.
@@ -419,7 +398,7 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 				&& this.dataLinkDatabase.equals(dataLinkDatabase))
 			return;
 		this.dataLinkDatabase = dataLinkDatabase;
-		this.needsFullSync = true;
+		this.setFullSyncValue(true);
 		this.pcs.firePropertyChange("dataLinkDatabase", oldValue,
 				dataLinkDatabase);
 	}
@@ -437,7 +416,7 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 				&& this.dataLinkSchema.equals(dataLinkSchema))
 			return;
 		this.dataLinkSchema = dataLinkSchema;
-		this.needsFullSync = true;
+		this.setFullSyncValue(true);
 		this.pcs.firePropertyChange("dataLinkSchema", oldValue, dataLinkSchema);
 	}
 
@@ -464,7 +443,7 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 			return;
 		// Work out all used names.
 		final Set<String> usedNames = new HashSet<String>();
-		for (final Iterator i = this.mart.getSchemas().values().iterator(); i
+		for (final Iterator<Schema> i = this.mart.getSchemas().values().iterator(); i
 				.hasNext();)
 			usedNames.add(((Schema) i.next()).getName());
 		// Make new name unique.
@@ -486,7 +465,7 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 		Log.debug("Renaming original schema " + this + " to " + name);
 		// Work out all used names.
 		final Set<String> usedNames = new HashSet<String>();
-		for (final Iterator i = this.mart.getSchemas().values().iterator(); i
+		for (final Iterator<Schema> i = this.mart.getSchemas().values().iterator(); i
 				.hasNext();)
 			usedNames.add(((Schema) i.next()).getOriginalName());
 		// Make new name unique.
@@ -532,7 +511,7 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 		if (this.keyGuessing == keyGuessing)
 			return;
 		this.keyGuessing = keyGuessing;
-		this.needsFullSync = true;
+		this.setFullSyncValue(true);
 		this.pcs.firePropertyChange("keyGuessing", oldValue, keyGuessing);
 	}
 
@@ -586,7 +565,7 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 	 *             if there was any other kind of logical problem.
 	 */
 	public void synchronise() throws SQLException, DataModelException {
-		this.needsFullSync = false;
+		this.setFullSyncValue(false);
 		this.progress = 0.0;
 		// Extend as required.
 	}
@@ -634,5 +613,12 @@ public class Schema implements Comparable<Schema>, DataLink, TransactionListener
 	public void init(List<String> tablesInDb) throws DataModelException, SQLException {
 		
 }
-	
+
+	/**
+	 * Subclasses use this to notify update requirements.
+	 */
+	protected void setFullSyncValue(boolean b) {
+		System.err.println("set fullsync value "+b);
+		this.needsFullSync = b;
+	}
 }
