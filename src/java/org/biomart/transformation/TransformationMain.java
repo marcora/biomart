@@ -16,9 +16,13 @@ import org.biomart.common.general.constants.MyConstants;
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.MyUtils;
+import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.objects.helpers.DatabaseParameter;
 import org.biomart.objects.helpers.Rdbs;
+import org.biomart.objects.objects.Attribute;
+import org.biomart.objects.objects.Filter;
 import org.biomart.objects.objects.MartRegistry;
+import org.biomart.objects.objects.SimpleFilter;
 import org.biomart.old.martService.Configuration;
 import org.biomart.old.martService.MartServiceConstants;
 import org.biomart.old.martService.objects.DatasetInMart;
@@ -352,10 +356,39 @@ if (currentMart.martName.equals("ensembl_expressionmart_48") && biomartPortalDat
 		}
 		
 		System.out.println("done.");	// If we see that, we didn't get a fatal exception
-		
+	
 		return transformation;
 	}
-
+	
+	@SuppressWarnings("all")	// TODO delete when finished
+	public static void detectFiltersWithNoCounterpartAttributes(Transformation transformation) throws FunctionalException {
+		List<Attribute> attributeList = transformation.getFullAttributeList();
+		List<Filter> filterList = transformation.getFullFilterList();
+		for (Filter filter : filterList) {
+			if (filter instanceof SimpleFilter && !filter.getPointer()) {
+				SimpleFilter simpleFilter = (SimpleFilter)filter;
+				String tableName = simpleFilter.getTableName();
+				String fieldName = simpleFilter.getFieldName();
+				String keyName = simpleFilter.getKeyName();
+				
+				Attribute a = null;
+				for (Attribute attribute : attributeList) {
+					if (!attribute.getPointer() && 
+							attribute.getTableName().equals(tableName) &&
+							attribute.getFieldName().equals(fieldName) &&
+							attribute.getKeyName().equals(keyName)) {
+						a = attribute;
+						break;
+					}
+				}
+				if (null==a) {
+					System.out.println(MartConfiguratorUtils.displayJdomElement(simpleFilter.generateXml()));
+					MyUtils.pressKeyToContinue();
+				}
+			}
+		}
+	}
+	
 	public static Configuration expandWebServiceConfigurationMap(MartServiceIdentifier martServiceIdentifier) throws FunctionalException, TechnicalException {
 		String formattedMartServiceServer = martServiceIdentifier.formatMartServiceUrl();
 		Configuration configuration = webServiceConfigurationMap.get(formattedMartServiceServer);

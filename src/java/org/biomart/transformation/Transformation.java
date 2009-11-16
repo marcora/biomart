@@ -12,6 +12,8 @@ import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.MyUtils;
 import org.biomart.objects.helpers.CurrentPath;
 import org.biomart.objects.objects.Attribute;
+import org.biomart.objects.objects.Config;
+import org.biomart.objects.objects.Container;
 import org.biomart.objects.objects.Dataset;
 import org.biomart.objects.objects.Filter;
 import org.biomart.objects.objects.Location;
@@ -252,6 +254,35 @@ public class Transformation {
 	
 	public void merge (Transformation transformation) {
 		this.martRegistry.merge(transformation.getMartRegistry());
+	}
+
+	public List<Attribute> getFullAttributeList() {
+		Dataset dataset = martRegistry.getLocationList().get(0).getMartList().get(0).getDatasetList().get(0);
+		Config config = dataset.getConfigList().get(0);
+		Container rootContainer = config.getRootContainer();
+		List<Attribute> attributeList = new ArrayList<Attribute>();
+		for (Container page : rootContainer.getContainerList()) {
+			for (Container group : page.getContainerList()) {
+				for (Container col : group.getContainerList()) {
+					attributeList.addAll(col.getAttributeList());
+				}			
+			}
+		}
+		return attributeList;
+	}
+	public List<Filter> getFullFilterList() {
+		Dataset dataset = martRegistry.getLocationList().get(0).getMartList().get(0).getDatasetList().get(0);
+		Config config = dataset.getConfigList().get(0);
+		Container rootContainer = config.getRootContainer();
+		List<Filter> filterList = new ArrayList<Filter>();
+		for (Container page : rootContainer.getContainerList()) {
+			for (Container group : page.getContainerList()) {
+				for (Container col : group.getContainerList()) {
+					filterList.addAll(col.getFilterList());
+				}			
+			}
+		}
+		return filterList;
 	}
 }
 
