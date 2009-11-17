@@ -19,6 +19,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -42,11 +43,11 @@ import org.biomart.configurator.utils.ConnectionPool;
 public class DBMetaTree extends TreeListComponent implements TreeSelectionListener {
     
 	private DbConnectionInfoObject conObject;
-	private JList list;
+	private MutableList mlist;
 		
 	public DBMetaTree() {
 		super("Schemas");
-		list = new JList();
+		mlist = new MutableList();
 	}
 	
 	public void setConnectionObject(DbConnectionInfoObject object) {
@@ -83,7 +84,7 @@ public class DBMetaTree extends TreeListComponent implements TreeSelectionListen
 					Matcher m = p.matcher(schemaName);
 					if (m.matches()) {
 						this.treeItemStrList.add(schemaName);
-						this.getSchemaPartitionList().add(schemaName);
+						this.getSchemaPartitionList().add(m.replaceAll(this.conObject.getPtNameExpression()));
 					}
 				}else
 					this.treeItemStrList.add(schemaName);
@@ -148,7 +149,7 @@ public class DBMetaTree extends TreeListComponent implements TreeSelectionListen
 	    panel.add(scrollPane);
 	    
 	  
-    	JScrollPane spScrollPane = new JScrollPane(list);
+    	JScrollPane spScrollPane = new JScrollPane(mlist);
     	panel.add(spScrollPane);
 	    
 	    
@@ -189,10 +190,13 @@ public class DBMetaTree extends TreeListComponent implements TreeSelectionListen
 		this.expandAllNodes();	
 		
 		//update partition list
-		if(list!=null)
-		list.clear();
+		if(mlist!=null)
+			mlist.getContents().clear();
+		
 		if(this.getSchemaPartitionList().size()>0) {
-			list.addAll(this.getSchemaPartitionList());
+			for(String s:this.getSchemaPartitionList())
+			mlist.getContents().addElement(s);
+
 		}
 		
 	}
@@ -289,4 +293,11 @@ public class DBMetaTree extends TreeListComponent implements TreeSelectionListen
 	}
 }
 
-
+class MutableList extends JList {
+    MutableList() {
+    	super(new DefaultListModel());
+    }
+    DefaultListModel getContents() {
+	return (DefaultListModel)getModel();
+    }
+}   
