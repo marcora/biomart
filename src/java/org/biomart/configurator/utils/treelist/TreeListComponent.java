@@ -31,6 +31,7 @@ public abstract class TreeListComponent implements TreeSelectionListener{
 	protected JTree tree;
 	protected Map<String, List<String>> treelistInfoMap;
 	protected CheckBoxList checkBoxList;
+	private List<String> schemaPartitionList = new ArrayList<String>();
 
 	
 	public TreeListComponent(String label) {
@@ -54,6 +55,9 @@ public abstract class TreeListComponent implements TreeSelectionListener{
 		this.treeItemStrList = items;
 	}
 
+	public List<String> getSchemaPartitionList() {
+		return this.schemaPartitionList;
+	}
 	
 }
 

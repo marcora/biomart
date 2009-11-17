@@ -15,6 +15,8 @@ public class DbConnectionInfoObject {
 	private String password;
 	private String schemaName;
 	private JdbcType type;
+	private String regex;
+	private String nameExpression;
 	
 	public String getJdbcUrl() {
 		return jdbcUrl;
@@ -29,13 +31,15 @@ public class DbConnectionInfoObject {
 	}
 	
 	public DbConnectionInfoObject(String url,String dbName, String schemaName,
-			String userName, String pwd, JdbcType type) {
+			String userName, String pwd, JdbcType type, String regex, String expression) {
 		this.jdbcUrl = url;
 		this.userName = userName;
 		this.password = pwd;
 		this.type = type;
 		this.databaseName = dbName;
 		this.schemaName = schemaName;
+		this.regex = regex;
+		this.nameExpression = expression;
 	}
 	
 	public JdbcType getJdbcType() {
@@ -80,5 +84,17 @@ public class DbConnectionInfoObject {
 	
 	public String getSchemaName() {
 		return this.schemaName;
+	}
+
+	public String getPartitionRegex() {
+		if(this.regex == null || "".equals(this.regex.trim()))
+			return null;
+		return this.regex;
+	}
+	
+	public String getPtNameExpression() {
+		if(this.nameExpression == null || "".equals(this.nameExpression.trim()))
+			return null;
+		return this.nameExpression;
 	}
 }

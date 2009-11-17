@@ -34,7 +34,6 @@ import org.biomart.builder.model.DataSetTable;
 import org.biomart.builder.model.JDBCSchema;
 import org.biomart.builder.model.Key;
 import org.biomart.builder.model.Relation;
-import org.biomart.builder.model.Schema;
 import org.biomart.builder.model.Table;
 import org.biomart.builder.view.gui.diagrams.Diagram;
 import org.biomart.builder.view.gui.diagrams.components.DiagramComponent;

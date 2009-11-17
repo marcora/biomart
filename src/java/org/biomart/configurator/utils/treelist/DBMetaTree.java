@@ -15,6 +15,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
@@ -37,9 +42,11 @@ import org.biomart.configurator.utils.ConnectionPool;
 public class DBMetaTree extends TreeListComponent implements TreeSelectionListener {
     
 	private DbConnectionInfoObject conObject;
+	private JList list;
 		
 	public DBMetaTree() {
 		super("Schemas");
+		list = new JList();
 	}
 	
 	public void setConnectionObject(DbConnectionInfoObject object) {
@@ -47,6 +54,15 @@ public class DBMetaTree extends TreeListComponent implements TreeSelectionListen
 	}
 
 	public List<String> getDatabases() {
+		Pattern p = null;
+		if(this.conObject.getPartitionRegex()!=null && this.conObject.getPtNameExpression()!=null)
+		try {
+			p = Pattern.compile(this.conObject.getPartitionRegex());
+		} catch (final PatternSyntaxException e) {
+			// Ignore and return if invalid.
+			return new ArrayList<String>();
+		}
+
 		Connection con = ConnectionPool.Instance.getConnection(this.conObject);
 		try {
 			DatabaseMetaData dmd = con.getMetaData();			
@@ -54,12 +70,23 @@ public class DBMetaTree extends TreeListComponent implements TreeSelectionListen
 					.getCatalogs() : dmd.getSchemas();
 			//clean all
 			this.treeItemStrList.clear();
+			this.getSchemaPartitionList().clear();
 			//check the first one is information_schema
-			rs2.next();
-			if(!"information_schema".equals(rs2.getString(1)))
-				this.treeItemStrList.add(rs2.getString(1));
+//			rs2.next();
+//			String schemaName = rs2.getString(1);
+			
+//			if(!"information_schema".equals(rs2.getString(1)))
+//				this.treeItemStrList.add(rs2.getString(1));
 			while (rs2.next()) {
-				this.treeItemStrList.add(rs2.getString(1));
+				String schemaName = rs2.getString(1);
+				if(this.conObject.getPartitionRegex()!=null && this.conObject.getPtNameExpression()!=null) {
+					Matcher m = p.matcher(schemaName);
+					if (m.matches()) {
+						this.treeItemStrList.add(schemaName);
+						this.getSchemaPartitionList().add(schemaName);
+					}
+				}else
+					this.treeItemStrList.add(schemaName);
 			}					
 		} catch(SQLException ex) {
 			ex.printStackTrace();
@@ -79,7 +106,7 @@ public class DBMetaTree extends TreeListComponent implements TreeSelectionListen
 
 		DbConnectionInfoObject dbConObj = new DbConnectionInfoObject(this.conObject.getJdbcUrl()+schemaName,
 				this.conObject.getDatabaseName(),schemaName,this.conObject.getUserName(),this.conObject.getPassword(),
-				this.conObject.getJdbcType());
+				this.conObject.getJdbcType(),this.conObject.getPartitionRegex(),this.conObject.getPtNameExpression());
 		Connection con = ConnectionPool.Instance.getConnection(dbConObj);
 		String sql = "select table_name from information_schema.tables where table_schema = '"+schemaName+"'";
 
@@ -120,6 +147,11 @@ public class DBMetaTree extends TreeListComponent implements TreeSelectionListen
 	    JScrollPane scrollPane = new JScrollPane(tree);
 	    panel.add(scrollPane);
 	    
+	  
+    	JScrollPane spScrollPane = new JScrollPane(list);
+    	panel.add(spScrollPane);
+	    
+	    
 	    this.checkBoxList = new CheckBoxList();
 	    
 	    JScrollPane listScrollPane = new JScrollPane(checkBoxList);
@@ -154,7 +186,15 @@ public class DBMetaTree extends TreeListComponent implements TreeSelectionListen
 		JTree.DynamicUtilTreeNode.createChildren(dbnode, nodesVector);
 		DefaultTreeModel model = (DefaultTreeModel)tree.getModel();
 		model.reload();
-		this.expandAllNodes();		
+		this.expandAllNodes();	
+		
+		//update partition list
+		if(list!=null)
+		list.clear();
+		if(this.getSchemaPartitionList().size()>0) {
+			list.addAll(this.getSchemaPartitionList());
+		}
+		
 	}
 	/**
 	 * table info in the current selected node is not stored, need special handle. 

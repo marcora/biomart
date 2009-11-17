@@ -583,8 +583,10 @@ public class McViewSchema extends McView implements TreeSelectionListener {
 					se.getAttributeValue("databaseName"),"",
 					se.getAttributeValue("userName"), 
 					se.getAttributeValue("password"),
-					JdbcType.MySQL
+					JdbcType.MySQL,
 					//JdbcType.valueOf(se.getAttributeValue("driverClassName"))
+					se.getAttributeValue("regex"),
+					se.getAttributeValue("expression")
 					);
 			Schema schema = new JDBCSchema(mart, conObj, se
 					.getAttributeValue("schemaName"),  schemaName, true, "", "");
@@ -749,7 +751,9 @@ public class McViewSchema extends McView implements TreeSelectionListener {
 				schemaElement.getAttributeValue("databaseName"),"",
 				schemaElement.getAttributeValue("userName"), 
 				schemaElement.getAttributeValue("password"),
-				JdbcType.valueOf(schemaElement.getAttributeValue("driverClassName"))
+				JdbcType.valueOf(schemaElement.getAttributeValue("driverClassName")),
+				schemaElement.getAttributeValue("regex"),
+				schemaElement.getAttributeValue("expression")
 				);
 		Schema schema = new JDBCSchema(mart, conObj, schemaElement
 				.getAttributeValue(Resources.get("NAME")),  schemaName, true, "", "");
@@ -1247,7 +1251,10 @@ public class McViewSchema extends McView implements TreeSelectionListener {
 		JDBCSchema jschema = (JDBCSchema)schema;
 		DbConnectionInfoObject conObj = new DbConnectionInfoObject(schemaElement.getAttributeValue("url"),
 				schemaElement.getAttributeValue("databaseName"),"",schemaElement.getAttributeValue("username"),
-				schemaElement.getAttributeValue(Resources.get("PASSWORD")),JdbcType.valueOf(schemaElement.getAttributeValue("driverClassName")));
+				schemaElement.getAttributeValue(Resources.get("PASSWORD")),
+				JdbcType.valueOf(schemaElement.getAttributeValue("driverClassName")),
+				schemaElement.getAttributeValue("regex"),
+				schemaElement.getAttributeValue("expression"));
 		jschema.setDataLinkDatabase(schemaElement.getAttributeValue("databaseName"));
 		jschema.setDataLinkSchema(schemaElement.getAttributeValue("schemaName"));
 		jschema.setKeyGuessing(true);

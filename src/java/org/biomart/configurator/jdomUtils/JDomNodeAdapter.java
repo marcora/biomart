@@ -1026,9 +1026,9 @@ public class JDomNodeAdapter extends DefaultMutableTreeNode {
 							host = host+":"+conObj.getPort();
 						MartServiceIdentifier initialHost = new MartServiceIdentifier(conObj.getHost(),conObj.getPort(),conObj.getPath());
 						TransformationMain.fetchWebServiceConfigurationMap(initialHost, conObj.getConfigMap().get(host+conObj.getPath()));
-						Document urlDoc = TransformationYongPrototype.wrappedTransform(initialHost, name, dsName);
+						MartRegistry registry = TransformationYongPrototype.wrappedTransformObject(initialHost, name, dsName);
 						//change the location name
-						Element locElement = urlDoc.getRootElement().getChild(Resources.get("LOCATION"));
+						/*Element locElement = urlDoc.getRootElement().getChild(Resources.get("LOCATION"));
 						boolean isNameEmpty = false;
 						if(conObj.getName()==null || conObj.getName().equals("")) 
 							isNameEmpty = true;
@@ -1039,7 +1039,8 @@ public class JDomNodeAdapter extends DefaultMutableTreeNode {
 						//change the mart name
 						Element martElement = locElement.getChild(Resources.get("MART"));
 						martElement.setAttribute(Resources.get("NAME"),name);
-						this.addLocationFromDocument(urlDoc);
+						this.addLocationFromDocument(urlDoc);*/
+						this.addLocationFromMartRegistry(registry);
 
 						//McEvent needs a not null object, host
 						McEventObject mcObject = new McEventObject(EventType.Request_NewLocation,host);
@@ -1765,9 +1766,28 @@ public class JDomNodeAdapter extends DefaultMutableTreeNode {
         	container.setAttribute(Resources.get("CONFIG"),userName+"_"+container.getAttributeValue(nameStr));
         	targetDs.addContent(container);  
 
-        	//add exportable; importable
+        	List<org.biomart.objects.objects.ElementList> expList =  config.getExportableList();
+        	for(org.biomart.objects.objects.ElementList el:expList) {
+        		try {
+					targetDs.addContent(el.generateXml());
+				} catch (FunctionalException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+        	}
         	
- /*       	List<Element> expList = JDomUtils.searchElementList(config, Resources.get("EXPORTABLE"), null);
+        	List<org.biomart.objects.objects.ElementList> impList = config.getImportableList();
+        	for(org.biomart.objects.objects.ElementList il:impList) {
+        		try {
+					targetDs.addContent(il.generateXml());
+				} catch (FunctionalException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+        	}
+        	//add exportable; importable
+        	/*
+        	List<Element> expList = JDomUtils.searchElementList(config, Resources.get("EXPORTABLE"), null);
         	for(Element exp:expList) {
         		exp.detach();
             	exp.setAttribute(Resources.get("GUI"),McGuiUtils.INSTANCE.getGuiType().toString());
@@ -1784,7 +1804,8 @@ public class JDomNodeAdapter extends DefaultMutableTreeNode {
 
         		targetDs.addContent(imp);        		
 
-        	}*/
+        	}
+        	*/
     	}
     }
 
@@ -1904,7 +1925,8 @@ public class JDomNodeAdapter extends DefaultMutableTreeNode {
     		DbConnectionInfoObject genObj = location.getConnectionObject();
     		DbConnectionInfoObject conObj = new DbConnectionInfoObject(genObj.getJdbcUrl()+schemaName,schemaName,
     				schemaName,genObj.getUserName(),
-    				genObj.getPassword(),genObj.getJdbcType());
+    				genObj.getPassword(),genObj.getJdbcType(),
+    				genObj.getPartitionRegex(),genObj.getPtNameExpression());
     		
     		Connection con = ConnectionPool.Instance.getConnection(conObj);
     		String sql = "select distinct "+colName +" from "+tableName;

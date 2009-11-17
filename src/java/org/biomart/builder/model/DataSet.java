@@ -998,7 +998,6 @@ public class DataSet extends Schema {
 
 			// Allow to go back up sourceRelation if it is a loopback
 			// 1:M relation and we have just merged the 1 end.
-			boolean isFirstLoopback = false;
 
 			// Don't go back up same relation unless we are doing
 			// loopback. If we are doing loopback, do source relation last
@@ -1159,7 +1158,7 @@ public class DataSet extends Schema {
 					newSourceDSCols.add(tu.getDataSetColumnFor(sourceKey
 							.getColumns()[j]));
 				// Repeat queueing of relation N times if compounded.
-				int defaultChildCompounded = isFirstLoopback ? 2 : 1;
+				int defaultChildCompounded = 1;
 				int childCompounded = defaultChildCompounded;
 				// Don't compound if loopback and we just processed the M end.
 						// Work out partition compounding. Table

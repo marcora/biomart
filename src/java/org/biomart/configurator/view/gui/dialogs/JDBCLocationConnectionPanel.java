@@ -23,6 +23,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -81,6 +83,8 @@ public class JDBCLocationConnectionPanel extends JPanel implements DocumentListe
 	private JCheckBox keyguessing;
 	private DbConnectionInfoObject conObject;
 	private JTextField dbTField;
+	private JTextField regexTF;
+	private JTextField expressionTF;
 
 	/**
 	 * This constructor creates a panel with all the fields necessary to
@@ -240,10 +244,18 @@ public class JDBCLocationConnectionPanel extends JPanel implements DocumentListe
 				updateDataBasesList();
 			}				
 		});
+		
 		this.add(field, fieldConstraints);
 
 		// Add the partition stuff.
-
+		this.regexTF = new JTextField(50);
+		this.expressionTF = new JTextField(20);
+		JLabel regexLabel = new JLabel("Regex:");
+		JLabel expressionLabel = new JLabel("Expression:");
+		this.add(regexLabel,labelConstraints);
+		this.add(regexTF,fieldConstraints);
+		this.add(expressionLabel,labelConstraints);
+		this.add(expressionTF,fieldConstraints);
 		// Two-column string/string panel of matches
 		label = new JLabel(Resources.get("databasesLabel"));
 		this.add(label, labelLastRowConstraints);
@@ -421,13 +433,12 @@ public class JDBCLocationConnectionPanel extends JPanel implements DocumentListe
 	private Schema privateCreateSchemaFromSettings(final String name)
 			throws Exception {
 		// Record the user's specifications.
-		final String driverClassName = this.driverClass.getText();
 		final String url = this.jdbcURL.getText();
 		final String username = this.username.getText();
 		final String password = new String(this.password.getPassword());
 		// Construct a JDBCSchema based on them.
 		DbConnectionInfoObject conObj = new DbConnectionInfoObject(url,"","",username,password,
-				(JdbcType)this.predefinedDriverClass.getSelectedItem());
+				(JdbcType)this.predefinedDriverClass.getSelectedItem(),this.regexTF.getText(),this.expressionTF.getText());
 		final JDBCSchema schema = new JDBCSchema(null, conObj,
 				 "", name, this.keyguessing.isSelected(), "", 
 				"");
@@ -494,14 +505,15 @@ public class JDBCLocationConnectionPanel extends JPanel implements DocumentListe
 		}
 
 
-		public void updateDataBasesList() {
-			if (!this.validateFields(true))
-				return;
+	public void updateDataBasesList() {
+		if (!this.validateFields(true))
+			return;
 
-			conObject = new DbConnectionInfoObject(this.jdbcURL.getText(),this.dbTField.getText(),"",
+		conObject = new DbConnectionInfoObject(this.jdbcURL.getText(),this.dbTField.getText(),"",
 					this.username.getText(),
 					new String(this.password.getPassword()),
-					(JdbcType)this.predefinedDriverClass.getSelectedItem());
+					(JdbcType)this.predefinedDriverClass.getSelectedItem(),
+					this.regexTF.getText(),this.expressionTF.getText());
 			final ProgressDialog2 progressMonitor = ProgressDialog2.getInstance();				
  
     		final SwingWorker worker = new SwingWorker() {
@@ -522,13 +534,13 @@ public class JDBCLocationConnectionPanel extends JPanel implements DocumentListe
 
     			public void finished() {
     				// Close the progress dialog.
-				progressMonitor.setVisible(false);
-			//	progressMonitor.dispose();
-			}
-		};
-		worker.start();
-		progressMonitor.start("testing");
-	}
+			progressMonitor.setVisible(false);
+		//	progressMonitor.dispose();
+		}
+	};
+	worker.start();
+	progressMonitor.start("testing");
+}
 	
 	public void clearDataBasesList() {
 		this.dbPreview.resetTree(null);
@@ -555,7 +567,8 @@ public class JDBCLocationConnectionPanel extends JPanel implements DocumentListe
 			DbConnectionInfoObject conObj = new DbConnectionInfoObject(this.jdbcURL.getText(),this.dbTField.getText(),"",
 					this.username.getText(),
 					new String(this.password.getPassword()),
-					(JdbcType)this.predefinedDriverClass.getSelectedItem());
+					(JdbcType)this.predefinedDriverClass.getSelectedItem(),
+					this.regexTF.getText(),this.expressionTF.getText());
 			loc.setConnectionObject(conObj);
 			loc.setKeyGuessing(true);
 		} else
@@ -572,7 +585,8 @@ public class JDBCLocationConnectionPanel extends JPanel implements DocumentListe
 				DbConnectionInfoObject conObj2 = new DbConnectionInfoObject(this.jdbcURL.getText(),this.dbTField.getText(),
 						dbName,this.username.getText(),
 						new String(this.password.getPassword()),
-						(JdbcType)this.predefinedDriverClass.getSelectedItem());
+						(JdbcType)this.predefinedDriverClass.getSelectedItem(),
+						this.regexTF.getText(),this.expressionTF.getText());
 				final JDBCSchema schema = new JDBCSchema(mart, conObj2,
 						 dbName, dbName, this.keyguessing.isSelected(), "", "");
 				mart.addSchema(schema);				

@@ -528,9 +528,6 @@ public class LocationConnectionDialog extends JDialog implements ItemListener{
 		return messages.isEmpty() && this.connectionPanel.validateFields(true);
 	}
 
-	private boolean test() {
-		return this.validateFields() && this.connectionPanel.test();
-	}
 	
 	public Location getMcLocation() {
 		return this.location;
