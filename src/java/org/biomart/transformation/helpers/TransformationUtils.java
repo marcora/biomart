@@ -13,6 +13,7 @@ import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.exceptions.WarningException;
 import org.biomart.common.general.utils.CompareUtils;
 import org.biomart.common.general.utils.MyUtils;
+import org.biomart.common.general.utils.XmlUtils;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.objects.helpers.PartitionReference;
 import org.biomart.objects.objects.Container;
@@ -54,10 +55,10 @@ public class TransformationUtils {
 	
 	
 	public static void throwUnhandledElementStructureException(Element element) throws FunctionalException {
-		throw new FunctionalException("Unhandled element structure for element: " + MartConfiguratorUtils.displayJdomElement(element));
+		throw new FunctionalException("Unhandled element structure for element: " + XmlUtils.displayJdomElement(element));
 	}
 	public static void throwUnknownElementException(Element element) throws FunctionalException {
-		throw new FunctionalException("Unknown element type: " + MartConfiguratorUtils.displayJdomElement(element));
+		throw new FunctionalException("Unknown element type: " + XmlUtils.displayJdomElement(element));
 	}
 	
 	public static void checkJdomElementProperties(Element element, List<String>... propertyLists) throws FunctionalException {
@@ -71,7 +72,7 @@ public class TransformationUtils {
 			}
 			if (missing && TransformationMain.ENABLE_PROPERTIES_CHECK) {
 				throw new FunctionalException("Unknown property: " + propertyName + ", in: " + 
-						element + "element: " + ",(" + element.getClass() + ")" + MartConfiguratorUtils.displayJdomElement(element));
+						element + "element: " + ",(" + element.getClass() + ")" + XmlUtils.displayJdomElement(element));
 			}
 		}
 	}
@@ -209,7 +210,7 @@ public class TransformationUtils {
 		String xmlFilePathAndName = transformationsGeneralOutput + MyUtils.FILE_SEPARATOR +
 		generateIdentifier(webService, databaseVersion, martServiceIdentifier, virtualSchema, datasetName) + ".xml";		
 		if (!new File(xmlFilePathAndName).exists()) {
-			MyUtils.writeXmlFile(xmlDocument, xmlFilePathAndName);
+			XmlUtils.writeXmlFile(xmlDocument, xmlFilePathAndName);
 		}
 		return xmlFilePathAndName;
 	}

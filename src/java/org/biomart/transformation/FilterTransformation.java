@@ -12,6 +12,7 @@ import java.util.Set;
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.MyUtils;
+import org.biomart.common.general.utils.XmlUtils;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.objects.data.FilterData;
@@ -74,7 +75,7 @@ public class FilterTransformation extends ElementTransformation {
 			Boolean forcedVisibility	// null if not forced, otherwise whatever the value given is
 			) throws FunctionalException, TechnicalException {
 		
-		System.out.println(MartConfiguratorUtils.displayJdomElement(oldFilter.getJdomElement()) + ", " + firstSpecific);
+		System.out.println(XmlUtils.displayJdomElement(oldFilter.getJdomElement()) + ", " + firstSpecific);
 		
 		// Disregard elements with no match in the DB
 		List<Integer> mainRowsList = null;
@@ -151,7 +152,7 @@ public class FilterTransformation extends ElementTransformation {
 			MyUtils.checkStatusProgram(!oldFilter.getPointer() || (oldFilter.getPointer() && 
 					MyUtils.nullOrEmpty(oldSpecificFilterContentList) && MyUtils.nullOrEmpty(oldOptionFilterList) &&	// oldEmptySpecificFilterContentList may be empty or null 
 					MyUtils.nullOrEmpty(oldSpecificOptionContentList) && MyUtils.nullOrEmpty(oldOptionValueList)), 
-					MartConfiguratorUtils.displayJdomElement(oldFilter.getJdomElement()) + ", " +
+					XmlUtils.displayJdomElement(oldFilter.getJdomElement()) + ", " +
 					filter.getClass().getSimpleName() + ", " + oldFilter.getClass().getSimpleName() + ", " +
 					oldFilter.getPointer() + ", " + 
 					(MyUtils.nullOrEmpty(oldSpecificFilterContentList)) + ", " + MyUtils.nullOrEmpty(oldEmptySpecificFilterContentList) + ", " + 
@@ -620,7 +621,7 @@ public class FilterTransformation extends ElementTransformation {
 			}
 		} else {
 			MyUtils.checkStatusProgram(FilterDisplayType.TEXTFIELD.equals(filterType) || FilterDisplayType.LIST.equals(filterType), 
-					filterType + ", " + MartConfiguratorUtils.displayJdomElement(oldFilter.getJdomElement()));		// case like "chromosome_region"
+					filterType + ", " + XmlUtils.displayJdomElement(oldFilter.getJdomElement()));		// case like "chromosome_region"
 			newFilter = new GroupFilter(super.mainPartitionTable, filterName);
 		}
 
@@ -874,7 +875,7 @@ public class FilterTransformation extends ElementTransformation {
 			return null;	// Containers
 		}
 		throw new FunctionalException("Unknown type combination: " + filterOldDisplayType + " and " + filterOldStyle + " and " + oldFilter.getType() + 
-				", oldFilter = " + MartConfiguratorUtils.displayJdomElement(oldFilter.getJdomElement()));
+				", oldFilter = " + XmlUtils.displayJdomElement(oldFilter.getJdomElement()));
 	}
 
 	@Override

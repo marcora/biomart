@@ -13,6 +13,7 @@ import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.CompareUtils;
 import org.biomart.common.general.utils.MyUtils;
+import org.biomart.common.general.utils.XmlUtils;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.objects.helpers.PartitionReference;
@@ -504,8 +505,8 @@ public abstract class ElementTransformation {
 	
 	public void throwForbiddenSpecificityException(Element templateElement, Element newElement) throws FunctionalException {
 		throw new FunctionalException("Forbidden specificity, " +
-				"templateElement = " + MartConfiguratorUtils.displayJdomElement(templateElement.generateXml()) +
-				", newElement = " + MartConfiguratorUtils.displayJdomElement(newElement.generateXml()));
+				"templateElement = " + XmlUtils.displayJdomElement(templateElement.generateXml()) +
+				", newElement = " + XmlUtils.displayJdomElement(newElement.generateXml()));
 	}
 	
 	protected void updateNonSpecificTemplateElement(Element templateElement, Element newElement, 
@@ -565,8 +566,8 @@ public abstract class ElementTransformation {
 				!TransformationUtils.checkValidSpecificityBoolean(templateElement.getVisible(), newElement.getVisible(), firstSpecific) ||
 				!TransformationUtils.checkValidSpecificityBoolean(templateElement.getCheckForNulls(), newElement.getCheckForNulls(), firstSpecific)) {
 			throw new FunctionalException("Forbidden specificity, " +
-					"templateAttribute = " + MartConfiguratorUtils.displayJdomElement(templateElement.generateXml()) +
-					", newAttribute = " + MartConfiguratorUtils.displayJdomElement(newElement.generateXml()));
+					"templateAttribute = " + XmlUtils.displayJdomElement(templateElement.generateXml()) +
+					", newAttribute = " + XmlUtils.displayJdomElement(newElement.generateXml()));
 		}
 		
 		// Update properties that are allowed to be part specific

@@ -10,6 +10,7 @@ import java.util.Set;
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.MyUtils;
+import org.biomart.common.general.utils.XmlUtils;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.objects.helpers.PartitionReference;
 import org.biomart.objects.objects.Element;
@@ -517,7 +518,7 @@ public class PointerTransformation {
 			}
 			MyUtils.checkStatusProgram(matchingRemotePart!=null, "remoteRowNumber = " + remoteRowNumber + 
 					", unreferencedRemoteDatasetName = " + unreferencedRemoteDatasetName + ", pointedElement = " +
-					MartConfiguratorUtils.displayJdomElement(pointedElement.generateXml()));
+					XmlUtils.displayJdomElement(pointedElement.generateXml()));
 			
 			// Assign part to range
 			pointingSourceRange.addPart(matchingRemotePart);

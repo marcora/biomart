@@ -9,6 +9,7 @@ import java.util.List;
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.MyUtils;
+import org.biomart.common.general.utils.XmlUtils;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.transformation.helpers.DatabaseCheck;
@@ -135,7 +136,7 @@ public class OldElement extends OldElementPlaceHolder /*implements Comparable<Ol
 			this.nctm = new NamingConventionTableName(this.tableConstraint);
 		} else {
 			this.filterGroup = !pointer && !this.option; 
-			MyUtils.checkStatusProgram(!this.filterGroup || hasChildren, MartConfiguratorUtils.displayJdomElement(jdomElement));
+			MyUtils.checkStatusProgram(!this.filterGroup || hasChildren, XmlUtils.displayJdomElement(jdomElement));
 		}
 		
 		this.dimensionPartition = new DimensionPartition(this.tableConstraint, this.key);		

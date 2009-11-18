@@ -7,7 +7,7 @@ import java.util.Set;
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.MyUtils;
-import org.biomart.objects.MartConfiguratorUtils;
+import org.biomart.common.general.utils.XmlUtils;
 import org.biomart.objects.objects.Attribute;
 import org.biomart.objects.objects.Container;
 import org.biomart.objects.objects.Filter;
@@ -48,7 +48,7 @@ public class AttributeTransformation extends ElementTransformation {
 			Attribute nonSpecificTemplateAttribute, Integer currentMainRowNumber, boolean firstSpecific) 
 	throws FunctionalException, TechnicalException {
 		
-		System.out.println(MartConfiguratorUtils.displayJdomElement(oldAttribute.getJdomElement()) + ", " + firstSpecific);
+		System.out.println(XmlUtils.displayJdomElement(oldAttribute.getJdomElement()) + ", " + firstSpecific);
 		
 		// Disregard elements with no match in the DB
 		List<Integer> mainRowsList = null;
@@ -98,7 +98,7 @@ public class AttributeTransformation extends ElementTransformation {
 			// Assumption: no pointers with children but range ones
 			MyUtils.checkStatusProgram(!oldAttribute.getPointer() || (oldAttribute.getPointer() && 
 					MyUtils.nullOrEmpty(oldSpecificAttributeContentList)), 
-					MartConfiguratorUtils.displayJdomElement(oldAttribute.getJdomElement()) + ", " +
+					XmlUtils.displayJdomElement(oldAttribute.getJdomElement()) + ", " +
 					attribute.getClass().getSimpleName() + ", " + oldAttribute.getClass().getSimpleName() + ", " + oldAttribute.getPointer() + ", " + 
 					(MyUtils.nullOrEmpty(oldSpecificAttributeContentList)));
 			

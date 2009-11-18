@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.utils.MyUtils;
+import org.biomart.common.general.utils.XmlUtils;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.objects.objects.types.ElementListType;
 
@@ -165,7 +166,7 @@ public class ElementList extends MartConfiguratorObject implements Serializable 
 		if (needIntersection) {
 			for (Element element : this.elements) {
 				try {
-					System.out.println(MartConfiguratorUtils.displayJdomElement(element.generateXml()));
+					System.out.println(XmlUtils.displayJdomElement(element.generateXml()));
 				} catch (FunctionalException e) {
 					e.printStackTrace();
 				}

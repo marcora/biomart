@@ -13,6 +13,7 @@ import net.sf.json.JSONObject;
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.MyUtils;
+import org.biomart.common.general.utils.XmlUtils;
 import org.biomart.martRemote.Jsoml;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.objects.Filter;
@@ -109,7 +110,7 @@ public class TreeFilterData implements Serializable {	//TODO merge with ListFilt
 		Element rootElement = generateXml(false);
 		
 		// Write the file
-		MyUtils.writeXmlFile(rootElement, this.dataFile.getAbsolutePath());
+		XmlUtils.writeXmlFile(rootElement, this.dataFile.getAbsolutePath());
 	}
 	
 	

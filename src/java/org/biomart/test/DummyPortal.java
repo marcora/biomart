@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.biomart.common.general.utils.MyUtils;
+import org.biomart.common.general.utils.XmlUtils;
 import org.biomart.objects.objects.Attribute;
 import org.biomart.objects.objects.Config;
 import org.biomart.objects.objects.Container;
@@ -23,7 +23,7 @@ public class DummyPortal {
 	public static void main(String[] args) throws Exception {
 		MartRegistry martRegistry = createDummyMartRegistry();
 		Element xml = martRegistry.generateXml();
-		System.out.println(MyUtils.writeXmlFile(xml, "/home/anthony/Desktop/dummyPortal.xml"));
+		System.out.println(XmlUtils.writeXmlFile(xml, "/home/anthony/Desktop/dummyPortal.xml"));
 	}
 
 	public static MartRegistry createDummyMartRegistry() {

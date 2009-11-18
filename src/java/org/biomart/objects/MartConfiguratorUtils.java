@@ -14,7 +14,6 @@ import org.biomart.objects.helpers.Property;
 import org.biomart.objects.objects.Part;
 import org.biomart.objects.objects.PartitionTable;
 import org.biomart.transformation.helpers.PartitionTableAndRow;
-import org.jdom.Attribute;
 import org.jdom.Comment;
 import org.jdom.Element;
 
@@ -87,19 +86,6 @@ public class MartConfiguratorUtils {
 		return property!=null && !MyUtils.isEmpty(property);
 	}
 	
-	public static String displayJdomElement(Element element) {
-		StringBuffer stringBuffer = new StringBuffer();
-		stringBuffer.append("<" + element.getName() + " ");
-		@SuppressWarnings("unchecked")
-		List<Attribute> attributeList = element.getAttributes();
-		for (int i = 0; i < attributeList.size(); i++) {
-			Attribute attribute = attributeList.get(i);
-			stringBuffer.append((i==0 ? "" : " ") + attribute.getName() + "=\"" + attribute.getValue() + "\"");
-		}
-		stringBuffer.append(">");
-		return stringBuffer.toString();
-	}
-
 	public static String booleanToBinaryDigit(Boolean b) {
 		return (b!=null && b ? "1" : "0");
 	}

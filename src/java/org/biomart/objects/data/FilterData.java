@@ -12,9 +12,9 @@ import net.sf.json.JSONObject;
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.MyUtils;
+import org.biomart.common.general.utils.XmlUtils;
 import org.biomart.martRemote.Jsoml;
 import org.biomart.objects.MartConfiguratorConstants;
-import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.objects.objects.Filter;
 import org.biomart.objects.objects.Part;
 import org.jdom.Element;
@@ -74,7 +74,7 @@ public class FilterData implements Serializable {
 	public LinkedHashMap<Filter,ArrayList<FilterDataRow>> addRowForPart(Part part, FilterDataRow dataRow) throws FunctionalException {
 		LinkedHashMap<Filter,ArrayList<FilterDataRow>> rowForPartValue = getRowForPartValue(part, dataRow);
 		if (rowForPartValue!=null) {
-			throw new FunctionalException("Row " + MartConfiguratorUtils.displayJdomElement(dataRow.generateXml()) + 
+			throw new FunctionalException("Row " + XmlUtils.displayJdomElement(dataRow.generateXml()) + 
 					" for part " + part.getXmlValue() + " is already in the data");
 		}
 		rowForPartValue = new LinkedHashMap<Filter, ArrayList<FilterDataRow>>();
@@ -201,7 +201,7 @@ public class FilterData implements Serializable {
 		Element rootElement = generateXml(false);
 				
 		// Write the file
-		MyUtils.writeXmlFile(rootElement, dataFilePathAndName);
+		XmlUtils.writeXmlFile(rootElement, dataFilePathAndName);
 	}
 		
 	/*public Element generateXml(boolean flatten) {

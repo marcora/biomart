@@ -9,6 +9,7 @@ import java.util.Map;
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.MyUtils;
+import org.biomart.common.general.utils.XmlUtils;
 import org.biomart.objects.helpers.CurrentPath;
 import org.biomart.objects.objects.Attribute;
 import org.biomart.objects.objects.Config;
@@ -203,7 +204,7 @@ public class Transformation {
 		Element newRootElement = this.martRegistry.generateXml();
 		
 		// Write the file
-		this.transformedDocument = MyUtils.writeXmlFile(newRootElement, params.getOutputXmlFilePathAndName());
+		this.transformedDocument = XmlUtils.writeXmlFile(newRootElement, params.getOutputXmlFilePathAndName());
 	}
 	
 	/**

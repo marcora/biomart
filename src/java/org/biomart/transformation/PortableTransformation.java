@@ -6,7 +6,7 @@ import java.util.List;
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.MyUtils;
-import org.biomart.objects.MartConfiguratorUtils;
+import org.biomart.common.general.utils.XmlUtils;
 import org.biomart.objects.objects.Attribute;
 import org.biomart.objects.objects.Config;
 import org.biomart.objects.objects.ElementList;
@@ -133,7 +133,7 @@ public class PortableTransformation {
 			//TODO ?
 		} else {
 			MyUtils.checkStatusProgram(MartServiceConstants.XML_ATTRIBUTE_VALUE_LINK.equals(oldPortable.getType()), 
-					"oldPortable = " + MartConfiguratorUtils.displayJdomElement(oldPortable.getJdomElement()));
+					"oldPortable = " + XmlUtils.displayJdomElement(oldPortable.getJdomElement()));
 			MyUtils.checkStatusProgram(!oldPortable.getPointer());
 		
 			// Compute intersection of the main table rows only for now (latest agreement)

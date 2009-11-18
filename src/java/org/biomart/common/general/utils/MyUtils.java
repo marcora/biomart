@@ -35,11 +35,8 @@ import org.biomart.common.general.constants.MyConstants;
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
 import org.jdom.Document;
-import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
-import org.jdom.output.Format;
-import org.jdom.output.XMLOutputter;
 
 
 /**
@@ -822,30 +819,6 @@ public class MyUtils {
 		return string!=null && string.length()>0 ? string.substring(0, 1).toLowerCase() + string.substring(1) : string;
 	}
 
-	public static void writeXmlFile(Element root) throws TechnicalException {
-		writeXmlFile(root, null);
-	}
-	public static Document writeXmlFile(Element root, String outputXmlFilePathAndName) throws TechnicalException {
-		Document newDocument = new Document(root);
-		writeXmlFile(newDocument, outputXmlFilePathAndName);
-		return newDocument;
-	}
-	public static void writeXmlFile(Document document, String outputXmlFilePathAndName) throws TechnicalException {
-		try {
-			XMLOutputter fmt = new XMLOutputter(Format.getPrettyFormat());
-			if (null!=outputXmlFilePathAndName) {
-				FileOutputStream fos = new FileOutputStream(outputXmlFilePathAndName);
-				fmt.output(document, fos);
-			} else {
-				fmt.output(document, System.out);
-			}
-		} catch (FileNotFoundException e) {
-			throw new TechnicalException(e);
-		} catch (IOException e) {
-			throw new TechnicalException(e);
-		}
-	}
-	
 	public static Document loadDocument(String stringUrl) throws TechnicalException {
 		URL url = getUrlFromString(stringUrl);
 		return loadDocument(url);

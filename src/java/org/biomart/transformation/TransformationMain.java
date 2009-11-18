@@ -16,6 +16,7 @@ import org.biomart.common.general.constants.MyConstants;
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.MyUtils;
+import org.biomart.common.general.utils.XmlUtils;
 import org.biomart.objects.helpers.DatabaseParameter;
 import org.biomart.objects.helpers.Rdbs;
 import org.biomart.objects.objects.MartRegistry;
@@ -128,9 +129,9 @@ public class TransformationMain {
 				MyUtils.writeSerializedObject(martRegistry, "./conf/files/" + 
 						(webServiceTransformation ? "web" : "rdbms") + "_portal.serial");
 				MyUtils.writeSerializedObject(martRegistry, "./conf/files/" + "portal.serial");
-				MyUtils.writeXmlFile(newRootElement, "./conf/xml/" + 
+				XmlUtils.writeXmlFile(newRootElement, "./conf/xml/" + 
 						(webServiceTransformation ? "web" : "rdbms") + "_portal.xml");
-				MyUtils.writeXmlFile((Element)newRootElement.clone(), "./conf/xml/" + "portal.xml");
+				XmlUtils.writeXmlFile((Element)newRootElement.clone(), "./conf/xml/" + "portal.xml");
 			} catch (TechnicalException e) {
 				e.printStackTrace();
 			}

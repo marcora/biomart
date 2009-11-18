@@ -21,6 +21,7 @@ import java.util.zip.GZIPInputStream;
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.MyUtils;
+import org.biomart.common.general.utils.XmlUtils;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.objects.helpers.DatabaseParameter;
 import org.jdom.Document;
@@ -486,7 +487,7 @@ public class DatabaseCheck {
 				document = builder.build(is);	
 				
 				MyUtils.writeSerializedObject(document, templateXmlSerialFilePathAndName);			
-				MyUtils.writeXmlFile(document, templateXmlFilePathAndName);
+				XmlUtils.writeXmlFile(document, templateXmlFilePathAndName);
 			}
 		} catch (SQLException e) {
 			throw new TechnicalException(e);

@@ -6,8 +6,8 @@ import java.util.Comparator;
 
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.utils.CompareUtils;
+import org.biomart.common.general.utils.XmlUtils;
 import org.biomart.objects.MartConfiguratorConstants;
-import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.transformation.helpers.TransformationUtils;
 import org.jdom.Element;
 
@@ -34,7 +34,7 @@ public class OldNode extends Object implements Comparable<OldNode>, Comparator<O
 		this(jdomDatasetConfig);
 		if (jdomDatasetConfig.getAttributes().size()>0 || jdomDatasetConfig.getChildren().size()>0) {
 			throw new FunctionalException("Not a basic XML node, " +
-					"jdomDatasetConfig = " + MartConfiguratorUtils.displayJdomElement(jdomDatasetConfig));
+					"jdomDatasetConfig = " + XmlUtils.displayJdomElement(jdomDatasetConfig));
 		}
 	}
 	
