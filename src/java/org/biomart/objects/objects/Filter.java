@@ -33,14 +33,14 @@ public abstract class Filter extends org.biomart.objects.objects.Element	// to a
 	public Filter() {} 	// for Serialization
 	protected Filter(PartitionTable mainPartitionTable, String name) {
 		this(mainPartitionTable, name, 
-				null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+				null, null, null, null, null, null, null, null, null, null, null, null, null, null);
 	}
 	protected Filter(PartitionTable mainPartitionTable, String name, String displayName, String description, Boolean visible, 
-			String locationName, String martName, Integer version, String datasetName, String configName, String tableName, String keyName, String fieldName, 
+			String locationName, String martName, Integer version, String datasetName, String configName, 
 			List<String> targetRangeList, Boolean selectedByDefault, Boolean pointer, String pointedElementName, Boolean checkForNulls, 
 			List<String> sourceRangeList) {
 		super(mainPartitionTable, name, displayName, description, visible, XML_ELEMENT_NAME, 
-				locationName, martName, version, datasetName, configName, tableName, keyName, fieldName, targetRangeList, selectedByDefault, 
+				locationName, martName, version, datasetName, configName, targetRangeList, selectedByDefault, 
 				pointer, pointedElementName, checkForNulls, sourceRangeList);
 	}
 	

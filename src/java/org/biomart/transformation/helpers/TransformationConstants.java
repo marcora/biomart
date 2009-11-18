@@ -122,5 +122,11 @@ public class TransformationConstants {
 	public static final String MAIN_PARTITION_FILTER_NAME = "main_partition_filter";
 	public static final String MAIN_PARTITION_FILTER_DISPLAY_NAME = "Main partition filter";
 	
+	// For attributes generated because a filter exists on the given relational info,
+	// but either there are no counterpart attributes or there are more than one (with split range)
+	public static final String GENERATED_ATTRIBUTES_CONTAINER_NAME = "TRANSFORMATION_GENERATED_ATTRIBUTES";
+	public static final String GENERATED_ATTRIBUTE_PREFIX = "G";
+	public static final String GENERATED_ATTRIBUTE_INFO_SEPARATOR = "___";
+	
 }
 

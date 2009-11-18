@@ -19,6 +19,8 @@ public class SimpleFilter extends Filter implements Serializable {
 
 	public static void main(String[] args) {}
 
+	protected String attributeName = null;
+
 	protected String displayType = null;
 	protected Boolean multiValue = null;	// Not sure applicable for trees
 	protected String orderBy = null;	// TODO Make <field> an object so we reference it instead of keeping the name?
@@ -57,6 +59,9 @@ public class SimpleFilter extends Filter implements Serializable {
 	public String toString() {
 		return 
 			super.toString() + ", " +
+			
+			"attributeName = " + attributeName + ", " +
+			
 			"displayType = " + displayType + ", " + 
 			"multiValue = " + multiValue + ", " +
 			"orderBy = " + orderBy + ", " +
@@ -73,7 +78,7 @@ public class SimpleFilter extends Filter implements Serializable {
 			"partition = " + partition;
 	}
 
-	/*@Override
+	@Override
 	public boolean equals(Object object) {
 		if (this==object) {
 			return true;
@@ -84,6 +89,8 @@ public class SimpleFilter extends Filter implements Serializable {
 		SimpleFilter simpleFilter=(SimpleFilter)object;
 		return (
 				super.equals(simpleFilter) &&
+				(this.attributeName==simpleFilter.attributeName || (this.attributeName!=null && attributeName.equals(simpleFilter.attributeName)))/* &&
+				
 				(this.displayType==simpleFilter.displayType || (this.displayType!=null && displayType.equals(simpleFilter.displayType))) &&
 				(this.orderBy==simpleFilter.orderBy || (this.orderBy!=null && orderBy.equals(simpleFilter.orderBy))) &&
 				(this.multiValue==simpleFilter.multiValue || (this.multiValue!=null && multiValue.equals(simpleFilter.multiValue))) &&
@@ -100,11 +107,11 @@ public class SimpleFilter extends Filter implements Serializable {
 				(this.partition==simpleFilter.partition || (this.partition!=null && partition.equals(simpleFilter.partition))) &&
 				
 				(this.tree==simpleFilter.tree || (this.tree!=null && tree.equals(simpleFilter.tree)))
-				//(this.treeFilterData==simpleFilter.treeFilterData || (this.treeFilterData!=null && treeFilterData.equals(simpleFilter.treeFilterData)))				
+				//(this.treeFilterData==simpleFilter.treeFilterData || (this.treeFilterData!=null && treeFilterData.equals(simpleFilter.treeFilterData)))*/
 		);
 	}
 
-	@Override
+	/*@Override
 	public int hashCode() {
 		int hash = MartConfiguratorConstants.HASH_SEED1;
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + super.hashCode();
@@ -128,6 +135,13 @@ public class SimpleFilter extends Filter implements Serializable {
 
 		return hash;
 	}*/
+	
+	public String getAttributeName() {
+		return attributeName;
+	}
+	public void setAttributeName(String attributeName) {
+		this.attributeName = attributeName;
+	}
 	
 	// List related
 	public ElementList getElementList() {
@@ -240,6 +254,8 @@ public class SimpleFilter extends Filter implements Serializable {
 				this.displayType!=null && !MyUtils.isEmpty(this.displayType)), this.name + ", " + this.displayType);
 		
 		if (!partition) {
+			MartConfiguratorUtils.addAttribute(element, "attributeName", this.attributeName);
+			
 			MartConfiguratorUtils.addAttribute(element, "orderBy", this.orderBy);
 			
 			MartConfiguratorUtils.addAttribute(element, "displayType", this.displayType);
@@ -277,6 +293,7 @@ public class SimpleFilter extends Filter implements Serializable {
 	public SimpleFilter(SimpleFilter simpleFilter, Part part, Boolean generic) throws FunctionalException {	// creates a light clone (temporary solution)
 		super(simpleFilter, part);
 		
+		this.attributeName = MartConfiguratorUtils.replacePartitionReferencesByValues(simpleFilter.attributeName, part);
 		this.displayType = MartConfiguratorUtils.replacePartitionReferencesByValues(simpleFilter.displayType, part);
 		this.orderBy = simpleFilter.orderBy;
 		this.multiValue = simpleFilter.multiValue;
@@ -303,6 +320,8 @@ public class SimpleFilter extends Filter implements Serializable {
 
 	public Jsoml generateOutputForWebService(boolean xml) throws FunctionalException {
 		Jsoml jsoml = super.generateOutputForWebService(xml);
+		
+		jsoml.setAttribute("attributeName", this.attributeName);
 		
 		jsoml.setAttribute("orderBy", this.orderBy);
 		

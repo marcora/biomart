@@ -1,6 +1,8 @@
 package org.biomart.transformation;
 
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -15,6 +17,8 @@ import org.biomart.objects.objects.PartitionTable;
 import org.biomart.objects.objects.Range;
 import org.biomart.objects.objects.types.FilterDisplayType;
 import org.biomart.transformation.helpers.DimensionPartition;
+import org.biomart.transformation.helpers.RelationalInfo;
+import org.biomart.transformation.helpers.TransformationConstants;
 import org.biomart.transformation.helpers.TransformationGeneralVariable;
 import org.biomart.transformation.helpers.TransformationHelper;
 import org.biomart.transformation.helpers.TransformationParameter;
@@ -221,5 +225,48 @@ public class AttributeTransformation extends ElementTransformation {
 				currentMainRow, templateAttribute.getLinkURL(), newAttribute.getLinkURL(), firstSpecific, mainRowsSet));
 		
 		return templateAttribute;
+	}
+	
+	/**
+	 * Generates an attribute for a filter that exists for a given relational info, 
+	 * but either there are no counterpart attributes or there are more than one (with split range)
+	 */
+	public Attribute createNewAttribute(RelationalInfo relationalInfo, Container rootContainer) throws FunctionalException, TechnicalException {
+		Attribute generatedAttribute = null;
+		
+		String generatedAttributeName = TransformationUtils.generateUniqueIdentiferForGeneratedAttribute(relationalInfo);
+		generatedAttribute = new Attribute(vars.getMainPartitionTable(), generatedAttributeName);
+		
+		generatedAttribute.setPointer(false);
+		
+		generatedAttribute.setLocationName(vars.getCurrentPath().getLocationName());
+		generatedAttribute.setMartName(vars.getCurrentPath().getMartName());
+		generatedAttribute.setVersion(vars.getCurrentPath().getMartVersion());
+		generatedAttribute.setDatasetName(vars.getCurrentPath().getDatasetName());
+		generatedAttribute.setConfigName(vars.getCurrentPath().getConfigName());
+		
+		generatedAttribute.setTableName(relationalInfo.getTableName());
+		generatedAttribute.setKeyName(relationalInfo.getKeyName());
+		generatedAttribute.setFieldName(relationalInfo.getColumnName());
+		
+		generatedAttribute.setSelectedByDefault(false);
+		
+		// Leave targetRange as is (no elements => invisible)
+		
+		// Add it to map of attributes and map for relational info
+		vars.getAttributeMap().put(generatedAttributeName, generatedAttribute);
+		vars.getRelationalInfoToAttributeMap().put(
+				relationalInfo, new ArrayList<Attribute>(Arrays.asList(new Attribute[] {generatedAttribute})));
+		
+		// If does not exist, create and add container for it
+		Container container = rootContainer.getContainer(TransformationConstants.GENERATED_ATTRIBUTES_CONTAINER_NAME);
+		if (null==container) {
+			container = TransformationUtils.generateContainerForGeneratedAttributes();
+			rootContainer.addContainer(container);
+		}
+		
+		container.addAttribute(generatedAttribute);
+		
+		return generatedAttribute;
 	}
 }

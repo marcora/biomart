@@ -32,6 +32,7 @@ import org.biomart.transformation.helpers.DimensionPartition;
 import org.biomart.transformation.helpers.ElementChildrenType;
 import org.biomart.transformation.helpers.FilterOldDisplayType;
 import org.biomart.transformation.helpers.FilterOldStyle;
+import org.biomart.transformation.helpers.RelationalInfo;
 import org.biomart.transformation.helpers.TransformationConstants;
 import org.biomart.transformation.helpers.TransformationGeneralVariable;
 import org.biomart.transformation.helpers.TransformationHelper;
@@ -662,9 +663,6 @@ public class FilterTransformation extends ElementTransformation {
 				MyUtils.checkStatusProgram(!vars.isTemplate() || currentMainRowNumber==null);	// Assume no part-specific cases like this
 									
 				// Discard provided value for these properties (make no sense)
-				groupFilter.setTableName(null);
-				groupFilter.setKeyName(null);
-				groupFilter.setFieldName(null);
 				groupFilter.setVisible(null);
 				
 				// dataFolderPath is children dependent
@@ -1045,6 +1043,55 @@ public class FilterTransformation extends ElementTransformation {
 		
 		Container rootContainer = config.getRootContainer();
 		rootContainer.addContainer(partitionFilterContainer);
+	}
+	
+	public void updateFilters(AttributeTransformation attributeTransformation, Container rootContainer) 
+	throws FunctionalException, TechnicalException {
+		for (Filter filter : vars.getFilterMap().values()) {
+			if (filter instanceof SimpleFilter && !filter.getPointer()) {	// treat pointers differently (later)
+				SimpleFilter simpleFilter = (SimpleFilter)filter;
+				if (!simpleFilter.getPartition()) {	// no need for an attribute when a partition filter
+					RelationalInfo relationalInfo = vars.getSimpleFilterToRelationInfoMap().get(simpleFilter);
+					MyUtils.checkStatusProgram(null!=relationalInfo, "simpleFilter = " + simpleFilter);
+					List<Attribute> attributeListForRelationInfo = vars.getRelationalInfoToAttributeMap().get(relationalInfo);
+					
+					/*
+					 * Either there is only one, in which case use it, otherwise generate an attribute for it
+					 */
+					String attributeName = null;
+					if (null!=attributeListForRelationInfo && attributeListForRelationInfo.size()==1) {
+						/*displayMatchingList(relationalInfo, attributeListForRelationInfo);*/
+						Attribute attribute = attributeListForRelationInfo!=null ? 
+								attributeListForRelationInfo.get(0) : null;
+						attributeName = attribute.getName();
+					} else {
+						
+						// Must create an attribute for this relational info
+						Attribute generatedAttribute = attributeTransformation.createNewAttribute(relationalInfo, rootContainer);
+						attributeName = generatedAttribute.getName();
+					}
+					simpleFilter.setAttributeName(attributeName);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Displays attributes that match the relational info for that pointer
+	 * @param relationalInfo
+	 * @param attributeListForRelationInfo
+	 */
+	@SuppressWarnings("unused")	// TODO to keep for now
+	private static void displayMatchingList(RelationalInfo relationalInfo,
+			List<Attribute> attributeListForRelationInfo) {
+		if (attributeListForRelationInfo!=null && attributeListForRelationInfo.size()>1) {
+			System.out.println("more than one for " + relationalInfo);
+			for (Attribute attribute : attributeListForRelationInfo) {
+				System.out.println("\t" + attribute.getName() + " - " + attribute.getTargetRange().getXmlValue());
+			}
+			System.out.println();
+			MyUtils.pressKeyToContinue();
+		}
 	}
 }
 

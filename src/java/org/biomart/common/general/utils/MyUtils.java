@@ -34,7 +34,6 @@ import java.util.TreeSet;
 import org.biomart.common.general.constants.MyConstants;
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
-import org.biomart.martRemote.MartRemoteConstants;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -937,9 +936,9 @@ public class MyUtils {
 		
 		return trimmedHost;
 	}
-	public static String getProperty(String propertyName) throws FileNotFoundException, IOException {
+	public static String getProperty(String propertyFile, String propertyName) throws FileNotFoundException, IOException {
 		Properties properties = new Properties();
-		properties.load(new FileInputStream(MartRemoteConstants.QUERY_TEST_PROPERTIES_FILE_PATH_AND_NAME));
+		properties.load(new FileInputStream(propertyFile));
 		return properties.getProperty(propertyName);
 	}
 	

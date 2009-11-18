@@ -19,6 +19,10 @@ public class Attribute extends Element implements /*Comparable<Attribute>, Compa
 	
 	public static void main(String[] args) {}
 
+	protected String tableName = null;
+	protected String keyName = null;
+	protected String fieldName = null;
+	
 	private Integer maxLength = null;
 	private String linkURL = null;
 
@@ -32,10 +36,37 @@ public class Attribute extends Element implements /*Comparable<Attribute>, Compa
 			List<String> sourceRangeList,
 			Integer maxLength, String linkURL) {
 		super(mainPartitionTable, name, displayName, description, visible, XML_ELEMENT_NAME,
-				locationName, martName, version, datasetName, configName, tableName, keyName, fieldName, targetRangeList, selectedByDefault, 
+				locationName, martName, version, datasetName, configName, targetRangeList, selectedByDefault, 
 				pointer, pointedElementName, checkForNulls, sourceRangeList);
+		this.tableName = tableName;
+		this.keyName = keyName;
+		this.fieldName = fieldName;
 		this.maxLength = maxLength;
 		this.linkURL = linkURL;
+	}
+
+	public String getTableName() {
+		return tableName;
+	}
+
+	public String getKeyName() {
+		return keyName;
+	}
+
+	public String getFieldName() {
+		return fieldName;
+	}
+
+	public void setTableName(String tableName) {
+		this.tableName = tableName;
+	}
+
+	public void setKeyName(String keyName) {
+		this.keyName = keyName;
+	}
+
+	public void setFieldName(String fieldName) {
+		this.fieldName = fieldName;
 	}
 
 	public Integer getMaxLength() {
@@ -58,11 +89,14 @@ public class Attribute extends Element implements /*Comparable<Attribute>, Compa
 	public String toString() {
 		return 
 			super.toString() + ", " + 
+			"tableName = " + tableName + ", " +
+			"keyName = " + keyName + ", " +
+			"fieldName = " + fieldName + ", " +
 			"maxLength = " + maxLength + ", " +
 			"linkURL = " + linkURL;
 	}
-
-	/*@Override
+	
+	@Override
 	public boolean equals(Object object) {
 		if (this==object) {
 			return true;
@@ -73,12 +107,16 @@ public class Attribute extends Element implements /*Comparable<Attribute>, Compa
 		Attribute attribute=(Attribute)object;
 		return (
 				super.equals(attribute) &&
-				(this.maxLength==attribute.maxLength || (this.maxLength!=null && maxLength.equals(attribute.maxLength))) &&
-				(this.linkURL==attribute.linkURL || (this.linkURL!=null && linkURL.equals(attribute.linkURL)))
+				
+				(this.tableName==attribute.tableName || (this.tableName!=null && tableName.equals(attribute.tableName))) &&
+				(this.keyName==attribute.keyName || (this.keyName!=null && keyName.equals(attribute.keyName))) &&
+				(this.fieldName==attribute.fieldName || (this.fieldName!=null && fieldName.equals(attribute.fieldName)))
+				/*(this.maxLength==attribute.maxLength || (this.maxLength!=null && maxLength.equals(attribute.maxLength))) &&
+				(this.linkURL==attribute.linkURL || (this.linkURL!=null && linkURL.equals(attribute.linkURL)))*/
 		);
 	}
 
-	@Override
+	/*@Override
 	public int hashCode() {
 		int hash = MartConfiguratorConstants.HASH_SEED1;
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + super.hashCode();
@@ -90,6 +128,9 @@ public class Attribute extends Element implements /*Comparable<Attribute>, Compa
 	public org.jdom.Element generateXml() throws FunctionalException {
 		
 		org.jdom.Element element = super.generateXml();
+		MartConfiguratorUtils.addAttribute(element, "table", this.tableName);
+		MartConfiguratorUtils.addAttribute(element, "key", this.keyName);
+		MartConfiguratorUtils.addAttribute(element, "field", this.fieldName);
 		MartConfiguratorUtils.addAttribute(element, "maxLength", this.maxLength);
 		MartConfiguratorUtils.addAttribute(element, "linkURL", this.linkURL);
 		

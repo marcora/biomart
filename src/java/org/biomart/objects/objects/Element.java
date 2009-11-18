@@ -22,10 +22,6 @@ public abstract class Element extends MartConfiguratorObject implements Serializ
 	protected Boolean checkForNulls = null;
 	
 	protected Boolean pointer = null;
-
-	protected String tableName = null;
-	protected String keyName = null;
-	protected String fieldName = null;
 	
 	protected String pointedElementName = null;
 	
@@ -47,7 +43,7 @@ public abstract class Element extends MartConfiguratorObject implements Serializ
 	
 	public Element() {} 	// for Serialization
 	protected Element(PartitionTable mainPartitionTable, String name, String displayName, String description, Boolean visible, String xmlElementName,
-			String locationName, String martName, Integer version, String datasetName, String configName, String tableName, String keyName, String fieldName, 
+			String locationName, String martName, Integer version, String datasetName, String configName, 
 			List<String> targetRangeList, Boolean selectedByDefault, Boolean pointer, String pointedElementName, Boolean checkForNulls, List<String> sourceRangeList) {
 		super(name, displayName, description, visible, xmlElementName);
 		
@@ -56,9 +52,6 @@ public abstract class Element extends MartConfiguratorObject implements Serializ
 		this.version = version;
 		this.datasetName = datasetName;
 		this.configName = configName;
-		this.tableName = tableName;
-		this.keyName = keyName;
-		this.fieldName = fieldName;
 		this.selectedByDefault = selectedByDefault;
 		this.pointer = pointer;
 		this.pointedElementName = pointedElementName;
@@ -103,18 +96,6 @@ public abstract class Element extends MartConfiguratorObject implements Serializ
 		return configName;
 	}
 
-	public String getTableName() {
-		return tableName;
-	}
-
-	public String getKeyName() {
-		return keyName;
-	}
-
-	public String getFieldName() {
-		return fieldName;
-	}
-
 	public Boolean getSelectedByDefault() {
 		return selectedByDefault;
 	}
@@ -149,18 +130,6 @@ public abstract class Element extends MartConfiguratorObject implements Serializ
 
 	public void setConfigName(String configName) {
 		this.configName = configName;
-	}
-
-	public void setTableName(String tableName) {
-		this.tableName = tableName;
-	}
-
-	public void setKeyName(String keyName) {
-		this.keyName = keyName;
-	}
-
-	public void setFieldName(String fieldName) {
-		this.fieldName = fieldName;
 	}
 
 	public void setSelectedByDefault(Boolean selectedByDefault) {
@@ -203,9 +172,6 @@ public abstract class Element extends MartConfiguratorObject implements Serializ
 			"version = " + version + ", " +
 			"datasetName = " + datasetName + ", " +
 			"configName = " + configName + ", " +
-			"tableName = " + tableName + ", " +
-			"keyName = " + keyName + ", " +
-			"fieldName = " + fieldName + ", " +
 			"checkForNulls = " + checkForNulls + ", " +
 			"pointedElementName = " + pointedElementName + ", " +
 			"targetRange = " + targetRange + ", " +
@@ -223,14 +189,16 @@ public abstract class Element extends MartConfiguratorObject implements Serializ
 		Element element=(Element)object;
 		return (
 			(super.equals(element)) &&
+			(this.getClass().equals(object.getClass())) &&
 			(this.pointer ? 
 					(
 							(this.datasetName==element.datasetName || (this.datasetName!=null && datasetName.equals(element.datasetName))) &&
 							(this.pointedElementName==element.pointedElementName || (this.pointedElementName!=null && pointedElementName.equals(element.pointedElementName)))
 					) : (
-							(this.tableName==element.tableName || (this.tableName!=null && tableName.equals(element.tableName))) &&
+							true
+							/*(this.tableName==element.tableName || (this.tableName!=null && tableName.equals(element.tableName))) &&
 							(this.keyName==element.keyName || (this.keyName!=null && keyName.equals(element.keyName))) &&
-							(this.fieldName==element.fieldName || (this.fieldName!=null && fieldName.equals(element.fieldName)))
+							(this.fieldName==element.fieldName || (this.fieldName!=null && fieldName.equals(element.fieldName)))*/
 					)
 			)
 			/*(this.selectedByDefault==element.selectedByDefault || (this.selectedByDefault!=null && selectedByDefault.equals(element.selectedByDefault))) &&
@@ -290,9 +258,6 @@ public abstract class Element extends MartConfiguratorObject implements Serializ
 		MartConfiguratorUtils.addAttribute(element, "version", this.version);
 		MartConfiguratorUtils.addAttribute(element, "dataset", this.datasetName);
 		MartConfiguratorUtils.addAttribute(element, "config", this.configName);
-		MartConfiguratorUtils.addAttribute(element, "table", this.tableName);
-		MartConfiguratorUtils.addAttribute(element, "key", this.keyName);
-		MartConfiguratorUtils.addAttribute(element, "field", this.fieldName);
 		MartConfiguratorUtils.addAttribute(element, "default", this.selectedByDefault);
 		MartConfiguratorUtils.addAttribute(element, "pointer", this.pointer);
 		MartConfiguratorUtils.addAttribute(element, pointedElementType, this.pointedElementName);

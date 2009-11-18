@@ -103,7 +103,8 @@ public class MartApi {
 		} else if (MartRemoteEnum.GET_LINKS.equals(remoteAccessEnum)) {
 			martServiceRequest = martApi.prepareGetLinks(username, password, format, datasetName);			
 		} else if (MartRemoteEnum.QUERY.equals(remoteAccessEnum)) {
-			martServiceRequest = martApi.prepareQuery(username, password, format, MyUtils.getProperty(query));			
+			martServiceRequest = martApi.prepareQuery(username, password, format, 
+					MyUtils.getProperty(MartRemoteConstants.QUERY_TEST_PROPERTIES_FILE_PATH_AND_NAME, query));			
 		}
 		
 		if (!martServiceRequest.isValid()) {

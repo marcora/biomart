@@ -167,6 +167,9 @@ public class DatasetTransformation {
 		// Transform all the attribute descriptions
 		attributeTransformation.transformElementsDescriptions(filterTransformation, oldAttributeDescriptionMap);
 		
+		// Update filters with their counterpart attributes, creating them as invisible if non-existent
+		filterTransformation.updateFilters(attributeTransformation, rootContainer);
+		
 		// Transform any pointed remote dataset
 		pointerTransformation.transformPointedDatasets();
 		

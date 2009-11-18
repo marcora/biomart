@@ -34,6 +34,7 @@ import org.biomart.transformation.helpers.ContainerPath;
 import org.biomart.transformation.helpers.DimensionPartition;
 import org.biomart.transformation.helpers.DimensionPartitionNameAndKeyAndValue;
 import org.biomart.transformation.helpers.NamingConventionTableName;
+import org.biomart.transformation.helpers.RelationalInfo;
 import org.biomart.transformation.helpers.TableNameAndKeyName;
 import org.biomart.transformation.helpers.TransformationConstants;
 import org.biomart.transformation.helpers.TransformationGeneralVariable;
@@ -439,11 +440,19 @@ public abstract class ElementTransformation {
 			newElement.setConfigName(vars.getCurrentPath().getConfigName());
 			
 			String keyName = help.replaceAliases(oldElement.getKey());
-			String fieldName = help.replaceAliases(oldElement.getField());
+			String columnName = help.replaceAliases(oldElement.getField());
 			
-			newElement.setTableName(tableName);
-			newElement.setKeyName(keyName);
-			newElement.setFieldName(fieldName);
+			if (newElement instanceof Attribute) {	// TODO move to there respective location
+				Attribute attribute = (Attribute)newElement;
+				
+				attribute.setTableName(tableName);
+				attribute.setKeyName(keyName);
+				attribute.setFieldName(columnName);
+			} else if (newElement instanceof SimpleFilter){
+				SimpleFilter simpleFilter = (SimpleFilter)newElement;
+				RelationalInfo relationalInfo = new RelationalInfo(tableName, keyName, columnName);
+				vars.getSimpleFilterToRelationInfoMap().put(simpleFilter, relationalInfo);
+			}
 		}
 	}
 	
@@ -477,7 +486,7 @@ public abstract class ElementTransformation {
 		} else if (null!=nonSpecificTemplateElement) {
 			MyUtils.checkStatusProgram(currentMainRow!=null);
 			MyUtils.checkStatusProgram(pushActionTemplateFilter==null && dimensionPartitionTemplateAttribute==null);
-			
+						
 			newElement = isAttribute ? 
 					updateNonSpecificTemplateAttribute((Attribute)nonSpecificTemplateElement, (Attribute)newElement, currentMainRow, firstSpecific) :
 					updateNonSpecificTemplateFilter((Filter)nonSpecificTemplateElement, (Filter)newElement, currentMainRow, firstSpecific);
@@ -490,8 +499,21 @@ public abstract class ElementTransformation {
 		// Add element to tree and map if new template or if updating a pushAction (in which case template is almost an empty shell and wasn't added before)
 		if (null==nonSpecificTemplateElement && null==dimensionPartitionTemplateAttribute) {
 			if (isAttribute) {
-				container.addAttribute((Attribute)newElement);
-				vars.getAttributeMap().put(elementName, (Attribute)newElement);
+				Attribute newAttribute = (Attribute)newElement;
+				container.addAttribute(newAttribute);
+				vars.getAttributeMap().put(elementName, newAttribute);
+				
+				// If not a pointer, add it to the list of attributes for that relational info
+				RelationalInfo relationalInfo = new RelationalInfo(newAttribute.getTableName(), newAttribute.getKeyName(), newAttribute.getFieldName());
+				if (!newAttribute.getPointer()) {	
+					//vars.getRelationalInfoToAttributeMap().put(relationalInfo, newAttribute);	// if more than one, will put the last one
+					List<Attribute> attributeList = vars.getRelationalInfoToAttributeMap().get(relationalInfo);
+					if (attributeList==null) {	
+						attributeList = new ArrayList<Attribute>();
+					}
+					attributeList.add(newAttribute);
+					vars.getRelationalInfoToAttributeMap().put(relationalInfo, attributeList);	// if more than one, will put the last one				
+				}
 			} else {
 				container.addFilter((Filter)newElement);
 				vars.getFilterMap().put(elementName, (Filter)newElement);
@@ -523,10 +545,38 @@ public abstract class ElementTransformation {
 		targetRange.addRangePartitionRow(mainPartitionTable, currentMainRow);
 		
 		// Check that all these properties are the same, exception made for the first specific which can define the 1st values for some properties
-		if (templateElement.getTableName()==null || 
-				!templateElement.getTableName().equals(newElement.getTableName())) {	// Can't even be null
-			throw new FunctionalException("Unhandled");
-		}	//TODO what if pointer?
+		Set<Integer> mainRowsSet = targetRange.getMainRowsSet();
+		
+		// Check the relational info
+		if (templateElement instanceof Attribute) {
+			Attribute templateAttribute = (Attribute)templateElement;
+			Attribute newAttribute = (Attribute)templateElement;
+			
+			if (templateAttribute.getTableName()==null || 
+				!templateAttribute.getTableName().equals(newAttribute.getTableName())) {	// Can't even be null
+				throw new FunctionalException("Unhandled");
+			}
+			
+			templateAttribute.setKeyName(updateSpecificProperty(
+				currentMainRow, templateAttribute.getKeyName(), newAttribute.getKeyName(), firstSpecific, mainRowsSet));
+			templateAttribute.setFieldName(updateSpecificProperty(
+				currentMainRow, templateAttribute.getFieldName(), newAttribute.getFieldName(), firstSpecific, mainRowsSet));		
+		}
+		if (templateElement instanceof SimpleFilter) {
+			RelationalInfo templateRelationalInfo = vars.getSimpleFilterToRelationInfoMap().get((SimpleFilter)templateElement);
+			RelationalInfo newRelationalInfo = vars.getSimpleFilterToRelationInfoMap().get((SimpleFilter)newElement);
+			
+			if (templateRelationalInfo.getTableName()==null || 
+					!templateRelationalInfo.getTableName().equals(newRelationalInfo.getTableName())) {
+				throw new FunctionalException("Unhandled");
+			}
+			
+			templateRelationalInfo.setKeyName(updateSpecificProperty(
+					currentMainRow, templateRelationalInfo.getKeyName(), newRelationalInfo.getKeyName(), firstSpecific, mainRowsSet));
+			templateRelationalInfo.setColumnName(updateSpecificProperty(
+					currentMainRow, templateRelationalInfo.getColumnName(), newRelationalInfo.getColumnName(), firstSpecific, mainRowsSet));	
+		}
+		
 		if (!TransformationUtils.checkValidSpecificityString(templateElement.getLocationName(), newElement.getLocationName(), firstSpecific) ||
 				!TransformationUtils.checkValidSpecificityString(templateElement.getMartName(), newElement.getMartName(), firstSpecific) ||
 				!TransformationUtils.checkValidSpecificityInteger(templateElement.getVersion(), newElement.getVersion(), firstSpecific) ||
@@ -543,17 +593,12 @@ public abstract class ElementTransformation {
 		}
 		
 		// Update properties that are allowed to be part specific
-		Set<Integer> mainRowsSet = targetRange.getMainRowsSet();
 		templateElement.setName(updateSpecificProperty(
 				currentMainRow, templateElement.getName(), newElement.getName(), firstSpecific, mainRowsSet));
 		templateElement.setDisplayName(updateSpecificProperty(
 				currentMainRow, templateElement.getDisplayName(), newElement.getDisplayName(), firstSpecific, mainRowsSet));
-		templateElement.setKeyName(updateSpecificProperty(
-				currentMainRow, templateElement.getKeyName(), newElement.getKeyName(), firstSpecific, mainRowsSet));
 		templateElement.setDescription(updateSpecificProperty(
 				currentMainRow, templateElement.getDescription(), newElement.getDescription(), firstSpecific, mainRowsSet));
-		templateElement.setFieldName(updateSpecificProperty(
-				currentMainRow, templateElement.getFieldName(), newElement.getFieldName(), firstSpecific, mainRowsSet));
 	}
 
 	abstract Attribute updateNonSpecificTemplateAttribute(Attribute templateAttribute, Attribute newAttribute, 

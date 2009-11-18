@@ -16,13 +16,9 @@ import org.biomart.common.general.constants.MyConstants;
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.MyUtils;
-import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.objects.helpers.DatabaseParameter;
 import org.biomart.objects.helpers.Rdbs;
-import org.biomart.objects.objects.Attribute;
-import org.biomart.objects.objects.Filter;
 import org.biomart.objects.objects.MartRegistry;
-import org.biomart.objects.objects.SimpleFilter;
 import org.biomart.old.martService.Configuration;
 import org.biomart.old.martService.MartServiceConstants;
 import org.biomart.old.martService.objects.DatasetInMart;
@@ -134,7 +130,7 @@ public class TransformationMain {
 				MyUtils.writeSerializedObject(martRegistry, "./conf/files/" + "portal.serial");
 				MyUtils.writeXmlFile(newRootElement, "./conf/xml/" + 
 						(webServiceTransformation ? "web" : "rdbms") + "_portal.xml");
-				MyUtils.writeXmlFile(newRootElement, "./conf/xml/" + "portal.xml");
+				MyUtils.writeXmlFile((Element)newRootElement.clone(), "./conf/xml/" + "portal.xml");
 			} catch (TechnicalException e) {
 				e.printStackTrace();
 			}
@@ -360,7 +356,7 @@ if (currentMart.martName.equals("ensembl_expressionmart_48") && biomartPortalDat
 		return transformation;
 	}
 	
-	@SuppressWarnings("all")	// TODO delete when finished
+	/*@SuppressWarnings("all")	// TODO delete when finished
 	public static void detectFiltersWithNoCounterpartAttributes(Transformation transformation) throws FunctionalException {
 		List<Attribute> attributeList = transformation.getFullAttributeList();
 		List<Filter> filterList = transformation.getFullFilterList();
@@ -387,7 +383,7 @@ if (currentMart.martName.equals("ensembl_expressionmart_48") && biomartPortalDat
 				}
 			}
 		}
-	}
+	}*/
 	
 	public static Configuration expandWebServiceConfigurationMap(MartServiceIdentifier martServiceIdentifier) throws FunctionalException, TechnicalException {
 		String formattedMartServiceServer = martServiceIdentifier.formatMartServiceUrl();

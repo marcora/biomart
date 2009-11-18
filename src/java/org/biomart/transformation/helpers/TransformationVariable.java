@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.biomart.common.general.utils.MapSame;
 import org.biomart.common.general.utils.MyUtils;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.helpers.CurrentPath;
@@ -18,6 +19,7 @@ import org.biomart.objects.objects.Dataset;
 import org.biomart.objects.objects.Filter;
 import org.biomart.objects.objects.GroupFilter;
 import org.biomart.objects.objects.PartitionTable;
+import org.biomart.objects.objects.SimpleFilter;
 import org.biomart.objects.objects.Table;
 
 
@@ -60,6 +62,11 @@ public class TransformationVariable {
 	private Map<Integer, String> ddptColumnNumberToColumnNameMap = null;
 	private Map<String, Integer> ddptColumnNameToColumnNumberMap = null;
 	
+	// For filter to assiate them with an attribute
+	private MapSame<SimpleFilter, RelationalInfo> simpleFilterToRelationInfoMap = null;
+	//private HashMap<RelationalInfo, Attribute> relationalInfoToAttributeMap = null;
+	private HashMap<RelationalInfo, List<Attribute>> relationalInfoToAttributeMap2 = null;
+
 	// For filter with explicit filter list
 	private Map<GroupFilter, List<String>> filterWithFilterList = null;
 	
@@ -91,6 +98,10 @@ public class TransformationVariable {
 		this.dimensionPartitionsMap = new HashMap<DimensionPartitionNameAndKeyAndValue, DimensionPartition>();
 		this.ddptColumnNumberToColumnNameMap = new TreeMap<Integer, String>();
 		this.ddptColumnNameToColumnNumberMap = new TreeMap<String, Integer>();
+		
+		this.simpleFilterToRelationInfoMap = new MapSame<SimpleFilter, RelationalInfo>();
+		//this.relationalInfoToAttributeMap = new HashMap<RelationalInfo, Attribute>();
+		this.relationalInfoToAttributeMap2 = new HashMap<RelationalInfo, List<Attribute>>();
 		
 		this.filterWithFilterList = new HashMap<GroupFilter, List<String>>();
 		
@@ -313,7 +324,18 @@ public class TransformationVariable {
 		this.defaultPartitionReference = defaultPartitionReference;
 	}
 
+	public MapSame<SimpleFilter, RelationalInfo> getSimpleFilterToRelationInfoMap() {
+		return simpleFilterToRelationInfoMap;
+	}
+
 	public Map<GroupFilter, List<String>> getFilterWithFilterList() {
 		return filterWithFilterList;
+	}
+	
+	/*public HashMap<RelationalInfo, Attribute> getRelationalInfoToAttributeMap() {
+		return relationalInfoToAttributeMap;
+	}*/
+	public HashMap<RelationalInfo, List<Attribute>> getRelationalInfoToAttributeMap() {
+		return relationalInfoToAttributeMap2;
 	}
 }

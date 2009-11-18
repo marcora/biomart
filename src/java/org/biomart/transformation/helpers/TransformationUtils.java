@@ -15,6 +15,7 @@ import org.biomart.common.general.utils.CompareUtils;
 import org.biomart.common.general.utils.MyUtils;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.objects.helpers.PartitionReference;
+import org.biomart.objects.objects.Container;
 import org.biomart.objects.objects.PartitionTable;
 import org.biomart.old.martService.MartServiceConstants;
 import org.biomart.transformation.TransformationMain;
@@ -220,5 +221,16 @@ public class TransformationUtils {
 	}
 	public static String generateTransformationTypeFolderName(boolean webService, String databaseVersion) {
 		return (webService ? "web" : "rdbms" + databaseVersion);
+	}
+	
+	public static Container generateContainerForGeneratedAttributes() {
+		return new Container(
+				TransformationConstants.GENERATED_ATTRIBUTES_CONTAINER_NAME, TransformationConstants.GENERATED_ATTRIBUTES_CONTAINER_NAME, 
+				TransformationConstants.GENERATED_ATTRIBUTES_CONTAINER_NAME, false, null);
+	}
+	public static String generateUniqueIdentiferForGeneratedAttribute(RelationalInfo relationalInfo) {
+		return TransformationConstants.GENERATED_ATTRIBUTE_PREFIX + TransformationConstants.GENERATED_ATTRIBUTE_INFO_SEPARATOR + 
+		relationalInfo.getTableName() + TransformationConstants.GENERATED_ATTRIBUTE_INFO_SEPARATOR + relationalInfo.getKeyName() + 
+		TransformationConstants.GENERATED_ATTRIBUTE_INFO_SEPARATOR + relationalInfo.getColumnName();
 	}
 }
