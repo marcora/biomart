@@ -1,7 +1,0 @@
-host=localhost
-port=3306
-database=ac_default1
-username=root
-password=root
-query=select * from club
-output=/home/anthony/Desktop/club
