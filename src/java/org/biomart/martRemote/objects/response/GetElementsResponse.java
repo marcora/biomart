@@ -25,7 +25,9 @@ public abstract class GetElementsResponse extends GetContaineesResponse {
 		super.populateObjects();
 		
 		// Grab only the elements of interest
-		addElements(super.rootContainer, attribute);
+		if (super.dataset!=null && super.rootContainer!=null) {
+			addElements(super.rootContainer, attribute);
+		}
 	}
 	private void addElements(Container container, boolean attribute) {
 		List<MartConfiguratorObject> containeeList = container.getContaineeList();

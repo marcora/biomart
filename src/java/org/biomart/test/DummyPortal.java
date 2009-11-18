@@ -21,7 +21,12 @@ import org.jdom.Element;
 public class DummyPortal {
 
 	public static void main(String[] args) throws Exception {
-		
+		MartRegistry martRegistry = createDummyMartRegistry();
+		Element xml = martRegistry.generateXml();
+		System.out.println(MyUtils.writeXmlFile(xml, "/home/anthony/Desktop/dummyPortal.xml"));
+	}
+
+	public static MartRegistry createDummyMartRegistry() {
 		MartRegistry martRegistry = new MartRegistry();
 		
 		Location location = new Location("location0", "location0", "location0", true, "www.host0.com", "anonymous", LocationType.RDBMS);
@@ -70,8 +75,6 @@ public class DummyPortal {
 		groupFilter.getElementList().addElement(simpleFilter2);
 		groupFilter.setPointer(false);
 		container1.addFilter(groupFilter);
-		
-		Element xml = martRegistry.generateXml();
-		System.out.println(MyUtils.writeXmlFile(xml, "/home/anthony/Desktop/dummyPortal.xml"));
+		return martRegistry;
 	}
 }

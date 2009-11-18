@@ -11,9 +11,6 @@ public class GetRootContainerResponse extends GetContaineesResponse {
 	public GetRootContainerResponse(MartRegistry martRegistry, MartRemoteRequest martServiceRequest) {
 		super(martRegistry, martServiceRequest);
 	}
-	/*public List<Container> getContainerList() {
-		return super.containerList;
-	}*/
 	public Container getRootContainer() {
 		return super.rootContainer;
 	}
@@ -23,10 +20,9 @@ public class GetRootContainerResponse extends GetContaineesResponse {
 	
 	@Override
 	public Jsoml createOutputResponse(boolean xml, Jsoml root) throws FunctionalException {
-		root.addContent(super.rootContainer.generateOutputForWebService(xml));
-		/*for (Container container : this.containerList) {
-			root.addContent(container.generateOutputForWebService(xml));
-		}*/
+		if (null!=super.rootContainer) {
+			root.addContent(super.rootContainer.generateOutputForWebService(xml));
+		}
 		return root;
 	}
 }

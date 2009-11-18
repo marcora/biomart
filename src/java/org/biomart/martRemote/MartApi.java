@@ -72,15 +72,22 @@ public class MartApi {
 	public MartApi() throws FunctionalException, TechnicalException {
 		this(MartRemoteConstants.BIOMART_JAVA_SERIALIZED_PORTAL_FILE);
 	}
-	private MartApi(String portalSerialFileUrl) 
+	public MartApi(String portalSerialFileUrl) 
 				throws TechnicalException, FunctionalException {
 		this(false, false, null, null, portalSerialFileUrl);
 	}
+	public MartApi(MartRegistry martRegistry) throws TechnicalException, FunctionalException {
+		this(false, false, null, null, null, martRegistry);
+	}
 	/**
-	 * Constructor for development
+	 * Constructors for development
 	 */
 	public MartApi(boolean debug, boolean validateXml, 
-			String xsdFilePath, String xsdFileUrl, String portalSerialFileUrl) 
+			String xsdFilePath, String xsdFileUrl, String portalSerialFileUrl) throws TechnicalException, FunctionalException {
+		this(debug, validateXml, xsdFilePath, xsdFileUrl, portalSerialFileUrl, null);
+	}
+	public MartApi(boolean debug, boolean validateXml, 
+			String xsdFilePath, String xsdFileUrl, String portalSerialFileUrl, MartRegistry martRegistry) 
 				throws TechnicalException, FunctionalException {
 		
 		this.debug = debug;
@@ -108,6 +115,10 @@ public class MartApi {
 		}
         this.xmlParameters = new XmlParameters(this.validateXml, martServiceNamespace, xsiNamespace, xsdFilePath);
         
+        this.martRegistry = null!=martRegistry ? martRegistry : loadSerializedMartRegistry(portalSerialFileUrl);
+	}
+	
+	private MartRegistry loadSerializedMartRegistry(String portalSerialFileUrl) throws TechnicalException {
 		URL portalSerialUrl = null;
 		try {
 			portalSerialFileUrl = portalSerialFileUrl.startsWith(MyConstants.FILE_SYSTEM_PROTOCOL) ? 
@@ -116,7 +127,7 @@ public class MartApi {
 		} catch (MalformedURLException e) {
 			throw new TechnicalException(e.getMessage() + ": " + portalSerialFileUrl);
 		}
-		martRegistry = (MartRegistry)MyUtils.readSerializedObject(portalSerialUrl);//martRegistry = TransformationYongPrototype.wrappedRebuildCentralPortalRegistry();
+		return (MartRegistry)MyUtils.readSerializedObject(portalSerialUrl);
 	}
 
 	public MartRegistry getMartRegistry() {

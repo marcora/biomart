@@ -5,6 +5,8 @@ import net.sf.json.JSONObject;
 import org.biomart.common.general.utils.MyUtils;
 import org.biomart.common.general.utils.XmlUtils;
 import org.biomart.martRemote.objects.response.GetRegistryResponse;
+import org.biomart.objects.objects.MartRegistry;
+import org.biomart.test.DummyPortal;
 import org.jdom.Document;
 
 public class MartApiTesting {
@@ -14,9 +16,14 @@ public class MartApiTesting {
 	 */
 	public static void main(String[] args) throws Exception {
 		
+		@SuppressWarnings("unused")
+		MartRegistry dummyMartRegistry = DummyPortal.createDummyMartRegistry();
+		
 		// Instantiate API
 		System.out.println("Loading registry...");
-		MartApi martApi = new MartApi();
+		MartApi martApi = 
+			new MartApi();	// will use the serialized portal
+			//new MartApi(dummyMartRegistry);	// will take any MartRegistry object
 		System.out.println();
 		
 		// For instance obtain the registry (= list of mats)
@@ -46,9 +53,6 @@ public class MartApiTesting {
 		 * To narrow down to just 3 partitions (takes a while if not)
 		 */
 		String partitionFilterArgument = "main_partition_filter.\"hsapiens_gene_ensembl,mmusculus_gene_ensembl,celegans_gene_ensembl\"";
-		
-		Document xmlDocument2 = martApi.getRootContainer("anonymous", "", null, "gene_ensembl", partitionFilterArgument).getXmlDocument();
-		MyUtils.writeXmlFile(xmlDocument2, "/home/anthony/Desktop/yyyyy.xml");
 		
 		System.out.println("Getting root container...");
 		System.out.println(MyUtils.capString(
