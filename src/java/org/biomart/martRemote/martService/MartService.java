@@ -21,24 +21,24 @@ public class MartService {
 	}
 
 	public String getRootContainer(String username, String password, String format, String dataset, String partitionFilter) throws FunctionalException, TechnicalException {
-		return MartServiceHelper.getContainees(MartRemoteEnum.GET_ROOT_CONTAINER, username, password, format, dataset, partitionFilter);
+		return MartServiceHelper.getRootContainer(username, password, format, dataset, partitionFilter);
 	}
 	
 	public String getAttributes(String username, String password, String format, String dataset, String partitionFilter) throws FunctionalException, TechnicalException {
-		return MartServiceHelper.getContainees(MartRemoteEnum.GET_ATTRIBUTES, username, password, format, dataset, partitionFilter);
+		return MartServiceHelper.getAttributes(username, password, format, dataset, partitionFilter);
 	}
 	
 	public String getFilters(String username, String password, String format, String dataset, String partitionFilter) throws FunctionalException, TechnicalException {
-		return MartServiceHelper.getContainees(MartRemoteEnum.GET_FILTERS, username, password, format, dataset, partitionFilter);
+		return MartServiceHelper.getFilters(username, password, format, dataset, partitionFilter);
 	}
 
 	public String query(String username, String password, String format, String query) throws FunctionalException, TechnicalException {
 		return MartServiceHelper.query(username, password, format, query);
 	}
 
-	public String testXsd() {
+	/*public String testXsd() {
 		return "" + MartServiceHelper.martApi.getXsd();
-	}
+	}*/
 	
 	public String testPortal() {
 		return "" + MartServiceHelper.martApi.getMartRegistry();
@@ -53,6 +53,6 @@ public class MartService {
 	}
 	
 	public String test(String arg1, String arg2) {
-		return "ok2: " + arg1 + " " + arg2;
+		return "ok: " + arg1 + " " + arg2;
 	}
 }

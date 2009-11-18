@@ -250,7 +250,9 @@ public class SimpleFilter extends Filter implements Serializable {
 	public SimpleFilter(SimpleFilter simpleFilter, Part part, Boolean generic) throws FunctionalException {	// creates a light clone (temporary solution)
 		super(simpleFilter, part);
 		
-		this.attributeName = MartConfiguratorUtils.replacePartitionReferencesByValues(simpleFilter.attributeName, part);
+			// careful with equals and this (repetations of clones in martview)
+		//this.attributeName = MartConfiguratorUtils.replacePartitionReferencesByValues(simpleFilter.attributeName, part);
+		
 		this.displayType = MartConfiguratorUtils.replacePartitionReferencesByValues(simpleFilter.displayType, part);
 		this.orderBy = simpleFilter.orderBy;
 		this.multiValue = simpleFilter.multiValue;
@@ -277,8 +279,6 @@ public class SimpleFilter extends Filter implements Serializable {
 
 	public Jsoml generateOutputForWebService(boolean xml) throws FunctionalException {
 		Jsoml jsoml = super.generateOutputForWebService(xml);
-		
-		jsoml.setAttribute("attributeName", this.attributeName);
 		
 		jsoml.setAttribute("orderBy", this.orderBy);
 		

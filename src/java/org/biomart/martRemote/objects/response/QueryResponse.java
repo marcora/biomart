@@ -90,8 +90,6 @@ public class QueryResponse extends MartRemoteResponse {
 		
 		RestFulQuery restFulQuery = null;
 		
-		System.out.println(query.toString());
-		
 		try {
 			restFulQuery = new RestFulQuery(
 					MartServiceConstants.CENTRAL_PORTAL_MART_SERVICE_STRING_URL, query.getFormerVirtualSchema(), 

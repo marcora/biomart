@@ -936,10 +936,35 @@ public class MyUtils {
 		
 		return trimmedHost;
 	}
-	public static String getProperty(String propertyFile, String propertyName) throws FileNotFoundException, IOException {
-		Properties properties = new Properties();
-		properties.load(new FileInputStream(propertyFile));
-		return properties.getProperty(propertyName);
+	
+	public static String capString(String string) {
+		return capString(string, 1000);
+	}
+	public static String capString(String string, int capSize) {
+		return string.length()>=capSize ? string.substring(0, capSize) : string; 
+	}
+	
+	public static String wrappedGetProperty(String propertyFile, String propertyName) {
+		String property = null;
+		try {
+			property = getProperty(propertyFile, propertyName);
+		} catch (FunctionalException e) {
+			e.printStackTrace();
+		} catch (TechnicalException e) {
+			e.printStackTrace();
+		}
+		return property;
+	}
+	public static String getProperty(String propertyFile, String propertyName) throws FunctionalException, TechnicalException {
+		try {
+			Properties properties = new Properties();
+			properties.load(new FileInputStream(propertyFile));
+			return properties.getProperty(propertyName);
+		} catch (FileNotFoundException e) {
+			throw new FunctionalException(e);
+		} catch (IOException e) {
+			throw new TechnicalException(e);
+		}
 	}
 	
 	@SuppressWarnings("unchecked")

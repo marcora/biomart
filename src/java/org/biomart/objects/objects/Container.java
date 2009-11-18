@@ -162,7 +162,7 @@ public class Container extends MartConfiguratorObject implements Serializable {
 	public Container(Container container, List<Integer> mainRowNumbersWanted) throws FunctionalException {	// creates a light clone (temporary solution)
 		this(container.name, container.displayName, container.description, container.visible, container.queryRestriction);
 		
-		for (MartConfiguratorObject containee : this.containeeList) {
+		for (MartConfiguratorObject containee : container.containeeList) {
 			if (containee instanceof Container) {
 				if (containee.getVisible()) {	// Only the visible ones
 					Container containerClone = new Container((Container)containee, mainRowNumbersWanted); 

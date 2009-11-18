@@ -38,7 +38,7 @@ public class Mart extends MartConfiguratorObject implements Serializable {
 	public List<Dataset> getDatasetList() {
 		return new ArrayList<Dataset>(this.datasetList);
 	}
-	public Dataset getLocation(String name) {
+	public Dataset getDataset(String name) {
 		return (Dataset)super.getMartConfiguratorObjectByName(this.datasetList, name);
 	}
 

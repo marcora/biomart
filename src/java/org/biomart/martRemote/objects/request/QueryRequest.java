@@ -47,10 +47,13 @@ public class QueryRequest extends MartRemoteRequest {
 			throw new TechnicalException(e);
 		}
 		Element cloneRoot = (Element)queryDocumentTmp.getRootElement().clone();
-		this.queryDocument = MartRemoteUtils.createNewResponseXmlDocument(super.xmlParameters, type.getRequestName());
+		this.queryDocument = MartRemoteUtils.createNewMartRemoteXmlDocument(super.xmlParameters, type.getRequestName());
 		Element rootElement = this.queryDocument.getRootElement();
 		rootElement.addContent(cloneRoot);
-		MartRemoteUtils.validateXml(this.queryDocument, super.errorMessage);	// Validation with XSD
+		
+		if (this.xmlParameters.getValidate()) {		// valide only if required
+			MartRemoteUtils.validateXml(this.queryDocument, super.errorMessage);	// Validation with XSD
+		}
 	}
 	
 	@Override

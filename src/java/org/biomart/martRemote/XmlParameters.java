@@ -5,15 +5,25 @@ import org.jdom.Namespace;
 
 
 public class XmlParameters {
-	protected Namespace martServiceNamespace = null;
-	protected Namespace xsiNamespace = null;
-	protected String xsdFile = null;
+	private Boolean validate = null;
+	private Namespace martServiceNamespace = null;
+	private Namespace xsiNamespace = null;
+	private String xsdFile = null;
 	
-	public XmlParameters(Namespace martServiceNamespace, Namespace xsiNamespace, String xsdFile) {
+	public XmlParameters() {
+		this.validate = false;
+	}
+	public XmlParameters(boolean validate, Namespace martServiceNamespace, Namespace xsiNamespace, String xsdFile) {
+		this.validate = validate;
 		this.martServiceNamespace = martServiceNamespace;
 		this.xsiNamespace = xsiNamespace;
 		this.xsdFile = xsdFile;
 	}
+	
+	public Boolean getValidate() {
+		return validate;
+	}
+	
 	public Namespace getMartServiceNamespace() {
 		return martServiceNamespace;
 	}

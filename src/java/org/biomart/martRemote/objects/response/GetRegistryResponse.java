@@ -75,59 +75,66 @@ public class GetRegistryResponse extends MartRemoteResponse {
 		}
 		return root;
 	}
-	
-	/*protected Document createXmlResponse(Document document) {
-		Element root = document.getRootElement();
-		for (int i = 0; i < this.martList.size(); i++) {
-			Mart mart = this.martList.get(i);	// martList is never null (empty at worse)
-			Location location = this.locationList.get(i);
-			
-			Element jdomObject = new Element("mart");
-			
-			// Mart info
-			MartConfiguratorUtils.addAttribute(jdomObject, "name", mart.getName());
-			MartConfiguratorUtils.addAttribute(jdomObject, "displayName", mart.getDisplayName());
-			MartConfiguratorUtils.addAttribute(jdomObject, "visible", mart.getVisible());		
-			
-			MartConfiguratorUtils.addAttribute(jdomObject, "version", mart.getVersion());
-			
-			// Location info
-			MartConfiguratorUtils.addAttribute(jdomObject, "host", location.getHost());
-			MartConfiguratorUtils.addAttribute(jdomObject, "type", (location.getType()!=null ? location.getType().getXmlValue() : null));
-			MartConfiguratorUtils.addAttribute(jdomObject, "user", location.getUser());
-			
-			root.addContent(jdomObject);
-		}
-		return document;
-	}
-	protected JSONObject createJsonResponse() {
-		JSONArray array = new JSONArray();
-		for (int i = 0; i < this.martList.size(); i++) {
-			Mart mart = this.martList.get(i);	// martList is never null (empty at worse)
-			Location location = this.locationList.get(i);
-			
-			JSONObject object = new JSONObject();
-			
-			// Mart info
-			object.put("name", mart.getName());
-			object.put("displayName", mart.getDisplayName());
-			object.put("visible", mart.getVisible());		
-			
-			object.put("version", mart.getVersion());
-			
-			// Location info
-			
-			object.put("host", location.getHost());
-			object.put("type", (location.getType()!=null ? location.getType().getXmlValue() : null));
-			object.put("user", location.getUser());
-			
-			JSONObject wrapper = new JSONObject();
-			wrapper.put("mart", object);
-			array.add(wrapper);
-		}
-		
-		JSONObject root = new JSONObject();
-		root.put(martRemoteRequest.getType().getResponseName(), array);
-		return root;
-	}*/
 }
+
+
+
+
+
+
+
+
+/*protected Document createXmlResponse(Document document) {
+	Element root = document.getRootElement();
+	for (int i = 0; i < this.martList.size(); i++) {
+		Mart mart = this.martList.get(i);	// martList is never null (empty at worse)
+		Location location = this.locationList.get(i);
+		
+		Element jdomObject = new Element("mart");
+		
+		// Mart info
+		MartConfiguratorUtils.addAttribute(jdomObject, "name", mart.getName());
+		MartConfiguratorUtils.addAttribute(jdomObject, "displayName", mart.getDisplayName());
+		MartConfiguratorUtils.addAttribute(jdomObject, "visible", mart.getVisible());		
+		
+		MartConfiguratorUtils.addAttribute(jdomObject, "version", mart.getVersion());
+		
+		// Location info
+		MartConfiguratorUtils.addAttribute(jdomObject, "host", location.getHost());
+		MartConfiguratorUtils.addAttribute(jdomObject, "type", (location.getType()!=null ? location.getType().getXmlValue() : null));
+		MartConfiguratorUtils.addAttribute(jdomObject, "user", location.getUser());
+		
+		root.addContent(jdomObject);
+	}
+	return document;
+}
+protected JSONObject createJsonResponse() {
+	JSONArray array = new JSONArray();
+	for (int i = 0; i < this.martList.size(); i++) {
+		Mart mart = this.martList.get(i);	// martList is never null (empty at worse)
+		Location location = this.locationList.get(i);
+		
+		JSONObject object = new JSONObject();
+		
+		// Mart info
+		object.put("name", mart.getName());
+		object.put("displayName", mart.getDisplayName());
+		object.put("visible", mart.getVisible());		
+		
+		object.put("version", mart.getVersion());
+		
+		// Location info
+		
+		object.put("host", location.getHost());
+		object.put("type", (location.getType()!=null ? location.getType().getXmlValue() : null));
+		object.put("user", location.getUser());
+		
+		JSONObject wrapper = new JSONObject();
+		wrapper.put("mart", object);
+		array.add(wrapper);
+	}
+	
+	JSONObject root = new JSONObject();
+	root.put(martRemoteRequest.getType().getResponseName(), array);
+	return root;
+}*/

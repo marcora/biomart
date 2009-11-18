@@ -17,7 +17,7 @@ public class Location extends MartConfiguratorObject implements Serializable {
 	private static final long serialVersionUID = 3492546591865583968L;
 	
 	public static final String XML_ELEMENT_NAME = 	//TODO put in McNodeType enum?
-		"location" + (MyUtils.anthony() ? MyUtils.getDateAndTime() : "");	//TODO remove (to help debug)
+		"location" + (MyUtils.anthony() && (1>0) ? MyUtils.getDateAndTime() : "");	//TODO remove (to help debug)
 	public static final McNodeType MC_NODE_TYPE = McNodeType.Location;
 	
 	public static void main(String[] args) {}

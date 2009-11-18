@@ -69,16 +69,7 @@ public abstract class GetContaineesResponse extends MartRemoteResponse {
 				}
 			}
 
-			System.out.println("mainRowNumbersWanted = " + mainRowNumbersWanted);
-
 			this.rootContainer = new Container(config.getRootContainer(), mainRowNumbersWanted);
-			//container.parentContainer!=null ? new Container(null, container.parentContainer.name, null, null, null, null) : null
-			
-			/*for (Container container : config.getContainerList()) {
-				if (container.getVisible()) {
-					this.containerList.add(new Container(container, mainRowNumbersWanted));
-				}
-			}*/
 		}
 	}
 }

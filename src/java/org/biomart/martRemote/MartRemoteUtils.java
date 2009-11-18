@@ -13,7 +13,7 @@ public class MartRemoteUtils {
 	public static String buildResponseName(String identifier) {
 		return identifier + MartRemoteConstants.RESPONSE_SUFFIX;
 	}
-	public static Document createNewResponseXmlDocument(XmlParameters xmlParameters, String rootName) {
+	public static Document createNewMartRemoteXmlDocument(XmlParameters xmlParameters, String rootName) {
 		Element root = new org.jdom.Element(rootName, xmlParameters.getMartServiceNamespace());
 		root.addNamespaceDeclaration(xmlParameters.getXsiNamespace());
 		root.setAttribute("schemaLocation", 
