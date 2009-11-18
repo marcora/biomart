@@ -56,33 +56,6 @@ public class GroupFilter extends Filter implements Serializable {
 			"simpleFilterList = " + (simpleFilterList!=null ? simpleFilterList.getStringValue() : null);
 	}
 	
-	/*@Override
-	public boolean equals(Object object) {
-		if (this==object) {
-			return true;
-		}
-		if((object==null) || (object.getClass()!= this.getClass())) {
-			return false;
-		}
-		GroupFilter groupFilter=(GroupFilter)object;
-		return (
-				(super.equals(groupFilter)) &&
-				(this.logicalOperator==groupFilter.logicalOperator || (this.logicalOperator!=null && logicalOperator.equals(groupFilter.logicalOperator))) &&
-				(this.multipleFilter==groupFilter.multipleFilter || (this.multipleFilter!=null && multipleFilter.equals(groupFilter.multipleFilter))) &&
-				(this.filterNamesList==groupFilter.filterNamesList || (this.filterNamesList!=null && filterNamesList.equals(groupFilter.filterNamesList)))
-		);
-	}
-
-	@Override
-	public int hashCode() {
-		int hash = MartConfiguratorConstants.HASH_SEED1;
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + super.hashCode();
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==logicalOperator? 0 : logicalOperator.hashCode());
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==multipleFilter? 0 : multipleFilter.hashCode());
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==filterNamesList? 0 : filterNamesList.hashCode());
-		return hash;
-	}*/
-	
 	public org.jdom.Element generateXml() throws FunctionalException {
 		org.jdom.Element element = super.generateXml();
 		MartConfiguratorUtils.addAttribute(element, "logicalOperator", this.logicalOperator);

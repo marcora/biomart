@@ -52,12 +52,10 @@ public class AttributeTransformation extends ElementTransformation {
 		
 		System.out.println(MartConfiguratorUtils.displayJdomElement(oldAttribute.getJdomElement()) + ", " + firstSpecific);
 		
-		PartitionTable mainPartitionTable = vars.getMainPartitionTable();
-		
 		// Disregard elements with no match in the DB
 		List<Integer> mainRowsList = null;
 		if (oldAttribute.getPointer() || oldAttribute.isMain() || oldAttribute.isDimension()) {
-			mainRowsList = checkDatabase(oldAttribute, currentMainRowNumber, mainPartitionTable);
+			mainRowsList = checkDatabase(oldAttribute, currentMainRowNumber);
 			if (mainRowsList.isEmpty()) {
 				return null;
 			}
@@ -110,16 +108,16 @@ public class AttributeTransformation extends ElementTransformation {
 			if (oldEmptySpecificAttributeContentList!=null && !oldEmptySpecificAttributeContentList.isEmpty()) {
 				
 				// Erase main partition rows since they are specified one by one
-				attribute.getTargetRange().removePartition(mainPartitionTable);
+				attribute.getTargetRange().removePartition(super.mainPartitionTable);
 				for (OldEmptySpecificElementContent oldEmptySpecificAttributeContent : oldEmptySpecificAttributeContentList) {
 					String mainRowName = oldEmptySpecificAttributeContent.getRangeInternalName();
-					Integer newCurrentRow = mainPartitionTable.getRowNumber(mainRowName);
+					Integer newCurrentRow = super.mainPartitionTable.getRowNumber(mainRowName);
 					MyUtils.checkStatusProgram(newCurrentRow!=null);
 					
 					if (attribute.getPointer() || (vars.isTemplate() && 
 							oldAttribute.checkDatabase(params.getTemplateName(), general.getDatabaseCheck(), mainRowName))) {
 																							// only for template (no access to DB otherwise)
-						attribute.getTargetRange().addRangePartitionRow(mainPartitionTable, newCurrentRow, true);
+						attribute.getTargetRange().addRangePartitionRow(super.mainPartitionTable, newCurrentRow, true);
 					}
 				}
 			}
@@ -128,7 +126,7 @@ public class AttributeTransformation extends ElementTransformation {
 				int specific = 0;
 				for (OldSpecificAttributeContent oldSpecificAttributeContent : oldSpecificAttributeContentList) {
 					String mainRowName = oldSpecificAttributeContent.getRangeInternalName();
-					Integer newCurrentRow = mainPartitionTable.getRowNumber(mainRowName);
+					Integer newCurrentRow = super.mainPartitionTable.getRowNumber(mainRowName);
 					MyUtils.checkStatusProgram(newCurrentRow!=null);
 					Attribute childAttribute = transformAttribute(container, oldSpecificAttributeContent, attribute, newCurrentRow, specific==0);
 					if (childAttribute!=null) {
@@ -142,7 +140,7 @@ public class AttributeTransformation extends ElementTransformation {
 		
 		// If pointer, prepare it's dataset transformation
 		if (attribute.getPointer()) {
-			boolean valid = this.pointerTransformation.preparePointedDatasetTransformation(oldAttribute, mainPartitionTable, attribute);
+			boolean valid = this.pointerTransformation.preparePointedDatasetTransformation(oldAttribute, super.mainPartitionTable, attribute);
 			if (!valid) {
 				return null;
 			}
@@ -163,14 +161,13 @@ public class AttributeTransformation extends ElementTransformation {
 	public Attribute createNewAttribute(OldAttribute oldAttribute, Integer currentMainRowNumber, List<Integer> mainRowsList,
 			DimensionPartition dimensionPartition) throws FunctionalException, TechnicalException {
 		
-		PartitionTable mainPartitionTable = vars.getMainPartitionTable();	// Used thoroughly here		
 		String attributeName = help.replaceAliases(oldAttribute.getInternalName());
 		Boolean pointer = oldAttribute.getPointer();
 		
-		Attribute newAttribute = new Attribute(mainPartitionTable, attributeName);
+		Attribute newAttribute = new Attribute(super.mainPartitionTable, attributeName);
 				
 		// Add ranges
-		updateRangeWithMainPartition(oldAttribute, currentMainRowNumber, mainRowsList, mainPartitionTable, newAttribute, null);
+		updateRangeWithMainPartition(oldAttribute, currentMainRowNumber, mainRowsList, newAttribute, null);
 		
 		// Add dimensionTable partition range
 		// Look for dimension partitions and create it if doesn't already exist
@@ -178,7 +175,7 @@ public class AttributeTransformation extends ElementTransformation {
 		
 		String tableName = null;
 		if (!pointer) {
-			tableName = computeTableName(oldAttribute, dimensionPartition, mainPartitionTable.getName(), dimensionPartitionTable);
+			tableName = computeTableName(oldAttribute, dimensionPartition, dimensionPartitionTable);
 			if (null==tableName) {	// No matching table for instance, ignore element
 				return null;
 			}
@@ -187,6 +184,10 @@ public class AttributeTransformation extends ElementTransformation {
 		assignSimpleProperties(oldAttribute, newAttribute, tableName);
 		
 		// For attributes only
+		newAttribute.setTableName(tableName);
+		newAttribute.setKeyName(help.replaceAliases(oldAttribute.getKey()));
+		newAttribute.setFieldName(help.replaceAliases(oldAttribute.getField()));
+		
 		Boolean selectedByDefault = oldAttribute.getDefault_();
 		newAttribute.setSelectedByDefault(selectedByDefault);
 		if (!pointer) {
@@ -235,7 +236,7 @@ public class AttributeTransformation extends ElementTransformation {
 		Attribute generatedAttribute = null;
 		
 		String generatedAttributeName = TransformationUtils.generateUniqueIdentiferForGeneratedAttribute(relationalInfo);
-		generatedAttribute = new Attribute(vars.getMainPartitionTable(), generatedAttributeName);
+		generatedAttribute = new Attribute(super.mainPartitionTable, generatedAttributeName);
 		
 		generatedAttribute.setPointer(false);
 		

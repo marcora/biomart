@@ -61,6 +61,7 @@ public abstract class ElementTransformation {
 	protected TransformationVariable vars = null;
 	protected TransformationHelper help = null;
 	protected PointerTransformation pointerTransformation = null;
+	protected PartitionTable mainPartitionTable = null;
 		
 	protected Boolean isAttribute = null;
 
@@ -73,6 +74,9 @@ public abstract class ElementTransformation {
 		this.pointerTransformation = pointerTransformation;
 		
 		this.isAttribute = isAttribute;
+	}
+	public void setMainPartitionTable(PartitionTable mainPartitionTable) {
+		this.mainPartitionTable = mainPartitionTable;	// saves some time
 	}
 	
 	public void transformElementsDescriptions(ElementTransformation crossElementTransformation, 
@@ -264,14 +268,13 @@ public abstract class ElementTransformation {
 			DimensionPartition dimensionPartition, Boolean forcedVisibility, FilterDisplayType nonSpecificFilterDisplayType) 
 	throws FunctionalException, TechnicalException;
 	
-	protected List<Integer> checkDatabase(
-			OldElement oldElement, Integer currentMainRowNumber, PartitionTable mainPartitionTable) throws TechnicalException, FunctionalException {
+	protected List<Integer> checkDatabase(OldElement oldElement, Integer currentMainRowNumber) throws TechnicalException, FunctionalException {
 		
 		List<Integer> mainRowsList = new ArrayList<Integer>();
 		
 		// Add main partition range (do it before dm partition so we can disregard invalid table+field combinations)
 		if (currentMainRowNumber!=null) {
-			String currentMainRowName = mainPartitionTable.getRowName(currentMainRowNumber);
+			String currentMainRowName = this.mainPartitionTable.getRowName(currentMainRowNumber);
 			if (!vars.isTemplate() || oldElement.checkDatabase(
 					params.getTemplateName(), general.getDatabaseCheck(), currentMainRowName)) {	// only for template (no access to DB otherwise)
 				mainRowsList.add(currentMainRowNumber);
@@ -279,7 +282,7 @@ public abstract class ElementTransformation {
 		} else {
 			MyUtils.checkStatusProgram(vars.isTemplate());
 			
-			Map<String, Integer> mapRowNameToRowNumber = mainPartitionTable.getRowNameToRowNumberMap();
+			Map<String, Integer> mapRowNameToRowNumber = this.mainPartitionTable.getRowNameToRowNumberMap();
 			for (Iterator<String> it = mapRowNameToRowNumber.keySet().iterator(); it.hasNext();) {
 				String mainRowName = it.next();
 				Integer mainRowNumber = mapRowNameToRowNumber.get(mainRowName);
@@ -295,8 +298,8 @@ public abstract class ElementTransformation {
 		return mainRowsList;
 	}
 	
-	protected void updateRangeWithMainPartition(OldElement oldElement, Integer currentMainRowNumber, List<Integer> mainRowsList,
-			PartitionTable mainPartitionTable, Element newElement, Boolean forcedVisibility) throws TechnicalException, FunctionalException {
+	protected void updateRangeWithMainPartition(OldElement oldElement, Integer currentMainRowNumber, List<Integer> mainRowsList, 
+			Element newElement, Boolean forcedVisibility) throws TechnicalException, FunctionalException {
 		
 		// At this point, can't be null or empty (or would have been disregarded before)
 		MyUtils.checkStatusProgram(mainRowsList!=null && !mainRowsList.isEmpty());
@@ -311,15 +314,15 @@ public abstract class ElementTransformation {
 		// Add main partition range (do it before dm partition so we can disregard invalid table+field combinations)
 		if (currentMainRowNumber!=null) {
 			MyUtils.checkStatusProgram(mainRowsList.size()==1 && mainRowsList.get(0).intValue()==currentMainRowNumber);	//TODO get rid of currentMainRowNumber and only use the list
-			newElement.getTargetRange().addRangePartitionRow(mainPartitionTable, currentMainRowNumber, visible);
+			newElement.getTargetRange().addRangePartitionRow(this.mainPartitionTable, currentMainRowNumber, visible);
 		} else {
 			MyUtils.checkStatusProgram(vars.isTemplate());
-			Map<String, Integer> mapRowNameToRowNumber = mainPartitionTable.getRowNameToRowNumberMap();
+			Map<String, Integer> mapRowNameToRowNumber = this.mainPartitionTable.getRowNameToRowNumberMap();
 			for (Iterator<String> it = mapRowNameToRowNumber.keySet().iterator(); it.hasNext();) {
 				String mainRowName = it.next();
 				Integer mainRowNumber = mapRowNameToRowNumber.get(mainRowName);
 				if (mainRowsList.contains(mainRowNumber)) {
-					newElement.getTargetRange().addRangePartitionRow(mainPartitionTable, mainRowNumber, visible);
+					newElement.getTargetRange().addRangePartitionRow(this.mainPartitionTable, mainRowNumber, visible);
 				}
 			}
 		}
@@ -349,7 +352,7 @@ public abstract class ElementTransformation {
 	}
 
 	protected String computeTableName(OldElement oldElement, DimensionPartition dimensionPartition, 
-			String mainPartitionTableName, PartitionTable dimensionPartitionTable) throws FunctionalException, TechnicalException {
+			PartitionTable dimensionPartitionTable) throws FunctionalException, TechnicalException {
 		
 		// Table name: handling of dimension table partition
 		if (help.containsAliases(oldElement.getTableConstraint())) {
@@ -408,7 +411,7 @@ public abstract class ElementTransformation {
 		// Create table if doesn't exist yet (can't be for a main)
 		if (null==table) {
 			MyUtils.checkStatusProgram(!mainTable, newTableName + ", " + tableConstraint + ", " + keyName + ", " + fieldName);
-			table = new Table(newTableName, vars.getMainPartitionTable(), false, TableType.TARGET, 
+			table = new Table(newTableName, this.mainPartitionTable, false, TableType.TARGET, 
 					keyName, new HashSet<String>(Arrays.asList(new String[] {fieldName, keyName})));
 			table.getRange().addRangePartitionRow(vars.getDefaultPT(), MartConfiguratorConstants.DEFAULT_PARTITION_TABLE_ROW);
 			dataset.addTable(table);
@@ -438,21 +441,6 @@ public abstract class ElementTransformation {
 			newElement.setVersion(vars.getCurrentPath().getMartVersion());
 			newElement.setDatasetName(vars.getCurrentPath().getDatasetName());
 			newElement.setConfigName(vars.getCurrentPath().getConfigName());
-			
-			String keyName = help.replaceAliases(oldElement.getKey());
-			String columnName = help.replaceAliases(oldElement.getField());
-			
-			if (newElement instanceof Attribute) {	// TODO move to there respective location
-				Attribute attribute = (Attribute)newElement;
-				
-				attribute.setTableName(tableName);
-				attribute.setKeyName(keyName);
-				attribute.setFieldName(columnName);
-			} else if (newElement instanceof SimpleFilter){
-				SimpleFilter simpleFilter = (SimpleFilter)newElement;
-				RelationalInfo relationalInfo = new RelationalInfo(tableName, keyName, columnName);
-				vars.getSimpleFilterToRelationInfoMap().put(simpleFilter, relationalInfo);
-			}
 		}
 	}
 	
@@ -532,17 +520,15 @@ public abstract class ElementTransformation {
 	protected void updateNonSpecificTemplateElement(Element templateElement, Element newElement, 
 			Integer currentMainRow, boolean firstSpecific) throws FunctionalException, TechnicalException {
 		
-		PartitionTable mainPartitionTable = vars.getMainPartitionTable();
-		
 		if (firstSpecific) {
 			// Erase main partition rows since they are specified one by one
-			templateElement.getTargetRange().removePartition(mainPartitionTable);
+			templateElement.getTargetRange().removePartition(this.mainPartitionTable);
 		}
 		
 		// Add row
 		Range targetRange = templateElement.getTargetRange();
-		MyUtils.checkStatusProgram(!targetRange.contains(mainPartitionTable, currentMainRow));
-		targetRange.addRangePartitionRow(mainPartitionTable, currentMainRow);
+		MyUtils.checkStatusProgram(!targetRange.contains(this.mainPartitionTable, currentMainRow));
+		targetRange.addRangePartitionRow(this.mainPartitionTable, currentMainRow);
 		
 		// Check that all these properties are the same, exception made for the first specific which can define the 1st values for some properties
 		Set<Integer> mainRowsSet = targetRange.getMainRowsSet();
@@ -610,8 +596,6 @@ public abstract class ElementTransformation {
 	protected String updateSpecificProperty(Integer currentMainRow, String templateProperty, String newProperty, 
 			boolean firstSpecific, Set<Integer> mainRowsSet) throws FunctionalException {
 		
-		PartitionTable mainPartitionTable = vars.getMainPartitionTable();
-		
 		String property = null;
 		if (templateProperty==null && newProperty==null) {
 			property = null;
@@ -653,7 +637,7 @@ public abstract class ElementTransformation {
 				int existingColumn = templatePartitionReference.getColumn();
 								
 				// Update partition table with new value: the new one (make sure empty slot)
-				mainPartitionTable.updateValue(currentMainRow, existingColumn, newProperty);
+				this.mainPartitionTable.updateValue(currentMainRow, existingColumn, newProperty);
 				
 				property = templateProperty;	// becomes a reference
 			} else if (!templateIsReference && !newIsReference) {
@@ -661,17 +645,17 @@ public abstract class ElementTransformation {
 				if (CompareUtils.same(templateProperty, newProperty)) {
 					property = templateProperty; // either, they're both the same
 				} else {
-					int newColumn = mainPartitionTable.addColumn();
+					int newColumn = this.mainPartitionTable.addColumn();
 					
-					PartitionReference mainPartitionReference = new PartitionReference(mainPartitionTable, newColumn);
+					PartitionReference mainPartitionReference = new PartitionReference(this.mainPartitionTable, newColumn);
 					
 					// Update the partition table: all previous rows get templateProperty, the new one gets newProperty
 					for (int mainRow : mainRowsSet) {						
 						if (mainRow!=currentMainRow) {	// It's already part of the rows
-							mainPartitionTable.updateValue(mainRow, newColumn, templateProperty);
+							this.mainPartitionTable.updateValue(mainRow, newColumn, templateProperty);
 						}
 					}
-					mainPartitionTable.updateValue(currentMainRow, newColumn, newProperty);
+					this.mainPartitionTable.updateValue(currentMainRow, newColumn, newProperty);
 					
 					property = mainPartitionReference.toXmlString();
 				}

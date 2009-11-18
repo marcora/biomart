@@ -96,48 +96,6 @@ public abstract class Filter extends org.biomart.objects.objects.Element	// to a
 			this.filterData = new FilterData(this);			
 		}
 	}
-
-	/*@Override
-	public boolean equals(Object object) {
-		if (this==object) {
-			return true;
-		}
-		if((object==null) || (object.getClass()!= this.getClass())) {
-			return false;
-		}
-		Filter filter=(Filter)object;
-		return (
-			super.equals(filter) &&
-			(this.qualifier==filter.qualifier || (this.qualifier!=null && qualifier.equals(filter.qualifier))) &&
-			(this.caseSensitive==filter.caseSensitive || (this.caseSensitive!=null && caseSensitive.equals(filter.caseSensitive))) &&
-			(this.dataFolderPath==filter.dataFolderPath || (this.dataFolderPath!=null && dataFolderPath.equals(filter.dataFolderPath)))
-			//(this.filterData==filter.filterData || (this.filterData!=null && filterData.equals(filter.filterData)))
-		);
-	}
-
-	@Override
-	public int hashCode() {
-		int hash = MartConfiguratorConstants.HASH_SEED1;
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + super.hashCode();
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==qualifier? 0 : qualifier.hashCode());
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==caseSensitive? 0 : caseSensitive.hashCode());
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==dataFolderPath? 0 : dataFolderPath.hashCode());
-		//hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==filterData? 0 : filterData.hashCode());
-		return hash;
-	}
-
-	public int compare(Filter filter1, Filter filter2) {
-		if (filter1==null && filter2!=null) {
-			return -1;
-		} else if (filter1!=null && filter2==null) {
-			return 1;
-		}
-		return 0;
-	}
-
-	public int compareTo(Filter filter) {
-		return compare(this, filter);
-	}*/
 	
 	public org.jdom.Element generateXml() throws FunctionalException {
 		org.jdom.Element element = super.generateXml();

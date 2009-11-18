@@ -10,7 +10,7 @@ import org.biomart.martRemote.Jsoml;
 import org.biomart.objects.MartConfiguratorUtils;
 
 
-public class Attribute extends Element implements /*Comparable<Attribute>, Comparator<Attribute>, */Serializable {
+public class Attribute extends Element implements Serializable {
 
 	private static final long serialVersionUID = 3472755898394368045L;
 	
@@ -111,19 +111,8 @@ public class Attribute extends Element implements /*Comparable<Attribute>, Compa
 				(this.tableName==attribute.tableName || (this.tableName!=null && tableName.equals(attribute.tableName))) &&
 				(this.keyName==attribute.keyName || (this.keyName!=null && keyName.equals(attribute.keyName))) &&
 				(this.fieldName==attribute.fieldName || (this.fieldName!=null && fieldName.equals(attribute.fieldName)))
-				/*(this.maxLength==attribute.maxLength || (this.maxLength!=null && maxLength.equals(attribute.maxLength))) &&
-				(this.linkURL==attribute.linkURL || (this.linkURL!=null && linkURL.equals(attribute.linkURL)))*/
 		);
 	}
-
-	/*@Override
-	public int hashCode() {
-		int hash = MartConfiguratorConstants.HASH_SEED1;
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + super.hashCode();
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==maxLength? 0 : maxLength.hashCode());
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==linkURL? 0 : linkURL.hashCode());
-		return hash;
-	}*/
 	
 	public org.jdom.Element generateXml() throws FunctionalException {
 		

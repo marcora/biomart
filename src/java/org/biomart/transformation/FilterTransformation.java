@@ -75,13 +75,11 @@ public class FilterTransformation extends ElementTransformation {
 			) throws FunctionalException, TechnicalException {
 		
 		System.out.println(MartConfiguratorUtils.displayJdomElement(oldFilter.getJdomElement()) + ", " + firstSpecific);
-
-		PartitionTable mainPartitionTable = vars.getMainPartitionTable();
 		
 		// Disregard elements with no match in the DB
 		List<Integer> mainRowsList = null;
 		if (oldFilter.getPointer() || oldFilter.isMain() || oldFilter.isDimension()) {
-			mainRowsList = checkDatabase(oldFilter, currentMainRowNumber, mainPartitionTable);
+			mainRowsList = checkDatabase(oldFilter, currentMainRowNumber);
 			if (mainRowsList.isEmpty()) {
 				return null;
 			}
@@ -163,16 +161,16 @@ public class FilterTransformation extends ElementTransformation {
 			// Simply add row to range
 			if (oldEmptySpecificFilterContentList!=null && !oldEmptySpecificFilterContentList.isEmpty()) {
 				// Erase main partition rows since they are specified one by one
-				filter.getTargetRange().removePartition(mainPartitionTable);
+				filter.getTargetRange().removePartition(super.mainPartitionTable);
 				for (OldEmptySpecificElementContent oldEmptySpecificFilterContent : oldEmptySpecificFilterContentList) {
 					String mainRowName = oldEmptySpecificFilterContent.getRangeInternalName();
-					Integer newCurrentRow = mainPartitionTable.getRowNumber(mainRowName);
+					Integer newCurrentRow = super.mainPartitionTable.getRowNumber(mainRowName);
 					MyUtils.checkStatusProgram(newCurrentRow!=null);
 					
 					if (filter.getPointer() || (vars.isTemplate() && 
 							oldFilter.checkDatabase(params.getTemplateName(), general.getDatabaseCheck(), mainRowName))) {
 																							// only for template (no access to DB otherwise)
-						filter.getTargetRange().addRangePartitionRow(mainPartitionTable, newCurrentRow, true);
+						filter.getTargetRange().addRangePartitionRow(super.mainPartitionTable, newCurrentRow, true);
 					}
 				}
 			}
@@ -181,7 +179,7 @@ public class FilterTransformation extends ElementTransformation {
 				int specific = 0;
 				for (OldSpecificFilterContent oldSpecificFilterContent : oldSpecificFilterContentList) {
 					String mainRowName = oldSpecificFilterContent.getRangeInternalName();
-					Integer newCurrentRow = mainPartitionTable.getRowNumber(mainRowName);
+					Integer newCurrentRow = super.mainPartitionTable.getRowNumber(mainRowName);
 					MyUtils.checkStatusProgram(newCurrentRow!=null);
 					Filter childFilter = transformFilter(container, oldSpecificFilterContent, null, filter, newCurrentRow, specific==0, null);
 					if (childFilter!=null) {
@@ -194,7 +192,7 @@ public class FilterTransformation extends ElementTransformation {
 				int specific = 0;
 				for (OldSpecificOptionContent oldSpecificOptionContent : oldSpecificOptionContentList) {
 					String mainRowName = oldSpecificOptionContent.getRangeInternalName();
-					Integer newCurrentRow = mainPartitionTable.getRowNumber(mainRowName);
+					Integer newCurrentRow = super.mainPartitionTable.getRowNumber(mainRowName);
 					MyUtils.checkStatusProgram(newCurrentRow!=null);
 					Filter childFilter = transformFilter(container, oldSpecificOptionContent, null, filter, newCurrentRow, specific==0, null);
 					if (childFilter!=null) {
@@ -356,12 +354,12 @@ public class FilterTransformation extends ElementTransformation {
 					return null;
 				}
 				groupFilter.getElementList().addElements(simpleFilterList);
-				setGroupFilterRange(mainPartitionTable, simpleFilterList, groupFilter);
+				setGroupFilterRange(simpleFilterList, groupFilter);
 			}
 		} 
 		
 		if (filter.getPointer()) {	// If pointer, prepare it's dataset transformation
-			boolean valid = this.pointerTransformation.preparePointedDatasetTransformation(oldFilter, mainPartitionTable, filter);
+			boolean valid = this.pointerTransformation.preparePointedDatasetTransformation(oldFilter, super.mainPartitionTable, filter);
 			if (!valid) {	// If points to an unexisting dataset
 				return null;
 			}
@@ -377,7 +375,7 @@ public class FilterTransformation extends ElementTransformation {
 		return filter;
 	}
 
-	private void setGroupFilterRange(PartitionTable mainPartitionTable, List<SimpleFilter> simpleFilterList, GroupFilter groupFilter) throws FunctionalException, TechnicalException {
+	private void setGroupFilterRange(List<SimpleFilter> simpleFilterList, GroupFilter groupFilter) throws FunctionalException, TechnicalException {
 		// Compute range as the intersection of the main rows for each filter
 		List<Range> rangeList = new ArrayList<Range>();
 		for (SimpleFilter simpleFilter : simpleFilterList) {
@@ -385,7 +383,7 @@ public class FilterTransformation extends ElementTransformation {
 			rangeList.add(targetRange);
 		}
 		
-		Range groupTargetRange = Range.mainRangesIntersection(mainPartitionTable, true, rangeList);
+		Range groupTargetRange = Range.mainRangesIntersection(super.mainPartitionTable, true, rangeList);
 		groupFilter.setTargetRange(groupTargetRange);
 	}
 
@@ -410,7 +408,7 @@ public class FilterTransformation extends ElementTransformation {
 			filterData.setToTemplate();
 		}
 		
-		Part currentPart = new Part(vars.getMainPartitionTable(), currentMainRow);
+		Part currentPart = new Part(super.mainPartitionTable, currentMainRow);
 		
 		MyUtils.checkStatusProgram(filterData!=null && null==filterData.getPartValue(currentPart));
 		filterData.addPart(currentPart);
@@ -469,7 +467,7 @@ public class FilterTransformation extends ElementTransformation {
 			treeFilterData.setToTemplate();
 		}
 		
-		Part currentPart = new Part(vars.getMainPartitionTable(), currentMainRow);
+		Part currentPart = new Part(super.mainPartitionTable, currentMainRow);
 		
 		MyUtils.checkStatusProgram(null==treeFilterData.getPartValue(currentPart));
 		ArrayList<TreeFilterDataRow> list = treeFilterData.addPart(currentPart);
@@ -515,7 +513,7 @@ public class FilterTransformation extends ElementTransformation {
 			// Try to get existing push action filter or create new one if first time
 			SimpleFilter pushActionFilter = this.pushActionMap.get(oldPushAction.getInternalName());
 			if (null==pushActionFilter) {
-				pushActionFilter = transformPushAction(null, vars.getMainPartitionTable(), oldPushAction);	// Container will be specified later
+				pushActionFilter = transformPushAction(null, oldPushAction);	// Container will be specified later
 			}
 			
 			// Special case here (cf. hsap_encode), the cascadeChild appears twice and it seems only the latest is considered
@@ -576,9 +574,9 @@ public class FilterTransformation extends ElementTransformation {
 		return dataRow;
 	}
 
-	private SimpleFilter transformPushAction(Container container, PartitionTable mainPartitionTable, OldPushAction oldPushAction) throws FunctionalException {
+	private SimpleFilter transformPushAction(Container container, OldPushAction oldPushAction) throws FunctionalException {
 		String pushActionName = oldPushAction.getInternalName();	// former 'ref'
-		SimpleFilter pushActionFilter = new SimpleFilter(mainPartitionTable, pushActionName);
+		SimpleFilter pushActionFilter = new SimpleFilter(super.mainPartitionTable, pushActionName);
 		pushActionFilter.setDataFolderPath(params.getDefaultDataFolderPath());	// We know for sure it has data by there
 		this.pushActionMap.put(pushActionFilter.getName(), pushActionFilter);
 		return pushActionFilter;
@@ -596,7 +594,6 @@ public class FilterTransformation extends ElementTransformation {
 			DimensionPartition dimensionPartition, Boolean forcedVisibility, FilterDisplayType nonSpecificFilterDisplayType) 
 			throws FunctionalException, TechnicalException {
 		
-		PartitionTable mainPartitionTable = vars.getMainPartitionTable();	// Used thoroughly here
 		String filterName = help.replaceAliases(oldFilter.getInternalName());
 		Boolean pointer = oldFilter.getPointer();
 		
@@ -615,16 +612,16 @@ public class FilterTransformation extends ElementTransformation {
 		if (!oldFilter.getHasFilterList()) {
 			if (pointer || null!=filterType) {
 				boolean tree = FilterDisplayType.TREE.equals(filterType);
-				newFilter = new SimpleFilter(mainPartitionTable, filterName, tree);
+				newFilter = new SimpleFilter(super.mainPartitionTable, filterName, tree);
 					
 			} else {	// groupFilter
 				MyUtils.checkStatusProgram(null==filterType);
-				newFilter = new GroupFilter(mainPartitionTable, filterName);
+				newFilter = new GroupFilter(super.mainPartitionTable, filterName);
 			}
 		} else {
 			MyUtils.checkStatusProgram(FilterDisplayType.TEXTFIELD.equals(filterType) || FilterDisplayType.LIST.equals(filterType), 
 					filterType + ", " + MartConfiguratorUtils.displayJdomElement(oldFilter.getJdomElement()));		// case like "chromosome_region"
-			newFilter = new GroupFilter(mainPartitionTable, filterName);
+			newFilter = new GroupFilter(super.mainPartitionTable, filterName);
 		}
 
 		boolean filterGroup = oldFilter.isFilterGroup();
@@ -634,7 +631,7 @@ public class FilterTransformation extends ElementTransformation {
 		if (!filterGroup) {
 			
 			// DB has already been checked by then, merely updating the range
-			updateRangeWithMainPartition(oldFilter, currentMainRowNumber, mainRowsList, mainPartitionTable, newFilter, forcedVisibility);
+			updateRangeWithMainPartition(oldFilter, currentMainRowNumber, mainRowsList, newFilter, forcedVisibility);
 						
 			// Add dimensionTable partition range
 			// Look for dimension partitions and create it if doesn't already exist
@@ -646,7 +643,7 @@ public class FilterTransformation extends ElementTransformation {
 		
 		String tableName = null;
 		if (!pointer && !filterGroup) {
-			tableName = computeTableName(oldFilter, dimensionPartition, mainPartitionTable.getName(), dimensionPartitionTable);
+			tableName = computeTableName(oldFilter, dimensionPartition, dimensionPartitionTable);
 			if (null==tableName) {	// No matching table for instance, ignore element
 				return null;
 			}
@@ -704,6 +701,11 @@ public class FilterTransformation extends ElementTransformation {
 				groupFilter.setLogicalOperator(logicalOperator);
 			} else if (newFilter instanceof SimpleFilter) {
 				SimpleFilter simpleFilter = (SimpleFilter)newFilter;
+				
+				// Relational info: store info in map to later associate filter with attribute
+				RelationalInfo relationalInfo = new RelationalInfo(
+						tableName, help.replaceAliases(oldFilter.getKey()), help.replaceAliases(oldFilter.getField()));
+				vars.getSimpleFilterToRelationInfoMap().put(simpleFilter, relationalInfo);
 
 				simpleFilter.setDisplayType(filterType.getValue());
 				
@@ -939,7 +941,7 @@ public class FilterTransformation extends ElementTransformation {
 				MyUtils.checkStatusProgram(newFilter instanceof TextfieldFilter ||
 						newFilter instanceof ListFilter, 
 						templateFilter.getName() + ", " + MartConfiguratorUtils.displayJdomElement(newFilter.generateXml()) + 
-						vars.getMainPartitionTable().getRowName(12) + ", " + newFilter.getClass());
+						vars.get###$().getRowName(12) + ", " + newFilter.getClass());
 				
 				TextfieldFilter templateTextfieldFilter = (TextfieldFilter)templateFilter;
 				TextfieldFilter newTextfieldFilter = (newFilter instanceof TextfieldFilter) ? 
@@ -1012,12 +1014,13 @@ public class FilterTransformation extends ElementTransformation {
 		}
 	}
 
-	public void createMainPartitionFilter(Config config, PartitionTable mainPartitionTable) throws FunctionalException {
+	public void createMainPartitionFilter(Config config) throws FunctionalException {
 
 		Container partitionFilterContainer = new Container(
 				TransformationConstants.PARTITION_FILTERS_CONTAINER_NAME, TransformationConstants.PARTITION_FILTERS_CONTAINER_DISPLAY_NAME,
 				null, true, null);
-		SimpleFilter mainPartitionFilter = new SimpleFilter(mainPartitionTable, TransformationConstants.MAIN_PARTITION_FILTER_NAME);
+		SimpleFilter mainPartitionFilter = new SimpleFilter(
+				super.mainPartitionTable, TransformationConstants.MAIN_PARTITION_FILTER_NAME);
 		mainPartitionFilter.setDisplayName(TransformationConstants.MAIN_PARTITION_FILTER_DISPLAY_NAME);
 		mainPartitionFilter.setVisible(true);
 		mainPartitionFilter.setSelectedByDefault(false);
@@ -1028,11 +1031,11 @@ public class FilterTransformation extends ElementTransformation {
 		FilterData filterData = mainPartitionFilter.getFilterData();
 		filterData.setToTemplate();
 		
-		Part part = MartConfiguratorUtils.createGenericPart(mainPartitionTable);
+		Part part = MartConfiguratorUtils.createGenericPart(super.mainPartitionTable);
 		filterData.addPart(part);
 		
-		for (int rowNumber = 0; rowNumber < mainPartitionTable.getRowNamesList().size(); rowNumber++) {
-			String rowName = mainPartitionTable.getRowNamesList().get(rowNumber);
+		for (int rowNumber = 0; rowNumber < super.mainPartitionTable.getRowNamesList().size(); rowNumber++) {
+			String rowName = super.mainPartitionTable.getRowNamesList().get(rowNumber);
 			FilterDataRow dataRow = new FilterDataRow(
 					mainPartitionFilter, rowName, rowName, rowNumber==0);	// first row is the default one
 			filterData.addRowForPart(part, dataRow);			

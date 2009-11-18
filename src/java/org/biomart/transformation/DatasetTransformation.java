@@ -113,9 +113,11 @@ public class DatasetTransformation {
 		MyUtils.checkStatusProgram(!vars.getNameToPartitionTableMap().keySet().contains(mainPartitionTable.getName()));
 		vars.getNameToPartitionTableMap().put(mainPartitionTable.getName(), mainPartitionTable);
 		vars.setMainPartitionTable(mainPartitionTable);
+		this.attributeTransformation.setMainPartitionTable(mainPartitionTable);	// to save time
+		this.filterTransformation.setMainPartitionTable(mainPartitionTable);	// to save time
 		
 		// Create and add main partition filter
-		filterTransformation.createMainPartitionFilter(config, mainPartitionTable);
+		filterTransformation.createMainPartitionFilter(config);
 		
 		// If template, generate database info from database, accounting for main partition
 		if (vars.isTemplate()) {

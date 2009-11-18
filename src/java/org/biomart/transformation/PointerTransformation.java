@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.MyUtils;
@@ -380,7 +379,7 @@ public class PointerTransformation {
 			}
 			
 			
-	if (false) {	//TODO sort this out
+	if (1>0) {	//TODO sort this out
 			MyUtils.checkStatusProgram(pointingElement.getClass().equals(pointedElement.getClass()),
 					pointingElement.getName() + ", " + 
 					pointingElement.getClass().getSimpleName() + ", " + pointedElement.getClass().getSimpleName());
