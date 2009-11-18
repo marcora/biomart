@@ -1,8 +1,6 @@
 package org.biomart.transformation;
 
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -255,9 +253,7 @@ public class AttributeTransformation extends ElementTransformation {
 		// Leave targetRange as is (no elements => invisible)
 		
 		// Add it to map of attributes and map for relational info
-		vars.getAttributeMap().put(generatedAttributeName, generatedAttribute);
-		vars.getRelationalInfoToAttributeMap().put(
-				relationalInfo, new ArrayList<Attribute>(Arrays.asList(new Attribute[] {generatedAttribute})));
+		vars.addAttributeToMaps(generatedAttribute);
 		
 		// If does not exist, create and add container for it
 		Container container = rootContainer.getContainer(TransformationConstants.GENERATED_ATTRIBUTES_CONTAINER_NAME);

@@ -104,7 +104,7 @@ public class PortableTransformation {
 		if (isPortable) {
 			List<String> filtersList = oldImportable.getFilters();
 			for (String filterName : filtersList) {
-				Filter filter = vars.getFilterMap().get(filterName);
+				Filter filter = vars.getFilterFromFilterMap(filterName);
 				if (!TransformationUtils.checkForWarning(null==filter, vars.getPortableReferencesAnInvalidElementList(),
 						"importable " + portableName + " references an invalid filter: " + filterName)) {
 					return null;
@@ -114,7 +114,7 @@ public class PortableTransformation {
 		} else {
 			List<String> attributesList = oldExportable.getAttributes();
 			for (String attributeName : attributesList) {
-				Attribute attribute = vars.getAttributeMap().get(attributeName);
+				Attribute attribute = vars.getAttributeFromAttributeMap(attributeName);
 				if (!TransformationUtils.checkForWarning(null==attribute, vars.getPortableReferencesAnInvalidElementList(),
 						"exportable " + portableName + " references an invalid attribute: " + attributeName)) {
 					return null;

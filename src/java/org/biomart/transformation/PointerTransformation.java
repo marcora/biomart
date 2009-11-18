@@ -337,7 +337,8 @@ public class PointerTransformation {
 			// If local pointer than simply get the pointed attribute from the appropriate map, and the current name of the dataset
 			if (pointerElementInfo.getLocal()) {
 				//MyUtils.checkStatusProgram(!vars.isTemplate() || MartConfiguratorUtils.containsPartitionReferences(pointedDatasetName));
-				pointedElement = isAttributePointer ? vars.getAttributeMap().get(pointedElementName) : vars.getFilterMap().get(pointedElementName);
+				pointedElement = isAttributePointer ? 
+						vars.getAttributeFromAttributeMap(pointedElementName) : vars.getFilterFromFilterMap(pointedElementName);
 				transformedDatasetName = vars.getDataset().getName();
 			}
 			

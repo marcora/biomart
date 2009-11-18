@@ -19,7 +19,7 @@ public class Attribute extends Element implements Serializable {
 	
 	public static void main(String[] args) {}
 
-	protected String tableName = null;
+	protected String tableName = null;		//TODO consider using the RelationInfo object instead?
 	protected String keyName = null;
 	protected String fieldName = null;
 	

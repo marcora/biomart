@@ -1005,7 +1005,7 @@ public class FilterTransformation extends ElementTransformation {
 			GroupFilter groupFilter = it.next();
 			List<String> filterNameList = filterWithFilterList.get(groupFilter);
 			for (String childFilterName : filterNameList) {
-				Filter filter = vars.getFilterMap().get(childFilterName);
+				Filter filter = vars.getFilterFromFilterMap(childFilterName);
 				MyUtils.checkStatusProgram(null!=filter);	// Assumes it refers to a filter already defined
 				MyUtils.checkStatusProgram(filter instanceof SimpleFilter);	// Assumes it refers to a simple filter
 				SimpleFilter simpleFilter = (SimpleFilter)filter;
@@ -1042,7 +1042,7 @@ public class FilterTransformation extends ElementTransformation {
 		}
 		
 		partitionFilterContainer.addFilter(mainPartitionFilter);
-		vars.getFilterMap().put(mainPartitionFilter.getName(), mainPartitionFilter);
+		vars.addFilterToMaps(mainPartitionFilter);
 		
 		Container rootContainer = config.getRootContainer();
 		rootContainer.addContainer(partitionFilterContainer);
@@ -1050,13 +1050,13 @@ public class FilterTransformation extends ElementTransformation {
 	
 	public void updateFilters(AttributeTransformation attributeTransformation, Container rootContainer) 
 	throws FunctionalException, TechnicalException {
-		for (Filter filter : vars.getFilterMap().values()) {
+		for (Filter filter : vars.getFiltersFromFilterMap()) {
 			if (filter instanceof SimpleFilter && !filter.getPointer()) {	// treat pointers differently (later)
 				SimpleFilter simpleFilter = (SimpleFilter)filter;
 				if (!simpleFilter.getPartition()) {	// no need for an attribute when a partition filter
 					RelationalInfo relationalInfo = vars.getSimpleFilterToRelationInfoMap().get(simpleFilter);
 					MyUtils.checkStatusProgram(null!=relationalInfo, "simpleFilter = " + simpleFilter);
-					List<Attribute> attributeListForRelationInfo = vars.getRelationalInfoToAttributeMap().get(relationalInfo);
+					List<Attribute> attributeListForRelationInfo = vars.getAttributeListFromRelationalInfoToAttributeListMap(relationalInfo);
 					
 					/*
 					 * Either there is only one, in which case use it, otherwise generate an attribute for it

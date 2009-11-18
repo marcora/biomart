@@ -115,11 +115,13 @@ public abstract class ElementTransformation {
 							vars.isTemplate() ? null : MartConfiguratorConstants.DEFAULT_PARTITION_TABLE_ROW, false, null);
 				} else if (isCrossElement && isAttribute) {
 					OldFilterDescription oldFilterDescription = (OldFilterDescription)oldElementDescription;
-					element = crossElementTransformation.transformFilter(containerPath.getCollectionContainer(), oldFilterDescription, null, null,
+					element = crossElementTransformation.transformFilter(	// crossElement is attribute if current is filter, and conversely
+							containerPath.getCollectionContainer(), oldFilterDescription, null, null,
 							vars.isTemplate() ? null : MartConfiguratorConstants.DEFAULT_PARTITION_TABLE_ROW, false, null);
 				} else if (isCrossElement && !isAttribute) {
 					OldAttributeDescription oldAttributeDescription = (OldAttributeDescription)oldElementDescription;
-					element = crossElementTransformation.transformAttribute(containerPath.getCollectionContainer(), oldAttributeDescription, null, 
+					element = crossElementTransformation.transformAttribute(	// crossElement is attribute if current is filter, and conversely
+							containerPath.getCollectionContainer(), oldAttributeDescription, null, 
 							vars.isTemplate() ? null : MartConfiguratorConstants.DEFAULT_PARTITION_TABLE_ROW, false);
 				}
 				
@@ -451,7 +453,7 @@ public abstract class ElementTransformation {
 		
 		// Element does not already exists
 		if (null==nonSpecificTemplateElement && null==dimensionPartitionTemplateAttribute && pushActionTemplateFilter==null) {
-			Element elementTmp = isAttribute ? vars.getAttributeMap().get(elementName) : vars.getFilterMap().get(elementName);
+			Element elementTmp = isAttribute ? vars.getAttributeFromAttributeMap(elementName) : vars.getFilterFromFilterMap(elementName);
 			TransformationUtils.checkForWarning(elementTmp!=null, vars.getNameConflictWarningList(),
 					(isAttribute ? ATTRIBUTE_STRING : FILTER_STRING) + elementName + " appears more than once");	
 			
@@ -489,22 +491,11 @@ public abstract class ElementTransformation {
 			if (isAttribute) {
 				Attribute newAttribute = (Attribute)newElement;
 				container.addAttribute(newAttribute);
-				vars.getAttributeMap().put(elementName, newAttribute);
-				
-				// If not a pointer, add it to the list of attributes for that relational info
-				RelationalInfo relationalInfo = new RelationalInfo(newAttribute.getTableName(), newAttribute.getKeyName(), newAttribute.getFieldName());
-				if (!newAttribute.getPointer()) {	
-					//vars.getRelationalInfoToAttributeMap().put(relationalInfo, newAttribute);	// if more than one, will put the last one
-					List<Attribute> attributeList = vars.getRelationalInfoToAttributeMap().get(relationalInfo);
-					if (attributeList==null) {	
-						attributeList = new ArrayList<Attribute>();
-					}
-					attributeList.add(newAttribute);
-					vars.getRelationalInfoToAttributeMap().put(relationalInfo, attributeList);	// if more than one, will put the last one				
-				}
+				vars.addAttributeToMaps(newAttribute);
 			} else {
-				container.addFilter((Filter)newElement);
-				vars.getFilterMap().put(elementName, (Filter)newElement);
+				Filter newFilter = (Filter)newElement;
+				container.addFilter(newFilter);
+				vars.addFilterToMaps(newFilter);
 			}
 		}
 		

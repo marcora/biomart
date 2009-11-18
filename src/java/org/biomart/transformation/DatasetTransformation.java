@@ -358,9 +358,7 @@ public class DatasetTransformation {
 	}
 
 	private void writeDataFiles() throws TechnicalException {
-		for (Iterator<Filter> it = vars.getFilterMap().values().iterator(); it.hasNext();) {
-			Filter filter = it.next();
-			
+		for (Filter filter : vars.getFiltersFromFilterMap()) {
 			if (filter instanceof SimpleFilter) {
 				SimpleFilter simpleFilter = (SimpleFilter)filter;
 				if (null!=simpleFilter.getDataFolderPath()) {

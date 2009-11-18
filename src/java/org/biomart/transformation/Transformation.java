@@ -3,7 +3,6 @@ package org.biomart.transformation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -136,17 +135,15 @@ public class Transformation {
 			Dataset dataset = transformation.vars.getDataset();;
 			dataset.setName(renamingMap.get(dataset.getName()));
 			
-			HashMap<String, Attribute> attributeMap = transformation.vars.getAttributeMap();
-			for (Iterator<Attribute> it = attributeMap.values().iterator(); it.hasNext();) {
-				Attribute attribute = it.next();
+			List<Attribute> attributeList = transformation.vars.getAttributesFromAttributeMap();
+			for (Attribute attribute : attributeList) {
 				if (attribute.getPointer()) {
 					attribute.setDatasetName(renamingMap.get(attribute.getDatasetName()));
 				}
 			}
 			
-			HashMap<String, Filter> filterMap = transformation.vars.getFilterMap();
-			for (Iterator<Filter> it = filterMap.values().iterator(); it.hasNext();) {
-				Filter filter = it.next();
+			List<Filter> filterList = transformation.vars.getFiltersFromFilterMap();
+			for (Filter filter : filterList) {
 				if (filter.getPointer()) {
 					filter.setDatasetName(renamingMap.get(filter.getDatasetName()));
 				}
@@ -226,7 +223,7 @@ public class Transformation {
 		MyUtils.checkStatusProgram(datasetName.equals(vars.getDataset().getName()) && virtualSchema.equals(params.getVirtualSchema()));
 															// Check virtual schema and dataset name matche
 		org.biomart.objects.objects.Element element = getAttribute ? 
-				vars.getAttributeMap().get(elementName) : vars.getFilterMap().get(elementName);
+				vars.getAttributeFromAttributeMap(elementName) : vars.getFilterFromFilterMap(elementName);
 		return element;
 	}
 

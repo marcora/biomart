@@ -64,8 +64,7 @@ public class TransformationVariable {
 	
 	// For filter to assiate them with an attribute
 	private MapSame<SimpleFilter, RelationalInfo> simpleFilterToRelationInfoMap = null;
-	//private HashMap<RelationalInfo, Attribute> relationalInfoToAttributeMap = null;
-	private HashMap<RelationalInfo, List<Attribute>> relationalInfoToAttributeMap2 = null;
+	private HashMap<RelationalInfo, List<Attribute>> relationalInfoToAttributeListMap = null;
 
 	// For filter with explicit filter list
 	private Map<GroupFilter, List<String>> filterWithFilterList = null;
@@ -101,7 +100,7 @@ public class TransformationVariable {
 		
 		this.simpleFilterToRelationInfoMap = new MapSame<SimpleFilter, RelationalInfo>();
 		//this.relationalInfoToAttributeMap = new HashMap<RelationalInfo, Attribute>();
-		this.relationalInfoToAttributeMap2 = new HashMap<RelationalInfo, List<Attribute>>();
+		this.relationalInfoToAttributeListMap = new HashMap<RelationalInfo, List<Attribute>>();
 		
 		this.filterWithFilterList = new HashMap<GroupFilter, List<String>>();
 		
@@ -235,12 +234,50 @@ public class TransformationVariable {
 		return portableReferencesAnInvalidElementList;
 	}
 
-	public HashMap<String, Attribute> getAttributeMap() {
-		return attributeMap;
+	
+	// Attribute map
+	public Attribute getAttributeFromAttributeMap(String attributeName) {
+		return attributeMap.get(attributeName);
 	}
-
-	public HashMap<String, Filter> getFilterMap() {
-		return filterMap;
+	public List<Attribute> getAttributesFromAttributeMap() {
+		return new ArrayList<Attribute>(this.attributeMap.values());
+	}
+	public List<Attribute> getAttributeListFromRelationalInfoToAttributeListMap(RelationalInfo relationalInfo) {
+		return relationalInfoToAttributeListMap.get(relationalInfo);
+	}
+	public void addAttributeToMaps(Attribute attribute) {
+		addAttributeToAttributeMap(attribute);
+		// If not a pointer, add it to the list of attributes for that relational info
+		if (!attribute.getPointer()) {
+			addAttributeToRelationalInfoToAttributeListMap(attribute);
+		}
+	}
+	private void addAttributeToAttributeMap(Attribute attribute) {	// keep it private
+		this.attributeMap.put(attribute.getName(), attribute);
+	}
+	private void addAttributeToRelationalInfoToAttributeListMap(Attribute attribute) {	// keep it private
+		RelationalInfo relationInfo = new RelationalInfo(attribute.getTableName(), attribute.getKeyName(), attribute.getConfigName());
+		List<Attribute> attributeList = this.relationalInfoToAttributeListMap.get(relationInfo);
+		if (null==attributeList) {
+			attributeList = new ArrayList<Attribute>();
+		}
+		attributeList.add(attribute);
+		this.relationalInfoToAttributeListMap.put(relationInfo, attributeList);
+	}
+	
+	
+	// Filter map
+	public void addFilterToMaps(Filter filter) {
+		addFilterToFilterMap(filter);
+	}
+	private void addFilterToFilterMap(Filter filter) {	// keep it private
+		this.filterMap.put(filter.getName(), filter);
+	}
+	public Filter getFilterFromFilterMap(String filterName) {
+		return filterMap.get(filterName);
+	}
+	public List<Filter> getFiltersFromFilterMap() {
+		return new ArrayList<Filter>(this.filterMap.values());
 	}
 
 	public Map<DimensionPartitionNameAndKeyAndValue, DimensionPartition> getDimensionPartitionsMap() {
@@ -330,12 +367,5 @@ public class TransformationVariable {
 
 	public Map<GroupFilter, List<String>> getFilterWithFilterList() {
 		return filterWithFilterList;
-	}
-	
-	/*public HashMap<RelationalInfo, Attribute> getRelationalInfoToAttributeMap() {
-		return relationalInfoToAttributeMap;
-	}*/
-	public HashMap<RelationalInfo, List<Attribute>> getRelationalInfoToAttributeMap() {
-		return relationalInfoToAttributeMap2;
 	}
 }
