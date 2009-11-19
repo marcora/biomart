@@ -35,9 +35,9 @@ import java.util.Map;
 
 import javax.swing.SwingUtilities;
 
-import org.biomart.builder.view.gui.diagrams.components.DiagramComponent;
-import org.biomart.builder.view.gui.diagrams.components.KeyComponent;
-import org.biomart.builder.view.gui.diagrams.components.RelationComponent;
+import org.biomart.configurator.view.gui.diagrams.components.DiagramComponent;
+import org.biomart.configurator.view.gui.diagrams.components.KeyComponent;
+import org.biomart.configurator.view.gui.diagrams.components.RelationComponent;
 
 /**
  * This layout manager lays out components in rows, grouped by the main dataset

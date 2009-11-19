@@ -66,9 +66,6 @@ import javax.swing.SwingUtilities;
 import org.biomart.builder.model.DataSetTable;
 import org.biomart.builder.model.Mart;
 import org.biomart.builder.model.Table;
-import org.biomart.builder.view.gui.diagrams.components.BoxShapedComponent;
-import org.biomart.builder.view.gui.diagrams.components.DiagramComponent;
-import org.biomart.builder.view.gui.diagrams.contexts.DiagramContext;
 import org.biomart.common.resources.Log;
 import org.biomart.common.resources.Resources;
 import org.biomart.common.utils.InverseMap;
@@ -79,6 +76,9 @@ import org.biomart.common.view.gui.LongProcess;
 import org.biomart.common.view.gui.dialogs.ComponentImageSaver;
 import org.biomart.common.view.gui.dialogs.ComponentPrinter;
 import org.biomart.configurator.utils.McUtils;
+import org.biomart.configurator.view.gui.diagrams.components.BoxShapedComponent;
+import org.biomart.configurator.view.gui.diagrams.components.DiagramComponent;
+import org.biomart.configurator.view.gui.diagrams.contexts.DiagramContext;
 
 
 /**

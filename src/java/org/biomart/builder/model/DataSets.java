@@ -29,10 +29,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import javax.swing.JOptionPane;
+
+import org.biomart.builder.model.DataSetTable;
 import org.biomart.builder.view.gui.diagrams.DataSetDiagram;
 import org.biomart.builder.view.gui.diagrams.Diagram;
-import org.biomart.builder.view.gui.diagrams.contexts.DataSetContext;
-import org.biomart.builder.view.gui.diagrams.contexts.DiagramContext;
 import org.biomart.builder.view.gui.dialogs.SaveDDLDialog;
 import org.biomart.builder.view.gui.dialogs.SuggestDataSetDialog;
 import org.biomart.common.resources.Log;
@@ -43,6 +43,9 @@ import org.biomart.configurator.utils.McEventObject;
 import org.biomart.configurator.utils.type.DataSetOptimiserType;
 import org.biomart.configurator.utils.type.EventType;
 import org.biomart.configurator.utils.type.IdwViewType;
+import org.biomart.configurator.view.gui.diagrams.contexts.DataSetContext;
+import org.biomart.configurator.view.gui.diagrams.contexts.DiagramContext;
+import org.biomart.configurator.view.gui.dialogs.ExplainTableDialog;
 import org.biomart.configurator.view.idwViews.McViews;
 
 
@@ -662,6 +665,17 @@ public class DataSets {
 		// Ask user for the new name.
 		this.requestRenameDataSetTable(dsTable, this.askUserForName(Resources
 				.get("requestDataSetTableName"), dsTable.getModifiedName()));
+	}
+
+	/**
+	 * Ask that an explanation dialog be opened that explains how the given
+	 * dataset table was constructed.
+	 * 
+	 * @param dsTable
+	 *            the dataset table that needs to be explained.
+	 */
+	public void requestExplainTable(final DataSetTable dsTable) {
+		ExplainTableDialog.showTableExplanation(this.mart, dsTable);
 	}
 
 	/**

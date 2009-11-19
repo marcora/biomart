@@ -30,10 +30,10 @@ import org.biomart.builder.model.Mart;
 import org.biomart.builder.model.Relation;
 import org.biomart.builder.model.Schema;
 import org.biomart.builder.view.gui.diagrams.DataSetLayoutManager.DataSetLayoutConstraint;
-import org.biomart.builder.view.gui.diagrams.components.RelationComponent;
-import org.biomart.builder.view.gui.diagrams.components.TableComponent;
 import org.biomart.configurator.utils.type.DataSetTableType;
 import org.biomart.configurator.utils.type.MartType;
+import org.biomart.configurator.view.gui.diagrams.components.RelationComponent;
+import org.biomart.configurator.view.gui.diagrams.components.TableComponent;
 
 
 /**

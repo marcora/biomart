@@ -36,9 +36,9 @@ import org.biomart.builder.model.Key;
 import org.biomart.builder.model.Relation;
 import org.biomart.builder.model.Table;
 import org.biomart.builder.view.gui.diagrams.Diagram;
-import org.biomart.builder.view.gui.diagrams.components.DiagramComponent;
 import org.biomart.common.exceptions.TransactionException;
 import org.biomart.common.view.gui.dialogs.StackTrace;
+import org.biomart.configurator.view.gui.diagrams.components.DiagramComponent;
 
 
 /**

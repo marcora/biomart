@@ -41,8 +41,6 @@ import org.biomart.builder.model.ForeignKey;
 import org.biomart.builder.model.PrimaryKey;
 import org.biomart.builder.view.gui.diagrams.Diagram;
 import org.biomart.builder.view.gui.diagrams.SchemaDiagram;
-import org.biomart.builder.view.gui.diagrams.contexts.DiagramContext;
-import org.biomart.builder.view.gui.diagrams.contexts.SchemaContext;
 import org.biomart.builder.view.gui.dialogs.KeyDialog;
 import org.biomart.common.resources.Resources;
 import org.biomart.common.utils.Transaction;
@@ -52,6 +50,8 @@ import org.biomart.common.view.gui.dialogs.ProgressDialog;
 import org.biomart.common.view.gui.dialogs.StackTrace;
 import org.biomart.configurator.utils.McUtils;
 import org.biomart.configurator.utils.type.Cardinality;
+import org.biomart.configurator.view.gui.diagrams.contexts.DiagramContext;
+import org.biomart.configurator.view.gui.diagrams.contexts.SchemaContext;
 
 
 /**

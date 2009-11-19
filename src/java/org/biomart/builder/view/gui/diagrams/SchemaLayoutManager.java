@@ -33,9 +33,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.swing.SwingUtilities;
-import org.biomart.builder.view.gui.diagrams.components.DiagramComponent;
-import org.biomart.builder.view.gui.diagrams.components.KeyComponent;
-import org.biomart.builder.view.gui.diagrams.components.RelationComponent;
+
+import org.biomart.configurator.view.gui.diagrams.components.DiagramComponent;
+import org.biomart.configurator.view.gui.diagrams.components.KeyComponent;
+import org.biomart.configurator.view.gui.diagrams.components.RelationComponent;
 
 /**
  * This layout manager lays out components in rows of a square block.

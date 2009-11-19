@@ -539,7 +539,7 @@ public class DataSet extends Schema {
 						throw new BioMartError(t);
 					}
 				}
-		}
+		} //end of if(parentDSTable !=null)
 
 		// How many times are allowed to iterate over each relation?
 		final Map<Relation,Integer> relationCount = new HashMap<Relation,Integer>();
@@ -684,9 +684,10 @@ public class DataSet extends Schema {
 			// Process the dimension relations of this table. For 1:M it's easy.
 			// For M:M, we have to work out which end is connected to the real
 			// table, then process the table at the other end of the relation.
+			//TODO do we have M:M
 			for (int i = 0; i < dimensionQ.size(); i++) {
 				final Object[] triple = (Object[]) dimensionQ.get(i);
-				final List newSourceDSCols = (List) triple[0];
+				final List<DataSetColumn> newSourceDSCols = (List<DataSetColumn>) triple[0];
 				final Relation dimensionRelation = (Relation) triple[1];
 				final int iteration = ((Integer) triple[2]).intValue();
 				if (dimensionRelation.isOneToMany())
@@ -695,7 +696,8 @@ public class DataSet extends Schema {
 							skippedMainTables, newSourceDSCols,
 							dimensionRelation, subclassCount, iteration,
 							unusedTables);
-				else
+				else System.err.println("check relation !!!");
+/*				else
 					this.generateDataSetTable(DataSetTableType.DIMENSION,
 							dsTable, dimensionRelation.getFirstKey().getTable()
 									.equals(realTable) ? dimensionRelation
@@ -704,6 +706,7 @@ public class DataSet extends Schema {
 											.getTable(), skippedMainTables,
 							newSourceDSCols, dimensionRelation, subclassCount,
 							iteration, unusedTables);
+							*/
 			}
 		}
 	}
