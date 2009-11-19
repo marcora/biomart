@@ -99,7 +99,7 @@ public class FilterAction implements ActionListener {
 		McEventObject obj = new McEventObject(EventType.Update_McViewType,type);
 		((McViewSchema)McViews.getInstance().getView(IdwViewType.SCHEMA)).getController().processV2Cupdate(obj);
 	}
-
+	
 	
 	private void setDebugView() {
 		this.setFilter(null);
@@ -131,7 +131,7 @@ public class FilterAction implements ActionListener {
 		filters.put(Resources.get("PARTITIONTABLE"), null);
 		filters.put(Resources.get("DSTABLE"), null);
 		filters.put(Resources.get("SubclassRelation"), null);
-			  
+		filters.put(Resources.get("CONFIG"), null);
 		String userName = McGuiUtils.INSTANCE.getCurrentUser().getUserName();
 		String guiName = McGuiUtils.INSTANCE.getGuiType().toString();
 		filters.put(Resources.get("CONTAINER"), null);
@@ -145,116 +145,121 @@ public class FilterAction implements ActionListener {
 		return filters;
 	  }
 	  
-	  private Map<String, HashMap<String, String>> createSourceFilter() {
-		  Map<String, HashMap<String, String>>filters = new HashMap<String, HashMap<String, String>>();
-		  filters.put(Resources.get("SYNUSERTABLE"), null);
-		  filters.put(Resources.get("MARTUSERS"), null);
-		  filters.put(Resources.get("PARTITIONTABLE"), null);
-		  filters.put(Resources.get("CONTAINER"), null);
-		  filters.put(Resources.get("DSTABLE"),null);
-		  filters.put(Resources.get("IMPORTABLE"), null);
-		  filters.put(Resources.get("EXPORTABLE"), null);
-		  filters.put(Resources.get("RELATION"), null);
-		  filters.put(Resources.get("SubclassRelation"), null);
-		  HashMap<String,String> pMap = new HashMap<String,String>();
-		  String userName = McGuiUtils.INSTANCE.getCurrentUser().getUserName();
-		  pMap.put(Resources.get("USER"), userName);
-		  filters.put(Resources.get("LOCATION"), pMap);
-		  return filters;
-	  }
-	  
-	  private Map<String, HashMap<String, String>> createTargetFilter() {
-		  Map<String, HashMap<String, String>>filters = new HashMap<String, HashMap<String, String>>();
-		  filters.put(Resources.get("SYNUSERTABLE"), null);
-		  filters.put(Resources.get("MARTUSERS"), null);
-		  filters.put(Resources.get("SOURCESCHEMA"), null);
-		  filters.put(Resources.get("CONTAINER"), null);
-		  filters.put(Resources.get("IMPORTABLE"), null);
-		  filters.put(Resources.get("EXPORTABLE"), null);
-		  filters.put(Resources.get("PARTITIONTABLE"),null);
-		  filters.put(Resources.get("SubclassRelation"), null);
-		  HashMap<String,String> pMap = new HashMap<String,String>();
-		  String userName = McGuiUtils.INSTANCE.getCurrentUser().getUserName();
-		  pMap.put(Resources.get("USER"), userName);
-		  filters.put(Resources.get("LOCATION"), pMap);
-		  return filters;
-	  }
-	  
-	  private Map<String, HashMap<String, String>> createMaterializeFilter() {
-		  Map<String, HashMap<String, String>>filters = new HashMap<String, HashMap<String, String>>();
-		  filters.put(Resources.get("SYNUSERTABLE"), null);
-		  filters.put(Resources.get("MARTUSERS"), null);
-		  filters.put(Resources.get("SOURCESCHEMA"), null);
-		  filters.put(Resources.get("CONTAINER"), null);
-		  filters.put(Resources.get("PARTITIONTABLE"),null);
-		  filters.put(Resources.get("IMPORTABLE"), null);
-		  filters.put(Resources.get("EXPORTABLE"), null);
-		  filters.put(Resources.get("SubclassRelation"), null);
-		  HashMap<String,String> pMap = new HashMap<String,String>();
-		  String userName = McGuiUtils.INSTANCE.getCurrentUser().getUserName();
-		  pMap.put(Resources.get("USER"), userName);
-		  filters.put(Resources.get("LOCATION"), pMap);
-		  return filters;
-	  }
-	  
-	  private Map<String, HashMap<String, String>> createUpdateFilter() {
-		  Map<String, HashMap<String, String>>filters = new HashMap<String, HashMap<String, String>>();
-		  filters.put(Resources.get("SYNUSERTABLE"), null);
-		  filters.put(Resources.get("MARTUSERS"), null);
-		  filters.put(Resources.get("SOURCESCHEMA"), null);
-		  filters.put(Resources.get("CONTAINER"), null);
-		  filters.put(Resources.get("PARTITIONTABLE"),null);
-		  filters.put(Resources.get("IMPORTABLE"), null);
-		  filters.put(Resources.get("EXPORTABLE"), null);
-		  filters.put(Resources.get("SubclassRelation"), null);
-		  HashMap<String,String> pMap = new HashMap<String,String>();
-		  String userName = McGuiUtils.INSTANCE.getCurrentUser().getUserName();
-		  pMap.put(Resources.get("USER"), userName);
-		  filters.put(Resources.get("LOCATION"), pMap);
-		  return filters;
-	  }
+	private Map<String, HashMap<String, String>> createSourceFilter() {
+		Map<String, HashMap<String, String>>filters = new HashMap<String, HashMap<String, String>>();
+		filters.put(Resources.get("SYNUSERTABLE"), null);
+		filters.put(Resources.get("MARTUSERS"), null);
+		filters.put(Resources.get("PARTITIONTABLE"), null);
+		filters.put(Resources.get("CONTAINER"), null);
+		filters.put(Resources.get("DSTABLE"),null);
+		filters.put(Resources.get("IMPORTABLE"), null);
+		filters.put(Resources.get("EXPORTABLE"), null);
+		filters.put(Resources.get("RELATION"), null);
+		filters.put(Resources.get("SubclassRelation"), null);
+		filters.put(Resources.get("CONFIG"), null);
+		HashMap<String,String> pMap = new HashMap<String,String>();
+		String userName = McGuiUtils.INSTANCE.getCurrentUser().getUserName();
+		pMap.put(Resources.get("USER"), userName);
+		filters.put(Resources.get("LOCATION"), pMap);
+		return filters;
+	}
+  
+	private Map<String, HashMap<String, String>> createTargetFilter() {
+		Map<String, HashMap<String, String>>filters = new HashMap<String, HashMap<String, String>>();
+		filters.put(Resources.get("SYNUSERTABLE"), null);
+		filters.put(Resources.get("MARTUSERS"), null);
+		filters.put(Resources.get("SOURCESCHEMA"), null);
+		filters.put(Resources.get("CONTAINER"), null);
+		filters.put(Resources.get("IMPORTABLE"), null);
+		filters.put(Resources.get("EXPORTABLE"), null);
+		filters.put(Resources.get("PARTITIONTABLE"),null);
+		filters.put(Resources.get("SubclassRelation"), null);
+		filters.put(Resources.get("CONFIG"), null);
+		HashMap<String,String> pMap = new HashMap<String,String>();
+		String userName = McGuiUtils.INSTANCE.getCurrentUser().getUserName();
+		pMap.put(Resources.get("USER"), userName);
+		filters.put(Resources.get("LOCATION"), pMap);
+		return filters;
+	}
+  
+	private Map<String, HashMap<String, String>> createMaterializeFilter() {
+		Map<String, HashMap<String, String>>filters = new HashMap<String, HashMap<String, String>>();
+		filters.put(Resources.get("SYNUSERTABLE"), null);
+		filters.put(Resources.get("MARTUSERS"), null);
+		filters.put(Resources.get("SOURCESCHEMA"), null);
+		filters.put(Resources.get("CONTAINER"), null);
+		filters.put(Resources.get("PARTITIONTABLE"),null);
+		filters.put(Resources.get("IMPORTABLE"), null);
+		filters.put(Resources.get("EXPORTABLE"), null);
+		filters.put(Resources.get("SubclassRelation"), null);
+		filters.put(Resources.get("CONFIG"), null);
+		HashMap<String,String> pMap = new HashMap<String,String>();
+		String userName = McGuiUtils.INSTANCE.getCurrentUser().getUserName();
+		pMap.put(Resources.get("USER"), userName);
+		filters.put(Resources.get("LOCATION"), pMap);
+		return filters;
+	}
+  
+	private Map<String, HashMap<String, String>> createUpdateFilter() {
+		Map<String, HashMap<String, String>>filters = new HashMap<String, HashMap<String, String>>();
+		filters.put(Resources.get("SYNUSERTABLE"), null);
+		filters.put(Resources.get("MARTUSERS"), null);
+		filters.put(Resources.get("SOURCESCHEMA"), null);
+		filters.put(Resources.get("CONTAINER"), null);
+		filters.put(Resources.get("PARTITIONTABLE"),null);
+		filters.put(Resources.get("IMPORTABLE"), null);
+		filters.put(Resources.get("EXPORTABLE"), null);
+		filters.put(Resources.get("SubclassRelation"), null);
+		filters.put(Resources.get("CONFIG"), null);
+		HashMap<String,String> pMap = new HashMap<String,String>();
+		String userName = McGuiUtils.INSTANCE.getCurrentUser().getUserName();
+		pMap.put(Resources.get("USER"), userName);
+		filters.put(Resources.get("LOCATION"), pMap);
+		return filters;
+	}
 
-	  
-	  private Map<String, HashMap<String, String>> createPartitionFilter() {
-		  Map<String, HashMap<String, String>>filters = new HashMap<String, HashMap<String, String>>();
-		  filters.put(Resources.get("SYNUSERTABLE"), null);
-		  filters.put(Resources.get("MARTUSERS"), null);
-		  filters.put(Resources.get("SOURCESCHEMA"), null);
-		  filters.put(Resources.get("CONTAINER"), null);
-		  filters.put(Resources.get("IMPORTABLE"), null);
-		  filters.put(Resources.get("EXPORTABLE"), null);
-		  filters.put(Resources.get("PARTITIONTABLE"),null);
-		  filters.put(Resources.get("SubclassRelation"), null);
-		  HashMap<String,String> pMap = new HashMap<String,String>();
-		  String userName = McGuiUtils.INSTANCE.getCurrentUser().getUserName();
-		  pMap.put(Resources.get("USER"), userName);
-		  filters.put(Resources.get("LOCATION"), pMap);
-		  return filters;
-	  }
-	  
+  
+	private Map<String, HashMap<String, String>> createPartitionFilter() {
+		Map<String, HashMap<String, String>>filters = new HashMap<String, HashMap<String, String>>();
+		filters.put(Resources.get("SYNUSERTABLE"), null);
+		filters.put(Resources.get("MARTUSERS"), null);
+		filters.put(Resources.get("SOURCESCHEMA"), null);
+		filters.put(Resources.get("CONTAINER"), null);
+		filters.put(Resources.get("IMPORTABLE"), null);
+		filters.put(Resources.get("EXPORTABLE"), null);
+		filters.put(Resources.get("PARTITIONTABLE"),null);
+		filters.put(Resources.get("SubclassRelation"), null);
+		filters.put(Resources.get("CONFIG"), null);
+		HashMap<String,String> pMap = new HashMap<String,String>();
+		String userName = McGuiUtils.INSTANCE.getCurrentUser().getUserName();
+		pMap.put(Resources.get("USER"), userName);
+		filters.put(Resources.get("LOCATION"), pMap);
+		return filters;
+	}
+  
 	  /**
 	   * apply filter and highlight the last selected node, if not the same node available, highlight row(0);
 	   * @param filter
 	   */
-	  private void setFilter(McFilter filter) {
-		  MartConfigTree tree = ((McViewTree)McViews.getInstance().getView(IdwViewType.MCTREE)).getMcTree();
-		  TreePath oldPath = tree.getSelectionPath();
-		  JDomNodeAdapter lastNode = null;
-		  if(oldPath!=null) {
-			 lastNode = (JDomNodeAdapter)oldPath.getLastPathComponent();
-		  }
-		  //go back to dataset or root
-		  JDomNodeAdapter dsNode = null;
-		  if(lastNode!=null) {
-			  Element dsElement = lastNode.findAncestorElement(lastNode.getNode(), Resources.get("DATASET"));
-			  if(dsElement!=null)
-				  dsNode = new JDomNodeAdapter(dsElement);
-			  else
-				  dsNode = (JDomNodeAdapter)tree.getModel().getRoot();
-		  }
-		  tree.getModel().setFilter(filter);
-		  int row = tree.expandNodeToDataSets(Resources.get("DATASET"),dsNode);
-		  tree.setSelectionRow(row);
-	  }
+	private void setFilter(McFilter filter) {
+		MartConfigTree tree = ((McViewTree)McViews.getInstance().getView(IdwViewType.MCTREE)).getMcTree();
+		TreePath oldPath = tree.getSelectionPath();
+		JDomNodeAdapter lastNode = null;
+		if(oldPath!=null) {
+			lastNode = (JDomNodeAdapter)oldPath.getLastPathComponent();
+		}
+		//go back to dataset or root
+		JDomNodeAdapter dsNode = null;
+		if(lastNode!=null) {
+			Element dsElement = lastNode.findAncestorElement(lastNode.getNode(), Resources.get("DATASET"));
+			if(dsElement!=null)
+				dsNode = new JDomNodeAdapter(dsElement);
+			else
+				dsNode = (JDomNodeAdapter)tree.getModel().getRoot();
+		}
+		tree.getModel().setFilter(filter);
+		int row = tree.expandNodeToDataSets(Resources.get("DATASET"),dsNode);
+		tree.setSelectionRow(row);
+	}
 	  	
 }

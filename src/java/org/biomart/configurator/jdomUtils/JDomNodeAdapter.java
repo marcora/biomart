@@ -346,8 +346,6 @@ public class JDomNodeAdapter extends DefaultMutableTreeNode {
 				dsElement.setAttribute(Resources.get("TIME"),McUtils.getCurrentTimeString());
 				//config name is user_type_dataset
 				String user = McGuiUtils.INSTANCE.getCurrentUser().getUserName();
-				String guiType = McGuiUtils.INSTANCE.getGuiType().toString();
-
 
 				for (final Iterator<Table> i = ds.getTables().values().iterator(); i.hasNext();) {
 
@@ -413,268 +411,131 @@ public class JDomNodeAdapter extends DefaultMutableTreeNode {
 
     
 
-    public void addGUIs(List<JDomNodeAdapter>configs) {;
-
+    @SuppressWarnings("unchecked") //unchecked for jdom
+	public void addGUIs(List<JDomNodeAdapter>configs) {;
     	String name = Resources.get("NAME");
-
     	List<Element> guiList = this.node.getChildren();
-
     	for(JDomNodeAdapter dataset:configs) {
-
     		for(Element gui:guiList) {
-
 	    		String datasetName = dataset.getAttributeValue(name);	    		 
-
 		    	Element configPointer = new Element(Resources.get("CONFIGPOINTER"));
-
 		    	configPointer.setAttribute(name,
-
-		    			this.node.getAttributeValue(name)+"_"+gui.getAttributeValue(name)+"_"+datasetName);
-
+		    	this.node.getAttributeValue(name)+"_"+gui.getAttributeValue(name)+"_"+datasetName);
 		    	gui.addContent(configPointer);	    		
-
     		}
-
     	}
-
-    	
-
-    	
-
     }
 
     
 
     private void doNaive(Element e, Mart mart, String datasetName, String userName) {
-
     	//e is dataset
-
     	String rName=Resources.get("NAME");
 
     	final DataSet ds = this.findDataSet(mart, datasetName);
-
     	if(ds==null) 
-
-    		return;
-
-    	
+    		return;   	
 
     	final Element filterContainer = new Element(Resources.get("CONTAINER"));
-
     	filterContainer.setAttribute(Resources.get("CONFIG"),userName+"_"+McGuiType.MARTVIEW+"_"+datasetName);
-
-//    	filterContainer.setAttribute(Resources.get("USER"),userName);
-
-//    	filterContainer.setAttribute(Resources.get("GUI"),McGuiType.MARTVIEW.toString());
-
-       	filterContainer.setAttribute(rName,Resources.get("FILTER"));
-
-    	e.addContent(filterContainer);
-
-    	
-
-     	
+      	filterContainer.setAttribute(rName,Resources.get("FILTER"));
+      	e.addContent(filterContainer);
 
     	final Element attContainer = new Element(Resources.get("CONTAINER"));
-
     	attContainer.setAttribute(Resources.get("CONFIG"),userName+"_"+McGuiType.MARTVIEW+"_"+datasetName);
-
-//    	attContainer.setAttribute(Resources.get("USER"),userName);
-
-//    	attContainer.setAttribute(Resources.get("GUI"),McGuiType.MARTVIEW.toString());
-
     	attContainer.setAttribute(rName,Resources.get("ATTRIBUTE"));
-
     	e.addContent(attContainer);
-
-    	
-
     	//need to order the DataSetTable 
 
     	List<DataSetTable> mainList = new ArrayList<DataSetTable>();
-
     	List<DataSetTable> subList = new ArrayList<DataSetTable>();
-
     	List<DataSetTable> dmList = new ArrayList<DataSetTable>();
-
     	for(Iterator<Table> it = ds.getTables().values().iterator(); it.hasNext(); ) {
-
     		DataSetTable dsTable = (DataSetTable)it.next();
-
     		if(dsTable.getType().equals(DataSetTableType.MAIN))
-
     			mainList.add(dsTable);
-
     		else if(dsTable.getType().equals(DataSetTableType.MAIN_SUBCLASS))
-
     			subList.add(dsTable);
-
     		else
-
     			dmList.add(dsTable);
-
     	}
 
     	//order sublist
-
     	while(subList.size()>0) {
-
     		DataSetTable lastDst = mainList.get(mainList.size()-1);
-
     		for(DataSetTable dst:subList) {
-
     			if(dst.getParent().equals(lastDst)) {
-
     				mainList.add(dst);
-
     				subList.remove(dst);
-
     				break;
-
     			}
-
     		}
-
     	}
-
-
-
     	mainList.addAll(dmList);
 
-    	
-
-    	for (DataSetTable dsTable:mainList) {
-
+     	for (DataSetTable dsTable:mainList) {
     		Element ftContainer = new Element(Resources.get("CONTAINER"));
-
     		ftContainer.setAttribute(rName,dsTable.getName());
-
-    		filterContainer.addContent(ftContainer);
-
-    		
-
+    		filterContainer.addContent(ftContainer);    		
     		Element atContainer = new Element(Resources.get("CONTAINER"));
-
     		atContainer.setAttribute(rName,dsTable.getName());
-
     		attContainer.addContent(atContainer);
 
-    		
-
     		String martName = e.getParentElement().getAttributeValue(Resources.get("NAME"));
-
     		String locName = e.getParentElement().getParentElement().getAttributeValue(Resources.get("NAME"));
-
     		//columns
-
     		for(final Iterator<Column> ci=dsTable.getColumns().values().iterator(); ci.hasNext();) {
-
     			DataSetColumn col =(DataSetColumn) ci.next();
-
     			Element attributeElement = new Element(Resources.get("ATTRIBUTEPOINTER"));
-
     			atContainer.addContent(attributeElement);    			
-
     			attributeElement.setAttribute(rName,col.getName());
-
     			attributeElement.setAttribute(Resources.get("POINTER"),"false");
-
     			attributeElement.setAttribute(Resources.get("TARGETFIELD"),col.getName());
-
     			if(col instanceof WrappedColumn) {
-
     				attributeElement.setAttribute(Resources.get("SOURCEFIELD"),
-
     						((WrappedColumn)col).getWrappedColumn().getName());
-
     				attributeElement.setAttribute(Resources.get("SOURCETABLE"),
-
     						((WrappedColumn)col).getWrappedColumn().getTable().getName());
-
     			}else if(col instanceof InheritedColumn) {
-
     				attributeElement.setAttribute(Resources.get("SOURCEFIELD"),
-
     						((InheritedColumn)col).getInheritedColumn().getName());
-
     				attributeElement.setAttribute(Resources.get("SOURCETABLE"),
-
     						((InheritedColumn)col).getInheritedColumn().getTable().getName());    				
-
     			}
-
     			attributeElement.setAttribute(Resources.get("LOCATION"),locName);
-
     			attributeElement.setAttribute(Resources.get("MART"),martName);
-
     			attributeElement.setAttribute(Resources.get("VERSION"),"");
-
     			attributeElement.setAttribute(Resources.get("DATASET"),ds.getName());
-
     			attributeElement.setAttribute(Resources.get("CONFIG"),"naive");
-
     			attributeElement.setAttribute(Resources.get("DSTABLE"),dsTable.getName());
-
     			attributeElement.setAttribute(Resources.get("SOURCERANGE"),"");
-
     			attributeElement.setAttribute(Resources.get("TARGETRANGE"),"");
-
     			attributeElement.setAttribute(Resources.get("REPORT"),"true");
-
     			attributeElement.setAttribute(Resources.get("DISPLAYNAME"),col.getName());    	
-
-    			
-
+ 
     			Element filterElement = new Element(Resources.get("FILTER"));
-
     			filterElement.setAttribute(rName, col.getName());
-
     			filterElement.setAttribute(Resources.get("POINTER"),"false");
-
     			filterElement.setAttribute(Resources.get("TARGETFIELD"),col.getName());
-
     			if(col instanceof WrappedColumn) {
-
     				filterElement.setAttribute(Resources.get("SOURCEFIELD"),
-
     						((WrappedColumn)col).getWrappedColumn().getName());
-
     				filterElement.setAttribute(Resources.get("SOURCETABLE"),
-
     						((WrappedColumn)col).getWrappedColumn().getTable().getName());
-
     			}
-
     			filterElement.setAttribute(Resources.get("LOCATION"),locName);
-
     			filterElement.setAttribute(Resources.get("MART"),martName);
-
     			filterElement.setAttribute(Resources.get("VERSION"),"");
-
     			filterElement.setAttribute(Resources.get("DATASET"),ds.getName());
-
     			filterElement.setAttribute(Resources.get("CONFIG"),"naive");
-
     			filterElement.setAttribute(Resources.get("DSTABLE"),dsTable.getName());
-
     			filterElement.setAttribute(Resources.get("SOURCERANGE"),"");
-
     			filterElement.setAttribute(Resources.get("TARGETRANGE"),"");
-
     			filterElement.setAttribute(Resources.get("REPORT"),"true");
-
     			filterElement.setAttribute(Resources.get("DISPLAYNAME"),col.getName());    	
-
     			ftContainer.addContent(filterElement);
-
-    			
-
     		}
-
-    		
-
     	}
-
     }
 
     

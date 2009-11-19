@@ -321,7 +321,7 @@ public class DataSet extends Schema {
 		String prefix = "";
 		if (parentDSTable != null) {
 			final String parts[] = parentDSTable.getName().split(
-					Resources.get("tablenameSep"));
+					Resources.get("tablenameSep")); //__
 			prefix = parts[parts.length - 1] + Resources.get("tablenameSep");
 		}
 		String fullName = prefix + realTable.getName();
@@ -334,7 +334,7 @@ public class DataSet extends Schema {
 				.hasNext()
 				&& dsTable == null;) {
 			final Map.Entry<String, Table> entry = i.next();
-			final String testName = (String) entry.getKey();
+			final String testName = entry.getKey();
 			final DataSetTable testTable = (DataSetTable) entry.getValue();
 			// If find table starting with same letters, check to see
 			// if can reuse, and update fullName to match it.
@@ -347,8 +347,7 @@ public class DataSet extends Schema {
 					dsTable.setType(type); // Just to make sure.
 					unusedTables.remove(dsTable);
 					dsTable.getTransformationUnits().clear();
-				} else
-					dsTable = null;
+				} 
 		}
 		// If still not found anything after all tables checked,
 		// create new table.
@@ -366,62 +365,8 @@ public class DataSet extends Schema {
 		dsTable.includedTables.clear();
 		dsTable.includedSchemas.clear();
 
-		// Identify secondStartTable and mergeTheseRelations.
-		Table secondStartTable = null;
+
 		final Set<Relation> mergeTheseRelations = new HashSet<Relation>();
-		if (dsTable.getType().equals(DataSetTableType.DIMENSION)) {
-			// A crude walk will tell us which relations we
-			// would have included if we had done a normal transform.
-			final List<Table> mergeTheseTables = new ArrayList<Table>();
-			mergeTheseTables.add(realTable);
-			for (int i = 0; i < mergeTheseTables.size(); i++) {
-				final Table cand = (Table) mergeTheseTables.get(i);
-				for (final Iterator<Relation> j = cand.getRelations().iterator(); j
-						.hasNext();) {
-					final Relation candRel = (Relation) j.next();
-					if (mergeTheseRelations.contains(candRel))
-						continue;
-					final Table newCand = candRel.getOtherKey(
-							candRel.getKeyForTable(cand)).getTable();
-					// Decide whether to include it or not.
-					// Skip the source relation.
-					if (candRel.equals(sourceRelation))
-						continue;
-					// Skip relations back to main tables.
-					if (skippedMainTables.contains(newCand))
-						continue;
-					// Skip incorrect relations.
-					if (candRel.getStatus().equals(
-							ComponentStatus.INFERRED_INCORRECT))
-						continue;
-					// Skip masked relations.
-					if (candRel.isMaskRelation(this, dsTable.getName()))
-						continue;
-					// Skip relations leading to masked schemas.
-					if (newCand.getSchema().isMasked())
-						continue;
-					// Skip 1:M relations from the 1 end unless forced or
-					// merged.
-					if (candRel.isOneToMany()
-							&& candRel.getOneKey().getTable().equals(cand)
-							&& !( candRel
-									.isMergeRelation(this)))
-						continue;
-					// Add relation to set, and add table at other
-					// end to queue.
-					if (!mergeTheseTables.contains(newCand)) {
-						mergeTheseTables.add(newCand);
-						//if (newCand.isTransformStart(this, dsTable.getName()))
-						//	secondStartTable = newCand;
-					}
-					mergeTheseRelations.add(candRel);
-				}
-			}
-			// At this stage we know if we have found an alternative
-			// start point. If not, we can empty out the walked set.
-			if (secondStartTable == null)
-				mergeTheseRelations.clear();
-		}
 
 		// Create the three relation-table pair queues we will work with. The
 		// normal queue holds pairs of relations and tables. The other two hold
@@ -429,9 +374,9 @@ public class DataSet extends Schema {
 		// relation. The normal queue has a third object associated with each
 		// entry, which specifies whether to treat the 1:M relations from
 		// the merged table as dimensions or not.
-		final List normalQ = new ArrayList();
-		final List subclassQ = new ArrayList();
-		final List dimensionQ = new ArrayList();
+		final List<Object[]> normalQ = new ArrayList<Object[]>();
+		final List<Object[]> subclassQ = new ArrayList<Object[]>();
+		final List<Object[]> dimensionQ = new ArrayList<Object[]>();
 
 		// Set up a list to hold columns for this table's primary key.
 		final List<Column> dsTablePKCols = new ArrayList<Column>();
@@ -598,13 +543,9 @@ public class DataSet extends Schema {
 
 		// How many times are allowed to iterate over each relation?
 		final Map<Relation,Integer> relationCount = new HashMap<Relation,Integer>();
-		for (final Iterator<Schema> i = this.getMart().getSchemasObj().getSchemas().values().iterator(); i
-				.hasNext();) {
-			final Schema schema =  i.next();
+		for (final Schema schema: this.getMart().getSchemasObj().getSchemas().values()) {
 			final Set<Relation> relations = new HashSet<Relation>();
-			for (final Iterator<Table> j = schema.getTables().values().iterator(); j
-					.hasNext();) {
-				final Table tbl = j.next();
+			for (final Table tbl:schema.getTables().values()) {
 				if (tbl.getPrimaryKey() != null)
 					relations.addAll(tbl.getPrimaryKey().getRelations());
 				for (final Iterator<ForeignKey> k = tbl.getForeignKeys().iterator(); k
@@ -628,12 +569,12 @@ public class DataSet extends Schema {
 		// want dimensions constructed if we are not already constructing
 		// a dimension ourselves.
 		this.processTable(parentTU, dsTable, dsTablePKCols,
-				secondStartTable != null ? secondStartTable : realTable,
+				realTable,
 				normalQ, subclassQ, dimensionQ, sourceDSCols,
-				secondStartTable != null ? null : sourceRelation,
+				sourceRelation,
 				relationCount, subclassCount, 
 						 !type.equals(DataSetTableType.DIMENSION),
-				Collections.EMPTY_LIST, Collections.EMPTY_LIST,
+				new ArrayList<String>(),new ArrayList<String>(),
 				relationIteration, 0, unusedCols, uniqueBases,
 				skippedMainTables, tableTracker, mergeTheseRelations);
 
@@ -1451,8 +1392,7 @@ public class DataSet extends Schema {
 			rel.addPropertyChangeListener("cardinality", this.rebuildListener);
 			rel.addPropertyChangeListener("status", this.rebuildListener);
 			rel.addPropertyChangeListener("maskRelation", this.rebuildListener);
-			rel
-					.addPropertyChangeListener("mergeRelation",
+			rel.addPropertyChangeListener("mergeRelation",
 							this.rebuildListener);
 			rel.addPropertyChangeListener("subclassRelation",
 					this.rebuildListener);

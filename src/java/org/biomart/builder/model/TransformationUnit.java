@@ -116,6 +116,7 @@ public abstract class TransformationUnit {
 	public static class SelectFromTable extends TransformationUnit {
 		private static final long serialVersionUID = 1L;
 
+		//it is a source table
 		private final Table table;
 
 		private SelectFromTable(final TransformationUnit previousUnit,
@@ -166,7 +167,7 @@ public abstract class TransformationUnit {
 				// We need to check each of our columns to see if they
 				// are dataset columns, and if so, if they point to
 				// the appropriate real column.
-				for (final Iterator i = this.getNewColumnNameMap().values()
+				for (final Iterator<DataSetColumn> i = this.getNewColumnNameMap().values()
 						.iterator(); i.hasNext() && candidate == null;) {
 					candidate = (DataSetColumn) i.next();
 					if (!this.columnMatches(column, candidate))
@@ -309,7 +310,7 @@ public abstract class TransformationUnit {
 		 *            Use 0 if it is not.
 		 */
 		public SkipTable(final TransformationUnit previousUnit,
-				final Table table, final List sourceDataSetColumns,
+				final Table table, final List<DataSetColumn> sourceDataSetColumns,
 				final Key schemaSourceKey, final Relation schemaRelation,
 				final int schemaRelationIteration) {
 			super(previousUnit, table, sourceDataSetColumns, schemaSourceKey,
