@@ -18,7 +18,6 @@
 
 package org.biomart.configurator.view.gui.dialogs;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -47,9 +46,9 @@ import org.biomart.builder.model.DataSetTable;
 import org.biomart.builder.model.Mart;
 import org.biomart.builder.model.Table;
 import org.biomart.builder.model.TransformationUnit;
-import org.biomart.builder.model.TransformationUnit.JoinTable;
-import org.biomart.builder.model.TransformationUnit.SelectFromTable;
-import org.biomart.builder.model.TransformationUnit.SkipTable;
+import org.biomart.builder.model.JoinTable;
+import org.biomart.builder.model.SelectFromTable;
+import org.biomart.builder.model.SkipTable;
 import org.biomart.builder.view.gui.diagrams.ExplainTransformationDiagram;
 import org.biomart.common.exceptions.BioMartError;
 import org.biomart.common.resources.Resources;
@@ -57,7 +56,6 @@ import org.biomart.common.resources.Settings;
 import org.biomart.common.utils.Transaction;
 import org.biomart.common.utils.Transaction.TransactionEvent;
 import org.biomart.common.utils.Transaction.TransactionListener;
-import org.biomart.common.view.gui.LongProcess;
 import org.biomart.configurator.utils.type.IdwViewType;
 import org.biomart.configurator.view.gui.diagrams.components.TableComponent;
 import org.biomart.configurator.view.gui.diagrams.contexts.ExplainContext;
@@ -194,12 +192,6 @@ public class ExplainTableDialog extends JDialog implements TransactionListener {
 		this.transformation = new JPanel(new GridBagLayout());
 		displayArea.add(new JScrollPane(this.transformation));
 
-		// Set up our content pane.
-		final JPanel content = new JPanel(new BorderLayout());
-		this.setContentPane(content);
-
-		// Add the display area to the pane.
-		content.add(displayArea, BorderLayout.CENTER);
 
 		// Work out what size we want the diagram to be.
 		final Dimension size = McViews.getInstance().getView(IdwViewType.SCHEMA).getPreferredSize();
@@ -210,11 +202,12 @@ public class ExplainTableDialog extends JDialog implements TransactionListener {
 				.min(size.width + 20, maxSize.width - 20));
 		size.height = Math.max(100, Math.min(size.height + 20,
 				maxSize.height - 20));
-		content.setPreferredSize(size);
+		displayArea.setPreferredSize(size);
 
 		// Make a context for our sub-diagrams.
 		this.transformationContext = new TransformationContext(this.mart,this.ds);
 
+		this.setContentPane(displayArea);
 
 		// Add a listener to the dataset such that if any part of the dataset
 		// changes, we recalculate ourselves entirely.
@@ -268,139 +261,137 @@ public class ExplainTableDialog extends JDialog implements TransactionListener {
 	private void recalculateTransformation() {
 		this.needsRebuild = false;
 
-				// Keep a note of shown tables.
-				final Map<String,Map<String,Object>> shownTables = new HashMap<String,Map<String,Object>>();
-				for (int i = 1; i <= ExplainTableDialog.this.transformationTableDiagrams
-						.size(); i++) {
-					final TableComponent[] comps = ((ExplainTransformationDiagram) ExplainTableDialog.this.transformationTableDiagrams
-							.get(i - 1)).getTableComponents();
-					final Map<String,Object> map = new HashMap<String,Object>();
-					shownTables.put("" + i, map);
-					for (int j = 0; j < comps.length; j++)
-						map.put(((Table) comps[j].getObject()).getName(),
-								comps[j].getState());
-				}
+		// Keep a note of shown tables.
+		final Map<String,Map<String,Object>> shownTables = new HashMap<String,Map<String,Object>>();
+		for (int i = 1; i <= ExplainTableDialog.this.transformationTableDiagrams.size(); i++) {
+			final TableComponent[] comps = ((ExplainTransformationDiagram) ExplainTableDialog.this.transformationTableDiagrams
+					.get(i - 1)).getTableComponents();
+			final Map<String,Object> map = new HashMap<String,Object>();
+			shownTables.put("" + i, map);
+			for (int j = 0; j < comps.length; j++)
+				map.put(((Table) comps[j].getObject()).getName(),
+						comps[j].getState());
+		}
 
-				// Clear the transformation box.
-				ExplainTableDialog.this.transformation.removeAll();
-				ExplainTableDialog.this.transformationTableDiagrams.clear();
+		// Clear the transformation box.
+		ExplainTableDialog.this.transformation.removeAll();
+		ExplainTableDialog.this.transformationTableDiagrams.clear();
 
-				// Keep track of columns counted so far.
-				final List<DataSetColumn> columnsSoFar = new ArrayList<DataSetColumn>();
+		// Keep track of columns counted so far.
+		final List<DataSetColumn> columnsSoFar = new ArrayList<DataSetColumn>();
 
-				// Count our steps.
-				int stepNumber = 1;
+		// Count our steps.
+		int stepNumber = 1;
 
-				// If more than a set limit of units, we hit memory
-				// and performance issues. Refuse to do the display and
-				// instead put up a helpful message. Limit should be
-				// configurable from a properties file.
-				final Collection<TransformationUnit> units = new ArrayList<TransformationUnit>(
-						ExplainTableDialog.this.dsTable
-								.getTransformationUnits()); // To prevent
-															// concmod.
-				if (units.size() > ExplainTableDialog.MAX_UNITS)
-					ExplainTableDialog.this.transformation.add(new JLabel(
-							Resources.get("tooManyUnits", ""
-									+ ExplainTableDialog.MAX_UNITS)),
-							ExplainTableDialog.this.fieldLastRowConstraints);
-				else {
-					// Insert show/hide hidden steps button.
-					ExplainTableDialog.this.transformation.add(new JLabel(),
-							ExplainTableDialog.this.labelConstraints);
-					JPanel field = new JPanel();
-					field.add(ExplainTableDialog.this.maskedHidden);
-					ExplainTableDialog.this.transformation.add(field,
-							ExplainTableDialog.this.fieldConstraints);
+		// If more than a set limit of units, we hit memory
+		// and performance issues. Refuse to do the display and
+		// instead put up a helpful message. Limit should be
+		// configurable from a properties file.
+		final Collection<TransformationUnit> units = new ArrayList<TransformationUnit>(
+				ExplainTableDialog.this.dsTable
+						.getTransformationUnits()); // To prevent
+													// concmod.
+		if (units.size() > ExplainTableDialog.MAX_UNITS)
+			ExplainTableDialog.this.transformation.add(new JLabel(
+					Resources.get("tooManyUnits", ""
+							+ ExplainTableDialog.MAX_UNITS)),
+					ExplainTableDialog.this.fieldLastRowConstraints);
+		else {
+			// Insert show/hide hidden steps button.
+			ExplainTableDialog.this.transformation.add(new JLabel(),
+					ExplainTableDialog.this.labelConstraints);
+			JPanel field = new JPanel();
+			field.add(ExplainTableDialog.this.maskedHidden);
+			ExplainTableDialog.this.transformation.add(field,
+					ExplainTableDialog.this.fieldConstraints);
 
-					// Iterate over transformation units.
-					for (final Iterator<TransformationUnit> i = units.iterator(); i.hasNext();) {
-						final TransformationUnit tu = (TransformationUnit) i.next();
-						// Holders for our stuff.
-						final JLabel label;
-						final ExplainTransformationDiagram diagram;
-						Map<String,Object> map = shownTables.get("" + stepNumber);
-						if (map==null)
-							map = Collections.emptyMap();
-						// Draw the unit.
-						if (tu instanceof SkipTable) {
-							// Don't show these if we're hiding masked things.
-							if (ExplainTableDialog.this.dsTable
-									.isExplainHideMasked())
-								continue;
-							// Temp table to schema table join.
-							label = new JLabel(
-									Resources
-											.get(
-													"stepTableLabel",
-													new String[] {
-															"" + stepNumber,
-															Resources
-																	.get("explainSkipLabel") }));
-							diagram = new ExplainTransformationDiagram.SkipTempReal(
-									ExplainTableDialog.this.mart,
-									(SkipTable) tu, columnsSoFar, stepNumber,
-									ExplainTableDialog.this.explainContext,
-									map);
-						}  else if (tu instanceof JoinTable) {
-							// Temp table to schema table join.
-							label = new JLabel(
-									Resources
-											.get(
-													"stepTableLabel",
-													new String[] {
-															"" + stepNumber,
-															Resources
-																	.get("explainMergeLabel") }));
-							diagram = new ExplainTransformationDiagram.TempReal(
-									ExplainTableDialog.this.mart,
-									(JoinTable) tu, columnsSoFar, stepNumber,
-									ExplainTableDialog.this.explainContext,
-									map);
-						} else if (tu instanceof SelectFromTable) {
-							// Do a single-step select.
-							label = new JLabel(
-									Resources
-											.get(
-													"stepTableLabel",
-													new String[] {
-															"" + stepNumber,
-															Resources
-																	.get("explainSelectLabel") }));
-							diagram = new ExplainTransformationDiagram.SingleTable(
-									ExplainTableDialog.this.mart,
-									(SelectFromTable) tu, stepNumber,
-									ExplainTableDialog.this.explainContext,
-									map);
-						} else
-							throw new BioMartError();
-						// Display the diagram.
-						ExplainTableDialog.this.transformation
-								.add(
-										label,
-										i.hasNext() ? ExplainTableDialog.this.labelConstraints
-												: ExplainTableDialog.this.labelLastRowConstraints);
-						diagram
-								.setDiagramContext(ExplainTableDialog.this.transformationContext);
-						field = new JPanel();
-						field.add(diagram);
-						ExplainTableDialog.this.transformation
-								.add(
-										field,
-										i.hasNext() ? ExplainTableDialog.this.fieldConstraints
-												: ExplainTableDialog.this.fieldLastRowConstraints);
-						// Add columns from this unit to the transformed table.
-						columnsSoFar.addAll(tu.getNewColumnNameMap().values());
-						stepNumber++;
-						// Remember what tables we just added.
-						ExplainTableDialog.this.transformationTableDiagrams
-								.add(diagram);
-					}
-				}
+			// Iterate over transformation units.
+			for (final Iterator<TransformationUnit> i = units.iterator(); i.hasNext();) {
+				final TransformationUnit tu = (TransformationUnit) i.next();
+				// Holders for our stuff.
+				final JLabel label;
+				final ExplainTransformationDiagram diagram;
+				Map<String,Object> map = shownTables.get("" + stepNumber);
+				if (map==null)
+					map = Collections.emptyMap();
+				// Draw the unit.
+				if (tu instanceof SkipTable) {
+					// Don't show these if we're hiding masked things.
+					if (ExplainTableDialog.this.dsTable
+							.isExplainHideMasked())
+						continue;
+					// Temp table to schema table join.
+					label = new JLabel(
+							Resources
+									.get(
+											"stepTableLabel",
+											new String[] {
+													"" + stepNumber,
+													Resources
+															.get("explainSkipLabel") }));
+					diagram = new ExplainTransformationDiagram.SkipTempReal(
+							ExplainTableDialog.this.mart,
+							(SkipTable) tu, columnsSoFar, stepNumber,
+							ExplainTableDialog.this.explainContext,
+							map);
+				}  else if (tu instanceof JoinTable) {
+					// Temp table to schema table join.
+					label = new JLabel(
+							Resources
+									.get(
+											"stepTableLabel",
+											new String[] {
+													"" + stepNumber,
+													Resources
+															.get("explainMergeLabel") }));
+					diagram = new ExplainTransformationDiagram.TempReal(
+							ExplainTableDialog.this.mart,
+							(JoinTable) tu, columnsSoFar, stepNumber,
+							ExplainTableDialog.this.explainContext,
+							map);
+				} else if (tu instanceof SelectFromTable) {
+					// Do a single-step select.
+					label = new JLabel(
+							Resources
+									.get(
+											"stepTableLabel",
+											new String[] {
+													"" + stepNumber,
+													Resources
+															.get("explainSelectLabel") }));
+					diagram = new ExplainTransformationDiagram.SingleTable(
+							ExplainTableDialog.this.mart,
+							(SelectFromTable) tu, stepNumber,
+							ExplainTableDialog.this.explainContext,
+							map);
+				} else
+					throw new BioMartError();
+				// Display the diagram.
+				ExplainTableDialog.this.transformation
+						.add(
+								label,
+								i.hasNext() ? ExplainTableDialog.this.labelConstraints
+										: ExplainTableDialog.this.labelLastRowConstraints);
+				diagram
+						.setDiagramContext(ExplainTableDialog.this.transformationContext);
+				field = new JPanel();
+				field.add(diagram);
+				ExplainTableDialog.this.transformation
+						.add(
+								field,
+								i.hasNext() ? ExplainTableDialog.this.fieldConstraints
+										: ExplainTableDialog.this.fieldLastRowConstraints);
+				// Add columns from this unit to the transformed table.
+				columnsSoFar.addAll(tu.getNewColumnNameMap().values());
+				stepNumber++;
+				// Remember what tables we just added.
+				ExplainTableDialog.this.transformationTableDiagrams
+						.add(diagram);
+			}
+		}
 
-				// Resize the diagram to fit the components.
-				ExplainTableDialog.this.transformation.revalidate();
-				ExplainTableDialog.this.transformation.repaint();
-
+		// Resize the diagram to fit the components.
+		ExplainTableDialog.this.transformation.revalidate();
+		ExplainTableDialog.this.transformation.repaint();
 	}
 }

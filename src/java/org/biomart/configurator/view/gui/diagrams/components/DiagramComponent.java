@@ -98,7 +98,7 @@ public interface DiagramComponent {
 	 * 
 	 * @return the map of inner components.
 	 */
-	public McBeanMap getSubComponents();
+	public McBeanMap<Object,DiagramComponent> getSubComponents();
 
 	/**
 	 * This method is called when the component needs to rethink its contents

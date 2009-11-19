@@ -37,9 +37,9 @@ import org.biomart.builder.model.Relation;
 import org.biomart.builder.model.Schema;
 import org.biomart.builder.model.Table;
 import org.biomart.builder.model.TransformationUnit;
-import org.biomart.builder.model.TransformationUnit.JoinTable;
-import org.biomart.builder.model.TransformationUnit.SelectFromTable;
-import org.biomart.builder.model.TransformationUnit.SkipTable;
+import org.biomart.builder.model.JoinTable;
+import org.biomart.builder.model.SelectFromTable;
+import org.biomart.builder.model.SkipTable;
 import org.biomart.builder.view.gui.diagrams.SchemaLayoutManager.SchemaLayoutConstraint;
 import org.biomart.common.exceptions.AssociationException;
 import org.biomart.common.exceptions.BioMartError;
@@ -66,13 +66,13 @@ import org.biomart.configurator.view.gui.diagrams.contexts.ExplainContext;
 public abstract class ExplainTransformationDiagram extends Diagram {
 	private static final long serialVersionUID = 1;
 
-	private final List tableComponents = new ArrayList();
+	private final List<TableComponent> tableComponents = new ArrayList<TableComponent>();
 
 	private final int step;
 
 	private final ExplainContext explainContext;
 
-	private final Map shownTables;
+	private final Map<String,Object> shownTables;
 
 	/**
 	 * Creates an empty diagram, using the single-parameter constructor from
@@ -92,7 +92,7 @@ public abstract class ExplainTransformationDiagram extends Diagram {
 	 */
 	protected ExplainTransformationDiagram(final Mart mart,
 			final int step, final ExplainContext explainContext,
-			final Map shownTables) {
+			final Map<String,Object> shownTables) {
 		super(new SchemaLayoutManager(), mart);
 		this.step = step;
 		this.explainContext = explainContext;
@@ -174,8 +174,8 @@ public abstract class ExplainTransformationDiagram extends Diagram {
 		/**
 		 * Creates a diagram showing the given table.
 		 * 
-		 * @param martTab
-		 *            the mart tab to pass menu events onto.
+		 * @param mart
+		 *            the mart to pass menu events onto.
 		 * @param stu
 		 *            the transformation unit to show.
 		 * @param step
@@ -189,7 +189,7 @@ public abstract class ExplainTransformationDiagram extends Diagram {
 		 */
 		public SingleTable(final Mart mart, final SelectFromTable stu,
 				final int step, final ExplainContext explainContext,
-				final Map shownTables) {
+				final Map<String,Object> shownTables) {
 			super(mart, step, explainContext, shownTables);
 
 			// Remember the params, and calculate the diagram.
@@ -210,7 +210,7 @@ public abstract class ExplainTransformationDiagram extends Diagram {
 							: this.stu.getTable().getName(), tempSourceSchema,
 					this.stu.getTable(), this.getExplainContext());
 			tempSourceSchema.getTables().put(tempSource.getName(), tempSource);
-			for (final Iterator i = this.stu.getNewColumnNameMap().values()
+			for (final Iterator<DataSetColumn> i = this.stu.getNewColumnNameMap().values()
 					.iterator(); i.hasNext();) {
 				final DataSetColumn col = (DataSetColumn) i.next();
 				tempSource.getColumns().put(col.getName(), col);
@@ -234,7 +234,7 @@ public abstract class ExplainTransformationDiagram extends Diagram {
 
 		private final JoinTable ltu;
 
-		private final Collection lIncludeCols;
+		private final Collection<Column> lIncludeCols;
 
 		/**
 		 * Creates a diagram showing the given pair of tables and a relation
@@ -257,7 +257,7 @@ public abstract class ExplainTransformationDiagram extends Diagram {
 		 */
 		public TempReal(final Mart mart, final JoinTable ltu,
 				final List lIncludeCols, final int step,
-				final ExplainContext explainContext, final Map shownTables) {
+				final ExplainContext explainContext, final Map<String,Object> shownTables) {
 			super(mart, step, explainContext, shownTables);
 
 			// Remember the columns, and calculate the diagram.
@@ -277,7 +277,7 @@ public abstract class ExplainTransformationDiagram extends Diagram {
 					.get("dummyTempTableName")
 					+ " " + this.getStep(), tempSourceSchema);
 			tempSourceSchema.getTables().put(tempSource.getName(), tempSource);
-			for (final Iterator i = this.lIncludeCols.iterator(); i.hasNext();) {
+			for (final Iterator<Column> i = this.lIncludeCols.iterator(); i.hasNext();) {
 				final Column col = (Column) i.next();
 				tempSource.getColumns().put(col.getName(), col);
 			}
@@ -508,7 +508,7 @@ public abstract class ExplainTransformationDiagram extends Diagram {
 		 */
 		public AdditionalColumns(final Mart mart,
 				final TransformationUnit etu, final int step,
-				final ExplainContext explainContext, final Map shownTables) {
+				final ExplainContext explainContext, final Map<String,Object> shownTables) {
 			super(mart, step, explainContext, shownTables);
 
 			// Remember the params, and calculate the diagram.
@@ -527,7 +527,7 @@ public abstract class ExplainTransformationDiagram extends Diagram {
 					.get("dummyTempTableName")
 					+ " " + this.getStep(), tempSourceSchema);
 			tempSourceSchema.getTables().put(tempSource.getName(), tempSource);
-			for (final Iterator i = this.etu.getNewColumnNameMap().values()
+			for (final Iterator<DataSetColumn> i = this.etu.getNewColumnNameMap().values()
 					.iterator(); i.hasNext();) {
 				final DataSetColumn col = (DataSetColumn) i.next();
 				tempSource.getColumns().put(col.getName(), col);
@@ -559,7 +559,7 @@ public abstract class ExplainTransformationDiagram extends Diagram {
 		 */
 		public static final int NO_ITERATION = -1;
 
-		private final PropertyChangeListener listener = new PropertyChangeListener() {
+/*		private final PropertyChangeListener listener = new PropertyChangeListener() {
 			public void propertyChange(final PropertyChangeEvent e) {
 				final PropertyChangeEvent ours = new PropertyChangeEvent(
 						RealisedRelation.this, e.getPropertyName(), e
@@ -568,7 +568,7 @@ public abstract class ExplainTransformationDiagram extends Diagram {
 				RealisedRelation.this.pcs.firePropertyChange(ours);
 			}
 		};
-
+*/
 		/**
 		 * Constructs a realised relation.
 		 * 

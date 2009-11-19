@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import org.biomart.builder.exceptions.ValidationException;
 import org.biomart.builder.model.ForeignKey;
-import org.biomart.builder.model.TransformationUnit.SelectFromTable;
+import org.biomart.builder.model.SelectFromTable;
 import org.biomart.common.resources.Log;
 import org.biomart.common.resources.Resources;
 import org.biomart.configurator.utils.type.DataSetTableType;
