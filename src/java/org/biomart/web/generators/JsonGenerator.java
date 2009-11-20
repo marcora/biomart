@@ -17,7 +17,7 @@ import org.biomart.martRemote.MartApi;
 
 // import org.biomart.test.DummyPortal;
 
-import org.biomart.objects.objects.*;
+import org.biomart.objects.lite.*;
 
 /**
  *
@@ -28,31 +28,35 @@ public class JsonGenerator {
     public static void main(String[] args) {
         try {
 
-            String USERNAME = "anonymous";
-            String PASSWORD = "";
-            String FORMAT = "";
+            final String USERNAME = "anonymous";
+            final String PASSWORD = "";
+            final String FORMAT = "";
+            final String PARTITION_FILTER = "";
 
-            MartApi martApi = new MartApi();
+            MartApi api = new MartApi();
 
-//            MartRegistry dummyMartRegistry = DummyPortal.createDummyMartRegistry();
-//            MartApi martApi = new MartApi(dummyMartRegistry);
+            List<LiteMart> marts = api.getRegistry(USERNAME, PASSWORD, FORMAT).getLiteMartList();
 
-            List<Mart> marts = martApi.getRegistry(USERNAME, PASSWORD, FORMAT).getMartList();
+            for (LiteMart mart : marts) {
 
-            for (Mart mart : marts) {
                 System.out.println("mart: " + mart.getName());
 
-                List<Dataset> datasets = mart.getDatasetList();
-                System.out.println("  datasets size: " + datasets.size());
+                List<LiteDataset> datasets = api.getDatasets(USERNAME, PASSWORD, FORMAT, mart.getName(), mart.getVersion()).getLiteDatasetList();
 
-                for (Dataset dataset : datasets) {
+                for (LiteDataset dataset : datasets) {
+
                     System.out.println("  dataset: " + dataset.getName());
 
-                    List<Config> configs = dataset.getConfigList();
-                    System.out.println("    configs size: " + configs.size());
+                    List<LiteFilter> filters = api.getFilters(USERNAME, PASSWORD, FORMAT, dataset.getName(), PARTITION_FILTER).getLiteFilterList();
 
-                    for (Config config : configs) {
-                        System.out.println("    config: " + config.getName());
+                    for (LiteFilter filter : filters) {
+                        System.out.println("    filter: " + filter.getName());
+                    }
+
+                    List<LiteAttribute> attributes = api.getAttributes(USERNAME, PASSWORD, FORMAT, dataset.getName(), PARTITION_FILTER).getLiteAttributeList();
+
+                    for (LiteAttribute attribute : attributes) {
+                        System.out.println("    attribute: " + attribute.getName());
                     }
                 }
             }
