@@ -1,47 +1,39 @@
 package org.biomart.martRemote.objects.response;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.martRemote.Jsoml;
 import org.biomart.martRemote.objects.request.MartRemoteRequest;
-import org.biomart.objects.objects.Element;
-import org.biomart.objects.objects.Filter;
+import org.biomart.objects.lite.LiteFilter;
+import org.biomart.objects.lite.LiteListFilter;
+import org.biomart.objects.lite.LiteSimpleMartConfiguratorObject;
 import org.biomart.objects.objects.MartRegistry;
 
 public class GetFiltersResponse extends GetElementsResponse {
 
-	private List<Filter> filterList = null;
+	private LiteListFilter liteListFilter = null;
 
 	public GetFiltersResponse(MartRegistry martRegistry, MartRemoteRequest martServiceRequest) {
 		super(martRegistry, martServiceRequest);
-		this.filterList = new ArrayList<Filter>();
+		
+		this.liteListFilter = new LiteListFilter(martServiceRequest);
 	}
 
-	public List<Filter> getFilterList() {
-		return filterList;
+	public LiteListFilter getLiteListFilter() {
+		return liteListFilter;
 	}
 
 	public void populateObjects() throws FunctionalException {
 		super.populateObjects(false);
-		for (Element element : super.elementList) {
-			this.filterList.add((Filter)element);
+		for (LiteSimpleMartConfiguratorObject liteElement : super.liteElementList) {
+			this.liteListFilter.addLiteFilter((LiteFilter)liteElement);
 		}
+		this.liteListFilter.lock();
 	}
 	
 	@Override
-	public Jsoml createOutputResponse(boolean xml, Jsoml root) throws FunctionalException {
-		for (Filter filter : this.filterList) {
-			root.addContent(filter.generateOutputForWebService(xml));
-		}
-		return root;
+	protected Jsoml createOutputResponse(boolean xml, Jsoml root)
+			throws FunctionalException {
+		// TODO Auto-generated method stub
+		return null;
 	}
-	/*protected Document createXmlResponse(Document document) throws FunctionalException {
-		org.jdom.Element root = document.getRootElement();
-		for (Filter filter : this.filterList) {
-			root.addContent(filter.generateXmlForWebService());
-		}
-		return document;
-	}*/
 }

@@ -4,15 +4,12 @@ package org.biomart.objects.objects;
 import java.io.Serializable;
 import java.util.Collection;
 
-import net.sf.json.JSONObject;
-
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.utils.CompareUtils;
 import org.biomart.martRemote.Jsoml;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.jdom.Element;
-import org.jdom.Namespace;
 
 
 public abstract class MartConfiguratorObject implements Serializable {
@@ -211,7 +208,11 @@ public abstract class MartConfiguratorObject implements Serializable {
 					MartConfiguratorUtils.replacePartitionReferencesByValues(martConfiguratorObject.description, part),
 				martConfiguratorObject.visible, martConfiguratorObject.xmlElementName);
 	}
-	
+	protected void updatePointerClone(org.biomart.objects.objects.Element pointingElement) {
+		this.name = pointingElement.name;
+		this.displayName = pointingElement.displayName;
+		this.description = pointingElement.description;
+	}
 	protected Jsoml generateOutputForWebService(boolean xml) throws FunctionalException {
 		Jsoml jsoml = new Jsoml(xml, this.xmlElementName);
 		
@@ -221,42 +222,5 @@ public abstract class MartConfiguratorObject implements Serializable {
 		jsoml.setAttribute("visible", this.visible);		
 		
 		return jsoml;
-		/*
-		if (xml) {
-			Element xmlElement = generateXmlForWebService();
-			xmlOrJson = new Jsoml(xmlElement);
-		} else {
-			JSONObject jsonObject = generateJsonForWebService();
-			xmlOrJson = new Jsoml(jsonObject);
-		}
-		return xmlOrJson;*/
-	}
-	protected Element generateXmlForWebService(Namespace namespace) throws FunctionalException {
-		Element jdomObject = new Element(xmlElementName, namespace);
-		
-		MartConfiguratorUtils.addAttribute(jdomObject, "name", this.name);
-		MartConfiguratorUtils.addAttribute(jdomObject, "displayName", this.displayName);
-		MartConfiguratorUtils.addAttribute(jdomObject, "description", this.description);
-		MartConfiguratorUtils.addAttribute(jdomObject, "visible", this.visible);		
-		
-		return jdomObject;
-	}
-	protected void updatePointerClone(org.biomart.objects.objects.Element pointingElement) {
-		this.name = pointingElement.name;
-		this.displayName = pointingElement.displayName;
-		this.description = pointingElement.description;
-	}
-	protected JSONObject generateJsonForWebService() {
-		JSONObject object = new JSONObject();
-		
-		object.put("name", this.name);
-		object.put("displayName", this.displayName);
-		object.put("visible", this.visible);
-		object.put("description", this.description);
-		
-		JSONObject datasetJsonObject = new JSONObject();
-		datasetJsonObject.put(xmlElementName, object);
-		
-		return datasetJsonObject;
 	}
 }

@@ -171,7 +171,7 @@ public class Container extends MartConfiguratorObject implements Serializable {
 			} else if (containee instanceof org.biomart.objects.objects.Element) {
 			
 				org.biomart.objects.objects.Element element = (org.biomart.objects.objects.Element)containee;
-				if (element instanceof SimpleFilter && ((SimpleFilter)element).partition) {
+				if (element instanceof SimpleFilter && ((SimpleFilter)element).getPartition()) {
 					SimpleFilter filterPartitionClone = new SimpleFilter((SimpleFilter)element);
 					addFilter(filterPartitionClone);
 				} else {

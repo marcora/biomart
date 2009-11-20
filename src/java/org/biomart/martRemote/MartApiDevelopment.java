@@ -1,13 +1,7 @@
 package org.biomart.martRemote;
 
-import java.io.StringWriter;
-
 import org.biomart.common.general.utils.MyUtils;
-import org.biomart.common.general.utils.Timer;
-import org.biomart.martRemote.enums.MartRemoteEnum;
 import org.biomart.martRemote.enums.MartServiceFormat;
-import org.biomart.martRemote.objects.request.MartRemoteRequest;
-import org.biomart.martRemote.objects.response.MartRemoteResponse;
 import org.biomart.transformation.helpers.TransformationConstants;
 
 public class MartApiDevelopment {
@@ -39,7 +33,7 @@ public class MartApiDevelopment {
 	@SuppressWarnings("all")
 	public static void main(String[] args) throws Exception {
 
-		StringWriter stringWriter = new StringWriter();
+		/*StringWriter stringWriter = new StringWriter();
 		MartApi martApi = new MartApi(true, true, 
 				MartRemoteConstants.XSD_FILE_FILE_PATH_AND_NAME, MartRemoteConstants.XSD_FILE_FILE_PATH_AND_NAME, 
 				MartRemoteConstants.PORTAL_SERIAL_FILE_PATH_AND_NAME);
@@ -99,7 +93,7 @@ public class MartApiDevelopment {
 		MyUtils.writeFile("/home/anthony/Desktop/MartApi", string);
 		
 		timer.stopTimer();
-		System.out.println(timer);
+		System.out.println(timer);*/
 		
 		/*MartRegistry martRegistry = martApi.getMartRegistry();
 		Location location = martRegistry.getLocation("ensembl_mart_55");

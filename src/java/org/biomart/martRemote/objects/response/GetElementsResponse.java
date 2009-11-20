@@ -5,39 +5,36 @@ import java.util.List;
 
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.martRemote.objects.request.MartRemoteRequest;
-import org.biomart.objects.objects.Attribute;
-import org.biomart.objects.objects.Container;
-import org.biomart.objects.objects.Element;
-import org.biomart.objects.objects.Filter;
-import org.biomart.objects.objects.MartConfiguratorObject;
+import org.biomart.objects.lite.LiteAttribute;
+import org.biomart.objects.lite.LiteContainer;
+import org.biomart.objects.lite.LiteFilter;
+import org.biomart.objects.lite.LiteSimpleMartConfiguratorObject;
 import org.biomart.objects.objects.MartRegistry;
 
 public abstract class GetElementsResponse extends GetContaineesResponse {
 
-	protected List<Element> elementList = null;
+	protected List<LiteSimpleMartConfiguratorObject> liteElementList = null;
 
 	public GetElementsResponse(MartRegistry martRegistry, MartRemoteRequest martServiceRequest) {
 		super(martRegistry, martServiceRequest);
-		this.elementList = new ArrayList<Element>();
+		this.liteElementList = new ArrayList<LiteSimpleMartConfiguratorObject>();
 	}
 	
 	public void populateObjects(boolean attribute) throws FunctionalException {
 		super.populateObjects();
 		
 		// Grab only the elements of interest
-		if (super.dataset!=null && super.rootContainer!=null) {
-			addElements(super.rootContainer, attribute);
-		}
+		addElements(super.liteRootContainer, attribute);
 	}
-	private void addElements(Container container, boolean attribute) {
-		List<MartConfiguratorObject> containeeList = container.getContaineeList();
-		for (MartConfiguratorObject containee : containeeList) {
-			if (attribute && containee instanceof Attribute) {
-				this.elementList.add((Attribute)containee);		
-			} else if (!attribute && containee instanceof Filter) {
-				this.elementList.add((Filter)containee);		
-			} else if (containee instanceof Container) {
-				addElements((Container)containee, attribute);
+	private void addElements(LiteContainer liteContainer, boolean attribute) {
+		List<LiteSimpleMartConfiguratorObject> containeeList = liteContainer.getLiteContaineeList();
+		for (LiteSimpleMartConfiguratorObject liteContainee : containeeList) {
+			if (attribute && liteContainee instanceof LiteAttribute) {
+				this.liteElementList.add((LiteAttribute)liteContainee);		
+			} else if (!attribute && liteContainee instanceof LiteFilter) {
+				this.liteElementList.add((LiteFilter)liteContainee);		
+			} else if (liteContainee instanceof LiteContainer) {
+				addElements((LiteContainer)liteContainee, attribute);
 			}
 		}
 	}

@@ -242,12 +242,9 @@ public class SimpleFilter extends Filter implements Serializable {
 
 	private List<String> cascadeChildrenNamesList = null;
 	public SimpleFilter(SimpleFilter simpleFilter) throws FunctionalException {
-		this(simpleFilter, null, true);
+		this(simpleFilter, null);
 	}
-	public SimpleFilter(SimpleFilter simpleFilter, Part part) throws FunctionalException {
-		this(simpleFilter, part, false);
-	}
-	public SimpleFilter(SimpleFilter simpleFilter, Part part, Boolean generic) throws FunctionalException {	// creates a light clone (temporary solution)
+	public SimpleFilter(SimpleFilter simpleFilter, Part part) throws FunctionalException {	// creates a light clone (temporary solution)
 		super(simpleFilter, part);
 		
 			// careful with equals and this (repetations of clones in martview)
@@ -262,6 +259,7 @@ public class SimpleFilter extends Filter implements Serializable {
 		this.trueDisplay = MartConfiguratorUtils.replacePartitionReferencesByValues(simpleFilter.trueDisplay, part);
 		this.falseValue = MartConfiguratorUtils.replacePartitionReferencesByValues(simpleFilter.falseValue, part);
 		this.falseDisplay = MartConfiguratorUtils.replacePartitionReferencesByValues(simpleFilter.falseDisplay, part);
+		this.partition = simpleFilter.partition;
 		
 		this.cascadeChildrenNamesList = new ArrayList<String>();
 		List<String> cascadeChildrenNamesTmp = simpleFilter.getElementList().getElementNames();

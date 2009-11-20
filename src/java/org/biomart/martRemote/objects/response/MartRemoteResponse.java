@@ -40,7 +40,7 @@ public abstract class MartRemoteResponse {
 		return errorMessage.length()==0;
 	}
 	
-	public MartRemoteRequest getMartServiceRemote() {
+	public MartRemoteRequest getMartServiceRequest() {
 		return martRemoteRequest;
 	}
 	
@@ -93,12 +93,12 @@ public abstract class MartRemoteResponse {
 		return jsonObject;
 	}
 
-	protected Document createXmlResponse(Document document) throws FunctionalException {
+	private Document createXmlResponse(Document document) throws FunctionalException {
 		Jsoml root = new Jsoml(document.getRootElement());
 		createOutputResponse(true, root).getXmlElement();
 		return document;		
 	}
-	protected JSONObject createJsonResponse(String responseName) throws FunctionalException {
+	private JSONObject createJsonResponse(String responseName) throws FunctionalException {
 		return createOutputResponse(false, new Jsoml(false, responseName)).getJsonObject();		
 	}
 	

@@ -124,9 +124,6 @@ public class Location extends MartConfiguratorObject implements Serializable {
 		return compare(this, location);
 	}*/
 	
-	/**
-	 * Only for the node, children are treated separately
-	 */
 	public Element generateXml() throws FunctionalException {
 		Element element = super.generateXml();
 		MartConfiguratorUtils.addAttribute(element, "host", this.host);

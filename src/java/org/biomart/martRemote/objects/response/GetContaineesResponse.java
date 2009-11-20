@@ -6,8 +6,8 @@ import java.util.List;
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.martRemote.objects.request.GetContaineesRequest;
 import org.biomart.martRemote.objects.request.MartRemoteRequest;
+import org.biomart.objects.lite.LiteContainer;
 import org.biomart.objects.objects.Config;
-import org.biomart.objects.objects.Container;
 import org.biomart.objects.objects.Dataset;
 import org.biomart.objects.objects.Location;
 import org.biomart.objects.objects.Mart;
@@ -16,22 +16,19 @@ import org.biomart.objects.objects.PartitionTable;
 
 public abstract class GetContaineesResponse extends MartRemoteResponse {
 
-	//protected List<Container> containerList = null;
-	protected Container rootContainer = null;
-
-	protected Dataset dataset = null;
+	protected LiteContainer liteRootContainer = null;
 	
 	protected GetContaineesResponse(MartRegistry martRegistry, MartRemoteRequest martServiceRequest) {
 		super(martRegistry, martServiceRequest);
-		//this.containerList = new ArrayList<Container>();
 	}
 
 	public void populateObjects() throws FunctionalException {
-		fetchDatasetByName();
-		fetchContainerList();
+		Dataset dataset = fetchDatasetByName();
+		fetchContainerList(dataset);
 	}
 	
-	private void fetchDatasetByName() {
+	private Dataset fetchDatasetByName() {
+		Dataset dataset = null;
 		GetContaineesRequest getContaineesRequest = (GetContaineesRequest)super.martRemoteRequest;
 		List<Location> locationList = super.martRegistry.getLocationList();
 		for (Location location : locationList) {
@@ -41,15 +38,16 @@ public abstract class GetContaineesResponse extends MartRemoteResponse {
 					List<Dataset> datasetList = mart.getDatasetList();
 					for (Dataset datasetTmp : datasetList) {
 						if (getContaineesRequest.getDatasetName().equals(datasetTmp.getName())) {
-							this.dataset = datasetTmp;
+							dataset = datasetTmp;
 						}
 					}
 				}
 			}
 		}
+		return dataset;
 	}
 	
-	private void fetchContainerList() throws FunctionalException {
+	private void fetchContainerList(Dataset dataset) throws FunctionalException {
 		GetContaineesRequest getContaineesRequest = (GetContaineesRequest)super.martRemoteRequest;
 
 		if (dataset!=null) {
@@ -69,7 +67,7 @@ public abstract class GetContaineesResponse extends MartRemoteResponse {
 				}
 			}
 
-			this.rootContainer = new Container(config.getRootContainer(), mainRowNumbersWanted);
+			this.liteRootContainer = new LiteContainer(super.martRemoteRequest, config.getRootContainer(), mainRowNumbersWanted);
 		}
 	}
 }

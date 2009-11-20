@@ -3,23 +3,14 @@ package org.biomart.martRemote.martService;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
-import org.biomart.common.general.utils.MyUtils;
-import org.biomart.common.general.utils.XmlUtils;
 import org.biomart.martRemote.MartApi;
-import org.biomart.martRemote.enums.MartRemoteEnum;
-import org.biomart.martRemote.enums.MartServiceFormat;
-import org.biomart.martRemote.objects.request.MartRemoteRequest;
-import org.biomart.martRemote.objects.request.QueryRequest;
-import org.biomart.martRemote.objects.response.MartRemoteResponse;
 import org.jdom.JDOMException;
 
 
@@ -100,7 +91,7 @@ public class MartServiceServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {		
 
-		try {
+		/*try {
 			String username = req.getParameter("username");
 			String password = req.getParameter("password");
 			if (null==username || "".equals(username)) {
@@ -134,13 +125,7 @@ public class MartServiceServlet extends HttpServlet {
 			} else if (MartRemoteEnum.GET_ROOT_CONTAINER.equals(remoteAccessEnum)) {
 				martServiceRequest = this.martServiceApi.prepareGetRootContainer(username, password, format, datasetName, partitionFilter);
 				martServiceResult = this.martServiceApi.executeGetRootContainer(martServiceRequest);
-			}/*else if (MartRemoteEnum.GET_ATTRIBUTES.equals(remoteAccessEnum)) {
-				martServiceRequest = this.martServiceApi.prepareGetAttributes(username, password, format, datasetName, partitionFilter);
-				martServiceResult = this.martServiceApi.executeGetAttributes(martServiceRequest);
-			} else if (MartRemoteEnum.GET_FILTERS.equals(remoteAccessEnum)) {
-				martServiceRequest = this.martServiceApi.prepareGetFilters(username, password, format, datasetName, partitionFilter);
-				martServiceResult = this.martServiceApi.executeGetFilters(martServiceRequest);
-			} */else if (MartRemoteEnum.GET_LINKS.equals(remoteAccessEnum)) {
+			} else if (MartRemoteEnum.GET_LINKS.equals(remoteAccessEnum)) {
 				martServiceRequest = this.martServiceApi.prepareGetLinks(username, password, format, datasetName);
 				martServiceResult = this.martServiceApi.executeGetLinks(martServiceRequest);
 			} else if (MartRemoteEnum.QUERY.equals(remoteAccessEnum)) {
@@ -170,7 +155,7 @@ public class MartServiceServlet extends HttpServlet {
 		} catch (FunctionalException e) {
 			e.printStackTrace();
 			exception(e);
-		}
+		}*/
 	}
 
 	// Miscellaneous

@@ -34,30 +34,30 @@ public class MartServiceHelper {
 	public static String getRegistry(String username, String password, String format)
 			throws FunctionalException {
 		initialize();
-		MartRemoteResponse martRemoteResponse = martApi.getRegistry(username, password, format);
+		MartRemoteResponse martRemoteResponse = martApi.getRegistryResponse(username, password, format);
 		return getResultAsString(martRemoteResponse);
 	}
 
 	public static String getDatasets(String username, String password,
 			String format, String mart, Integer version) throws FunctionalException {
 		initialize();
-		MartRemoteResponse martRemoteResponse = martApi.getDatasets(username, password, format, mart, version);
+		MartRemoteResponse martRemoteResponse = martApi.getDatasetsResponse(username, password, format, mart, version);
 		return getResultAsString(martRemoteResponse);
 	}
 	
 	public static String getRootContainer(String username, String password, String format, String dataset, String partitionFilter) throws FunctionalException, TechnicalException {
 		MartServiceHelper.initialize();
-		MartRemoteResponse martRemoteResponse = martApi.getRootContainer(username, password, format, dataset, partitionFilter);
+		MartRemoteResponse martRemoteResponse = martApi.getRootContainerResponse(username, password, format, dataset, partitionFilter);
 		return getResultAsString(martRemoteResponse);
 	}
 	public static String getAttributes(String username, String password, String format, String dataset, String partitionFilter) throws FunctionalException, TechnicalException {
 		MartServiceHelper.initialize();
-		MartRemoteResponse martRemoteResponse = martApi.getAttributes(username, password, format, dataset, partitionFilter);
+		MartRemoteResponse martRemoteResponse = martApi.getAttributesResponse(username, password, format, dataset, partitionFilter);
 		return getResultAsString(martRemoteResponse);
 	}
 	public static String getFilters(String username, String password, String format, String dataset, String partitionFilter) throws FunctionalException, TechnicalException {
 		MartServiceHelper.initialize();
-		MartRemoteResponse martRemoteResponse = martApi.getFilters(username, password, format, dataset, partitionFilter);
+		MartRemoteResponse martRemoteResponse = martApi.getFiltersResponse(username, password, format, dataset, partitionFilter);
 		return getResultAsString(martRemoteResponse);
 	}
 	public static String query(String username, String password, String format,

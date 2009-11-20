@@ -91,7 +91,8 @@ public class GroupFilter extends Filter implements Serializable {
 		
 		jsoml.setAttribute("logicalOperator", this.logicalOperator);
 		jsoml.setAttribute("multipleFilter", this.multipleFilter);
-		jsoml.setAttribute("filterList", (simpleFilterList!=null ? simpleFilterList.getStringValue() : null));
+		
+		jsoml.setAttribute("filterList", this.simpleFilterNames);
 		
 		return jsoml;
 	}
