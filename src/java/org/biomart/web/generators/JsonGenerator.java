@@ -6,11 +6,18 @@ package org.biomart.web.generators;
 
 import java.io.*;
 
+import java.util.List;
+
 import net.sf.json.JSONObject;
 
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
+
 import org.biomart.martRemote.MartApi;
+
+// import org.biomart.test.DummyPortal;
+
+import org.biomart.objects.objects.*;
 
 /**
  *
@@ -21,63 +28,39 @@ public class JsonGenerator {
     public static void main(String[] args) {
         try {
 
-            MartApi martApi = new MartApi();
-
             String USERNAME = "anonymous";
             String PASSWORD = "";
             String FORMAT = "";
-            String MART = "ensembl_mart_55";
-            Integer VERSION = 55;
-            String DATASET = "gene_ensembl";
-            String PARTITION_FILTER = "main_partition_filter.\"hsapiens_gene_ensembl,mmusculus_gene_ensembl,celegans_gene_ensembl\"";
 
-            JSONObject registry = martApi.getRegistry(USERNAME, PASSWORD, FORMAT).getJsonObject();
-            write(registry, "registry.json");
-            System.out.println(registry);
+            MartApi martApi = new MartApi();
 
-            JSONObject datasets = martApi.getDatasets(USERNAME, PASSWORD, FORMAT, MART, VERSION).getJsonObject();
-            write(datasets, "datasets.json");
-            System.out.println(datasets);
+//            MartRegistry dummyMartRegistry = DummyPortal.createDummyMartRegistry();
+//            MartApi martApi = new MartApi(dummyMartRegistry);
 
-            JSONObject root = martApi.getRootContainer(USERNAME, PASSWORD, FORMAT, DATASET, PARTITION_FILTER).getJsonObject();
-            write(root, "root.json");
-            System.out.println(root);
+            List<Mart> marts = martApi.getRegistry(USERNAME, PASSWORD, FORMAT).getMartList();
 
-            JSONObject filters = martApi.getFilters(USERNAME, PASSWORD, FORMAT, DATASET, PARTITION_FILTER).getJsonObject();
-            write(filters, "filters.json");
-            System.out.println(filters);
+            for (Mart mart : marts) {
+                System.out.println("mart: " + mart.getName());
 
-            JSONObject attributes = martApi.getAttributes(USERNAME, PASSWORD, FORMAT, DATASET, PARTITION_FILTER).getJsonObject();
-            write(attributes, "attributes.json");
-            System.out.println(attributes);
+                List<Dataset> datasets = mart.getDatasetList();
+                System.out.println("  datasets size: " + datasets.size());
 
+                for (Dataset dataset : datasets) {
+                    System.out.println("  dataset: " + dataset.getName());
+
+                    List<Config> configs = dataset.getConfigList();
+                    System.out.println("    configs size: " + configs.size());
+
+                    for (Config config : configs) {
+                        System.out.println("    config: " + config.getName());
+                    }
+                }
+            }
         } catch (FunctionalException e) {
-
             e.printStackTrace();
         } catch (TechnicalException e) {
-
             e.printStackTrace();
         }
-    }
-
-    private static JSONObject decorateMart(JSONObject mart) {
-        return mart;
-    }
-
-    private static JSONObject decorateDataset(JSONObject dataset) {
-        return dataset;
-    }
-
-    private static JSONObject decorateContainer(JSONObject container) {
-        return container;
-    }
-
-    private static JSONObject decorateFilter(JSONObject filter) {
-        return filter;
-    }
-
-    private static JSONObject decorateAttribute(JSONObject attribute) {
-        return attribute;
     }
 
     private static void write(JSONObject jsonobject, String filename) {
