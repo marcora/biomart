@@ -49,7 +49,6 @@ import org.biomart.builder.model.TransformationUnit;
 import org.biomart.builder.model.JoinTable;
 import org.biomart.builder.model.SelectFromTable;
 import org.biomart.builder.model.SkipTable;
-import org.biomart.builder.view.gui.diagrams.ExplainTransformationDiagram;
 import org.biomart.common.exceptions.BioMartError;
 import org.biomart.common.resources.Resources;
 import org.biomart.common.resources.Settings;
@@ -60,6 +59,10 @@ import org.biomart.configurator.utils.type.IdwViewType;
 import org.biomart.configurator.view.gui.diagrams.components.TableComponent;
 import org.biomart.configurator.view.gui.diagrams.contexts.ExplainContext;
 import org.biomart.configurator.view.gui.diagrams.contexts.TransformationContext;
+import org.biomart.configurator.view.gui.diagrams.explain.ExplainTransformationDiagram;
+import org.biomart.configurator.view.gui.diagrams.explain.SingleTable;
+import org.biomart.configurator.view.gui.diagrams.explain.SkipTempReal;
+import org.biomart.configurator.view.gui.diagrams.explain.TempReal;
 import org.biomart.configurator.view.idwViews.McViews;
 
 /**
@@ -329,7 +332,7 @@ public class ExplainTableDialog extends JDialog implements TransactionListener {
 													"" + stepNumber,
 													Resources
 															.get("explainSkipLabel") }));
-					diagram = new ExplainTransformationDiagram.SkipTempReal(
+					diagram = new SkipTempReal(
 							ExplainTableDialog.this.mart,
 							(SkipTable) tu, columnsSoFar, stepNumber,
 							ExplainTableDialog.this.explainContext,
@@ -344,7 +347,7 @@ public class ExplainTableDialog extends JDialog implements TransactionListener {
 													"" + stepNumber,
 													Resources
 															.get("explainMergeLabel") }));
-					diagram = new ExplainTransformationDiagram.TempReal(
+					diagram = new TempReal(
 							ExplainTableDialog.this.mart,
 							(JoinTable) tu, columnsSoFar, stepNumber,
 							ExplainTableDialog.this.explainContext,
@@ -359,7 +362,7 @@ public class ExplainTableDialog extends JDialog implements TransactionListener {
 													"" + stepNumber,
 													Resources
 															.get("explainSelectLabel") }));
-					diagram = new ExplainTransformationDiagram.SingleTable(
+					diagram = new SingleTable(
 							ExplainTableDialog.this.mart,
 							(SelectFromTable) tu, stepNumber,
 							ExplainTableDialog.this.explainContext,
