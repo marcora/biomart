@@ -14,6 +14,7 @@ import org.biomart.objects.lite.LiteListFilter;
 import org.biomart.objects.lite.LiteMart;
 import org.biomart.objects.lite.LiteMartRegistry;
 import org.biomart.objects.lite.LiteRootContainer;
+import org.biomart.objects.lite.QueryResult;
 import org.biomart.objects.objects.MartRegistry;
 import org.biomart.test.DummyPortal;
 import org.jdom.Document;
@@ -57,6 +58,8 @@ public class MartApiTesting {
 			// Create the XML document corresonding to the previous request
 			displayXml(liteMartRegistry.getXmlDocument());
 	
+			// Manipulation of the objects
+			
 			System.out.println(liteMartRegistry.getLiteMartList());
 						// You can see what other methods you have access to on that object (get the list of light marts for instance here)
 			
@@ -123,20 +126,30 @@ public class MartApiTesting {
 			// Create the XML document corresonding to the previous request
 			displayXml(liteListFilter.getXmlDocument());
 			
+			//System.out.println(MyUtils.capString(martApi.getDatasets("anonymous", "", null, "ensembl_mart_55", 55).getJsonObject().toString()));
 			
 			//----------------------------------------------------------------
 			// Querying
-			/*System.out.println("Querying...");
+			System.out.println("Getting filters...");
+			QueryResult queryResult = martApi.query("anonymous", "", null, 
+					MyUtils.wrappedGetProperty(MartRemoteConstants.QUERY_TEST_PROPERTIES_FILE_PATH_AND_NAME, "query1"));
+			System.out.println();
+			
+			// Create the JSON object corresonding to the previous request
+			displayJson(queryResult.getJsonObject());
+			
+			// Create the XML document corresonding to the previous request
+			displayXml(queryResult.getXmlDocument());
+
+			
+			//----------------------------------------------------------------
+			// Querying
+			System.out.println("Querying...");
 			System.out.println(MyUtils.capString(
 					martApi.query("anonymous", "", null, 
 					MyUtils.wrappedGetProperty(MartRemoteConstants.QUERY_TEST_PROPERTIES_FILE_PATH_AND_NAME, "query1")
 					).getJsonObject().toString()));
-			System.out.println();*/
-			
-			/*
-			System.out.println(MyUtils.capString(
-					martApi.getDatasets("anonymous", "", null, "ensembl_mart_55", 55).getJsonObject().toString()));
-			*/
+			System.out.println();
 			
 		} catch (FunctionalException e) {		// usually an error in arguments, or in the algorithm (message should describe the problem...)
 			e.printStackTrace();

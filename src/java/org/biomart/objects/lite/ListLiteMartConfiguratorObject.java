@@ -1,13 +1,20 @@
 package org.biomart.objects.lite;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
 import net.sf.json.JSONObject;
 
 import org.biomart.common.general.exceptions.FunctionalException;
+import org.biomart.common.general.exceptions.TechnicalException;
+import org.biomart.common.general.utils.MyUtils;
+import org.biomart.common.general.utils.XmlUtils;
 import org.biomart.martRemote.Jsoml;
+import org.biomart.martRemote.MartRemoteUtils;
+import org.biomart.martRemote.XmlParameters;
 import org.biomart.martRemote.objects.request.MartRemoteRequest;
 import org.jdom.Document;
 
@@ -51,6 +58,25 @@ public abstract class ListLiteMartConfiguratorObject extends LiteMartConfigurato
 		}
 		return stringBuffer.toString();
 	}
+	
+	
+	@Override
+	public Document getXmlDocument() throws TechnicalException, FunctionalException {
+		return super.getXmlDocument();
+	}
+	@Override
+	public Document getXmlDocument(boolean debug, Writer printWriter) throws TechnicalException, FunctionalException {
+		return super.getXmlDocument(debug, printWriter);
+	}
+	@Override
+	public JSONObject getJsonObject() throws TechnicalException, FunctionalException {
+		return super.getJsonObject();
+	}
+	@Override
+	public JSONObject getJsonObject(boolean debug, Writer printWriter) throws TechnicalException, FunctionalException {
+		return super.getJsonObject(debug, printWriter);
+	}
+	
 	
 	@Override
 	protected Document generateXml(Document document) throws FunctionalException {

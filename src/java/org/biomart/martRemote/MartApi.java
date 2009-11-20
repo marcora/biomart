@@ -41,6 +41,7 @@ import org.biomart.objects.lite.LiteListDataset;
 import org.biomart.objects.lite.LiteListFilter;
 import org.biomart.objects.lite.LiteMartRegistry;
 import org.biomart.objects.lite.LiteRootContainer;
+import org.biomart.objects.lite.QueryResult;
 import org.biomart.objects.objects.MartRegistry;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -324,7 +325,7 @@ public class MartApi {
 		return martRemoteRequest.isValid() ?
 				(GetContaineesResponse)executeRequest(martRemoteRequest) : null;
 	}
-	public QueryResponse query(String username, String password, String format,
+	public QueryResponse queryResponse(String username, String password, String format,
 			String query) throws FunctionalException {
 		MartRemoteRequest martRemoteRequest = null;
 		try {
@@ -339,6 +340,11 @@ public class MartApi {
 		}
 		return martRemoteRequest.isValid() ?
 			(QueryResponse)executeRequest(martRemoteRequest) : null;
+	}
+	public QueryResult query(String username, String password, String format,
+			String query) throws FunctionalException {
+		QueryResponse queryResponse = queryResponse(username, password, format, query);
+		return queryResponse!=null ? queryResponse.getQueryResult() : null;
 	}
 	
 	private MartRemoteResponse executeRequest(MartRemoteRequest martRemoteRequest) throws FunctionalException {

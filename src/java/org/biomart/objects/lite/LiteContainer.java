@@ -65,7 +65,7 @@ public class LiteContainer extends LiteSimpleMartConfiguratorObject implements
 				org.biomart.objects.objects.Element element = (org.biomart.objects.objects.Element) containee;
 				if (element instanceof SimpleFilter
 						&& ((SimpleFilter) element).getPartition()) {
-					LiteSimpleFilter liteSimpleFilterPartition = new LiteSimpleFilter((SimpleFilter) element);
+					LiteFilter liteSimpleFilterPartition = new LiteFilter((SimpleFilter) element);
 					addLiteFilter(liteSimpleFilterPartition);
 				} else {
 					Range targetRange = element.getTargetRange();
@@ -93,12 +93,13 @@ public class LiteContainer extends LiteSimpleMartConfiguratorObject implements
 									} else if (pointedElement instanceof Filter) {
 										LiteFilter pointedLiteFilter = null;
 										if (pointedElement instanceof SimpleFilter) {
-											LiteSimpleFilter pointedLiteSimpleFilter = new LiteSimpleFilter(
-													(SimpleFilter) pointedElement, part);
+											LiteFilter pointedLiteSimpleFilter = 
+												new LiteFilter((SimpleFilter) pointedElement, part);
 											pointedLiteSimpleFilter.updatePointerClone(element);
 											pointedLiteFilter = pointedLiteSimpleFilter;
 										} else if (pointedElement instanceof GroupFilter) {
-											LiteGroupFilter pointedLiteGroupFilter = new LiteGroupFilter((GroupFilter) pointedElement, part);
+											LiteFilter pointedLiteGroupFilter = 
+												new LiteFilter((GroupFilter) pointedElement, part);
 											pointedLiteGroupFilter.updatePointerClone(element);
 											pointedLiteFilter = pointedLiteGroupFilter;
 										}
@@ -115,9 +116,9 @@ public class LiteContainer extends LiteSimpleMartConfiguratorObject implements
 									} else if (element instanceof Filter) {
 										LiteFilter liteFilter = null;
 										if (element instanceof SimpleFilter) {
-											liteFilter = new LiteSimpleFilter((SimpleFilter) element, part);
+											liteFilter = new LiteFilter((SimpleFilter) element, part);
 										} else if (element instanceof GroupFilter) {
-											liteFilter = new LiteGroupFilter((GroupFilter) element, part);
+											liteFilter = new LiteFilter((GroupFilter) element, part);
 										}
 										if (!this.liteFilterList.contains(liteFilter)) { // No repetitions
 											addLiteFilter(liteFilter); // also handles containeeList

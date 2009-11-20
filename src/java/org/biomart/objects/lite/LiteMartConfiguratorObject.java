@@ -19,14 +19,10 @@ import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.objects.MartConfiguratorObject;
 import org.jdom.Document;
 
-public abstract class LiteMartConfiguratorObject implements Serializable {
+public abstract class LiteMartConfiguratorObject extends MartRemoteObject implements Serializable {
 
 	private static final long serialVersionUID = -4092400660475456118L;
 
-	protected MartRemoteRequest martRemoteRequest = null;
-	
-	protected String xmlElementName = null;
-	
 	protected String name = null;
 	protected String displayName = null;
 	protected String description = null;
@@ -40,11 +36,7 @@ public abstract class LiteMartConfiguratorObject implements Serializable {
 	}
 	protected LiteMartConfiguratorObject(MartRemoteRequest martRemoteRequest, 
 			String xmlElementName, String name, String displayName, String description, Boolean visible) {
-		if (null!=martRemoteRequest) {
-			this.martRemoteRequest = martRemoteRequest;
-		}
-		
-		this.xmlElementName = xmlElementName;
+		super(martRemoteRequest, xmlElementName);
 			
 		this.name = name;
 		this.displayName = displayName;
@@ -88,14 +80,16 @@ public abstract class LiteMartConfiguratorObject implements Serializable {
 		return hash;
 	}
 	
-	public Document getXmlDocument() throws TechnicalException, FunctionalException {
+	@Override
+	protected Document getXmlDocument() throws TechnicalException, FunctionalException {
 		return getXmlDocument(false, null);
 	}
-	public Document getXmlDocument(boolean debug, Writer printWriter) throws TechnicalException, FunctionalException {
-		XmlParameters xmlParameters = martRemoteRequest.getXmlParameters();
+	@Override
+	protected Document getXmlDocument(boolean debug, Writer printWriter) throws TechnicalException, FunctionalException {
+		XmlParameters xmlParameters = super.martRemoteRequest.getXmlParameters();
 		
 		Document document = MartRemoteUtils.createNewMartRemoteXmlDocument(
-				xmlParameters, martRemoteRequest.getType().getResponseName());
+				xmlParameters, super.martRemoteRequest.getType().getResponseName());
 		document = generateXml(document);
 		if (debug && printWriter!=null) {
 			try {
@@ -113,13 +107,15 @@ public abstract class LiteMartConfiguratorObject implements Serializable {
 			
 		return document;
 	}
-	public JSONObject getJsonObject() throws TechnicalException, FunctionalException {
+	@Override
+	protected JSONObject getJsonObject() throws TechnicalException, FunctionalException {
 		return getJsonObject(false, null);
 	}
-	public JSONObject getJsonObject(boolean debug, Writer printWriter) throws TechnicalException, FunctionalException {
+	@Override
+	protected JSONObject getJsonObject(boolean debug, Writer printWriter) throws TechnicalException, FunctionalException {
 		JSONObject jsonObject = null;
 		try {
-			jsonObject = generateJson(martRemoteRequest.getType().getResponseName());
+			jsonObject = generateJson(super.martRemoteRequest.getType().getResponseName());
 			if (debug && printWriter!=null) {
 				printWriter.append(JsonUtils.getJSONObjectNiceString(jsonObject) + MyUtils.LINE_SEPARATOR);
 			}

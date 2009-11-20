@@ -63,7 +63,7 @@ public class MartServiceHelper {
 	public static String query(String username, String password, String format,
 			String query) throws FunctionalException {
 		initialize();
-		MartRemoteResponse martRemoteResponse = martApi.query(username, password, format, query);
+		MartRemoteResponse martRemoteResponse = martApi.queryResponse(username, password, format, query);
 		return getResultAsString(martRemoteResponse);
 	}
 
