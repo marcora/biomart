@@ -574,10 +574,11 @@ public class JDBCLocationConnectionPanel extends JPanel implements DocumentListe
 		
 		loc.addSelectedTables(selectedTablesMap);
 		loc.addDBTablesMap(this.dbPreview.getDBInfo(true));
-		for(Iterator<String> it = selectedTablesMap.keySet().iterator(); it.hasNext();) {
-			String dbName = it.next();
-			//check if mart is already exist
-			if(loc.getMart(dbName) == null) {
+		if(isPartitionApplied()) {
+			if(selectedTablesMap.size()>0) {
+				Iterator<String> it = selectedTablesMap.keySet().iterator();
+				String dbName = it.next();
+				//assume the mart is unique for now TODO, find a name for mart
 				final Mart mart = new Mart(loc,dbName,type);
 				// Construct a JDBCSchema based on them.
 				DbConnectionInfoObject conObj2 = new DbConnectionInfoObject(this.jdbcURL.getText(),this.dbTField.getText(),
@@ -586,15 +587,40 @@ public class JDBCLocationConnectionPanel extends JPanel implements DocumentListe
 						(JdbcType)this.predefinedDriverClass.getSelectedItem(),
 						this.regexTF.getText(),this.expressionTF.getText());
 				final JDBCSchema schema = new JDBCSchema(mart, conObj2,
-						 dbName, dbName, this.keyguessing.isSelected(), "", "");
+						 dbName, dbName, this.keyguessing.isSelected(), 
+						 this.regexTF.getText(),this.expressionTF.getText());
 				mart.addSchema(schema);				
-				loc.addMart(mart);
+				loc.addMart(mart);				
+			}
+		}else {
+			for(Iterator<String> it = selectedTablesMap.keySet().iterator(); it.hasNext();) {
+				String dbName = it.next();
+				//check if mart is already exist
+				if(loc.getMart(dbName) == null) {
+					final Mart mart = new Mart(loc,dbName,type);
+					// Construct a JDBCSchema based on them.
+					DbConnectionInfoObject conObj2 = new DbConnectionInfoObject(this.jdbcURL.getText(),this.dbTField.getText(),
+							dbName,this.username.getText(),
+							new String(this.password.getPassword()),
+							(JdbcType)this.predefinedDriverClass.getSelectedItem(),
+							this.regexTF.getText(),this.expressionTF.getText());
+					final JDBCSchema schema = new JDBCSchema(mart, conObj2,
+							 dbName, dbName, this.keyguessing.isSelected(), 
+							 this.regexTF.getText(),this.expressionTF.getText());
+					mart.addSchema(schema);				
+					loc.addMart(mart);
+				}
 			}
 		}
 		return loc;
 	}
 
-
+	private boolean isPartitionApplied() {
+		if(!"".equals(this.regexTF.getText()) && !"".equals(this.expressionTF.getText()))
+			return true;
+		else
+			return false;
+	}
 	
 	public void setType(MartType type) {
 		this.type = type;

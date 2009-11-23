@@ -1269,11 +1269,11 @@ public class McViewSchema extends McView implements TreeSelectionListener {
 		Location loc = McGuiUtils.INSTANCE.getCurrentUser().getLocation(locationElement.getAttributeValue(Resources.get("NAME")));
 		// If the mart has no datasets, ignore the request.
 		final Mart mart = loc.getMart(martElement.getAttributeValue(Resources.get("NAME")));
-		final Collection datasets = new ArrayList(mart.getDataSets().values());
+		final List<DataSet> datasets = new ArrayList<DataSet>(mart.getDataSets().values());
 		// Remove partition table datasets from the list.
 		// Also remove masked datasets.
-		for (final Iterator i = datasets.iterator(); i.hasNext();) {
-			final DataSet ds = (DataSet) i.next();
+		for (final Iterator<DataSet> i = datasets.iterator(); i.hasNext();) {
+			final DataSet ds = i.next();
 			if ( ds.isMasked())
 				i.remove();
 		}

@@ -1703,22 +1703,56 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 			
 			this.setMetaInfo(this.conObj.getDatabaseName(), this.conObj.getSchemaName());
 			
-			//create table			
-			for(String tbName:this.tblColMap.keySet()) {
-				Table table = new Table(this,tbName);
-				this.getTables().put(tbName, table);
-				//create column
-				for(String colName:this.tblColMap.get(tbName)) {
-					Column dbTblCol = new Column(table,colName);
-					table.getColumns().put(colName, dbTblCol);
-				}
-				//create PK
-				List<Column> pkColList = new ArrayList<Column>();
-				if(this.tblPkMap.get(tbName)!=null)
-					for(String pkColName:this.tblPkMap.get(tbName)) {
-						pkColList.add(table.getColumns().get(pkColName));
+			//create table	
+			if(this.isSchemaPartitioned()) {
+				//get all tables in all selected database
+				for(String tbName:this.tblColMap.keySet()) {
+					int index = tbName.indexOf(".");
+					String tableName = tbName.substring(index+1);
+					String ptName = tbName.substring(0,index);
+					Table table = this.getTables().get(tableName);
+					if(table==null) {
+						table = new Table(this,tableName);
+						this.getTables().put(tableName, table);
 					}
-				this.createPKforTable(table, pkColList);
+					table.addPartition(ptName);
+					//create column
+					for(String colName: this.tblColMap.get(tbName)) {
+						Column dbTblCol = table.getColumns().get(colName);
+						if(dbTblCol == null) {
+							dbTblCol = new Column(table,colName);
+							table.getColumns().put(colName, dbTblCol);
+						}
+						dbTblCol.addPartition(ptName);
+					}					
+				}
+				//create PK for each table
+				for(Table table:this.getTables().values()) {
+					List<Column> pkColList = new ArrayList<Column>();
+					if(this.tblPkMap.get(table.getName())!=null)
+						for(String pkColName:this.tblPkMap.get(table.getName())) {
+							pkColList.add(table.getColumns().get(pkColName));
+						}
+					this.createPKforTable(table, pkColList);
+				}
+			}else {
+				for(String tbName:this.tblColMap.keySet()) {
+					String tableName = tbName.substring(tbName.indexOf(".")+1);
+					Table table = new Table(this,tableName);
+					this.getTables().put(tableName, table);
+					//create column
+					for(String colName:this.tblColMap.get(tbName)) {
+						Column dbTblCol = new Column(table,colName);
+						table.getColumns().put(colName, dbTblCol);
+					}
+					//create PK
+					List<Column> pkColList = new ArrayList<Column>();
+					if(this.tblPkMap.get(tableName)!=null)
+						for(String pkColName:this.tblPkMap.get(tableName)) {
+							pkColList.add(table.getColumns().get(pkColName));
+						}
+					this.createPKforTable(table, pkColList);
+				}
 			}
 
 				t2 = McUtils.getCurrentTime();
@@ -1812,22 +1846,33 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 	}
 	
 	private void setMySQLMetaInfo(String dbName,String schemaName) {
-		String lastTableName = "";
 		List<String> colList = new ArrayList<String>();
 		List<String> pkList = new ArrayList<String>();
-		StringBuffer sb = new StringBuffer("select table_name,column_name,column_key from information_schema.columns where");
-		sb.append(" table_schema='"+schemaName+"' order by table_name, ordinal_position");
+		StringBuffer sb = new StringBuffer("select table_schema,table_name,column_name,column_key from information_schema.columns where ");
+		if(this.isSchemaPartitioned()) {
+			for(Iterator<String> i = this.getMart().getMartLocation().getSelectedTables().keySet().iterator();i.hasNext();) {
+				sb.append("table_schema='"+i.next()+"' " );
+				if(i.hasNext())
+					sb.append(" or ");
+			}
+		} else
+			sb.append(" table_schema='"+schemaName+"' ");
+		sb.append("order by table_schema, table_name, ordinal_position");
+
+		String lastTableName = "";		
+		String lastSchema = "";
 		Connection con = ConnectionPool.Instance.getConnection(this.conObj);
 		try {
 			Statement st = con.createStatement();
 			ResultSet rs = st.executeQuery(sb.toString());
 			while(rs.next()) {
 				String tableName = rs.getString("table_name");
+				String schemaStr = rs.getString("table_schema");
 				//finish all columns in one table and move to the next, if previous table doesn't have a PK, 
 				//create using keyguessing
-				if(!lastTableName.equals(tableName)) {
+				if(!(lastTableName.equals(tableName) && lastSchema.equals(schemaStr))) {
 					if(!lastTableName.equals("")) {
-						this.tblColMap.put(lastTableName, colList);
+						this.tblColMap.put(schemaStr+"."+lastTableName, colList);
 						this.tblPkMap.put(lastTableName, pkList);
 						//no fk for MyISAM;
 						colList = new ArrayList<String>();
@@ -1838,6 +1883,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 					
 					//clean flags
 					lastTableName = tableName;
+					lastSchema = schemaStr;
 				}
 				
 				colList.add(rs.getString("column_name"));
@@ -1856,7 +1902,7 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		this.tblColMap.put(lastTableName, colList);
+		this.tblColMap.put(lastSchema+"."+lastTableName, colList);
 		this.tblPkMap.put(lastTableName, pkList);		
 	}
 	
@@ -1930,4 +1976,10 @@ public class JDBCSchema extends Schema implements JDBCDataLink{
 
 	}
 
+	private boolean isSchemaPartitioned() {
+		if(this.conObj.getPartitionRegex()!=null && this.conObj.getPtNameExpression()!=null)
+			return true;
+		else
+			return false;
+	}
 }

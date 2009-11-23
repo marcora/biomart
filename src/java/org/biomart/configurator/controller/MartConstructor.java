@@ -109,7 +109,7 @@ public interface MartConstructor {
 	 */
 	public ConstructorRunnable getConstructorRunnable(
 			String targetDatabaseName, String targetSchemaName,
-			Collection datasets, Collection prefixes) throws Exception;
+			Collection<DataSet> datasets, Collection prefixes) throws Exception;
 
 	/**
 	 * This interface defines a class which does the actual construction work.
@@ -182,7 +182,7 @@ public interface MartConstructor {
 			ConstructorRunnable {
 		private boolean cancelled = false;
 
-		private Collection datasets;
+		private Collection<DataSet> datasets;
 
 		private String datasetSchemaName;
 
@@ -223,7 +223,7 @@ public interface MartConstructor {
 		 *            partitions.
 		 */
 		public GenericConstructorRunnable(final String datasetSchemaName,
-				final Collection datasets) {
+				final Collection<DataSet> datasets) {
 			super();
 			Log.debug("Created generic constructor runnable");
 			this.datasets = datasets;

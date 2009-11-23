@@ -69,7 +69,7 @@ public class Table implements Comparable<Table>, TransactionListener {
 	private final McBeanMap<String, Column> columns;
 
 	private final McBeanCollection<ForeignKey> foreignKeys;
-
+	private final Set<String> partitions;
 	private final String name;
 	private PrimaryKey primaryKey;
 
@@ -104,6 +104,7 @@ public class Table implements Comparable<Table>, TransactionListener {
 	public Table(final Schema schema, String name) {
 		Log.debug("Creating table " + name + " in " + schema);
 		this.schema = schema;
+		this.partitions = new HashSet<String>();
 		this.uniqueId = this.schema.getNextUniqueId();
 		this.columns = new McBeanMap<String, Column>(new HashMap<String,Column>());
 		this.foreignKeys = new McBeanCollection<ForeignKey>(new HashSet<ForeignKey>());
@@ -413,6 +414,13 @@ public class Table implements Comparable<Table>, TransactionListener {
 		return "(" + this.schema + ") " + this.name;
 	}
 
+	public Set<String> getPartitions() {
+		return this.partitions;
+	}
+	
+	public void addPartition(String value) {
+		this.partitions.add(value);
+	}
 	/**
 	 * Defines the restriction on a table, ie. a where-clause.
 	 */

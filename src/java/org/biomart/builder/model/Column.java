@@ -19,6 +19,9 @@
 package org.biomart.builder.model;
 
 import java.beans.PropertyChangeListener;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.biomart.common.resources.Log;
 import org.biomart.common.resources.Resources;
 import org.biomart.common.utils.Transaction;
@@ -50,7 +53,7 @@ public class Column implements Comparable<Column>, TransactionListener {
 			: Transaction.getCurrentTransaction().isAllowVisModChange();
 
 	private boolean directModified = false;
-
+	private final Set<String> partitions;
 	/**
 	 * Subclasses use this field to fire events of their own.
 	 */
@@ -67,6 +70,7 @@ public class Column implements Comparable<Column>, TransactionListener {
 	 */
 	public Column(final Table table, String name) {
 		Log.debug("Creating column " + name + " on table " + table);
+		partitions = new HashSet<String>();
 		// Remember the values.
 		this.table = table;
 		// First we need to find out the base name, ie. the bit
@@ -189,5 +193,13 @@ public class Column implements Comparable<Column>, TransactionListener {
 
 	public String toString() {
 		return this.name + " [" + this.getTable().toString() + "]";
+	}
+
+	public Set<String> getPartitions() {
+		return this.partitions;
+	}
+	
+	public void addPartition(String value){
+		this.partitions.add(value);
 	}
 }
