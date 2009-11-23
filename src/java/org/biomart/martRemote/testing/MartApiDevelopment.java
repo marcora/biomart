@@ -1,6 +1,7 @@
-package org.biomart.martRemote;
+package org.biomart.martRemote.testing;
 
 import org.biomart.common.general.utils.MyUtils;
+import org.biomart.martRemote.MartRemoteConstants;
 import org.biomart.martRemote.enums.MartServiceFormat;
 import org.biomart.transformation.helpers.TransformationConstants;
 

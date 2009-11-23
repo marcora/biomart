@@ -1,11 +1,10 @@
-package org.biomart.martRemote.martService;
+package org.biomart.martRemote;
 
 import java.io.StringWriter;
 
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
-import org.biomart.martRemote.MartApi;
-import org.biomart.martRemote.MartRemoteConstants;
+import org.biomart.martRemote.martService.MartServiceConstants;
 import org.biomart.martRemote.objects.response.MartRemoteResponse;
 
 public class MartServiceHelper {

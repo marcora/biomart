@@ -26,7 +26,7 @@ public class LiteContainer extends LiteMartConfiguratorObject implements Seriali
 	private Integer queryRestriction = null;
 
 	private List<LiteMartConfiguratorObject> liteContaineeList = null;	// Ordered references to above lists of containers, 
-																				// filters & attributes
+																		// filters & attributes
 
 	private List<LiteContainer> liteContainerList = null;
 	private List<LiteFilter> liteFilterList = null;
@@ -131,6 +131,18 @@ public class LiteContainer extends LiteMartConfiguratorObject implements Seriali
 			}
 		}
 	}
+	private void addLiteContainer(LiteContainer liteContainer) {
+		this.liteContainerList.add(liteContainer);
+		this.liteContaineeList.add(liteContainer);
+	}
+	private void addLiteFilter(LiteFilter liteFilter) {
+		this.liteFilterList.add(liteFilter);
+		this.liteContaineeList.add(liteFilter);
+	}
+	private void addLiteAttribute(LiteAttribute liteAttribute) {
+		this.liteAttributeList.add(liteAttribute);
+		this.liteContaineeList.add(liteAttribute);
+	}
 	
 	public List<LiteMartConfiguratorObject> getLiteContaineeList() {
 		return new ArrayList<LiteMartConfiguratorObject>(liteContaineeList);
@@ -143,21 +155,6 @@ public class LiteContainer extends LiteMartConfiguratorObject implements Seriali
 	}
 	public List<LiteAttribute> getLiteAttributeList() {
 		return new ArrayList<LiteAttribute>(liteAttributeList);
-	}
-
-	private void addLiteContainer(LiteContainer liteContainer) {
-		this.liteContainerList.add(liteContainer);
-		this.liteContaineeList.add(liteContainer);
-	}
-
-	private void addLiteFilter(LiteFilter liteFilter) {
-		this.liteFilterList.add(liteFilter);
-		this.liteContaineeList.add(liteFilter);
-	}
-
-	private void addLiteAttribute(LiteAttribute liteAttribute) {
-		this.liteAttributeList.add(liteAttribute);
-		this.liteContaineeList.add(liteAttribute);
 	}
 	
 	// Properties in super class available for this light object

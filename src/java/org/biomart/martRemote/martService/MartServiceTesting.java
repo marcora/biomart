@@ -3,7 +3,8 @@ package org.biomart.martRemote.martService;
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.martRemote.MartApi;
-import org.biomart.martRemote.MartApiDevelopment;
+import org.biomart.martRemote.MartServiceHelper;
+import org.biomart.martRemote.testing.MartApiDevelopment;
 
 public class MartServiceTesting {
 

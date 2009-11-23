@@ -282,30 +282,30 @@ public class MartApi {
 	}
 	
 
-	public GetRegistryResponse getRegistryResponse(String username, String password, String format) throws FunctionalException {
+	protected GetRegistryResponse getRegistryResponse(String username, String password, String format) throws FunctionalException {
 		MartRemoteRequest martRemoteRequest = this.prepareGetRegistry(
 				username, password, MartServiceFormat.getFormat(format));
 		return martRemoteRequest.isValid() ?
 				(GetRegistryResponse)executeRequest(martRemoteRequest) : null;
 	}
-	public GetDatasetsResponse getDatasetsResponse(String username, String password,
+	protected GetDatasetsResponse getDatasetsResponse(String username, String password,
 			String format, String mart, Integer version) throws FunctionalException {
 		MartRemoteRequest martRemoteRequest = this.prepareGetDatasets(
 				username, password, MartServiceFormat.getFormat(format), mart, version);
 		return martRemoteRequest.isValid() ?
 				(GetDatasetsResponse)executeRequest(martRemoteRequest) : null;
 	}
-	public GetRootContainerResponse getRootContainerResponse(String username, String password, String format, 
+	protected GetRootContainerResponse getRootContainerResponse(String username, String password, String format, 
 			String dataset, String partitionFilter) throws FunctionalException, TechnicalException {
 		return (GetRootContainerResponse)getContainees(
 				MartRemoteEnum.GET_ROOT_CONTAINER, username, password, format, dataset, partitionFilter);
 	}
-	public GetAttributesResponse getAttributesResponse(String username, String password, String format, 
+	protected GetAttributesResponse getAttributesResponse(String username, String password, String format, 
 			String dataset, String partitionFilter) throws FunctionalException, TechnicalException {
 		return (GetAttributesResponse)getContainees(
 				MartRemoteEnum.GET_ATTRIBUTES, username, password, format, dataset, partitionFilter);
 	}
-	public GetFiltersResponse getFiltersResponse(String username, String password, String format, 
+	protected GetFiltersResponse getFiltersResponse(String username, String password, String format, 
 			String dataset, String partitionFilter) throws FunctionalException, TechnicalException {
 		return (GetFiltersResponse)getContainees(
 				MartRemoteEnum.GET_FILTERS, username, password, format, dataset, partitionFilter);
@@ -326,7 +326,7 @@ public class MartApi {
 		return martRemoteRequest.isValid() ?
 				(GetContaineesResponse)executeRequest(martRemoteRequest) : null;
 	}
-	public QueryResponse queryResponse(String username, String password, String format,
+	protected QueryResponse queryResponse(String username, String password, String format,
 			String query) throws FunctionalException {
 		MartRemoteRequest martRemoteRequest = null;
 		try {
@@ -389,7 +389,7 @@ public class MartApi {
 		<query processor="CSV" header="true" uniqueRows="false" count="false" datasetConfigVersion="0.8"><dataset name="hsapiens_gene_ensembl"><attribute name="ensembl_gene_id" /><attribute name="ensembl_transcript_id" /><filter name="chromosome_name" value="1" /></dataset></query>
 	 */
 	// Response writing
-	public String processMartServiceResult(MartRemoteResponse martRemoteResponse, Writer writer) throws TechnicalException, FunctionalException {
+	protected String processMartServiceResult(MartRemoteResponse martRemoteResponse, Writer writer) throws TechnicalException, FunctionalException {
 		MartRemoteWrapper martRemoteWrapper = martRemoteResponse.getMartRemoteWrapper();
 		if (null!=martRemoteWrapper && martRemoteResponse.getMartServiceRequest().getFormat().isXml()) {
 			Document document = martRemoteWrapper.getXmlDocument(this.debug, writer);

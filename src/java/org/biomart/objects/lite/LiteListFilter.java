@@ -19,8 +19,7 @@ public class LiteListFilter extends ListLiteMartConfiguratorObject implements Se
 	 * Only used to populate the objects, should not be used once locked
 	 */
 	public void addLiteFilter(LiteFilter liteFilter) throws FunctionalException {
-		super.checkLock();
-		super.liteMartConfiguratorObjectList.add(liteFilter);
+		super.addliteMartConfiguratorObject(liteFilter);
 	}
 	
 	@SuppressWarnings("unchecked")

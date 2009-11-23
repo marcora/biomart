@@ -21,11 +21,27 @@ import org.jdom.Document;
 public abstract class MartRemoteWrapper implements Serializable {
 
 	private static final long serialVersionUID = -7987597129758017949L;
+
+	protected static final String LOCK_VIOLATION_ERROR_MESSAGE = "Invalid operation: objects are already populated";
 	
 	protected MartRemoteRequest martRemoteRequest = null;
+	protected Boolean lock = null;
 	
 	protected MartRemoteWrapper(MartRemoteRequest martRemoteRequest) {
 		this.martRemoteRequest = martRemoteRequest;
+		this.lock = false;
+	}
+	
+	/**
+	 * In order to "lock" the object once populated (becomes read-only)
+	 */
+	public void lock() {
+		this.lock = true;
+	}
+	protected void checkLock() throws FunctionalException {
+		if (this.lock) {
+			throw new FunctionalException(LOCK_VIOLATION_ERROR_MESSAGE);
+		}
 	}
 	
 	public Document getXmlDocument() throws TechnicalException, FunctionalException {

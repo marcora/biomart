@@ -19,8 +19,7 @@ public class LiteListAttribute extends ListLiteMartConfiguratorObject implements
 	 * Only used to populate the objects, should not be used once locked
 	 */
 	public void addLiteAttribute(LiteAttribute liteAttribute) throws FunctionalException {
-		super.checkLock();
-		super.liteMartConfiguratorObjectList.add(liteAttribute);
+		super.addliteMartConfiguratorObject(liteAttribute);
 	}
 	
 	@SuppressWarnings("unchecked")

@@ -1,4 +1,4 @@
-package org.biomart.martRemote;
+package org.biomart.configurator.test;
 
 
 import java.io.File;

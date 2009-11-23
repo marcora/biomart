@@ -1,17 +1,12 @@
 package org.biomart.objects.lite;
 
 import java.io.Serializable;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.sf.json.JSONObject;
-
 import org.biomart.common.general.exceptions.FunctionalException;
-import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.martRemote.Jsoml;
 import org.biomart.martRemote.objects.request.MartRemoteRequest;
-import org.jdom.Document;
 
 public class QueryResult extends MartRemoteWrapper implements Serializable {
 
@@ -26,10 +21,12 @@ public class QueryResult extends MartRemoteWrapper implements Serializable {
 		this.headers = null;
 	}
 
-	public void setHeaders(List<String> headers) {
+	public void setHeaders(List<String> headers) throws FunctionalException {
+		super.checkLock();
 		this.headers = headers;
 	}
-	public void setData(List<List<String>> data) {
+	public void setData(List<List<String>> data) throws FunctionalException {
+		super.checkLock();
 		this.data = data;
 	}
 
@@ -42,30 +39,6 @@ public class QueryResult extends MartRemoteWrapper implements Serializable {
 			data.add(new ArrayList<String>(list));
 		}
 		return data;
-	}
-
-	@Override
-	public JSONObject getJsonObject() throws TechnicalException,
-			FunctionalException {
-		return super.getJsonObject();
-	}
-
-	@Override
-	public JSONObject getJsonObject(boolean debug, Writer printWriter)
-			throws TechnicalException, FunctionalException {
-		return super.getJsonObject(debug, printWriter);
-	}
-
-	@Override
-	public Document getXmlDocument() throws TechnicalException,
-			FunctionalException {
-		return super.getXmlDocument();
-	}
-
-	@Override
-	public Document getXmlDocument(boolean debug, Writer printWriter)
-			throws TechnicalException, FunctionalException {
-		return super.getXmlDocument(debug, printWriter);
 	}
 	
 	protected Jsoml generateExchangeFormat(boolean xml, Jsoml root) throws FunctionalException {	// unless overriden

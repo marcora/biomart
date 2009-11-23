@@ -19,8 +19,7 @@ public class LiteListDataset extends ListLiteMartConfiguratorObject implements S
 	 * Only used to populate the objects, should not be used once locked
 	 */
 	public void addLiteDataset(LiteDataset liteDataset) throws FunctionalException {
-		super.checkLock();
-		super.liteMartConfiguratorObjectList.add(liteDataset);
+		super.addliteMartConfiguratorObject(liteDataset);
 	}
 	
 	@SuppressWarnings("unchecked")

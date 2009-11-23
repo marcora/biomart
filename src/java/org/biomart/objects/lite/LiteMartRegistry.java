@@ -19,8 +19,7 @@ public class LiteMartRegistry extends ListLiteMartConfiguratorObject implements 
 	 * Only used to populate the objects, should not be used once locked
 	 */
 	public void addLiteMart(LiteMart liteMart) throws FunctionalException {
-		super.checkLock();
-		super.liteMartConfiguratorObjectList.add(liteMart);
+		super.addliteMartConfiguratorObject(liteMart);
 	}
 	
 	@SuppressWarnings("unchecked")

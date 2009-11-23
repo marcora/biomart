@@ -2,6 +2,7 @@ package org.biomart.martRemote.martService;
 
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
+import org.biomart.martRemote.MartServiceHelper;
 import org.biomart.martRemote.enums.MartRemoteEnum;
 
 

@@ -25,7 +25,7 @@ public class LiteRootContainer extends ListLiteMartConfiguratorObject implements
 			Arrays.asList(new LiteMartConfiguratorObject[] {liteRootContainer}));
 	}
 	
-	public LiteContainer getLiteRootContainer() {
+	public LiteContainer getLiteContainer() {
 		List<? extends LiteMartConfiguratorObject> liteRootContainer = 
 			super.getLiteMartConfiguratorObjectList();	// can only have 0 or 1 element
 		return liteRootContainer!=null && !liteRootContainer.isEmpty() ? (LiteContainer)liteRootContainer.get(0) : null;
@@ -33,7 +33,7 @@ public class LiteRootContainer extends ListLiteMartConfiguratorObject implements
 
 	@Override
 	public String toString() {
-		LiteContainer liteRootContainer = getLiteRootContainer();
+		LiteContainer liteRootContainer = getLiteContainer();
 		return "liteRootContainer = " + (liteRootContainer!=null ? 
 				liteRootContainer.getName() : null);
 	}

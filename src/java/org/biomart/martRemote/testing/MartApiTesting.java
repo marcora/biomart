@@ -1,4 +1,4 @@
-package org.biomart.martRemote;
+package org.biomart.martRemote.testing;
 
 import java.util.List;
 
@@ -8,6 +8,8 @@ import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.MyUtils;
 import org.biomart.common.general.utils.XmlUtils;
+import org.biomart.martRemote.MartApi;
+import org.biomart.martRemote.MartRemoteConstants;
 import org.biomart.objects.lite.LiteListAttribute;
 import org.biomart.objects.lite.LiteListDataset;
 import org.biomart.objects.lite.LiteListFilter;
@@ -48,8 +50,7 @@ public class MartApiTesting {
 			//----------------------------------------------------------------
 			// Obtain the registry (= list of light marts)
 			outln("Getting registry...");
-			LiteMartRegistry liteMartRegistry = martApi.getRegistry(
-					"anonymous", "", null);
+			LiteMartRegistry liteMartRegistry = martApi.getRegistry("anonymous", "", null);
 			outln();
 
 			// Create the JSON object corresonding to the previous request
@@ -136,7 +137,7 @@ public class MartApiTesting {
 			outln();
 			
 			// Create the JSON object corresonding to the previous request
-			displayJson(queryResult.getJsonObject());
+			//displayJson(queryResult.getJsonObject());	NOW DEPRECATED
 			
 			// Create the XML document corresonding to the previous request
 			displayXml(queryResult.getXmlDocument());
@@ -152,6 +153,7 @@ public class MartApiTesting {
 		outln("done.");
 	}
 	
+	@SuppressWarnings("unused")
 	private static void displayJson(JSONObject jsonObject) throws TechnicalException, FunctionalException {
 		outln("JSON:");
 		outln(jsonObject);
