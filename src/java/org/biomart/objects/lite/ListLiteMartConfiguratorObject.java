@@ -1,6 +1,5 @@
 package org.biomart.objects.lite;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -10,15 +9,11 @@ import net.sf.json.JSONObject;
 
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
-import org.biomart.common.general.utils.MyUtils;
-import org.biomart.common.general.utils.XmlUtils;
 import org.biomart.martRemote.Jsoml;
-import org.biomart.martRemote.MartRemoteUtils;
-import org.biomart.martRemote.XmlParameters;
 import org.biomart.martRemote.objects.request.MartRemoteRequest;
 import org.jdom.Document;
 
-public abstract class ListLiteMartConfiguratorObject extends LiteMartConfiguratorObject implements Serializable {
+public class ListLiteMartConfiguratorObject extends LiteMartConfiguratorObject implements Serializable {
 
 	private static final long serialVersionUID = -4022534573758673228L;
 
@@ -77,18 +72,7 @@ public abstract class ListLiteMartConfiguratorObject extends LiteMartConfigurato
 		return super.getJsonObject(debug, printWriter);
 	}
 	
-	
 	@Override
-	protected Document generateXml(Document document) throws FunctionalException {
-		Jsoml root = new Jsoml(document.getRootElement());
-		generateExchangeFormat(true, root).getXmlElement();
-		return document;
-	}
-	@Override
-	protected JSONObject generateJson(String responseName) throws FunctionalException {
-		return generateExchangeFormat(false, new Jsoml(false, responseName)).getJsonObject();		
-	}
-	
 	protected Jsoml generateExchangeFormat(boolean xml, Jsoml root) throws FunctionalException {	// unless overriden
 		for (LiteSimpleMartConfiguratorObject liteSimpleMartConfiguratorObject : this.liteMartConfiguratorObjectList) {
 			Jsoml jsoml = liteSimpleMartConfiguratorObject.generateExchangeFormat(xml);

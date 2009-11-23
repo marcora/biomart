@@ -34,23 +34,23 @@ public class MartApiTesting {
 		 */
 		String partitionFilterArgument = "main_partition_filter.\"hsapiens_gene_ensembl,mmusculus_gene_ensembl,celegans_gene_ensembl\"";
 		
-		System.out.println("start.");
+		outln("start.");
 		
 		try {
 			
 			// Instantiate API
-			System.out.println("Loading registry...");
+			outln("Loading registry...");
 			MartApi martApi = 
 				new MartApi();	// will use the serialized portal
 				//new MartApi(dummyMartRegistry);	// will take any MartRegistry object
-			System.out.println();
+			outln();
 			
 			//----------------------------------------------------------------
 			// Obtain the registry (= list of light marts)
-			System.out.println("Getting registry...");
+			outln("Getting registry...");
 			LiteMartRegistry liteMartRegistry = martApi.getRegistry(
 					"anonymous", "", null);
-			System.out.println();
+			outln();
 
 			// Create the JSON object corresonding to the previous request
 			displayJson(liteMartRegistry.getJsonObject());
@@ -60,23 +60,23 @@ public class MartApiTesting {
 	
 			// Manipulation of the objects
 			
-			System.out.println(liteMartRegistry.getLiteMartList());
+			outln(liteMartRegistry.getLiteMartList());
 						// You can see what other methods you have access to on that object (get the list of light marts for instance here)
 			
 			List<LiteMart> liteMartList = liteMartRegistry.getLiteMartList();
 			LiteMart liteMart = null;
 			if (!liteMartList.isEmpty()) {
 				liteMart = liteMartList.get(0);
-				System.out.println(liteMart.getDisplayName());
+				outln(liteMart.getDisplayName());
 						// You can see what methods you have access to on that object (get the display name for instance here)
 			}
 			
 			//----------------------------------------------------------------
 			// Obtain the list of datasets (= list of light datasets)
-			System.out.println("Getting datasets...");
+			outln("Getting datasets...");
 			LiteListDataset liteListDataset = martApi.getDatasets(
 					"anonymous", "", null, "ensembl_mart_55", 55);
-			System.out.println();
+			outln();
 
 			// Create the JSON object corresonding to the previous request
 			displayJson(liteListDataset.getJsonObject());
@@ -87,10 +87,10 @@ public class MartApiTesting {
 			
 			//----------------------------------------------------------------
 			// Obtain the root container (= tree structure of light objects)
-			System.out.println("Getting root container...");
+			outln("Getting root container...");
 			LiteRootContainer liteRootContainer = martApi.getRootContainer(
 					"anonymous", "", null, "gene_ensembl", partitionFilterArgument);
-			System.out.println();
+			outln();
 			
 			// Create the JSON object corresonding to the previous request
 			displayJson(liteRootContainer.getJsonObject());
@@ -101,10 +101,10 @@ public class MartApiTesting {
 
 			//----------------------------------------------------------------
 			// Obtain the list of attributes (= list of light attributes)
-			System.out.println("Getting attributes...");
+			outln("Getting attributes...");
 			LiteListAttribute liteListAttribute = martApi.getAttributes(
 					"anonymous", "", null, "gene_ensembl", partitionFilterArgument);
-			System.out.println();
+			outln();
 			
 			// Create the JSON object corresonding to the previous request
 			displayJson(liteListAttribute.getJsonObject());
@@ -115,10 +115,10 @@ public class MartApiTesting {
 			
 			//----------------------------------------------------------------
 			// Obtain the list of attributes (= list of light filters)
-			System.out.println("Getting filters...");
+			outln("Getting filters...");
 			LiteListFilter liteListFilter = martApi.getFilters(
 					"anonymous", "", null, "gene_ensembl", partitionFilterArgument);
-			System.out.println();
+			outln();
 			
 			// Create the JSON object corresonding to the previous request
 			displayJson(liteListFilter.getJsonObject());
@@ -126,14 +126,14 @@ public class MartApiTesting {
 			// Create the XML document corresonding to the previous request
 			displayXml(liteListFilter.getXmlDocument());
 			
-			//System.out.println(MyUtils.capString(martApi.getDatasets("anonymous", "", null, "ensembl_mart_55", 55).getJsonObject().toString()));
+			//outln(MyUtils.capString(martApi.getDatasets("anonymous", "", null, "ensembl_mart_55", 55).getJsonObject().toString()));
 			
 			//----------------------------------------------------------------
 			// Querying
-			System.out.println("Getting filters...");
+			outln("Querying...");
 			QueryResult queryResult = martApi.query("anonymous", "", null, 
 					MyUtils.wrappedGetProperty(MartRemoteConstants.QUERY_TEST_PROPERTIES_FILE_PATH_AND_NAME, "query1"));
-			System.out.println();
+			outln();
 			
 			// Create the JSON object corresonding to the previous request
 			displayJson(queryResult.getJsonObject());
@@ -142,33 +142,40 @@ public class MartApiTesting {
 			displayXml(queryResult.getXmlDocument());
 
 			
-			//----------------------------------------------------------------
-			// Querying
-			System.out.println("Querying...");
-			System.out.println(MyUtils.capString(
-					martApi.query("anonymous", "", null, 
-					MyUtils.wrappedGetProperty(MartRemoteConstants.QUERY_TEST_PROPERTIES_FILE_PATH_AND_NAME, "query1")
-					).getJsonObject().toString()));
-			System.out.println();
-			
 		} catch (FunctionalException e) {		// usually an error in arguments, or in the algorithm (message should describe the problem...)
 			e.printStackTrace();
 		} catch (TechnicalException e) {		// errors we don't control (connection lost, no more disk space...)
 			e.printStackTrace();
 		}
 		
-		System.out.println("done.");
+		MyUtils.writeFile("./MartApiTesting.out", stringBuffer.toString());
+		outln("done.");
 	}
 	
 	private static void displayJson(JSONObject jsonObject) throws TechnicalException, FunctionalException {
-		System.out.println("JSON:");
-		System.out.println(jsonObject);
-		System.out.println();
+		outln("JSON:");
+		outln(jsonObject);
+		outln();
 	}
 
 	private static void displayXml(Document xmlDocument) throws TechnicalException {
-		System.out.println("XML:");
-		System.out.println(XmlUtils.getXmlDocumentString(xmlDocument));
-		System.out.println();
+		outln("XML:");
+		outln(XmlUtils.getXmlDocumentString(xmlDocument));
+		outln();
+	}
+	
+	private static StringBuffer stringBuffer = new StringBuffer();
+	private static void outln(Object object) {
+		outln(object!=null ? object.toString() : null);
+	}
+	private static void outln() {
+		outln("");
+	}
+	private static void outln(String message) {
+		out(message + "\n");
+	}
+	private static void out(String message) {
+		System.out.print(message);
+		stringBuffer.append(message);
 	}
 }

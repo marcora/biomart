@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <martRegistry>
-  <location20091118_151722341 name="ensembl_mart_55" displayName="ensembl_mart_55" description="ensembl_mart_55" visible="true" host="martdb.ensembl.org" type="rdbms" user="anonymous">
+  <location20091118_170956590 name="ensembl_mart_55" displayName="ensembl_mart_55" description="ensembl_mart_55" visible="true" host="martdb.ensembl.org" type="rdbms" user="anonymous">
     <mart name="ensembl_mart_55" displayName="ensembl_mart_55" description="ensembl_mart_55" visible="true" version="55">
       <dataset name="gene_ensembl" displayName="(P0C5) genes ((P0C10))" description="Ensembl Genes" visible="true" materialized="true" centralTable="(P0C1)_gene_ensembl__gene__main">
         <partitionTable name="0" rows="50" cols="21" flatten="false">
@@ -6033,8 +6033,8 @@
         </config>
       </dataset>
     </mart>
-  </location20091118_151722341>
-  <location20091118_151722341 name="vega_mart_55" displayName="vega_mart_55" description="vega_mart_55" visible="true" host="martdb.ensembl.org" type="rdbms" user="anonymous">
+  </location20091118_170956590>
+  <location20091118_170956590 name="vega_mart_55" displayName="vega_mart_55" description="vega_mart_55" visible="true" host="martdb.ensembl.org" type="rdbms" user="anonymous">
     <mart name="vega_mart_55" displayName="vega_mart_55" description="vega_mart_55" visible="true" version="55">
       <dataset name="gene_vega" displayName="(P0C5) genes ((P0C9))" description="Vega Genes" visible="true" materialized="true" centralTable="(P0C1)_gene_vega__gene__main">
         <partitionTable name="0" rows="2" cols="12" flatten="false">
@@ -6870,8 +6870,8 @@
         </config>
       </dataset>
     </mart>
-  </location20091118_151722341>
-  <location20091118_151722341 name="snp_mart_55" displayName="snp_mart_55" description="snp_mart_55" visible="true" host="martdb.ensembl.org" type="rdbms" user="anonymous">
+  </location20091118_170956590>
+  <location20091118_170956590 name="snp_mart_55" displayName="snp_mart_55" description="snp_mart_55" visible="true" host="martdb.ensembl.org" type="rdbms" user="anonymous">
     <mart name="snp_mart_55" displayName="snp_mart_55" description="snp_mart_55" visible="true" version="55">
       <dataset name="snp" displayName="(P0C3) Variation ((P0C6))" visible="true" materialized="true" centralTable="(P0C1)_snp__variation__main">
         <partitionTable name="0" rows="13" cols="10" flatten="false">
@@ -9148,6 +9148,6 @@
         </config>
       </dataset>
     </mart>
-  </location20091118_151722341>
+  </location20091118_170956590>
 </martRegistry>
 

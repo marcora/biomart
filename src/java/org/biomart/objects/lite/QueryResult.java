@@ -17,8 +17,7 @@ public class QueryResult extends MartRemoteObject implements Serializable {
 
 	private static final long serialVersionUID = -5390698374744515564L;
 
-	private static final String XML_ELEMENT_NAME = "query" +
-			"";
+	private static final String XML_ELEMENT_NAME = "query";
 	
 	private List<String> headers = null;
 	private List<List<String>> data = null;
@@ -50,29 +49,25 @@ public class QueryResult extends MartRemoteObject implements Serializable {
 	@Override
 	public JSONObject getJsonObject() throws TechnicalException,
 			FunctionalException {
-		// TODO Auto-generated method stub
-		return null;
+		return super.getJsonObject();
 	}
 
 	@Override
 	public JSONObject getJsonObject(boolean debug, Writer printWriter)
 			throws TechnicalException, FunctionalException {
-		// TODO Auto-generated method stub
-		return null;
+		return super.getJsonObject(debug, printWriter);
 	}
 
 	@Override
 	public Document getXmlDocument() throws TechnicalException,
 			FunctionalException {
-		// TODO Auto-generated method stub
-		return null;
+		return super.getXmlDocument();
 	}
 
 	@Override
 	public Document getXmlDocument(boolean debug, Writer printWriter)
 			throws TechnicalException, FunctionalException {
-		// TODO Auto-generated method stub
-		return null;
+		return super.getXmlDocument(debug, printWriter);
 	}
 	
 	protected Jsoml generateExchangeFormat(boolean xml, Jsoml root) throws FunctionalException {	// unless overriden

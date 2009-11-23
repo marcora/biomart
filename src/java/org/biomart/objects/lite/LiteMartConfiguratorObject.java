@@ -1,23 +1,10 @@
 package org.biomart.objects.lite;
 
-import java.io.IOException;
 import java.io.Serializable;
-import java.io.Writer;
 
-import net.sf.json.JSONException;
-import net.sf.json.JSONObject;
-
-import org.biomart.common.general.exceptions.FunctionalException;
-import org.biomart.common.general.exceptions.TechnicalException;
-import org.biomart.common.general.utils.JsonUtils;
-import org.biomart.common.general.utils.MyUtils;
-import org.biomart.common.general.utils.XmlUtils;
-import org.biomart.martRemote.MartRemoteUtils;
-import org.biomart.martRemote.XmlParameters;
 import org.biomart.martRemote.objects.request.MartRemoteRequest;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.objects.MartConfiguratorObject;
-import org.jdom.Document;
 
 public abstract class LiteMartConfiguratorObject extends MartRemoteObject implements Serializable {
 
@@ -47,6 +34,22 @@ public abstract class LiteMartConfiguratorObject extends MartRemoteObject implem
 		this.name = martConfiguratorObject.getName();
 		this.displayName = martConfiguratorObject.getDisplayName();
 		this.description = martConfiguratorObject.getDescription();
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	public Boolean getVisible() {
+		return visible;
+	}
+
+	public String getDescription() {
+		return description;
 	}
 
 	@Override
@@ -79,55 +82,4 @@ public abstract class LiteMartConfiguratorObject extends MartRemoteObject implem
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==name? 0 : name.hashCode());	// Sufficient for our system
 		return hash;
 	}
-	
-	@Override
-	protected Document getXmlDocument() throws TechnicalException, FunctionalException {
-		return getXmlDocument(false, null);
-	}
-	@Override
-	protected Document getXmlDocument(boolean debug, Writer printWriter) throws TechnicalException, FunctionalException {
-		XmlParameters xmlParameters = super.martRemoteRequest.getXmlParameters();
-		
-		Document document = MartRemoteUtils.createNewMartRemoteXmlDocument(
-				xmlParameters, super.martRemoteRequest.getType().getResponseName());
-		document = generateXml(document);
-		if (debug && printWriter!=null) {
-			try {
-				printWriter.append(XmlUtils.getXmlDocumentString(document) + MyUtils.LINE_SEPARATOR);
-			} catch (IOException e) {
-				throw new TechnicalException(e);
-			}
-		}
-		
-		if (xmlParameters.getValidate()) {		// valide only if required
-			StringBuffer errorMessage = new StringBuffer();
-			MartRemoteUtils.validateXml(document, errorMessage);	// Validation with XSD
-					// update errorMessage if not validation fails
-		}
-			
-		return document;
-	}
-	@Override
-	protected JSONObject getJsonObject() throws TechnicalException, FunctionalException {
-		return getJsonObject(false, null);
-	}
-	@Override
-	protected JSONObject getJsonObject(boolean debug, Writer printWriter) throws TechnicalException, FunctionalException {
-		JSONObject jsonObject = null;
-		try {
-			jsonObject = generateJson(super.martRemoteRequest.getType().getResponseName());
-			if (debug && printWriter!=null) {
-				printWriter.append(JsonUtils.getJSONObjectNiceString(jsonObject) + MyUtils.LINE_SEPARATOR);
-			}
-		} catch (JSONException e) {
-			throw new TechnicalException(e);
-		} catch (IOException e) {
-			throw new TechnicalException(e);
-		}
-		
-		return jsonObject;
-	}
-
-	protected abstract Document generateXml(Document document) throws FunctionalException;
-	protected abstract JSONObject generateJson(String responseName) throws FunctionalException;
 }

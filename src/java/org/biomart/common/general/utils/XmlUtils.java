@@ -23,13 +23,15 @@ public class XmlUtils {
 		XMLOutputter prettyFormat = new XMLOutputter(Format.getPrettyFormat());
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		String xmlDocumentString = null;
-		try {
-			prettyFormat.output(document, baos);
-			xmlDocumentString = baos.toString("UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			throw new TechnicalException(e);
-		} catch (IOException e) {
-			throw new TechnicalException(e);
+		if (document!=null) {
+			try {
+				prettyFormat.output(document, baos);
+				xmlDocumentString = baos.toString("UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				throw new TechnicalException(e);
+			} catch (IOException e) {
+				throw new TechnicalException(e);
+			}
 		}
 		return xmlDocumentString;
 	}
