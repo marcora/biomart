@@ -24,6 +24,7 @@ import org.biomart.builder.model.DataSetTable;
 import org.biomart.builder.model.InheritedColumn;
 import org.biomart.builder.model.JDBCSchema;
 import org.biomart.builder.model.Mart;
+import org.biomart.builder.model.PartitionTable;
 import org.biomart.builder.model.Relation;
 import org.biomart.builder.model.Schema;
 import org.biomart.builder.model.Table;
@@ -79,11 +80,8 @@ public class JDomNodeAdapter extends DefaultMutableTreeNode {
 	/** the Element encapsulated by this node */
 
     private Element node;
-
     
-
     /** used for toString() */
-
     private final static String tab = "  ";
 
     private final static String lf = "\n";
@@ -348,60 +346,38 @@ public class JDomNodeAdapter extends DefaultMutableTreeNode {
 				String user = McGuiUtils.INSTANCE.getCurrentUser().getUserName();
 
 				for (final Iterator<Table> i = ds.getTables().values().iterator(); i.hasNext();) {
-
 					final DataSetTable dsTable = (DataSetTable)i.next();
 					Log.debug("Writing modifications for " + dsTable);
 					final Element dstElement = new Element(Resources.get("DSTABLE"));
-
 					dsElement.addContent(dstElement);
-
 					dstElement.setAttribute("name",dsTable.getName());
-
 					DataSetTableType type = dsTable.getType();
-
 					if(type.equals(DataSetTableType.MAIN))
-
 						dstElement.setAttribute("type","0");
-
 					else if(type.equals(DataSetTableType.MAIN_SUBCLASS))
-
 						dstElement.setAttribute("type","1");
-
 					else
-
 						dstElement.setAttribute("type","2");
 
-						
-
 					//attribute
-
 					for (final Iterator<Column> ci = dsTable.getColumns().values().iterator(); ci.hasNext();) {
-
 						final Column col = ci.next();
-
 						final Element colElement = new Element(Resources.get("COLUMN"));
-
 						dstElement.addContent(colElement);
-
 						colElement.setAttribute("name",col.getName());
-
 						//default no masked column
-
 						colElement.setAttribute(Resources.get("maskColumnTitle"),"0");
-
 					}
-
 				}
-
-
-					Element e = this.findChildElement(currentElement, Resources.get("DATASET"), ds.getName());
-
-					this.doNaive(e, mart, ds.getName(),user);
-
-			
-
+				Element e = this.findChildElement(currentElement, Resources.get("DATASET"), ds.getName());
+				this.doNaive(e, mart, ds.getName(),user);
 				newNodes.add(new JDomNodeAdapter(dsElement));
-
+				//add partition table is exist
+				if(!ds.getPartitions().isEmpty()) {
+					for(PartitionTable pt:ds.getPartitions()) {
+						dsElement.addContent(pt.toXML());
+					}
+				}
 	    	}
 
 		}
@@ -1051,6 +1027,7 @@ public class JDomNodeAdapter extends DefaultMutableTreeNode {
     	filterElement.setAttribute(Resources.get("PARTITIONTABLE"),ptName);
     	attElement.setAttribute(Resources.get("PARTITIONTABLE"),ptName);
      }
+
 
     
 

@@ -7,6 +7,7 @@ public enum McNodeType {
 	Mart(2),
 	DataSet(3),
 	Container(4),
+	PartitionTable(4),
 	Filter(5),
 	Attribute(5),
 	AttributePointer(5);

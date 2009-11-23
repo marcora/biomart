@@ -99,21 +99,14 @@ public class DataSet extends Schema {
 	};
 
 	private final Table centralTable;
-
 	private final Set<Relation> includedRelations;
-
 	private final Set<Table> includedTables;
-
 	private final Set<Schema> includedSchemas;
-
 	private boolean invisible;
-
+	private List<PartitionTable> ptList; //the last one has the biggest number
 
 	private DataSetOptimiserType optimiser;
-
 	private boolean indexOptimiser;
-
-
 	private boolean deadCheck = false;
 
 	/**
@@ -169,7 +162,7 @@ public class DataSet extends Schema {
 		this.includedRelations = new LinkedHashSet<Relation>();
 		this.includedTables = new LinkedHashSet<Table>();
 		this.includedSchemas = new LinkedHashSet<Schema>();
-
+		this.ptList = new ArrayList<PartitionTable>();
 		// All changes to us make us modified.
 
 		// Recalculate completely if parent mart changes case.
@@ -1457,4 +1450,17 @@ public class DataSet extends Schema {
 		return this.includedSchemas;
 	}
 
+	public int getNextPartitionIntName() {
+		if(this.ptList.isEmpty())
+			return 1;
+		return this.ptList.get(this.ptList.size()-1).getNameInt()+1;
+	}
+	
+	public List<PartitionTable> getPartitions() {
+		return this.ptList;
+	}
+	
+	public void addPartition(PartitionTable pt) {
+		this.ptList.add(pt);
+	}
 }

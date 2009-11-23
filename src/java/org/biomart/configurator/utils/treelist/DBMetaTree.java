@@ -196,7 +196,6 @@ public class DBMetaTree extends TreeListComponent implements TreeSelectionListen
 		if(this.getSchemaPartitionList().size()>0) {
 			for(String s:this.getSchemaPartitionList())
 			mlist.getContents().addElement(s);
-
 		}
 		
 	}

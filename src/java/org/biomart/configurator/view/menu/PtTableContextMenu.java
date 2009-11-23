@@ -65,7 +65,7 @@ public class PtTableContextMenu extends JPopupMenu {
 	private void  addPtDependentMenu() {
 		String type = this.ptElement.getAttributeValue(Resources.get("TYPE"));
 		//add flatten in dm
-		if(type.equals("2")) {
+		if("2".equals(type)) {
 			JMenuItem flattenItem = new JMenuItem("Flatten");
 			flattenItem.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {					

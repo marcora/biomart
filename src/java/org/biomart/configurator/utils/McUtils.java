@@ -6,6 +6,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.ImageIcon;
 
@@ -40,6 +42,11 @@ public class McUtils {
 		return calendar.getTimeInMillis();
 	}
 
+	public static String getRegValue(String reg, String expression, String input) {
+		Pattern p = Pattern.compile(reg);
+		Matcher m = p.matcher(input);
+		return m.replaceAll(expression);
+	}
     /** Returns an ImageIcon, or null if the path was invalid. */
     public static ImageIcon createImageIcon(String path) {
          return new ImageIcon(path);

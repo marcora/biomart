@@ -1,14 +1,18 @@
 package org.biomart.configurator.model;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
+import org.biomart.builder.model.DataSet;
 import org.biomart.builder.model.JDBCSchema;
 import org.biomart.builder.model.Mart;
+import org.biomart.builder.model.PartitionTable;
 import org.biomart.builder.model.Schema;
 import org.biomart.builder.model.Table;
 import org.biomart.common.resources.Settings;
@@ -145,15 +149,31 @@ public class Location {
 			Map<String, Schema> schemas = mart.getSchemasObj().getSchemas();
 			for (final Iterator<Schema> s = schemas.values().iterator(); s.hasNext();) {
 				JDBCSchema schema = (JDBCSchema)s.next();
-				Map<String,Table> tables = schema.getTables();
-				
+				Map<String,Table> tables = schema.getTables();				
 				for(String st:stStrings) {
 					Table table = (Table)tables.get(st);
 					suggestTables.add(table);
 				}
 			}
 			try{
-				mart.suggestDataSets(suggestTables);
+				Collection<DataSet> dss = mart.suggestDataSets(suggestTables);
+				Set<String> ptSet = null;
+				//wrong logic, should not use all schemas
+				for (final Iterator<Schema> s = schemas.values().iterator(); s.hasNext();) {
+					JDBCSchema schema = (JDBCSchema)s.next();
+					if(!schema.getPartitions().isEmpty()) {
+						ptSet = schema.getPartitions();
+						break;
+					}
+				}
+				if(!ptSet.isEmpty())
+					for(DataSet ds:dss) {
+						PartitionTable pt = new PartitionTable(ds);
+						for(String ptStr:ptSet) {
+							pt.addRow(ptStr);
+						}
+						ds.addPartition(pt);
+					}
 			}catch(Exception e) {
 				e.printStackTrace();
 			}
