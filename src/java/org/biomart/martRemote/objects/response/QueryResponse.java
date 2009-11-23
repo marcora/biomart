@@ -11,11 +11,11 @@ import java.util.List;
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.MyUtils;
-import org.biomart.martRemote.Jsoml;
 import org.biomart.martRemote.objects.request.MartRemoteRequest;
 import org.biomart.martRemote.objects.request.Query;
 import org.biomart.martRemote.objects.request.QueryDataset;
 import org.biomart.martRemote.objects.request.QueryRequest;
+import org.biomart.objects.lite.MartRemoteWrapper;
 import org.biomart.objects.lite.QueryResult;
 import org.biomart.objects.objects.MartRegistry;
 import org.biomart.old.martService.MartServiceConstants;
@@ -33,6 +33,10 @@ public class QueryResponse extends MartRemoteResponse {
 		this.queryResult = new QueryResult(martServiceRequest);
 	}
 	
+	@Override
+	public MartRemoteWrapper getMartRemoteWrapper() {
+		return this.getQueryResult();
+	}
 	public QueryResult getQueryResult() {
 		return queryResult;
 	}
@@ -83,12 +87,5 @@ public class QueryResponse extends MartRemoteResponse {
 		}
 		
 		return data;
-	}
-
-	@Override
-	protected Jsoml createOutputResponse(boolean xml, Jsoml root)
-			throws FunctionalException {
-		// TODO Auto-generated method stub
-		return null;
 	}
 }

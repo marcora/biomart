@@ -1,9 +1,9 @@
 package org.biomart.martRemote.objects.response;
 
 import org.biomart.common.general.exceptions.FunctionalException;
-import org.biomart.martRemote.Jsoml;
 import org.biomart.martRemote.objects.request.MartRemoteRequest;
 import org.biomart.objects.lite.LiteRootContainer;
+import org.biomart.objects.lite.MartRemoteWrapper;
 import org.biomart.objects.objects.MartRegistry;
 
 public class GetRootContainerResponse extends GetContaineesResponse {
@@ -15,6 +15,10 @@ public class GetRootContainerResponse extends GetContaineesResponse {
 		
 		this.liteRootContainer = new LiteRootContainer(martServiceRequest);
 	}
+	@Override
+	public MartRemoteWrapper getMartRemoteWrapper() {
+		return this.getLiteRootContainer();
+	}
 	public LiteRootContainer getLiteRootContainer() {
 		return this.liteRootContainer;
 	}
@@ -22,12 +26,5 @@ public class GetRootContainerResponse extends GetContaineesResponse {
 		super.populateObjects();
 		this.liteRootContainer.setLiteRootContainer(super.liteRootContainer);
 		this.liteRootContainer.lock();
-	}
-	
-	@Override
-	protected Jsoml createOutputResponse(boolean xml, Jsoml root)
-			throws FunctionalException {
-		// TODO Auto-generated method stub
-		return null;
 	}
 }

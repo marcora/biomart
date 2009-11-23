@@ -13,17 +13,15 @@ import org.biomart.martRemote.Jsoml;
 import org.biomart.martRemote.objects.request.MartRemoteRequest;
 import org.jdom.Document;
 
-public class QueryResult extends MartRemoteObject implements Serializable {
+public class QueryResult extends MartRemoteWrapper implements Serializable {
 
 	private static final long serialVersionUID = -5390698374744515564L;
-
-	private static final String XML_ELEMENT_NAME = "query";
 	
 	private List<String> headers = null;
 	private List<List<String>> data = null;
 	
 	public QueryResult(MartRemoteRequest martRemoteRequest) {
-		super(martRemoteRequest, XML_ELEMENT_NAME);
+		super(martRemoteRequest);
 		this.data = new ArrayList<List<String>>();
 		this.headers = null;
 	}

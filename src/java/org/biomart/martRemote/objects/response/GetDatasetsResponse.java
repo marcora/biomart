@@ -3,11 +3,11 @@ package org.biomart.martRemote.objects.response;
 import java.util.List;
 
 import org.biomart.common.general.exceptions.FunctionalException;
-import org.biomart.martRemote.Jsoml;
 import org.biomart.martRemote.objects.request.GetDatasetsRequest;
 import org.biomart.martRemote.objects.request.MartRemoteRequest;
 import org.biomart.objects.lite.LiteDataset;
 import org.biomart.objects.lite.LiteListDataset;
+import org.biomart.objects.lite.MartRemoteWrapper;
 import org.biomart.objects.objects.Config;
 import org.biomart.objects.objects.Dataset;
 import org.biomart.objects.objects.Location;
@@ -23,6 +23,10 @@ public class GetDatasetsResponse extends MartRemoteResponse {
 		this.liteListDataset = new LiteListDataset(martServiceRequest);
 	}
 
+	@Override
+	public MartRemoteWrapper getMartRemoteWrapper() {
+		return this.getLiteListDataset();
+	}
 	public LiteListDataset getLiteListDataset() {
 		return liteListDataset;
 	}
@@ -51,12 +55,5 @@ public class GetDatasetsResponse extends MartRemoteResponse {
 			}
 		}
 		this.liteListDataset.lock();
-	}
-
-	@Override
-	protected Jsoml createOutputResponse(boolean xml, Jsoml root)
-			throws FunctionalException {
-		// TODO Auto-generated method stub
-		return null;
 	}
 }

@@ -2,29 +2,31 @@ package org.biomart.objects.lite;
 
 import java.io.Serializable;
 
+import net.sf.json.JSONObject;
+
+import org.biomart.common.general.exceptions.FunctionalException;
+import org.biomart.martRemote.Jsoml;
 import org.biomart.martRemote.objects.request.MartRemoteRequest;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.objects.MartConfiguratorObject;
+import org.jdom.Element;
 
-public abstract class LiteMartConfiguratorObject extends MartRemoteObject implements Serializable {
+public abstract class LiteMartConfiguratorObject implements Serializable {
 
-	private static final long serialVersionUID = -4092400660475456118L;
-
+	private static final long serialVersionUID = -8493793578216273507L;
+	
+	protected String xmlElementName = null;
 	protected String name = null;
 	protected String displayName = null;
 	protected String description = null;
 	protected Boolean visible = null;
-	
+
 	protected LiteMartConfiguratorObject(MartRemoteRequest martRemoteRequest) {
-		this(martRemoteRequest, null, null, null, null, null);
+		this(null, null, null, null, null);
 	}		
 	protected LiteMartConfiguratorObject(String xmlElementName, String name, String displayName, String description, Boolean visible) {
-		this(null, xmlElementName, name, displayName, description, visible);
-	}
-	protected LiteMartConfiguratorObject(MartRemoteRequest martRemoteRequest, 
-			String xmlElementName, String name, String displayName, String description, Boolean visible) {
-		super(martRemoteRequest, xmlElementName);
-			
+
+		this.xmlElementName = xmlElementName;
 		this.name = name;
 		this.displayName = displayName;
 		this.description = description;
@@ -35,21 +37,10 @@ public abstract class LiteMartConfiguratorObject extends MartRemoteObject implem
 		this.displayName = martConfiguratorObject.getDisplayName();
 		this.description = martConfiguratorObject.getDescription();
 	}
-
+	
+	// only property always available for all subclasses
 	public String getName() {
 		return name;
-	}
-
-	public String getDisplayName() {
-		return displayName;
-	}
-
-	public Boolean getVisible() {
-		return visible;
-	}
-
-	public String getDescription() {
-		return description;
 	}
 
 	@Override
@@ -82,4 +73,14 @@ public abstract class LiteMartConfiguratorObject extends MartRemoteObject implem
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==name? 0 : name.hashCode());	// Sufficient for our system
 		return hash;
 	}
+	
+	public Element getXmlElement() throws FunctionalException {
+		return generateExchangeFormat(true).getXmlElement();
+	}
+	@Deprecated
+	public JSONObject getJsonObject() throws FunctionalException {
+		return generateExchangeFormat(false).getJsonObject();
+	}
+	
+	protected abstract Jsoml generateExchangeFormat(boolean xml) throws FunctionalException;
 }

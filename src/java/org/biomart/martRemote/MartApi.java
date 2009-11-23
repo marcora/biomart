@@ -41,6 +41,7 @@ import org.biomart.objects.lite.LiteListDataset;
 import org.biomart.objects.lite.LiteListFilter;
 import org.biomart.objects.lite.LiteMartRegistry;
 import org.biomart.objects.lite.LiteRootContainer;
+import org.biomart.objects.lite.MartRemoteWrapper;
 import org.biomart.objects.lite.QueryResult;
 import org.biomart.objects.objects.MartRegistry;
 import org.jdom.Document;
@@ -388,19 +389,21 @@ public class MartApi {
 		<query processor="CSV" header="true" uniqueRows="false" count="false" datasetConfigVersion="0.8"><dataset name="hsapiens_gene_ensembl"><attribute name="ensembl_gene_id" /><attribute name="ensembl_transcript_id" /><filter name="chromosome_name" value="1" /></dataset></query>
 	 */
 	// Response writing
-	public String processMartServiceResult(MartRemoteResponse martServiceResponse, Writer writer) throws TechnicalException, FunctionalException {
-		if (martServiceResponse.getMartServiceRequest().getFormat().isXml()) {
-			Document document = martServiceResponse.getXmlDocument(this.debug, writer);
-			if (martServiceResponse.isValid()) {
+	public String processMartServiceResult(MartRemoteResponse martRemoteResponse, Writer writer) throws TechnicalException, FunctionalException {
+		MartRemoteWrapper martRemoteWrapper = martRemoteResponse.getMartRemoteWrapper();
+		if (null!=martRemoteWrapper && martRemoteResponse.getMartServiceRequest().getFormat().isXml()) {
+			Document document = martRemoteWrapper.getXmlDocument(this.debug, writer);
+			if (martRemoteResponse.isValid()) {
 				return writeXmlResponse(document, writer);					
 			}
-		} else if (martServiceResponse.getMartServiceRequest().getFormat().isJson()) {
-			JSONObject jSONObject = martServiceResponse.getJsonObject(this.debug, writer);
-			if (martServiceResponse.isValid()) {					
+		} else if (null!=martRemoteWrapper && martRemoteResponse.getMartServiceRequest().getFormat().isJson()) {
+			@SuppressWarnings("deprecation")	// for now
+			JSONObject jSONObject = martRemoteWrapper.getJsonObject(this.debug, writer);
+			if (martRemoteResponse.isValid()) {					
 				return writeJsonResponse(jSONObject, writer);
 			}
 		}
-		return writeError(martServiceResponse.getErrorMessage(), writer);	//	if (!martServiceResult.isValid())
+		return writeError(martRemoteResponse.getErrorMessage(), writer);	//	if (!martServiceResult.isValid())
 	}
 	
 	private String writeXmlResponse(Document document, Writer writer) throws TechnicalException {
@@ -440,28 +443,3 @@ public class MartApi {
 		return message;
 	}	
 }
-
-
-
-
-/*public String writeJsonResponse(JSON json, Writer writer) throws TechnicalException {
-	if (null!=writer && COMPACT) {
-		try {
-			writer.append(json.toString().substring(0, 1000) + MyUtils.LINE_SEPARATOR);
-		} catch (IOException e) {
-			throw new TechnicalException(e);
-		}
-	}
-	return json.toString().substring(0, 1000);
-}
-@Deprecated
-public String writeJsonResponse(org.json.JSONObject root, Writer writer) throws TechnicalException {
-	if (null!=writer && COMPACT) {
-		try {
-			writer.append(JsonUtils.getJSONObjectNiceString(root) + MyUtils.LINE_SEPARATOR);
-		} catch (IOException e) {
-			throw new TechnicalException(e);
-		}
-	}
-	return root.toString();
-}*/

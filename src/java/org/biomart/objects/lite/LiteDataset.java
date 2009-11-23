@@ -9,7 +9,7 @@ import org.biomart.objects.objects.Config;
 import org.biomart.objects.objects.Dataset;
 import org.biomart.objects.objects.Mart;
 
-public class LiteDataset extends LiteSimpleMartConfiguratorObject implements Serializable {
+public class LiteDataset extends LiteMartConfiguratorObject implements Serializable {
 	
 	private static final long serialVersionUID = 5954018490665763734L;
 	
@@ -28,9 +28,6 @@ public class LiteDataset extends LiteSimpleMartConfiguratorObject implements Ser
 	}
 	
 	// Properties in super class available for this light object
-	public String getName() {
-		return super.name;
-	}
 	public Boolean getVisible() {
 		return super.visible;
 	}

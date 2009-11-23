@@ -21,12 +21,12 @@ public class LiteRootContainer extends ListLiteMartConfiguratorObject implements
 	 */
 	public void setLiteRootContainer(LiteContainer liteRootContainer) throws FunctionalException {
 		super.checkLock();
-		super.liteMartConfiguratorObjectList = new ArrayList<LiteSimpleMartConfiguratorObject>(
-			Arrays.asList(new LiteSimpleMartConfiguratorObject[] {liteRootContainer}));
+		super.liteMartConfiguratorObjectList = new ArrayList<LiteMartConfiguratorObject>(
+			Arrays.asList(new LiteMartConfiguratorObject[] {liteRootContainer}));
 	}
 	
 	public LiteContainer getLiteRootContainer() {
-		List<? extends LiteSimpleMartConfiguratorObject> liteRootContainer = 
+		List<? extends LiteMartConfiguratorObject> liteRootContainer = 
 			super.getLiteMartConfiguratorObjectList();	// can only have 0 or 1 element
 		return liteRootContainer!=null && !liteRootContainer.isEmpty() ? (LiteContainer)liteRootContainer.get(0) : null;
 	}

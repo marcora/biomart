@@ -9,7 +9,7 @@ import org.biomart.objects.objects.Location;
 import org.biomart.objects.objects.Mart;
 import org.biomart.objects.objects.types.LocationType;
 
-public class LiteMart extends LiteSimpleMartConfiguratorObject implements Serializable {
+public class LiteMart extends LiteMartConfiguratorObject implements Serializable {
 	
 	private static final long serialVersionUID = 5954018490665763734L;
 	
@@ -33,9 +33,6 @@ public class LiteMart extends LiteSimpleMartConfiguratorObject implements Serial
 	}
 	
 	// Properties in super class available for this light object
-	public String getName() {
-		return super.name;
-	}
 	public String getDisplayName() {
 		return super.displayName;
 	}

@@ -53,7 +53,7 @@ public class MartApiTesting {
 			outln();
 
 			// Create the JSON object corresonding to the previous request
-			displayJson(liteMartRegistry.getJsonObject());
+			//displayJson(liteMartRegistry.getJsonObject());	NOW DEPRECATED
 			
 			// Create the XML document corresonding to the previous request
 			displayXml(liteMartRegistry.getXmlDocument());
@@ -79,7 +79,7 @@ public class MartApiTesting {
 			outln();
 
 			// Create the JSON object corresonding to the previous request
-			displayJson(liteListDataset.getJsonObject());
+			//displayJson(liteListDataset.getJsonObject());	NOW DEPRECATED
 			
 			// Create the XML document corresonding to the previous request
 			displayXml(liteListDataset.getXmlDocument());
@@ -93,7 +93,7 @@ public class MartApiTesting {
 			outln();
 			
 			// Create the JSON object corresonding to the previous request
-			displayJson(liteRootContainer.getJsonObject());
+			//displayJson(liteRootContainer.getJsonObject());	NOW DEPRECATED
 			
 			// Create the XML document corresonding to the previous request
 			displayXml(liteRootContainer.getXmlDocument());
@@ -107,7 +107,7 @@ public class MartApiTesting {
 			outln();
 			
 			// Create the JSON object corresonding to the previous request
-			displayJson(liteListAttribute.getJsonObject());
+			//displayJson(liteListAttribute.getJsonObject());	NOW DEPRECATED
 			
 			// Create the XML document corresonding to the previous request
 			displayXml(liteListAttribute.getXmlDocument());
@@ -121,7 +121,7 @@ public class MartApiTesting {
 			outln();
 			
 			// Create the JSON object corresonding to the previous request
-			displayJson(liteListFilter.getJsonObject());
+			//displayJson(liteListFilter.getJsonObject());	NOW DEPRECATED
 			
 			// Create the XML document corresonding to the previous request
 			displayXml(liteListFilter.getXmlDocument());

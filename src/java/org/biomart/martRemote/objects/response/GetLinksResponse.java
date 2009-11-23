@@ -3,9 +3,8 @@ package org.biomart.martRemote.objects.response;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.biomart.common.general.exceptions.FunctionalException;
-import org.biomart.martRemote.Jsoml;
 import org.biomart.martRemote.objects.request.MartRemoteRequest;
+import org.biomart.objects.lite.MartRemoteWrapper;
 import org.biomart.objects.objects.Dataset;
 import org.biomart.objects.objects.Location;
 import org.biomart.objects.objects.Mart;
@@ -20,8 +19,12 @@ public class GetLinksResponse extends MartRemoteResponse {
 		this.datasetList = new ArrayList<Dataset>();
 	}
 
-	public List<Dataset> getDatasetList() {
-		return datasetList;
+	@Override
+	public MartRemoteWrapper getMartRemoteWrapper() {
+		return this.getDatasetList();
+	}
+	public MartRemoteWrapper getDatasetList() {
+		return null;
 	}
 	
 
@@ -38,11 +41,5 @@ public class GetLinksResponse extends MartRemoteResponse {
 				}
 			}
 		}
-	}
-
-	@Override
-	public Jsoml createOutputResponse(boolean xml, Jsoml root) throws FunctionalException {
-		//TODOs
-		return root;
 	}
 }

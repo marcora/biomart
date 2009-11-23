@@ -14,7 +14,7 @@ import org.biomart.objects.objects.GroupFilter;
 import org.biomart.objects.objects.Part;
 import org.biomart.objects.objects.SimpleFilter;
 
-public class LiteFilter extends LiteSimpleMartConfiguratorObject implements Serializable {
+public class LiteFilter extends LiteMartConfiguratorObject implements Serializable {
 
 	private static final long serialVersionUID = 3717403391079076481L;
 
@@ -121,9 +121,6 @@ public class LiteFilter extends LiteSimpleMartConfiguratorObject implements Seri
 	}
 	
 	// Properties in super class available for this light object
-	public String getName() {
-		return super.name;
-	}
 	public String getDisplayName() {
 		return super.displayName;
 	}

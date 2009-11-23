@@ -1,11 +1,11 @@
 package org.biomart.martRemote.objects.response;
 
 import org.biomart.common.general.exceptions.FunctionalException;
-import org.biomart.martRemote.Jsoml;
 import org.biomart.martRemote.objects.request.MartRemoteRequest;
 import org.biomart.objects.lite.LiteFilter;
 import org.biomart.objects.lite.LiteListFilter;
-import org.biomart.objects.lite.LiteSimpleMartConfiguratorObject;
+import org.biomart.objects.lite.LiteMartConfiguratorObject;
+import org.biomart.objects.lite.MartRemoteWrapper;
 import org.biomart.objects.objects.MartRegistry;
 
 public class GetFiltersResponse extends GetElementsResponse {
@@ -18,22 +18,19 @@ public class GetFiltersResponse extends GetElementsResponse {
 		this.liteListFilter = new LiteListFilter(martServiceRequest);
 	}
 
+	@Override
+	public MartRemoteWrapper getMartRemoteWrapper() {
+		return this.getLiteListFilter();
+	}
 	public LiteListFilter getLiteListFilter() {
 		return liteListFilter;
 	}
 
 	public void populateObjects() throws FunctionalException {
 		super.populateObjects(false);
-		for (LiteSimpleMartConfiguratorObject liteElement : super.liteElementList) {
+		for (LiteMartConfiguratorObject liteElement : super.liteElementList) {
 			this.liteListFilter.addLiteFilter((LiteFilter)liteElement);
 		}
 		this.liteListFilter.lock();
-	}
-	
-	@Override
-	protected Jsoml createOutputResponse(boolean xml, Jsoml root)
-			throws FunctionalException {
-		// TODO Auto-generated method stub
-		return null;
 	}
 }

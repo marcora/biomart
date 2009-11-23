@@ -17,8 +17,7 @@ import org.biomart.objects.objects.Part;
 import org.biomart.objects.objects.Range;
 import org.biomart.objects.objects.SimpleFilter;
 
-public class LiteContainer extends LiteSimpleMartConfiguratorObject implements
-		Serializable {
+public class LiteContainer extends LiteMartConfiguratorObject implements Serializable {
 
 	private static final long serialVersionUID = 5317562972868527144L;
 
@@ -26,7 +25,7 @@ public class LiteContainer extends LiteSimpleMartConfiguratorObject implements
 
 	private Integer queryRestriction = null;
 
-	private List<LiteSimpleMartConfiguratorObject> liteContaineeList = null;	// Ordered references to above lists of containers, 
+	private List<LiteMartConfiguratorObject> liteContaineeList = null;	// Ordered references to above lists of containers, 
 																				// filters & attributes
 
 	private List<LiteContainer> liteContainerList = null;
@@ -45,7 +44,7 @@ public class LiteContainer extends LiteSimpleMartConfiguratorObject implements
 
 		this.queryRestriction = container.getQueryRestriction();
 
-		this.liteContaineeList = new ArrayList<LiteSimpleMartConfiguratorObject>();
+		this.liteContaineeList = new ArrayList<LiteMartConfiguratorObject>();
 
 		this.liteContainerList = new ArrayList<LiteContainer>();
 		this.liteFilterList = new ArrayList<LiteFilter>();
@@ -133,8 +132,8 @@ public class LiteContainer extends LiteSimpleMartConfiguratorObject implements
 		}
 	}
 	
-	public List<LiteSimpleMartConfiguratorObject> getLiteContaineeList() {
-		return new ArrayList<LiteSimpleMartConfiguratorObject>(liteContaineeList);
+	public List<LiteMartConfiguratorObject> getLiteContaineeList() {
+		return new ArrayList<LiteMartConfiguratorObject>(liteContaineeList);
 	}
 	public List<LiteContainer> getLiteContainerList() {
 		return new ArrayList<LiteContainer>(liteContainerList);
@@ -162,9 +161,6 @@ public class LiteContainer extends LiteSimpleMartConfiguratorObject implements
 	}
 	
 	// Properties in super class available for this light object
-	public String getName() {
-		return super.name;
-	}
 	public String getDisplayName() {
 		return super.displayName;
 	}
@@ -201,7 +197,7 @@ public class LiteContainer extends LiteSimpleMartConfiguratorObject implements
 
 		jsoml.setAttribute("queryRestriction", this.queryRestriction);
 
-		for (LiteSimpleMartConfiguratorObject liteContainee : this.liteContaineeList) {
+		for (LiteMartConfiguratorObject liteContainee : this.liteContaineeList) {
 			if (liteContainee instanceof LiteContainer) {
 				Jsoml containeeJsoml = liteContainee.generateExchangeFormat(xml);
 				jsoml.addContent(containeeJsoml);

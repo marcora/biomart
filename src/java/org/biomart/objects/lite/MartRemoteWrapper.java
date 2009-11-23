@@ -18,22 +18,20 @@ import org.biomart.martRemote.XmlParameters;
 import org.biomart.martRemote.objects.request.MartRemoteRequest;
 import org.jdom.Document;
 
-public abstract class MartRemoteObject implements Serializable {
+public abstract class MartRemoteWrapper implements Serializable {
 
-	private static final long serialVersionUID = -7771063236020188948L;
-
-	protected MartRemoteRequest martRemoteRequest = null;
-	protected String xmlElementName = null;
+	private static final long serialVersionUID = -7987597129758017949L;
 	
-	protected MartRemoteObject(MartRemoteRequest martRemoteRequest, String xmlElementName) {
+	protected MartRemoteRequest martRemoteRequest = null;
+	
+	protected MartRemoteWrapper(MartRemoteRequest martRemoteRequest) {
 		this.martRemoteRequest = martRemoteRequest;
-		this.xmlElementName = xmlElementName;
 	}
 	
-	protected Document getXmlDocument() throws TechnicalException, FunctionalException {
+	public Document getXmlDocument() throws TechnicalException, FunctionalException {
 		return getXmlDocument(false, null);
 	}
-	protected Document getXmlDocument(boolean debug, Writer printWriter) throws TechnicalException, FunctionalException {
+	public Document getXmlDocument(boolean debug, Writer printWriter) throws TechnicalException, FunctionalException {
 		XmlParameters xmlParameters = this.martRemoteRequest.getXmlParameters();
 		
 		Document document = MartRemoteUtils.createNewMartRemoteXmlDocument(
@@ -55,10 +53,13 @@ public abstract class MartRemoteObject implements Serializable {
 			
 		return document;
 	}
-	protected JSONObject getJsonObject() throws TechnicalException, FunctionalException {
+	
+	@Deprecated
+	public JSONObject getJsonObject() throws TechnicalException, FunctionalException {
 		return getJsonObject(false, null);
 	}
-	protected JSONObject getJsonObject(boolean debug, Writer printWriter) throws TechnicalException, FunctionalException {
+	@Deprecated
+	public JSONObject getJsonObject(boolean debug, Writer printWriter) throws TechnicalException, FunctionalException {
 		JSONObject jsonObject = null;
 		try {
 			jsonObject = generateJson(this.martRemoteRequest.getType().getResponseName());
@@ -73,13 +74,17 @@ public abstract class MartRemoteObject implements Serializable {
 		
 		return jsonObject;
 	}
-	protected Document generateXml(Document document) throws FunctionalException {
+	
+	private Document generateXml(Document document) throws FunctionalException {
 		Jsoml root = new Jsoml(document.getRootElement());
 		generateExchangeFormat(true, root).getXmlElement();
 		return document;
 	}
-	protected JSONObject generateJson(String responseName) throws FunctionalException {
+	
+	@Deprecated
+	private JSONObject generateJson(String responseName) throws FunctionalException {
 		return generateExchangeFormat(false, new Jsoml(false, responseName)).getJsonObject();		
 	}
+	
 	protected abstract Jsoml generateExchangeFormat(boolean xml, Jsoml root) throws FunctionalException;
 }

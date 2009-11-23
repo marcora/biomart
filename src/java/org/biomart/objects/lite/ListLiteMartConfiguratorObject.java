@@ -1,31 +1,26 @@
 package org.biomart.objects.lite;
 
 import java.io.Serializable;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.sf.json.JSONObject;
-
 import org.biomart.common.general.exceptions.FunctionalException;
-import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.martRemote.Jsoml;
 import org.biomart.martRemote.objects.request.MartRemoteRequest;
-import org.jdom.Document;
 
-public class ListLiteMartConfiguratorObject extends LiteMartConfiguratorObject implements Serializable {
+public class ListLiteMartConfiguratorObject extends MartRemoteWrapper implements Serializable {
 
 	private static final long serialVersionUID = -4022534573758673228L;
 
 	protected String LOCK_VIOLATION_ERROR_MESSAGE = "Invalid operation: objects are already populated";
 	
-	protected List<LiteSimpleMartConfiguratorObject> liteMartConfiguratorObjectList = null;
+	protected List<LiteMartConfiguratorObject> liteMartConfiguratorObjectList = null;
 	protected Boolean lock = null;
 	
 	public ListLiteMartConfiguratorObject(MartRemoteRequest martRemoteRequest) {
 		super(martRemoteRequest);
 		
-		this.liteMartConfiguratorObjectList = new ArrayList<LiteSimpleMartConfiguratorObject>();
+		this.liteMartConfiguratorObjectList = new ArrayList<LiteMartConfiguratorObject>();
 		this.lock = false;
 	}
 	
@@ -41,8 +36,8 @@ public class ListLiteMartConfiguratorObject extends LiteMartConfiguratorObject i
 		}
 	}
 	
-	protected List<? extends LiteSimpleMartConfiguratorObject> getLiteMartConfiguratorObjectList() {
-		return (List<? extends LiteSimpleMartConfiguratorObject>)this.liteMartConfiguratorObjectList;
+	protected List<? extends LiteMartConfiguratorObject> getLiteMartConfiguratorObjectList() {
+		return (List<? extends LiteMartConfiguratorObject>)this.liteMartConfiguratorObjectList;
 	}
 
 	@Override
@@ -54,28 +49,10 @@ public class ListLiteMartConfiguratorObject extends LiteMartConfiguratorObject i
 		return stringBuffer.toString();
 	}
 	
-	
-	@Override
-	public Document getXmlDocument() throws TechnicalException, FunctionalException {
-		return super.getXmlDocument();
-	}
-	@Override
-	public Document getXmlDocument(boolean debug, Writer printWriter) throws TechnicalException, FunctionalException {
-		return super.getXmlDocument(debug, printWriter);
-	}
-	@Override
-	public JSONObject getJsonObject() throws TechnicalException, FunctionalException {
-		return super.getJsonObject();
-	}
-	@Override
-	public JSONObject getJsonObject(boolean debug, Writer printWriter) throws TechnicalException, FunctionalException {
-		return super.getJsonObject(debug, printWriter);
-	}
-	
 	@Override
 	protected Jsoml generateExchangeFormat(boolean xml, Jsoml root) throws FunctionalException {	// unless overriden
-		for (LiteSimpleMartConfiguratorObject liteSimpleMartConfiguratorObject : this.liteMartConfiguratorObjectList) {
-			Jsoml jsoml = liteSimpleMartConfiguratorObject.generateExchangeFormat(xml);
+		for (LiteMartConfiguratorObject liteMartConfiguratorObject : this.liteMartConfiguratorObjectList) {
+			Jsoml jsoml = liteMartConfiguratorObject.generateExchangeFormat(xml);
 			root.addContent(jsoml);
 		}
 		return root;
