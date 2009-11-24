@@ -32,5 +32,5 @@
 	<classpathentry kind="lib" path="lib/smtp.jar"/>
 	<classpathentry kind="lib" path="lib/xalan.jar"/>
 	<classpathentry kind="lib" path="lib/xercesImpl-2.8.1.jar"/>
-	<classpathentry kind="output" path="bin/java"/>
+	<classpathentry kind="output" path="bin"/>
 </classpath>
