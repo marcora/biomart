@@ -2,12 +2,9 @@ package org.biomart.objects.objects;
 
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.utils.MyUtils;
-import org.biomart.martRemote.Jsoml;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.objects.data.TreeFilterData;
 import org.biomart.objects.objects.types.ElementListType;
@@ -235,72 +232,5 @@ public class SimpleFilter extends Filter implements Serializable {
 		}
 		
 		return element;
-	}
-	
-	
-	// ===================================== Should be a different class ============================================
-
-	private List<String> cascadeChildrenNamesList = null;
-	public SimpleFilter(SimpleFilter simpleFilter) throws FunctionalException {
-		this(simpleFilter, null);
-	}
-	public SimpleFilter(SimpleFilter simpleFilter, Part part) throws FunctionalException {	// creates a light clone (temporary solution)
-		super(simpleFilter, part);
-		
-			// careful with equals and this (repetations of clones in martview)
-		//this.attributeName = MartConfiguratorUtils.replacePartitionReferencesByValues(simpleFilter.attributeName, part);
-		
-		this.displayType = MartConfiguratorUtils.replacePartitionReferencesByValues(simpleFilter.displayType, part);
-		this.orderBy = simpleFilter.orderBy;
-		this.multiValue = simpleFilter.multiValue;
-		this.buttonURL = MartConfiguratorUtils.replacePartitionReferencesByValues(simpleFilter.buttonURL, part);
-		this.upload = simpleFilter.upload;
-		this.trueValue = MartConfiguratorUtils.replacePartitionReferencesByValues(simpleFilter.trueValue, part);
-		this.trueDisplay = MartConfiguratorUtils.replacePartitionReferencesByValues(simpleFilter.trueDisplay, part);
-		this.falseValue = MartConfiguratorUtils.replacePartitionReferencesByValues(simpleFilter.falseValue, part);
-		this.falseDisplay = MartConfiguratorUtils.replacePartitionReferencesByValues(simpleFilter.falseDisplay, part);
-		this.partition = simpleFilter.partition;
-		
-		this.cascadeChildrenNamesList = new ArrayList<String>();
-		List<String> cascadeChildrenNamesTmp = simpleFilter.getElementList().getElementNames();
-		for (String filterName : cascadeChildrenNamesTmp) {
-			this.cascadeChildrenNamesList.add(MartConfiguratorUtils.replacePartitionReferencesByValues(filterName, part));
-		}
-		
-		if (simpleFilter.treeFilterData!=null) {
-			TreeFilterData treeFilterDataClone = new TreeFilterData(simpleFilter.treeFilterData, part);
-			if (treeFilterDataClone.hasData()) {	// may not be the case if parts don't match (not all parts have data)
-				this.treeFilterData = treeFilterDataClone;
-			}
-		}
-	}
-
-	public Jsoml generateOutputForWebService(boolean xml) throws FunctionalException {
-		Jsoml jsoml = super.generateOutputForWebService(xml);
-		
-		jsoml.setAttribute("orderBy", this.orderBy);
-		
-		jsoml.setAttribute("displayType", this.displayType);
-		
-		jsoml.setAttribute("upload", this.upload);	
-		
-		jsoml.setAttribute("multiValue", this.multiValue);	
-		
-		jsoml.setAttribute("partition", this.partition);	
-		
-		jsoml.setAttribute("cascadeChildren", this.cascadeChildrenNamesList);
-		
-		jsoml.setAttribute("buttonURL", this.buttonURL);
-		
-		jsoml.setAttribute("trueValue", this.trueValue);
-		jsoml.setAttribute("trueDisplay", this.trueDisplay);
-		jsoml.setAttribute("falseValue", this.falseValue);
-		jsoml.setAttribute("falseDisplay",  this.falseDisplay);
-
-		if (this.treeFilterData!=null) {
-			jsoml.addContent(this.treeFilterData.generateExchangeFormat(xml, true));
-		}
-		
-		return jsoml;
 	}
 }

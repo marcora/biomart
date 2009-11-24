@@ -114,7 +114,7 @@ public class TreeFilterData implements Serializable {	//TODO merge with ListFilt
 	}
 	
 	
-	// ===================================== Should be a different class ============================================
+	// ===================================== Should be a different class? ============================================
 
 	@SuppressWarnings("unused")
 	private String filterName = null;
@@ -166,21 +166,4 @@ public class TreeFilterData implements Serializable {	//TODO merge with ListFilt
 		}
 		return rootElement;
 	}
-	/*public Element generateXml(boolean flatten) {
-		Element rootElement = new Element("treeData");
-		for (Iterator<Part> it = this.map.keySet().iterator(); it.hasNext();) {
-			Part part = it.next();
-			
-			Element partElement = new Element("part");
-			partElement.setAttribute("name", part.getXmlValue(flatten));
-			rootElement.addContent(partElement);
-			
-			ArrayList<TreeFilterDataRow> children = this.map.get(part);
-			for (TreeFilterDataRow treeFilterDataRow : children) {
-				Element treeFilterDataRowElement = treeFilterDataRow.generateXml();
-				partElement.addContent(treeFilterDataRowElement);
-			}
-		}
-		return rootElement;
-	}*/
 }

@@ -240,7 +240,7 @@ public class FilterData implements Serializable {
 		return rootElement;
 	}*/
 	
-	// ===================================== Should be a different class ============================================
+	// ===================================== Should be a different class? ============================================
 
 	@SuppressWarnings("unused")
 	private String filterName = null;

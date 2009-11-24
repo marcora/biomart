@@ -1,11 +1,8 @@
 package org.biomart.objects.objects;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.biomart.common.general.exceptions.FunctionalException;
-import org.biomart.martRemote.Jsoml;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.objects.objects.types.ElementListType;
 
@@ -62,38 +59,5 @@ public class GroupFilter extends Filter implements Serializable {
 		MartConfiguratorUtils.addAttribute(element, "multipleFilter", this.multipleFilter);
 		MartConfiguratorUtils.addAttribute(element, "filterList", (simpleFilterList!=null ? simpleFilterList.getStringValue() : null));
 		return element;
-	}
-	
-	
-	
-	
-	
-	
-	
-	
-	// ===================================== Should be a different class ============================================
-
-	private List<String> simpleFilterNames = null;
-	public GroupFilter(GroupFilter groupFilter, Part part) throws FunctionalException {	// creates a light clone (temporary solution)
-		super(groupFilter, part);
-		this.logicalOperator = groupFilter.logicalOperator;
-		this.multipleFilter = groupFilter.multipleFilter;
-		
-		this.simpleFilterNames = new ArrayList<String>();
-		List<String> simpleFilterNamesTmp = groupFilter.getElementList().getElementNames();
-		for (String filterName : simpleFilterNamesTmp) {
-			this.simpleFilterNames.add(MartConfiguratorUtils.replacePartitionReferencesByValues(filterName, part));
-		}
-	}
-
-	public Jsoml generateOutputForWebService(boolean xml) throws FunctionalException {
-		Jsoml jsoml = super.generateOutputForWebService(xml);
-		
-		jsoml.setAttribute("logicalOperator", this.logicalOperator);
-		jsoml.setAttribute("multipleFilter", this.multipleFilter);
-		
-		jsoml.setAttribute("filterList", this.simpleFilterNames);
-		
-		return jsoml;
 	}
 }

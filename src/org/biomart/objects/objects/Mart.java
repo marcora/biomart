@@ -97,11 +97,4 @@ public class Mart extends MartConfiguratorObject implements Serializable {
 		
 		return element;
 	}
-
-	
-	// ===================================== Should be a different class ============================================
-
-	public Mart(Mart mart) throws CloneNotSupportedException {	// creates a light clone (temporary solution)
-		this(mart.name, mart.displayName, null, mart.visible, mart.version);
-	}
 }

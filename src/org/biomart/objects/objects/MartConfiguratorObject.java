@@ -6,7 +6,6 @@ import java.util.Collection;
 
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.utils.CompareUtils;
-import org.biomart.martRemote.Jsoml;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.jdom.Element;
@@ -188,39 +187,5 @@ public abstract class MartConfiguratorObject implements Serializable {
 		MartConfiguratorUtils.addAttribute(jdomElement, "description", this.description);
 		MartConfiguratorUtils.addAttribute(jdomElement, "visible", this.visible);
 		return jdomElement;
-	}
-	
-	
-	
-	
-	// ===================================== Should be a different class ============================================
-
-	protected MartConfiguratorObject(MartConfiguratorObject martConfiguratorObject) {
-		this(martConfiguratorObject, null);
-	}
-	protected MartConfiguratorObject(MartConfiguratorObject martConfiguratorObject, Part part) {	// creates a light clone (temporary solution)
-		this(
-				part==null ? martConfiguratorObject.name : 
-					MartConfiguratorUtils.replacePartitionReferencesByValues(martConfiguratorObject.name, part),
-				part==null ? martConfiguratorObject.displayName : 
-					MartConfiguratorUtils.replacePartitionReferencesByValues(martConfiguratorObject.displayName, part),
-				part==null ? martConfiguratorObject.description : 
-					MartConfiguratorUtils.replacePartitionReferencesByValues(martConfiguratorObject.description, part),
-				martConfiguratorObject.visible, martConfiguratorObject.xmlElementName);
-	}
-	protected void updatePointerClone(org.biomart.objects.objects.Element pointingElement) {
-		this.name = pointingElement.name;
-		this.displayName = pointingElement.displayName;
-		this.description = pointingElement.description;
-	}
-	protected Jsoml generateOutputForWebService(boolean xml) throws FunctionalException {
-		Jsoml jsoml = new Jsoml(xml, this.xmlElementName);
-		
-		jsoml.setAttribute("name", this.name);
-		jsoml.setAttribute("displayName", this.displayName);
-		jsoml.setAttribute("description", this.description);
-		jsoml.setAttribute("visible", this.visible);		
-		
-		return jsoml;
 	}
 }

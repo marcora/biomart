@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.configurator.utils.type.McNodeType;
-import org.biomart.martRemote.Jsoml;
 import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.objects.data.FilterData;
 import org.biomart.objects.data.TreeFilterData;
@@ -101,33 +100,5 @@ public abstract class Filter extends org.biomart.objects.objects.Element	// to a
 		org.jdom.Element element = super.generateXml();
 		MartConfiguratorUtils.addAttribute(element, "dataFolderPath", this.dataFolderPath);
 		return element;
-	}
-	
-	
-	
-	// ===================================== Should be a different class ============================================
-
-	protected Filter(Filter filter, Part part) throws FunctionalException {	// creates a light clone (temporary solution)
-		super(filter, part);
-		this.qualifier = filter.qualifier;
-		this.caseSensitive = filter.caseSensitive;
-		if (filter.filterData!=null) {
-			FilterData filterDataClone = new FilterData(filter.filterData, part);
-			if (filterDataClone.hasData()) {	// may not be the case if parts don't match (not all parts have data)
-				this.filterData = filterDataClone;
-			}
-		}
-	}	
-
-	public Jsoml generateOutputForWebService(boolean xml) throws FunctionalException {
-		Jsoml jsoml = super.generateOutputForWebService(xml);
-		
-		jsoml.setAttribute("qualifier", this.qualifier);
-		jsoml.setAttribute("caseSensitive", this.caseSensitive);
-		if (this.filterData!=null) {		
-			jsoml.addContent(this.filterData.generateExchangeFormat(xml, true));
-		}
-		
-		return jsoml;
 	}
 }

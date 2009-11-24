@@ -99,30 +99,6 @@ public class Location extends MartConfiguratorObject implements Serializable {
 			(this.type==location.type || (this.type!=null && type.equals(location.type)))
 		);
 	}
-
-	/*@Override
-	public int hashCode() {
-		int hash = MartConfiguratorConstants.HASH_SEED1;
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + super.hashCode();
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==host? 0 : host.hashCode());
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==user? 0 : user.hashCode());
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==type? 0 : type.hashCode());
-		//TODO martList?
-		return hash;
-	}*/
-
-	/*public int compare(Location location1, Location location2) {
-		if (location1==null && location2!=null) {
-			return -1;
-		} else if (location1!=null && location2==null) {
-			return 1;
-		}
-		return CompareUtils.compareNull(location1.host, location2.host);
-	}
-
-	public int compareTo(Location location) {
-		return compare(this, location);
-	}*/
 	
 	public Element generateXml() throws FunctionalException {
 		Element element = super.generateXml();
@@ -135,19 +111,5 @@ public class Location extends MartConfiguratorObject implements Serializable {
 		}
 		
 		return element;
-	}
-
-	
-	
-	// ===================================== Should be a different class ============================================
-
-	public Location(Location location) throws CloneNotSupportedException {	// creates a light clone (temporary solution)
-		this(null, null, null, null,	// irrelevant here 
-				location.getHost(), location.getUser(), location.getType());
-		
-		this.martList = new ArrayList<Mart>();
-		for (Mart mart : location.martList) {
-			this.martList.add(new Mart(mart));
-		}
 	}
 }

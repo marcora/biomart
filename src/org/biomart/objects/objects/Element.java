@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.utils.MyUtils;
-import org.biomart.martRemote.Jsoml;
 import org.biomart.objects.MartConfiguratorUtils;
 
 
@@ -269,32 +268,5 @@ public abstract class Element extends MartConfiguratorObject implements Serializ
 		this.targetRange.getStringValue(element, "targetRange");
 		
 		return element;
-	}
-	
-
-	
-	
-	// ===================================== Should be a different class ============================================
-
-	protected Element(Element element, Part part) {	// creates a light clone (temporary solution)
-		super(element, part);		
-		
-		this.pointer = false;	// no pointers for mart service
-		super.visible = null;	// irrelevant for elements
-		this.selectedByDefault = element.selectedByDefault;
-	}
-	protected void updatePointerClone(org.biomart.objects.objects.Element pointingElement) {
-		super.updatePointerClone(pointingElement);
-		this.selectedByDefault = pointingElement.selectedByDefault;
-	}
-	protected Jsoml generateOutputForWebService(boolean xml) throws FunctionalException {
-		Jsoml jsoml = super.generateOutputForWebService(xml);
-		
-		jsoml.removeAttribute("visible");	// not applicable for elements
-		
-		// Element attributes
-		jsoml.setAttribute("default", this.selectedByDefault);
-		
-		return jsoml;
 	}
 }

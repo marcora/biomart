@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.configurator.utils.type.McNodeType;
-import org.biomart.martRemote.Jsoml;
 import org.biomart.objects.MartConfiguratorUtils;
 
 
@@ -131,27 +130,5 @@ public class Attribute extends Element implements Serializable {
 		MartConfiguratorUtils.addAttribute(element, "linkURL", this.linkURL);
 		
 		return element;
-	}
-	
-	
-	
-	
-	
-	
-	// ===================================== Should be a different class ============================================
-
-	public Attribute(Attribute attribute, Part part) {	// creates a light clone (temporary solution)
-		super(attribute, part);
-		this.maxLength = attribute.maxLength;
-		this.linkURL = MartConfiguratorUtils.replacePartitionReferencesByValues(attribute.linkURL, part);
-	}
-
-	public Jsoml generateOutputForWebService(boolean xml) throws FunctionalException {
-		Jsoml jsoml = super.generateOutputForWebService(xml);
-		
-		jsoml.setAttribute("maxLength", this.maxLength);
-		jsoml.setAttribute("linkURL", this.linkURL);
-		
-		return jsoml;
 	}
 }
