@@ -16,17 +16,14 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
-
 import org.biomart.common.resources.Resources;
 import org.biomart.configurator.jdomUtils.JDomUtils;
-import org.biomart.configurator.utils.McGuiUtils;
 import org.jdom.Element;
 
 public class DsInConfigPanel extends JPanel implements ItemListener {
