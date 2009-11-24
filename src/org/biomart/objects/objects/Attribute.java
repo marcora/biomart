@@ -14,7 +14,7 @@ public class Attribute extends Element implements Serializable {
 	private static final long serialVersionUID = 3472755898394368045L;
 	
 	public static final String XML_ELEMENT_NAME = "attribute";
-	public static final McNodeType MC_NODE_TYPE = McNodeType.Attribute;
+//	public static final McNodeType MC_NODE_TYPE = McNodeType.ATTRIBUTE;
 	
 	public static void main(String[] args) {}
 

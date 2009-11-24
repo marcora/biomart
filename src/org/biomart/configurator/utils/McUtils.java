@@ -12,6 +12,8 @@ import java.util.regex.Pattern;
 import javax.swing.ImageIcon;
 
 import org.biomart.common.resources.Resources;
+import org.biomart.configurator.utils.type.McNodeType;
+import org.jdom.Element;
 
 public class McUtils {
 	
@@ -52,4 +54,12 @@ public class McUtils {
          return new ImageIcon(path);
     }
 
+    public static Object getObjectFromElement(Element node) {
+    	String type = node.getName();
+    	McNodeType nodeType = McNodeType.valueOf(type.toUpperCase());
+    	switch(nodeType) {
+    	
+    	}
+    	return null;
+    }
 }

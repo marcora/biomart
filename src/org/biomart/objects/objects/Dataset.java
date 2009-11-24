@@ -15,7 +15,7 @@ public class Dataset extends MartConfiguratorObject implements Serializable {
 	private static final long serialVersionUID = 1514366091760993846L;
 
 	public static final String XML_ELEMENT_NAME = "dataset";
-	public static final McNodeType MC_NODE_TYPE = McNodeType.DataSet;
+//	public static final McNodeType MC_NODE_TYPE = McNodeType.DataSet;
 	
 	public static void main(String[] args) {}
 

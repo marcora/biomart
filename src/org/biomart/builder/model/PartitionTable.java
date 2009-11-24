@@ -6,17 +6,19 @@ import java.util.Map;
 import org.biomart.common.general.utils.MyUtils;
 import org.biomart.common.resources.Resources;
 import org.biomart.configurator.utils.type.McNodeType;
+import org.biomart.configurator.utils.type.PartitionType;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.jdom.Element;
 
 public class PartitionTable {
 
-	public final McNodeType MC_NODE_TYPE = McNodeType.PartitionTable;
+	public final McNodeType MC_NODE_TYPE = McNodeType.PARTITIONTABLE;
 	private DataSet dataSet;
 	private Integer nameI;
 	private Integer totalRows = null;
 	private Integer totalColumns = null;
 	private List<List<String>> table = null;
+	private PartitionType partitionType = PartitionType.Schema;
 	private Boolean flatten = null;
 	//may need a partition type
 	private Boolean main = null;	// Whether this is the main partition table
@@ -33,17 +35,32 @@ public class PartitionTable {
 		return rowNumberToRowNameMap;
 	}
 
+	public List<String> getRow(int row) {
+		return this.table.get(row);
+	}
 	
-	public PartitionTable(DataSet ds) {
+	public List<String> getCol(int col) {
+		List<String> res = new ArrayList<String>();
+		for(List<String> rows: this.table) 
+			res.add(rows.get(col));
+					
+		return res;
+	}
+	
+	public PartitionTable(DataSet ds, PartitionType type) {
 		this.dataSet = ds;
 		this.table = new ArrayList<List<String>>();
 		this.nameI = ds.getNextPartitionIntName();
+		this.partitionType = type;
 	}
 	
 	public PartitionTable(Element ptElement) {
 		
 	}
 	
+	public PartitionType getType() {
+		return this.partitionType;
+	}
 
 	private static ArrayList<List<String>> createBasicPartitionTableTable(String firstValue) {
 		ArrayList<List<String>> table = new ArrayList<List<String>>();
@@ -155,6 +172,7 @@ public class PartitionTable {
 		ptElement.setAttribute("cols",""+this.getTotalColumns());
 		ptElement.setAttribute("rows",""+this.getTotalRows());
 		ptElement.setAttribute(Resources.get("FLATTEN"),"0");
+		ptElement.setAttribute(Resources.get("TYPE"),this.partitionType.toString());
 		//generate all cells;
 		if(this.getTotalRows()>0) {
 			for(int i=0; i<this.getTotalRows(); i++) {

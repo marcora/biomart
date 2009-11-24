@@ -16,7 +16,7 @@ public class Container extends MartConfiguratorObject implements Serializable {
 	private static final long serialVersionUID = 8818099786702183740L;
 	
 	public static final String XML_ELEMENT_NAME = "container";
-	public static final McNodeType MC_NODE_TYPE = McNodeType.Container;
+//	public static final McNodeType MC_NODE_TYPE = McNodeType.Container;
 	
 	public static void main(String[] args) {}
 

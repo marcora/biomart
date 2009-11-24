@@ -18,7 +18,7 @@ public abstract class Filter extends org.biomart.objects.objects.Element	// to a
 	private static final long serialVersionUID = 8117878349721027751L;
 	
 	public static final String XML_ELEMENT_NAME = "filter";
-	public static final McNodeType MC_NODE_TYPE = McNodeType.Filter;
+//	public static final McNodeType MC_NODE_TYPE = McNodeType.Filter;
 	
 	public static void main(String[] args) {}
 

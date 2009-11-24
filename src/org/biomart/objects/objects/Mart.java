@@ -16,7 +16,7 @@ public class Mart extends MartConfiguratorObject implements Serializable {
 	private static final long serialVersionUID = -5444938136316400493L;
 
 	public static final String XML_ELEMENT_NAME = "mart";
-	public static final McNodeType MC_NODE_TYPE = McNodeType.Mart;
+//	public static final McNodeType MC_NODE_TYPE = McNodeType.Mart;
 	
 	public static void main(String[] args) {}
 

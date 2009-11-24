@@ -54,7 +54,7 @@ public class DsTablesDialog extends JDialog {
 		Element dsElement = this.dataset.getNode();
 		List<Element> dsTableList = this.dataset.getNode().getChildren(Resources.get("DSTABLE"));
 		for(Element dsTable:dsTableList) {
-			McDsTable mcDs = new McDsTable(McNodeType.DataSet,dsElement.getParentElement().getParentElement().
+			McDsTable mcDs = new McDsTable(McNodeType.DATASET,dsElement.getParentElement().getParentElement().
 					getAttributeValue(Resources.get("NAME")),dsElement.getParentElement().
 					getAttributeValue(Resources.get("NAME")),dsElement.getAttributeValue(Resources.get("NAME")),
 					dsTable.getAttributeValue(Resources.get("NAME")));

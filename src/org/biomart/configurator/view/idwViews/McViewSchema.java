@@ -205,7 +205,10 @@ public class McViewSchema extends McView implements TreeSelectionListener {
 
 	private void showDsInConfig(JDomNodeAdapter treeNode) {
 		Element node = treeNode.getNode();
+		//dsPanel {mainPanel {partitonPanel,contentPanel}, buttonPanel,resultPanel }
 		JPanel dsPanel = new JPanel(new BorderLayout());
+		JPanel mainPanel = new JPanel(new BorderLayout());
+		JPanel ptPanel = new JPanel();
 		JPanel contentPanel = new JPanel(new FlowLayout());
 		JPanel buttonPanel = new JPanel(new FlowLayout());
 		JPanel resultPanel = new JPanel();
@@ -233,7 +236,23 @@ public class McViewSchema extends McView implements TreeSelectionListener {
 				contentPanel.add(new DsInConfigPanel(linkedDs));
 			}
 		}
-		dsPanel.add(contentPanel, BorderLayout.NORTH);
+		//if has schema partitions
+		List<Element> pteList = JDomUtils.searchElementList(node, Resources.get("PARTITIONTABLE"), null);
+		Element partitionElement = null;
+		if(pteList!=null)
+			for(Element pte:pteList) {
+				String type = pte.getAttributeValue(Resources.get("TYPE"));
+				if("Schema".equals(type)) {
+					partitionElement = pte;
+					break;
+				}
+			}
+		if(partitionElement!=null) {
+			
+		}
+		else	
+			mainPanel.add(contentPanel);
+		dsPanel.add(mainPanel, BorderLayout.NORTH);
 		dsPanel.add(resultPanel, BorderLayout.SOUTH);
 		dsPanel.add(buttonPanel, BorderLayout.CENTER);
 

@@ -2,10 +2,8 @@ package org.biomart.configurator.controller;
 
 import java.util.Observable;
 import java.util.Observer;
-
 import org.biomart.configurator.model.McModel;
 import org.biomart.configurator.utils.McEventObject;
-import org.biomart.configurator.utils.type.IdwViewType;
 import org.biomart.configurator.view.McView;
 
 public class McController implements Observer {

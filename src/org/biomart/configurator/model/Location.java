@@ -18,6 +18,7 @@ import org.biomart.builder.model.Table;
 import org.biomart.common.resources.Settings;
 import org.biomart.configurator.utils.DbConnectionInfoObject;
 import org.biomart.configurator.utils.McUtils;
+import org.biomart.configurator.utils.type.PartitionType;
 
 /**
  * needs to handle new location or a location from XML
@@ -168,7 +169,7 @@ public class Location {
 				}
 				if(!ptSet.isEmpty())
 					for(DataSet ds:dss) {
-						PartitionTable pt = new PartitionTable(ds);
+						PartitionTable pt = new PartitionTable(ds,PartitionType.Schema);
 						for(String ptStr:ptSet) {
 							pt.addRow(ptStr);
 						}
