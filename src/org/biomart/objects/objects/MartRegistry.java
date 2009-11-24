@@ -2,7 +2,9 @@ package org.biomart.objects.objects;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.jdom.Document;
@@ -18,6 +20,7 @@ public class MartRegistry extends MartConfiguratorObject implements Serializable
 	public static void main(String[] args) {}
 	
 	private List<Location> locationList = null;
+	private Map<String, Dataset> nameToDatasetMap = null;	// dataset names being unique within a portal
 	
 	public MartRegistry() {
 		super();
@@ -55,6 +58,33 @@ public class MartRegistry extends MartConfiguratorObject implements Serializable
 		}
 	}
 	
+	/**
+	 * to be called before trying to get a dataset from name TODO should be updated in addDataset from Mart class instead
+	 */
+	public void updateNameToDatasetMap() throws FunctionalException {
+		this.nameToDatasetMap = new HashMap<String, Dataset>();
+		for (Location location : this.getLocationList()) {
+			for (Mart mart : location.getMartList()) {
+				for (Dataset dataset : mart.getDatasetList()) {
+					if (null!=this.nameToDatasetMap.get(dataset.getName())) {
+						throw new FunctionalException("Dataset name conflict on: " + dataset.getName());
+					}
+					this.nameToDatasetMap.put(dataset.getName(), dataset);
+				}
+			}
+		}
+	}
+	/**
+	 * updateNameToDatasetMap should be called prior to using this method TODO better
+	 */
+	public Dataset getDataset(String datasetName) throws FunctionalException {
+		if (null==this.nameToDatasetMap) {	// TODO better
+			throw new FunctionalException("Map not up to date");
+		}
+		return this.nameToDatasetMap.get(datasetName);
+	}
+	
+	
 	public Document generateXmlDocument() throws FunctionalException {
 		return new Document(this.generateXml());
 	}
@@ -68,37 +98,3 @@ public class MartRegistry extends MartConfiguratorObject implements Serializable
 		return element;
 	}
 }
-
-
-
-
-
-/*MartRegistry martRegistry = new MartRegistry();
-List<Location> locationList = new ArrayList<Location>();
-Map<Location, List<Mart>> martMap = new HashMap<Location, List<Mart>>();
-for (MartRegistry martRegistryTmp : martRegistryList) {
-	List<Location> locationListTmp = martRegistryTmp.getLocationList();
-	for (Location location : locationListTmp) {
-		if (!locationList.contains(location)) {
-			martRegistry.addLocation(location);
-			locationList.add(location);
-			martMap.put(location, location.getMartList());
-		} else {
-			Location currentLocation = locationList.get(locationList.indexOf(location));
-			List<Mart> martListTmp = location.getMartList();
-			List<Mart> martList = martMap.get(location);
-			for (Mart mart : martListTmp) {
-				if (!martList.contains(mart)) {
-					currentLocation.addMart(mart);
-					martList.add(mart);
-				} else {
-					Mart currentMart = martList.get(martList.indexOf(mart));
-					List<Dataset> datasetList = mart.getDatasetList();
-					for (Dataset dataset : datasetList) {
-						currentMart.addDataset(dataset);
-					}
-				}
-			}
-		}
-	}
-}*/

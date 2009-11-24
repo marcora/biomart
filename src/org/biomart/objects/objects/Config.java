@@ -4,6 +4,7 @@ package org.biomart.objects.objects;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.configurator.utils.type.McNodeType;
@@ -25,6 +26,9 @@ public class Config extends MartConfiguratorObject implements Serializable {
 
 	private List<ElementList> importableList = null;
 	private List<ElementList> exportableList = null;
+	
+	private Map<String, Attribute> plainNameToAttributeMap = null;
+	private Map<String, Filter> plainNameToFilterMap = null;
 
 	public Config(String name,  
 			String datasetName) {
