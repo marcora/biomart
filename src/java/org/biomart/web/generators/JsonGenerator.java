@@ -1,4 +1,5 @@
 // give more sensible empty value other than null to getDescription etc
+
 package org.biomart.web.generators;
 
 import java.io.*;
