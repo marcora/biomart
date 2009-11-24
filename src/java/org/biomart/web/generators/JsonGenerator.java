@@ -54,7 +54,7 @@ public class JsonGenerator {
                         jsonDataset = jsonifyDataset(mart, dataset);
                         jsonDatasets.accumulate("rows", jsonDataset);
 
-                        LiteContainer root = api.getRootContainer(USERNAME, PASSWORD, FORMAT, "gene_ensembl", PARTITION_FILTER).getLiteRootContainer();
+                        LiteContainer root = api.getRootContainer(USERNAME, PASSWORD, FORMAT, "gene_ensembl", PARTITION_FILTER).getLiteContainer();
 
                         JSONObject tree = jsonifyContainer(root, null);
 
@@ -151,16 +151,16 @@ public class JsonGenerator {
 
         // add common props
         js.put("id", dataset.getName());
-        js.put("title", dataset.getDisplayName());
-        js.put("description", dataset.getDescription());
+//        js.put("title", dataset.getDisplayName());
+//        js.put("description", dataset.getDescription());
 
         // add stems prop
         ArrayList<String> stems = new ArrayList<String>();
         stems.add(mart.getDisplayName());
-        stems.add(mart.getDescription());
+//        stems.add(mart.getDescription());
         stems.add(mart.getVersion().toString());
-        stems.add(dataset.getDisplayName());
-        stems.add(dataset.getDescription());
+//        stems.add(dataset.getDisplayName());
+//        stems.add(dataset.getDescription());
         js.put("stems", normalize(join(stems, " ")));
 
         return js;
