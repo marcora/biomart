@@ -195,44 +195,6 @@ public class PartitionTable extends MartConfiguratorObject implements Comparable
 			+ ", " + this.hashCode();
 	}
 
-	/*@Override
-	public boolean equals(Object object) {
-		
-		if (this==object) {
-			return true;
-		}
-		if((object==null) || (object.getClass()!= this.getClass())) {
-			return false;
-		}
-		PartitionTable partitionTable=(PartitionTable)object;
-		return (
-			super.equals(partitionTable) &&
-			
-			(this.main==partitionTable.main || (this.main!=null && main.equals(partitionTable.main))) &&
-			(this.flatten==partitionTable.flatten || (this.flatten!=null && flatten.equals(partitionTable.flatten))) &&
-			
-			(this.totalRows==partitionTable.totalRows || (this.totalRows!=null && totalRows.equals(partitionTable.totalRows))) &&
-			(this.totalColumns==partitionTable.totalColumns || (this.totalColumns!=null && totalColumns.equals(partitionTable.totalColumns))) &&
-			
-			(this.table==partitionTable.table || (this.table!=null && table.equals(partitionTable.table)))
-		);
-	}
-
-	@Override
-	public int hashCode() {
-		int hash = MartConfiguratorConstants.HASH_SEED1;
-		
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + super.hashCode();
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==main? 0 : main.hashCode());
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==flatten? 0 : flatten.hashCode());
-		
-		//hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==totalRows? 0 : totalRows.hashCode());
-		//hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==totalColumns? 0 : totalColumns.hashCode());
-		//hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==table? 0 : table.hashCode());		//FIXME don't understand that makes it crash
-		
-		return hash;
-	}*/
-
 	public int compare(PartitionTable partitionTable1, PartitionTable partitionTable2) {
 		if (partitionTable1==null && partitionTable2!=null) {
 			return -1;

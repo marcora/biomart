@@ -128,14 +128,6 @@ public class Table extends MartConfiguratorObject implements Comparable<Table>, 
 
 	@Override
 	public int hashCode() {
-		/*int hash = MartConfiguratorConstants.HASH_SEED1;
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + super.hashCode();
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==main? 0 : main.hashCode());
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==key? 0 : key.hashCode());
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==range? 0 : range.hashCode());
-		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==fields? 0 : fields.hashCode());
-		return hash;*/
-		
 		int hash = MartConfiguratorConstants.HASH_SEED1;
 		hash = MartConfiguratorConstants.HASH_SEED2 * hash + (null==name? 0 : name.toLowerCase().hashCode());	// Must specify toLowerCase here	TODO move to MCO?
 		return hash;

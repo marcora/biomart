@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.biomart.common.general.exceptions.FunctionalException;
+import org.biomart.objects.objects.portal.Portal;
 import org.jdom.Document;
 import org.jdom.Element;
 
@@ -19,11 +20,14 @@ public class MartRegistry extends MartConfiguratorObject implements Serializable
 	
 	public static void main(String[] args) {}
 	
+	private Portal portal = null;
 	private List<Location> locationList = null;
+	
 	private Map<String, Dataset> nameToDatasetMap = null;	// dataset names being unique within a portal
 	
 	public MartRegistry() {
 		super();
+		this.portal = new Portal();
 		this.locationList = new ArrayList<Location>();
 	}
 
@@ -36,11 +40,15 @@ public class MartRegistry extends MartConfiguratorObject implements Serializable
 	public Location getLocation(String name) {
 		return (Location)super.getMartConfiguratorObjectByName(this.locationList, name);
 	}
+	public Portal getPortal() {
+		return portal;
+	}
 
 	@Override
 	public String toString() {
 		return 
 			super.toString() + ", " +
+			"portal = " + portal + ", " +
 			"locationList.size() = " + this.locationList.size();
 	}
 
@@ -90,6 +98,8 @@ public class MartRegistry extends MartConfiguratorObject implements Serializable
 	}
 	public Element generateXml() throws FunctionalException {
 		Element element = new Element(XML_ELEMENT_NAME);
+		
+		element.addContent(this.portal.generateXml());
 		
 		for (Location location : this.locationList) {
 			element.addContent(location.generateXml());

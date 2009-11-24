@@ -24,7 +24,7 @@ public abstract class Element extends MartConfiguratorObject implements Serializ
 	
 	protected String pointedElementName = null;
 	
-	protected String locationName = null;
+	protected String locationName = null;	// TODO create an object for those 5 properties? used in alias as well
 	protected String martName = null;
 	protected Integer version = null;
 	protected String datasetName = null;
