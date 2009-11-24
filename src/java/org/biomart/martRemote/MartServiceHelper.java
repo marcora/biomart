@@ -6,6 +6,7 @@ import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.martRemote.martService.MartServiceConstants;
 import org.biomart.martRemote.objects.response.MartRemoteResponse;
+import org.biomart.objects.MartConfiguratorConstants;
 
 public class MartServiceHelper {
 	
@@ -17,7 +18,7 @@ public class MartServiceHelper {
 			try {
 				MartServiceHelper.martApi = new MartApi(false, false,
 	MartServiceConstants.XSD_FILE_PATH, MartServiceConstants.XSD_FILE_URL, 
-						MartRemoteConstants.BIOMART_JAVA_SERIALIZED_PORTAL_FILE);
+						MartConfiguratorConstants.BIOMART_JAVA_SERIALIZED_PORTAL_FILE);
 				MartServiceHelper.loadedProperly = MartServiceHelper.martApi!=null;
 			} catch (TechnicalException e) {
 				e.printStackTrace();

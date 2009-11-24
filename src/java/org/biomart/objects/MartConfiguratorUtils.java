@@ -2,15 +2,20 @@ package org.biomart.objects;
 
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.biomart.common.general.constants.MyConstants;
+import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.MyUtils;
 import org.biomart.objects.helpers.PartitionReference;
 import org.biomart.objects.helpers.Property;
+import org.biomart.objects.objects.MartRegistry;
 import org.biomart.objects.objects.Part;
 import org.biomart.objects.objects.PartitionTable;
 import org.biomart.transformation.helpers.PartitionTableAndRow;
@@ -238,5 +243,17 @@ public class MartConfiguratorUtils {
 	public static Part createGenericPart(PartitionTable mainPartitionTable) {
 		return new Part(false, null, null, 
 				new PartitionTableAndRow(mainPartitionTable, MartConfiguratorConstants.PARTITION_TABLE_ROW_WILDCARD_NUMBER));
+	}
+
+	public static MartRegistry loadSerializedMartRegistry(String portalSerialFileUrl) throws TechnicalException {
+		URL portalSerialUrl = null;
+		try {
+			portalSerialFileUrl = portalSerialFileUrl.startsWith(MyConstants.FILE_SYSTEM_PROTOCOL) ? 
+					portalSerialFileUrl : MyConstants.FILE_SYSTEM_PROTOCOL + portalSerialFileUrl;
+			portalSerialUrl = new URL(portalSerialFileUrl);
+		} catch (MalformedURLException e) {
+			throw new TechnicalException(e.getMessage() + ": " + portalSerialFileUrl);
+		}
+		return (MartRegistry)MyUtils.readSerializedObject(portalSerialUrl);
 	}
 }

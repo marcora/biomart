@@ -114,6 +114,13 @@ public class Attribute extends Element implements Serializable {
 		);
 	}
 	
+	public String toSqlString() throws FunctionalException {
+		if (super.pointer) {
+			throw new FunctionalException("Cannot invoke method from pointer");
+		}
+		return this.tableName + "." + this.fieldName;
+	}
+	
 	public org.jdom.Element generateXml() throws FunctionalException {
 		
 		org.jdom.Element element = super.generateXml();
@@ -125,6 +132,8 @@ public class Attribute extends Element implements Serializable {
 		
 		return element;
 	}
+	
+	
 	
 	
 	

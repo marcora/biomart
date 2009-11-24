@@ -1,12 +1,16 @@
 package org.biomart.objects;
 
 
+import java.io.File;
 import java.util.regex.Pattern;
 
 import org.biomart.common.general.utils.MyUtils;
 
 public class MartConfiguratorConstants {
 
+	public static final String BIOMART_JAVA_SERIALIZED_PORTAL_FILE = 
+		new File("conf/files/portal.serial").getAbsolutePath();
+	
 	public static final int HASH_SEED1 = 7;
 	public static final int HASH_SEED2 = 31;
 	

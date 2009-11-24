@@ -11,7 +11,6 @@ import org.biomart.configurator.utils.type.McNodeType;
 import org.biomart.martRemote.Jsoml;
 import org.biomart.objects.MartConfiguratorConstants;
 import org.biomart.objects.MartConfiguratorUtils;
-import org.jdom.Element;
 
 
 public class Container extends MartConfiguratorObject implements Serializable {
@@ -85,7 +84,7 @@ public class Container extends MartConfiguratorObject implements Serializable {
 	public MartConfiguratorObject getContainee(String name) {
 		return super.getMartConfiguratorObjectByName(this.containeeList, name);
 	}
-	public Container getContainer(String name) {
+	public Container getContainer(String name) {	// TODO potential name conflicts
 		return (Container)super.getMartConfiguratorObjectByName(this.containerList, name);
 	}
 	public Attribute getAttribute(String name) {
@@ -93,6 +92,29 @@ public class Container extends MartConfiguratorObject implements Serializable {
 	}
 	public Filter getFilter(String name) {
 		return (Filter)super.getMartConfiguratorObjectByName(this.filterList, name);
+	}
+	public Element getElementRecursively(boolean isAttribute, String name) {
+		Element element = null;
+		MartConfiguratorObject martConfiguratorObject = super.getMartConfiguratorObjectByName(
+				isAttribute ? this.attributeList : this.filterList, name);
+		if (martConfiguratorObject==null) {
+			for (Container container : this.containerList) {
+				if (null!=(martConfiguratorObject = container.getElementRecursively(isAttribute, name))) {
+					break;
+				}
+			}
+		} else {
+			element = (Element)martConfiguratorObject;
+		}
+		return element;
+	}
+	public Attribute getAttributeRecursively(String name) {
+		Element element = getElementRecursively(true, name);
+		return element!=null ? (Attribute)element : null;
+	}
+	public Filter getFilterRecursively(String name) {
+		Element element = getElementRecursively(false, name);
+		return element!=null ? (Filter)element : null;
 	}
 
 	public Integer getQueryRestriction() {
@@ -144,8 +166,8 @@ public class Container extends MartConfiguratorObject implements Serializable {
 		return hash;
 	}*/
 
-	public Element generateXml() throws FunctionalException  {
-		Element element = super.generateXml();
+	public org.jdom.Element generateXml() throws FunctionalException  {
+		org.jdom.Element element = super.generateXml();
 		
 		MartConfiguratorUtils.addAttribute(element, "queryRestriction", this.queryRestriction);
 		

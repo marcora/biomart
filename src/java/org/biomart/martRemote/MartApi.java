@@ -11,7 +11,6 @@ import java.util.List;
 
 import net.sf.json.JSONObject;
 
-import org.biomart.common.general.constants.MyConstants;
 import org.biomart.common.general.exceptions.FunctionalException;
 import org.biomart.common.general.exceptions.TechnicalException;
 import org.biomart.common.general.utils.MyUtils;
@@ -36,6 +35,8 @@ import org.biomart.martRemote.objects.response.GetRegistryResponse;
 import org.biomart.martRemote.objects.response.GetRootContainerResponse;
 import org.biomart.martRemote.objects.response.MartRemoteResponse;
 import org.biomart.martRemote.objects.response.QueryResponse;
+import org.biomart.objects.MartConfiguratorConstants;
+import org.biomart.objects.MartConfiguratorUtils;
 import org.biomart.objects.lite.LiteListAttribute;
 import org.biomart.objects.lite.LiteListDataset;
 import org.biomart.objects.lite.LiteListFilter;
@@ -77,7 +78,7 @@ public class MartApi {
 	private Boolean debug = null;
 	
 	public MartApi() throws FunctionalException, TechnicalException {
-		this(MartRemoteConstants.BIOMART_JAVA_SERIALIZED_PORTAL_FILE);
+		this(MartConfiguratorConstants.BIOMART_JAVA_SERIALIZED_PORTAL_FILE);
 	}
 	public MartApi(String portalSerialFileUrl) 
 				throws TechnicalException, FunctionalException {
@@ -122,21 +123,9 @@ public class MartApi {
 		}
         this.xmlParameters = new XmlParameters(this.validateXml, martServiceNamespace, xsiNamespace, xsdFilePath);
         
-        this.martRegistry = null!=martRegistry ? martRegistry : loadSerializedMartRegistry(portalSerialFileUrl);
+        this.martRegistry = null!=martRegistry ? martRegistry : MartConfiguratorUtils.loadSerializedMartRegistry(portalSerialFileUrl);
 	}
 	
-	private MartRegistry loadSerializedMartRegistry(String portalSerialFileUrl) throws TechnicalException {
-		URL portalSerialUrl = null;
-		try {
-			portalSerialFileUrl = portalSerialFileUrl.startsWith(MyConstants.FILE_SYSTEM_PROTOCOL) ? 
-					portalSerialFileUrl : MyConstants.FILE_SYSTEM_PROTOCOL + portalSerialFileUrl;
-			portalSerialUrl = new URL(portalSerialFileUrl);
-		} catch (MalformedURLException e) {
-			throw new TechnicalException(e.getMessage() + ": " + portalSerialFileUrl);
-		}
-		return (MartRegistry)MyUtils.readSerializedObject(portalSerialUrl);
-	}
-
 	public MartRegistry getMartRegistry() {
 		return martRegistry;
 	}
